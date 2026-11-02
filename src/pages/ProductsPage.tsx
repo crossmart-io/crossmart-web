@@ -7,6 +7,7 @@ import { Spinner } from '@/components/ui/spinner';
 import { ROUTES } from '@/config/routes';
 import {
   ActiveFilterChip,
+  BulkActionBar,
   CATALOG_GAP_COPY,
   ImportProductsDialog,
   ProductFilters,
@@ -14,12 +15,15 @@ import {
   ProductsEmptyState,
   ProductsTable,
   ProductsTableSkeleton,
+  ProductViewsBar,
   toStatusCounts,
   toStatusQuery,
   useCatalogStats,
+  useListSelection,
   useProductListFilters,
   useProducts,
 } from '@/features/catalog';
+import type { Selection } from '@/hooks/useSelection';
 import { pluralize } from '@/lib/format';
 import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
 
@@ -55,6 +59,7 @@ export function ProductsPage() {
       description="One catalog for every channel you sell on."
       actions={<AddProductActions workspaceId={workspace?.id} />}
     >
+      {workspace && <ProductViewsBar workspaceId={workspace.id} filters={filters} />}
       <ProductFilters
         search={filters.search}
         onSearchChange={filters.setSearch}
@@ -76,6 +81,7 @@ interface ProductResultsProps {
 }
 
 function ProductResults({ workspace, filters }: ProductResultsProps) {
+  const selection = useListSelection(filters);
   const products = useProducts({
     workspaceId: workspace?.id,
     search: filters.debouncedSearch,
@@ -109,6 +115,7 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
         products={products.products}
         currency={workspace?.currency ?? ''}
         isRefreshing={products.isPlaceholderData}
+        selection={selection}
       />
       {products.hasNextPage && (
         <LoadMoreButton
@@ -116,6 +123,7 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
           onLoadMore={() => void products.fetchNextPage()}
         />
       )}
+      {workspace && <SelectionActions workspaceId={workspace.id} selection={selection} />}
     </>
   );
 }
@@ -136,5 +144,22 @@ function LoadMoreButton({ isLoading, onLoadMore }: { isLoading: boolean; onLoadM
       {isLoading && <Spinner data-icon="inline-start" />}
       {isLoading ? 'Loading…' : 'Load more'}
     </Button>
+  );
+}
+
+function SelectionActions({
+  workspaceId,
+  selection,
+}: {
+  workspaceId: string;
+  selection: Selection;
+}) {
+  if (selection.ids.size === 0) return null;
+  return (
+    <>
+      {/* Room under the last row, so the floating bar never covers it. */}
+      <div className="h-16" aria-hidden="true" />
+      <BulkActionBar workspaceId={workspaceId} selection={selection} />
+    </>
   );
 }

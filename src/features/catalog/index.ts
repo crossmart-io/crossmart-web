@@ -12,3 +12,6 @@ export { SEARCH_DEBOUNCE_MS } from './catalog.constants';
 export { CATALOG_GAP_COPY, toCatalogGap } from './catalog-gap';
 export { ActiveFilterChip } from './components/ActiveFilterChip';
 export { type ProductListFilters, useProductListFilters } from './hooks/useProductListFilters';
+export { BulkActionBar } from './components/bulk/BulkActionBar';
+export { ProductViewsBar } from './components/views/ProductViewsBar';
+export { useListSelection } from './hooks/useListSelection';

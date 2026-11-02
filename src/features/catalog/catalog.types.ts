@@ -6,3 +6,5 @@ export type Variant = components['schemas']['VariantDto'];
 export type CatalogImportResult = components['schemas']['CatalogImportResultDto'];
 export type ImportIssue = components['schemas']['ImportIssueDto'];
 export type CatalogStats = components['schemas']['CatalogStatsDto'];
+export type ProductView = components['schemas']['ProductViewDto'];
+export type BulkProductActionBody = components['schemas']['BulkProductActionDto'];
