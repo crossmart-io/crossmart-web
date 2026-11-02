@@ -213,7 +213,7 @@ export interface paths {
     put?: never;
     /**
      * Import products or stock from a file
-     * @description In `create` mode, products whose handle is already in the catalog are skipped, never overwritten. In `update` mode, products are replaced by handle and their variants matched by SKU; stock is left as it is. In `inventory` mode, a `sku,available` CSV sets the stock of tracked variants. Invalid records are reported; the rest are applied. Every import is recorded in the import history.
+     * @description In `create` mode, products whose handle is already in the catalog are skipped, never overwritten. In `update` mode, products are found by handle and only the columns in the file change: a missing column keeps its value, an empty cell clears it. Variants are matched by SKU, then by option values, and are never deleted; stock is left as it is. In `inventory` mode, a `sku,available` CSV sets the stock of tracked variants. Invalid records are reported; the rest are applied. Every import is recorded in the import history.
      */
     post: operations['ProductImportsController_import_v1'];
     delete?: never;
@@ -1799,6 +1799,7 @@ export enum ImportIssueCode {
   unknown_sku = 'unknown_sku',
   not_tracked = 'not_tracked',
   duplicate_row = 'duplicate_row',
+  unmatched_variant = 'unmatched_variant',
 }
 export enum ImportJobStatus {
   PROCESSING = 'PROCESSING',
