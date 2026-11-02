@@ -1,15 +1,10 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { fetchClient } from '@/api/client';
 import { CatalogImportFormat } from '@/api/schema';
 import { toApiErrorMessage } from '@/api/api-error';
-import {
-  IMPORT_FORM_FIELDS,
-  PRODUCT_IMPORTS_ENDPOINT,
-  PRODUCTS_ENDPOINT,
-} from '../catalog.constants';
+import { IMPORT_FORM_FIELDS, PRODUCT_IMPORTS_ENDPOINT } from '../catalog.constants';
 import type { CatalogImportResult } from '../catalog.types';
-
-const HTTP_METHOD_GET = 'get';
+import { useInvalidateCatalog } from './useInvalidateCatalog';
 
 function toImportForm(file: File): FormData {
   const form = new FormData();
@@ -20,7 +15,7 @@ function toImportForm(file: File): FormData {
 
 /** Uploads a Shopify product export, then refreshes the product list. */
 export function useImportProducts(workspaceId: string | undefined) {
-  const queryClient = useQueryClient();
+  const invalidateCatalog = useInvalidateCatalog();
 
   return useMutation<CatalogImportResult, Error, File>({
     mutationFn: async (file) => {
@@ -33,7 +28,6 @@ export function useImportProducts(workspaceId: string | undefined) {
       if (error) throw new Error(toApiErrorMessage(error));
       return data;
     },
-    onSuccess: () =>
-      queryClient.invalidateQueries({ queryKey: [HTTP_METHOD_GET, PRODUCTS_ENDPOINT] }),
+    onSuccess: invalidateCatalog,
   });
 }

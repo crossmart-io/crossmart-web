@@ -1,5 +1,9 @@
+import { Plus } from 'lucide-react';
 import { useState } from 'react';
+import { Link } from 'react-router';
+import { PageHeader } from '@/components/layout/PageHeader';
 import { Button } from '@/components/ui/button';
+import { ROUTES } from '@/config/routes';
 import {
   ALL_STATUSES,
   ImportProductsDialog,
@@ -29,13 +33,21 @@ export function ProductsPage() {
 
   return (
     <section className="flex flex-col gap-6">
-      <div className="flex items-end justify-between gap-4">
-        <div className="flex flex-col gap-1">
-          <h1 className="font-heading text-2xl font-semibold tracking-tight">Products</h1>
-          <p className="text-muted-foreground">One catalog for every channel you sell on.</p>
-        </div>
-        {importDialog}
-      </div>
+      <PageHeader
+        title="Products"
+        description="One catalog for every channel you sell on."
+        actions={
+          <>
+            {importDialog}
+            <Button asChild variant="default">
+              <Link to={ROUTES.newProduct}>
+                <Plus />
+                Add product
+              </Link>
+            </Button>
+          </>
+        }
+      />
       <ProductFilters
         search={search}
         onSearchChange={setSearch}
