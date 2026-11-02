@@ -1,9 +1,7 @@
 import { ImagePlus } from 'lucide-react';
 import { type DragEvent, useRef, useState } from 'react';
 import { cn } from 'cn';
-import { IMAGE_FILE_ACCEPT } from '../../catalog.constants';
-
-const IMAGE_MIME_PREFIX = 'image/';
+import { IMAGE_FILE_ACCEPT, MAX_IMAGE_MEGABYTES } from '../../catalog.constants';
 
 interface ImageDropzoneProps {
   onFiles: (files: File[]) => void;
@@ -19,9 +17,8 @@ export function ImageDropzone({ onFiles, compact = false }: ImageDropzoneProps) 
   function handleDrop(event: DragEvent<HTMLButtonElement>) {
     event.preventDefault();
     setIsDragging(false);
-    onFiles(
-      [...event.dataTransfer.files].filter((file) => file.type.startsWith(IMAGE_MIME_PREFIX)),
-    );
+    // Everything dropped is passed on, so files that cannot be used are reported, not ignored.
+    onFiles([...event.dataTransfer.files]);
   }
 
   return (
@@ -36,9 +33,9 @@ export function ImageDropzone({ onFiles, compact = false }: ImageDropzoneProps) 
         onDragLeave={() => setIsDragging(false)}
         onDrop={handleDrop}
         className={cn(
-          'flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-center text-sm text-muted-foreground transition-colors hover:border-foreground/40 hover:bg-muted/50',
+          'flex w-full cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-dashed text-center text-sm text-muted-foreground transition-colors hover:border-foreground/40 hover:bg-muted/50 focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none',
           compact ? 'aspect-square' : 'px-6 py-10',
-          isDragging && 'border-primary bg-muted',
+          isDragging && 'border-primary bg-primary/5 text-foreground',
         )}
       >
         <ImagePlus className="size-5" aria-hidden="true" />
@@ -47,7 +44,7 @@ export function ImageDropzone({ onFiles, compact = false }: ImageDropzoneProps) 
         ) : (
           <>
             <span className="font-medium text-foreground">Add images</span>
-            <span>Drop JPEG, PNG, WebP or GIF files, up to 20 MB each</span>
+            <span>Drop JPEG, PNG, WebP or GIF files, up to {MAX_IMAGE_MEGABYTES} MB each</span>
           </>
         )}
       </button>

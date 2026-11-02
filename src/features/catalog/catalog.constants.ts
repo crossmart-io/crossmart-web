@@ -13,12 +13,27 @@ export const UPLOAD_FILE_FIELD = 'file';
 export const PRODUCT_IMAGES_ENDPOINT = '/api/v1/workspaces/{workspaceId}/media/product-images';
 export const CATALOG_STATS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/catalog-stats';
 
-/** Image types the API accepts; the API checks the bytes again. */
-export const IMAGE_FILE_ACCEPT = 'image/jpeg,image/png,image/webp,image/gif';
+/** The image types the API accepts. It checks the file content again, not just the name. */
+export const IMAGE_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const;
+export const IMAGE_FILE_ACCEPT = IMAGE_CONTENT_TYPES.join(',');
+const BYTES_PER_KILOBYTE = 1024;
+const BYTES_PER_MEGABYTE = BYTES_PER_KILOBYTE * BYTES_PER_KILOBYTE;
+export const MAX_IMAGE_MEGABYTES = 20;
+/** Mirrors the API limit, so a large file fails before it is uploaded. */
+export const MAX_IMAGE_BYTES = MAX_IMAGE_MEGABYTES * BYTES_PER_MEGABYTE;
 
 /** Toasts after product changes. */
 export const PRODUCT_FEEDBACK = {
   created: 'Product created',
   saved: 'Product saved',
   deleted: 'Product deleted',
+} as const;
+
+/** Feedback while editing a product. */
+export const EDITOR_FEEDBACK = {
+  invalid: 'Some fields need attention before you can save.',
+  newProduct: 'New product',
+  unsaved: 'Unsaved changes',
+  optionRemoved: 'Option removed. Its variants were merged.',
+  undo: 'Undo',
 } as const;

@@ -6,6 +6,8 @@ import { Toaster } from '@/components/ui/sonner';
 import { createAppQueryClient } from './query-client';
 import { router } from './router';
 
+const TOAST_MOBILE_BOTTOM_OFFSET = '5.5rem';
+
 export function App() {
   const [queryClient] = useState(createAppQueryClient);
 
@@ -13,7 +15,8 @@ export function App() {
     <ThemeProvider>
       <QueryClientProvider client={queryClient}>
         <RouterProvider router={router} />
-        <Toaster position="bottom-right" />
+        {/* Clear of the floating save bar on phones. */}
+        <Toaster position="bottom-right" mobileOffset={{ bottom: TOAST_MOBILE_BOTTOM_OFFSET }} />
       </QueryClientProvider>
     </ThemeProvider>
   );

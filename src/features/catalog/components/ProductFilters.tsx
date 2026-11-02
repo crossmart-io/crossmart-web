@@ -1,5 +1,5 @@
 import { Search } from 'lucide-react';
-import { Input } from '@/components/ui/input';
+import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { STATUS_FILTERS, type StatusFilter } from '../product-status';
 
@@ -34,20 +34,19 @@ export function ProductFilters({
           ))}
         </TabsList>
       </Tabs>
-      <div className="relative sm:w-72">
-        <Search
-          className="pointer-events-none absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
-          aria-hidden="true"
-        />
-        <Input
+      <InputGroup className="sm:w-72">
+        <InputGroupAddon>
+          <Search aria-hidden="true" />
+        </InputGroupAddon>
+        <InputGroupInput
           type="search"
           value={search}
           onChange={(event) => onSearchChange(event.target.value)}
           placeholder="Search title, handle or SKU"
           aria-label="Search products"
-          className="pl-8"
+          spellCheck={false}
         />
-      </div>
+      </InputGroup>
     </div>
   );
 }
