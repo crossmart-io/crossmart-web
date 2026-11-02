@@ -1,5 +1,6 @@
 import { Upload } from 'lucide-react';
 import { useState } from 'react';
+import type { CatalogImportMode } from '@/api/schema';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -11,6 +12,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useImportProducts } from '../hooks/useImportProducts';
+import { DEFAULT_IMPORT_MODE } from '../imports.constants';
 import { ImportFileForm } from './ImportFileForm';
 import { ImportResultSummary } from './ImportResultSummary';
 
@@ -18,6 +20,7 @@ const IMPORT_FORM_ID = 'catalog-import-form';
 
 export function ImportProductsDialog({ workspaceId }: { workspaceId: string | undefined }) {
   const [open, setOpen] = useState(false);
+  const [mode, setMode] = useState<CatalogImportMode>(DEFAULT_IMPORT_MODE);
   const [file, setFile] = useState<File | null>(null);
   const importProducts = useImportProducts(workspaceId);
   const result = importProducts.data;
@@ -26,6 +29,7 @@ export function ImportProductsDialog({ workspaceId }: { workspaceId: string | un
     setOpen(nextOpen);
     if (!nextOpen) {
       setFile(null);
+      setMode(DEFAULT_IMPORT_MODE);
       importProducts.reset();
     }
   }
@@ -38,12 +42,13 @@ export function ImportProductsDialog({ workspaceId }: { workspaceId: string | un
           Import
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Import from Shopify</DialogTitle>
+          <DialogTitle>{result ? 'Import finished' : 'Import from a CSV file'}</DialogTitle>
           <DialogDescription>
-            In Shopify, go to Products → Export and choose CSV. Products already in your catalog are
-            left unchanged.
+            {result
+              ? 'Here is what changed in your catalog.'
+              : 'Add products, update the ones you have, or set stock levels.'}
           </DialogDescription>
         </DialogHeader>
         {result ? (
@@ -51,9 +56,11 @@ export function ImportProductsDialog({ workspaceId }: { workspaceId: string | un
         ) : (
           <ImportFileForm
             formId={IMPORT_FORM_ID}
+            mode={mode}
+            onModeChange={setMode}
             error={importProducts.error}
             onFileChange={setFile}
-            onSubmit={() => file && importProducts.mutate(file)}
+            onSubmit={() => file && importProducts.mutate({ mode, file })}
           />
         )}
         <DialogFooter>

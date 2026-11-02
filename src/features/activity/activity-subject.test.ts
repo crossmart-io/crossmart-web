@@ -4,7 +4,7 @@ import {
   ActivityOutcome,
   ActivitySubjectType,
 } from '@/api/schema';
-import { toProductRoute } from '@/config/routes';
+import { toImportJobRoute, toProductRoute } from '@/config/routes';
 import type { ActivityEvent } from './activity.types';
 import { toSubjectRoute } from './activity-subject';
 
@@ -40,5 +40,15 @@ describe('toSubjectRoute', () => {
     expect(
       toSubjectRoute(productEvent(ActivityAction.products_bulk_updated, null)),
     ).toBeUndefined();
+  });
+
+  it('links an import to its entry in the import history', () => {
+    const event = productEvent(ActivityAction.stock_imported, null);
+    expect(
+      toSubjectRoute({
+        ...event,
+        subject: { type: ActivitySubjectType.import_job, id: 'job-1', label: 'stock.csv' },
+      }),
+    ).toBe(toImportJobRoute('job-1'));
   });
 });

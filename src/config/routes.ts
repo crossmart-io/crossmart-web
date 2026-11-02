@@ -1,5 +1,6 @@
 export const ROUTE_PARAMS = {
   productId: 'productId',
+  jobId: 'jobId',
 } as const;
 
 export const ROUTES = {
@@ -12,12 +13,18 @@ export const ROUTES = {
   inventory: '/inventory',
   channels: '/channels',
   activity: '/activity',
+  imports: '/imports',
+  importJob: `/imports/:${ROUTE_PARAMS.jobId}`,
   apiKeys: '/settings/api-keys',
   members: '/settings/members',
 } as const;
 
 export function toProductRoute(productId: string): string {
   return ROUTES.product.replace(`:${ROUTE_PARAMS.productId}`, productId);
+}
+
+export function toImportJobRoute(jobId: string): string {
+  return ROUTES.importJob.replace(`:${ROUTE_PARAMS.jobId}`, jobId);
 }
 
 /** Query parameters that pages read from the URL, so filtered views can be linked to. */

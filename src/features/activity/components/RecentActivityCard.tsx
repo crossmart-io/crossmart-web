@@ -38,7 +38,7 @@ function RecentActivity({ workspaceId, productId }: RecentActivityCardProps) {
   return (
     <ul className="-my-2 divide-y">
       {data.items.map((event) => (
-        <ActivityEventItem key={event.id} event={event} linkSubject={false} compact />
+        <ActivityEventItem key={event.id} event={event} pageSubjectId={productId} compact />
       ))}
     </ul>
   );
