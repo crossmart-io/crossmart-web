@@ -6,3 +6,4 @@ export { SignUpForm } from './components/SignUpForm';
 export { UserMenu } from './components/UserMenu';
 export { useSession } from './hooks/useSession';
 export { refreshSession } from './session-signal';
+export { toInitials } from './initials';

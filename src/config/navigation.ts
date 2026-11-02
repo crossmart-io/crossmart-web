@@ -1,4 +1,12 @@
-import { KeyRound, LayoutDashboard, Package, Share2, Users, type LucideIcon } from 'lucide-react';
+import {
+  History,
+  KeyRound,
+  LayoutDashboard,
+  Package,
+  Share2,
+  Users,
+  type LucideIcon,
+} from 'lucide-react';
 import { ROUTES } from './routes';
 
 export interface NavItem {
@@ -21,6 +29,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { label: 'Overview', to: ROUTES.home, icon: LayoutDashboard, end: true },
       { label: 'Products', to: ROUTES.products, icon: Package },
       { label: 'Channels', to: ROUTES.channels, icon: Share2 },
+      { label: 'Activity', to: ROUTES.activity, icon: History },
     ],
   },
   {
