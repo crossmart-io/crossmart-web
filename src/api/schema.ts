@@ -21,10 +21,158 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/me': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The signed-in user and the workspaces they belong to */
+    get: operations['MeController_getMe_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** A workspace and your role in it */
+    get: operations['WorkspacesController_getWorkspace_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/members': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The members of a workspace */
+    get: operations['WorkspacesController_listMembers_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/api-keys': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Active API keys of a workspace */
+    get: operations['ApiKeysController_list_v1'];
+    put?: never;
+    /** Create an API key. The secret is returned once. */
+    post: operations['ApiKeysController_create_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/api-keys/{apiKeyId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Revoke an API key */
+    delete: operations['ApiKeysController_revoke_v1'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
-  schemas: never;
+  schemas: {
+    /**
+     * @description Your role here
+     * @enum {string}
+     */
+    WorkspaceRole: WorkspaceRole;
+    WorkspaceDto: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      organizationId: string;
+      name: string;
+      slug: string;
+      /** @description Your role here */
+      role: components['schemas']['WorkspaceRole'];
+    };
+    MeDto: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      email: string;
+      workspaces: components['schemas']['WorkspaceDto'][];
+    };
+    WorkspaceMemberDto: {
+      /** Format: uuid */
+      userId: string;
+      name: string;
+      email: string;
+      role: components['schemas']['WorkspaceRole'];
+      /** Format: date-time */
+      joinedAt: string;
+    };
+    ApiKeyDto: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      role: components['schemas']['WorkspaceRole'];
+      /** @description The first characters of the key, to tell keys apart */
+      prefix: string;
+      /** Format: date-time */
+      lastUsedAt: string | null;
+      /** Format: date-time */
+      expiresAt: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreateApiKeyDto: {
+      /** @example Claude Desktop */
+      name: string;
+      /** @description At most your own role. OWNER is not allowed. */
+      role: components['schemas']['WorkspaceRole'];
+      /**
+       * Format: date-time
+       * @description Leave empty for a key that does not expire
+       */
+      expiresAt?: string;
+    };
+    IssuedApiKeyDto: {
+      apiKey: components['schemas']['ApiKeyDto'];
+      /** @description The full key. Shown once; store it now. */
+      secret: string;
+    };
+  };
   responses: never;
   parameters: never;
   requestBodies: never;
@@ -181,6 +329,133 @@ export interface operations {
       };
     };
   };
+  MeController_getMe_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['MeDto'];
+        };
+      };
+    };
+  };
+  WorkspacesController_getWorkspace_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WorkspaceDto'];
+        };
+      };
+    };
+  };
+  WorkspacesController_listMembers_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WorkspaceMemberDto'][];
+        };
+      };
+    };
+  };
+  ApiKeysController_list_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ApiKeyDto'][];
+        };
+      };
+    };
+  };
+  ApiKeysController_create_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateApiKeyDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['IssuedApiKeyDto'];
+        };
+      };
+    };
+  };
+  ApiKeysController_revoke_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        apiKeyId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -219,4 +494,11 @@ export enum PathsApiV1HealthGetResponses503ContentApplicationJsonDetailsStatus {
   up = 'up',
   degraded = 'degraded',
   down = 'down',
+}
+export enum WorkspaceRole {
+  OWNER = 'OWNER',
+  ADMIN = 'ADMIN',
+  EDITOR = 'EDITOR',
+  APPROVER = 'APPROVER',
+  VIEWER = 'VIEWER',
 }
