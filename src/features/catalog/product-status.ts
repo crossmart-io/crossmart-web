@@ -1,4 +1,5 @@
 import { ProductStatus } from '@/api/schema';
+import type { CatalogStats } from './catalog.types';
 
 export const PRODUCT_STATUS_LABELS: Record<ProductStatus, string> = {
   [ProductStatus.ACTIVE]: 'Active',
@@ -20,4 +21,18 @@ export const STATUS_FILTERS: readonly { value: StatusFilter; label: string }[] =
 
 export function toStatusQuery(filter: StatusFilter): ProductStatus | undefined {
   return filter === ALL_STATUSES ? undefined : filter;
+}
+
+export function toStatusFilter(value: string | null): StatusFilter {
+  return STATUS_FILTERS.find((filter) => filter.value === value)?.value ?? ALL_STATUSES;
+}
+
+/** Products per status filter, for the counts next to each one. */
+export function toStatusCounts(stats: CatalogStats): Record<StatusFilter, number> {
+  return {
+    [ALL_STATUSES]: stats.products,
+    [ProductStatus.ACTIVE]: stats.activeProducts,
+    [ProductStatus.DRAFT]: stats.draftProducts,
+    [ProductStatus.ARCHIVED]: stats.archivedProducts,
+  };
 }

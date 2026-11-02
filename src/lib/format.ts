@@ -1,6 +1,19 @@
+const moneyFormats = new Map<string, Intl.NumberFormat>();
+const DATE_FORMAT = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+
+/** One formatter per currency: building an Intl formatter is far slower than using one. */
+function moneyFormat(currency: string): Intl.NumberFormat {
+  let format = moneyFormats.get(currency);
+  if (!format) {
+    format = new Intl.NumberFormat(undefined, { style: 'currency', currency });
+    moneyFormats.set(currency, format);
+  }
+  return format;
+}
+
 /** Display only: amounts stay exact decimal strings everywhere else. */
 export function formatMoney(amount: string, currency: string): string {
-  return new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(Number(amount));
+  return moneyFormat(currency).format(Number(amount));
 }
 
 export function formatPriceRange(range: { min: string; max: string }, currency: string): string {
@@ -10,4 +23,9 @@ export function formatPriceRange(range: { min: string; max: string }, currency: 
 
 export function pluralize(count: number, singular: string, plural = `${singular}s`): string {
   return `${count.toLocaleString()} ${count === 1 ? singular : plural}`;
+}
+
+/** A calendar date in the user's locale, or `fallback` when there is none. */
+export function formatDate(value: string | null | undefined, fallback = '—'): string {
+  return value ? DATE_FORMAT.format(new Date(value)) : fallback;
 }

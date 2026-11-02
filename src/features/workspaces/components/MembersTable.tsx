@@ -2,6 +2,7 @@ import { ErrorState } from '@/components/feedback/ErrorState';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Table,
   TableBody,
@@ -10,10 +11,9 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { formatDate } from '@/lib/format';
 import { useMembers } from '../hooks/useMembers';
 import { WORKSPACE_ROLE_DESCRIPTIONS, WORKSPACE_ROLE_LABELS } from '../workspace-role';
-
-const DATE_FORMAT = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
 
 export function MembersTable({ workspaceId }: { workspaceId: string }) {
   const { data: members, isPending, error, refetch } = useMembers(workspaceId);
@@ -48,12 +48,18 @@ export function MembersTable({ workspaceId }: { workspaceId: string }) {
                 </div>
               </TableCell>
               <TableCell>
-                <Badge variant="secondary" title={WORKSPACE_ROLE_DESCRIPTIONS[member.role]}>
-                  {WORKSPACE_ROLE_LABELS[member.role]}
-                </Badge>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    {/* Focusable, so keyboard users can read what the role allows. */}
+                    <Badge variant="secondary" tabIndex={0}>
+                      {WORKSPACE_ROLE_LABELS[member.role]}
+                    </Badge>
+                  </TooltipTrigger>
+                  <TooltipContent>{WORKSPACE_ROLE_DESCRIPTIONS[member.role]}</TooltipContent>
+                </Tooltip>
               </TableCell>
               <TableCell className="hidden text-muted-foreground sm:table-cell">
-                {DATE_FORMAT.format(new Date(member.joinedAt))}
+                {formatDate(member.joinedAt)}
               </TableCell>
             </TableRow>
           ))}

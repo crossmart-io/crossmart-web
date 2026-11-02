@@ -20,13 +20,8 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { WORKSPACE_ROLE_LABELS } from '@/features/workspaces';
+import { formatDate } from '@/lib/format';
 import { type ApiKey, useApiKeys, useRevokeApiKey } from '../hooks/useApiKeys';
-
-const DATE_FORMAT = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
-
-function formatDate(value: string | null | undefined, fallback: string): string {
-  return value ? DATE_FORMAT.format(new Date(value)) : fallback;
-}
 
 export function ApiKeysTable({ workspaceId }: { workspaceId: string }) {
   const { data: apiKeys, isPending, error, refetch } = useApiKeys(workspaceId);

@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -48,11 +49,13 @@ export function ApiKeyFields({ name, onNameChange, role, onRoleChange }: ApiKeyF
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {ASSIGNABLE_KEY_ROLES.map((keyRole) => (
-              <SelectItem key={keyRole} value={keyRole}>
-                {WORKSPACE_ROLE_LABELS[keyRole]}
-              </SelectItem>
-            ))}
+            <SelectGroup>
+              {ASSIGNABLE_KEY_ROLES.map((keyRole) => (
+                <SelectItem key={keyRole} value={keyRole}>
+                  {WORKSPACE_ROLE_LABELS[keyRole]}
+                </SelectItem>
+              ))}
+            </SelectGroup>
           </SelectContent>
         </Select>
         <FieldDescription>{WORKSPACE_ROLE_DESCRIPTIONS[role]}</FieldDescription>

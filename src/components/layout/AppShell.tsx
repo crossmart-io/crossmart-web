@@ -1,3 +1,4 @@
+import { useRef } from 'react';
 import { Outlet } from 'react-router';
 import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
@@ -7,8 +8,12 @@ import { UserMenu } from '@/features/auth';
 import { AppSidebar } from './AppSidebar';
 import { BreadcrumbsProvider } from './BreadcrumbsProvider';
 import { HeaderBreadcrumbs } from './HeaderBreadcrumbs';
+import { useFocusOnNavigation } from './useFocusOnNavigation';
 
 export function AppShell() {
+  const mainRef = useRef<HTMLElement>(null);
+  useFocusOnNavigation(mainRef);
+
   return (
     <TooltipProvider>
       <BreadcrumbsProvider>
@@ -30,6 +35,7 @@ export function AppShell() {
               </div>
             </header>
             <main
+              ref={mainRef}
               id={MAIN_CONTENT_ID}
               tabIndex={-1}
               className="mx-auto w-full max-w-6xl px-4 py-6 outline-none sm:px-6 lg:py-8"

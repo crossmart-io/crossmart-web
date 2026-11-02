@@ -1,55 +1,79 @@
-import { useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import type { CatalogGap } from '@/api/schema';
 import { ROUTE_QUERY } from '@/config/routes';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { SEARCH_DEBOUNCE_MS } from '../catalog.constants';
 import { toCatalogGap } from '../catalog-gap';
-import { ALL_STATUSES, type StatusFilter } from '../product-status';
+import { ALL_STATUSES, type StatusFilter, toStatusFilter } from '../product-status';
 
 export interface ProductListFilters {
+  /** What is in the search box right now. */
   search: string;
   setSearch: (search: string) => void;
   /** The search the list is filtered by, once typing pauses. */
   debouncedSearch: string;
   status: StatusFilter;
   setStatus: (status: StatusFilter) => void;
-  /** From the URL, so Catalog health can link to a filtered list. */
   gap: CatalogGap | undefined;
   clearGap: () => void;
   isFiltered: boolean;
   clearAll: () => void;
 }
 
+type ParamsUpdate = (params: URLSearchParams) => void;
+
+/**
+ * Search, status and gap live in the URL, so a filtered list can be linked to and comes back
+ * as it was after opening a product. URL updates replace the entry instead of adding history.
+ */
 export function useProductListFilters(): ProductListFilters {
   const [searchParams, setSearchParams] = useSearchParams();
+  const urlSearch = searchParams.get(ROUTE_QUERY.search) ?? '';
+  const status = toStatusFilter(searchParams.get(ROUTE_QUERY.status));
   const gap = toCatalogGap(searchParams.get(ROUTE_QUERY.gap));
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<StatusFilter>(ALL_STATUSES);
+  const [search, setSearch] = useState(urlSearch);
   const debouncedSearch = useDebouncedValue(search.trim(), SEARCH_DEBOUNCE_MS);
 
-  function clearGap() {
-    setSearchParams((params) => {
-      params.delete(ROUTE_QUERY.gap);
-      return params;
-    });
-  }
+  const updateParams = useCallback(
+    (update: ParamsUpdate) =>
+      setSearchParams(
+        (params) => {
+          update(params);
+          return params;
+        },
+        { replace: true },
+      ),
+    [setSearchParams],
+  );
 
-  function clearAll() {
-    setSearch('');
-    setStatus(ALL_STATUSES);
-    clearGap();
-  }
+  // Typing settles into the URL once the debounce passes.
+  useEffect(() => {
+    if (debouncedSearch !== urlSearch) {
+      updateParams((params) => setOrDelete(params, ROUTE_QUERY.search, debouncedSearch));
+    }
+  }, [debouncedSearch, urlSearch, updateParams]);
 
   return {
     search,
     setSearch,
     debouncedSearch,
     status,
-    setStatus,
+    setStatus: (next) =>
+      updateParams((params) =>
+        setOrDelete(params, ROUTE_QUERY.status, next === ALL_STATUSES ? '' : next),
+      ),
     gap,
-    clearGap,
+    clearGap: () => updateParams((params) => params.delete(ROUTE_QUERY.gap)),
     isFiltered: Boolean(debouncedSearch) || status !== ALL_STATUSES || Boolean(gap),
-    clearAll,
+    clearAll: () => {
+      setSearch('');
+      updateParams((params) => Object.values(ROUTE_QUERY).forEach((key) => params.delete(key)));
+    },
   };
+}
+
+function setOrDelete(params: URLSearchParams, key: string, value: string): void {
+  if (value) params.set(key, value);
+  else params.delete(key);
 }
