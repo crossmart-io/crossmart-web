@@ -1,8 +1,9 @@
-import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
 import type { CatalogGap, ProductStatus } from '@/api/schema';
 import { ROUTE_QUERY } from '@/config/routes';
-import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { useDebouncedSearchParam } from '@/hooks/useDebouncedSearchParam';
+import { useSearchParamsUpdater } from '@/hooks/useSearchParamsUpdater';
+import { setOrDeleteParam } from '@/lib/search-params';
 import { SEARCH_DEBOUNCE_MS } from '../catalog.constants';
 import { toCatalogGap } from '../catalog-gap';
 import { ALL_STATUSES, type StatusFilter, toStatusFilter, toStatusQuery } from '../product-status';
@@ -30,38 +31,20 @@ export interface ProductListFilters {
   applyFilters: (values: ListFilterValues) => void;
 }
 
-type ParamsUpdate = (params: URLSearchParams) => void;
-
 /**
  * Search, status and gap live in the URL, so a filtered list can be linked to and comes back
  * as it was after opening a product. URL updates replace the entry instead of adding history.
  */
 export function useProductListFilters(): ProductListFilters {
-  const [searchParams, setSearchParams] = useSearchParams();
-  const urlSearch = searchParams.get(ROUTE_QUERY.search) ?? '';
+  const [searchParams] = useSearchParams();
+  const updateParams = useSearchParamsUpdater();
   const status = toStatusFilter(searchParams.get(ROUTE_QUERY.status));
   const gap = toCatalogGap(searchParams.get(ROUTE_QUERY.gap));
-  const [search, setSearch] = useState(urlSearch);
-  const debouncedSearch = useDebouncedValue(search.trim(), SEARCH_DEBOUNCE_MS);
-
-  const updateParams = useCallback(
-    (update: ParamsUpdate) =>
-      setSearchParams(
-        (params) => {
-          update(params);
-          return params;
-        },
-        { replace: true },
-      ),
-    [setSearchParams],
-  );
-
-  // Typing settles into the URL once the debounce passes.
-  useEffect(() => {
-    if (debouncedSearch !== urlSearch) {
-      updateParams((params) => setOrDelete(params, ROUTE_QUERY.search, debouncedSearch));
-    }
-  }, [debouncedSearch, urlSearch, updateParams]);
+  const {
+    value: search,
+    setValue: setSearch,
+    debouncedValue: debouncedSearch,
+  } = useDebouncedSearchParam(ROUTE_QUERY.search, SEARCH_DEBOUNCE_MS);
 
   return {
     search,
@@ -70,7 +53,7 @@ export function useProductListFilters(): ProductListFilters {
     status,
     setStatus: (next) =>
       updateParams((params) =>
-        setOrDelete(params, ROUTE_QUERY.status, next === ALL_STATUSES ? '' : next),
+        setOrDeleteParam(params, ROUTE_QUERY.status, next === ALL_STATUSES ? '' : next),
       ),
     gap,
     clearGap: () => updateParams((params) => params.delete(ROUTE_QUERY.gap)),
@@ -82,9 +65,9 @@ export function useProductListFilters(): ProductListFilters {
     applyFilters: (values) => {
       setSearch(values.search ?? '');
       updateParams((params) => {
-        setOrDelete(params, ROUTE_QUERY.search, values.search ?? '');
-        setOrDelete(params, ROUTE_QUERY.status, values.status ?? '');
-        setOrDelete(params, ROUTE_QUERY.gap, values.gap ?? '');
+        setOrDeleteParam(params, ROUTE_QUERY.search, values.search ?? '');
+        setOrDeleteParam(params, ROUTE_QUERY.status, values.status ?? '');
+        setOrDeleteParam(params, ROUTE_QUERY.gap, values.gap ?? '');
       });
     },
   };
@@ -97,9 +80,4 @@ export function matchesFilters(filters: ProductListFilters, values: ListFilterVa
     toStatusQuery(filters.status) === (values.status ?? undefined) &&
     filters.gap === (values.gap ?? undefined)
   );
-}
-
-function setOrDelete(params: URLSearchParams, key: string, value: string): void {
-  if (value) params.set(key, value);
-  else params.delete(key);
 }

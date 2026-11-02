@@ -5,6 +5,7 @@ import {
   Package,
   Share2,
   Users,
+  Warehouse,
   type LucideIcon,
 } from 'lucide-react';
 import { ROUTES } from './routes';
@@ -28,6 +29,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { label: 'Overview', to: ROUTES.home, icon: LayoutDashboard, end: true },
       { label: 'Products', to: ROUTES.products, icon: Package },
+      { label: 'Inventory', to: ROUTES.inventory, icon: Warehouse },
       { label: 'Channels', to: ROUTES.channels, icon: Share2 },
       { label: 'Activity', to: ROUTES.activity, icon: History },
     ],

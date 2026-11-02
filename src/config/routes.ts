@@ -9,6 +9,7 @@ export const ROUTES = {
   products: '/products',
   newProduct: '/products/new',
   product: `/products/:${ROUTE_PARAMS.productId}`,
+  inventory: '/inventory',
   channels: '/channels',
   activity: '/activity',
   apiKeys: '/settings/api-keys',
@@ -24,6 +25,7 @@ export const ROUTE_QUERY = {
   gap: 'gap',
   search: 'q',
   status: 'status',
+  stockLevel: 'stock',
 } as const;
 
 /** Filters of the activity page, kept in the URL so a filtered log can be shared. */

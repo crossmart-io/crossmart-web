@@ -12,6 +12,7 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.product_view_deleted]: 'View deleted',
   [ActivityAction.api_key_created]: 'API key created',
   [ActivityAction.api_key_revoked]: 'API key revoked',
+  [ActivityAction.inventory_adjusted]: 'Stock adjusted',
 };
 
 export function toActivityAction(value: string | null): ActivityAction | undefined {

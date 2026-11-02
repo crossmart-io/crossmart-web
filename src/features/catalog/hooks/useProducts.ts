@@ -1,12 +1,9 @@
-import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { ApiRequestError } from '@/api/api-error';
 import { fetchClient } from '@/api/client';
 import type { CatalogGap, ProductStatus } from '@/api/schema';
+import { useCursorPages } from '@/hooks/useCursorPages';
 import { PRODUCTS_ENDPOINT, PRODUCTS_PAGE_SIZE } from '../catalog.constants';
 import type { ProductSummary } from '../catalog.types';
-
-/** Same key prefix as the generated query hooks, so one invalidation refreshes both. */
-const HTTP_METHOD_GET = 'get';
 
 interface ProductsFilter {
   workspaceId: string | undefined;
@@ -31,20 +28,14 @@ async function fetchProductPage(
   return data;
 }
 
-/**
- * Product pages in title order. The API pages by cursor, which the generated infinite-query
- * helper does not support (it starts every list at offset 0).
- */
+/** Product pages in title order, a page at a time (the API pages by cursor). */
 export function useProducts(filter: ProductsFilter) {
-  const query = useInfiniteQuery({
-    queryKey: [HTTP_METHOD_GET, PRODUCTS_ENDPOINT, filter],
-    queryFn: ({ pageParam, signal }) => fetchProductPage(filter, pageParam, signal),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+  const query = useCursorPages<ProductSummary>({
+    endpoint: PRODUCTS_ENDPOINT,
+    params: filter,
+    fetchPage: (cursor, signal) => fetchProductPage(filter, cursor, signal),
     enabled: Boolean(filter.workspaceId),
-    // Keep the current rows while a new filter loads, instead of flashing a skeleton.
-    placeholderData: keepPreviousData,
+    keepPreviousPages: true,
   });
-  const products: ProductSummary[] = query.data?.pages.flatMap((page) => page.items) ?? [];
-  return { ...query, products };
+  return { ...query, products: query.items };
 }

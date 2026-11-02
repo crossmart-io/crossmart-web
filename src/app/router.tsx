@@ -32,6 +32,11 @@ const appRoutes: RouteObject[] = [
       })),
   },
   {
+    path: ROUTES.inventory,
+    lazy: () =>
+      import('@/pages/InventoryPage').then(({ InventoryPage }) => ({ Component: InventoryPage })),
+  },
+  {
     path: ROUTES.channels,
     lazy: () =>
       import('@/pages/ChannelsPage').then(({ ChannelsPage }) => ({ Component: ChannelsPage })),

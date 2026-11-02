@@ -1,5 +1,9 @@
 const moneyFormats = new Map<string, Intl.NumberFormat>();
 const DATE_FORMAT = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
+const DATE_TIME_FORMAT = new Intl.DateTimeFormat(undefined, {
+  dateStyle: 'medium',
+  timeStyle: 'short',
+});
 
 /** One formatter per currency: building an Intl formatter is far slower than using one. */
 function moneyFormat(currency: string): Intl.NumberFormat {
@@ -28,4 +32,9 @@ export function pluralize(count: number, singular: string, plural = `${singular}
 /** A calendar date in the user's locale, or `fallback` when there is none. */
 export function formatDate(value: string | null | undefined, fallback = '—'): string {
   return value ? DATE_FORMAT.format(new Date(value)) : fallback;
+}
+
+/** A date and time of day in the user's locale, for history entries. */
+export function formatDateTime(value: string): string {
+  return DATE_TIME_FORMAT.format(new Date(value));
 }
