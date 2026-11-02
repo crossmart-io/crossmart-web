@@ -7,6 +7,7 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
+import { toDocumentTitle } from '@/config/app';
 
 interface AuthCardProps extends PropsWithChildren {
   title: string;
@@ -17,6 +18,7 @@ interface AuthCardProps extends PropsWithChildren {
 export function AuthCard({ title, description, footer, children }: AuthCardProps) {
   return (
     <Card>
+      <title>{toDocumentTitle(title)}</title>
       <CardHeader>
         <CardTitle className="text-xl">
           <h1>{title}</h1>

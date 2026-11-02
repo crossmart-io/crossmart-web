@@ -12,7 +12,7 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, actions, back }: PageHeaderProps) {
   return (
-    <div className="mb-6 flex flex-col gap-3">
+    <div className="flex flex-col gap-3">
       {back && (
         <Link
           to={back.to}

@@ -1,21 +1,20 @@
+import { ArrowUpRight } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { EXTERNAL_LINKS } from '@/config/links';
 import { CHANNEL_STATUS_LABELS, ChannelStatus, type ChannelInfo } from '../channels.constants';
+import { ChannelLogo } from './ChannelLogo';
 
 export function ChannelCard({ channel }: { channel: ChannelInfo }) {
+  const inDevelopment = channel.status === ChannelStatus.InDevelopment;
+
   return (
     <Card>
       <CardContent className="flex flex-col gap-3">
-        <div className="flex items-center justify-between">
-          <span
-            className="grid size-10 place-items-center rounded-lg text-sm font-bold text-white"
-            style={{ backgroundColor: channel.color }}
-            aria-hidden="true"
-          >
-            {channel.name.charAt(0)}
-          </span>
-          <Badge variant={channel.status === ChannelStatus.InDevelopment ? 'secondary' : 'outline'}>
+        <div className="flex items-start justify-between">
+          <ChannelLogo logo={channel.logo} />
+          <Badge variant={inDevelopment ? 'default' : 'outline'}>
             {CHANNEL_STATUS_LABELS[channel.status]}
           </Badge>
         </div>
@@ -24,9 +23,12 @@ export function ChannelCard({ channel }: { channel: ChannelInfo }) {
           <p className="text-sm text-muted-foreground">{channel.description}</p>
         </div>
       </CardContent>
-      <CardFooter>
-        <Button variant="outline" className="w-full" disabled>
-          Connect
+      <CardFooter className="mt-auto">
+        <Button variant="ghost" size="sm" className="-ml-2" asChild>
+          <a href={EXTERNAL_LINKS.issues} target="_blank" rel="noreferrer">
+            {inDevelopment ? 'Follow on GitHub' : 'Request on GitHub'}
+            <ArrowUpRight data-icon="inline-end" />
+          </a>
         </Button>
       </CardFooter>
     </Card>

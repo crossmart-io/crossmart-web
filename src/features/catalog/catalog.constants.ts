@@ -15,3 +15,10 @@ export const CATALOG_STATS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/catalog-
 
 /** Image types the API accepts; the API checks the bytes again. */
 export const IMAGE_FILE_ACCEPT = 'image/jpeg,image/png,image/webp,image/gif';
+
+/** Toasts after product changes. */
+export const PRODUCT_FEEDBACK = {
+  created: 'Product created',
+  saved: 'Product saved',
+  deleted: 'Product deleted',
+} as const;

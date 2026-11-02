@@ -276,6 +276,8 @@ export interface components {
     };
     /** @enum {string} */
     ProductStatus: ProductStatus;
+    /** @enum {string} */
+    CatalogGap: CatalogGap;
     PriceRangeDto: {
       /**
        * @description Decimal string in the workspace currency
@@ -498,6 +500,11 @@ export interface components {
       contentType: components['schemas']['ImageContentType'];
       byteSize: number;
     };
+    CatalogGapCountDto: {
+      gap: components['schemas']['CatalogGap'];
+      /** @description Products with this gap */
+      products: number;
+    };
     CatalogStatsDto: {
       products: number;
       activeProducts: number;
@@ -506,6 +513,8 @@ export interface components {
       variants: number;
       /** @description Tracked variants with nothing available */
       outOfStockVariants: number;
+      /** @description Products lacking what channels require */
+      gaps: components['schemas']['CatalogGapCountDto'][];
     };
   };
   responses: never;
@@ -797,6 +806,8 @@ export interface operations {
         /** @description Matches title, handle or SKU */
         search?: string;
         status?: components['schemas']['ProductStatus'];
+        /** @description Only products that lack this value */
+        gap?: components['schemas']['CatalogGap'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
         limit?: number;
@@ -1045,6 +1056,13 @@ export enum ProductStatus {
   DRAFT = 'DRAFT',
   ACTIVE = 'ACTIVE',
   ARCHIVED = 'ARCHIVED',
+}
+export enum CatalogGap {
+  images = 'images',
+  description = 'description',
+  sku = 'sku',
+  barcode = 'barcode',
+  out_of_stock = 'out_of_stock',
 }
 export enum OutOfStockPolicy {
   STOP_SELLING = 'STOP_SELLING',

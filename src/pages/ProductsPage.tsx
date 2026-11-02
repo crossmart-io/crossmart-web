@@ -1,69 +1,103 @@
 import { Plus } from 'lucide-react';
-import { useState } from 'react';
 import { Link } from 'react-router';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { ErrorState } from '@/components/feedback/ErrorState';
+import { Page } from '@/components/layout/Page';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/config/routes';
 import {
-  ALL_STATUSES,
+  ActiveFilterChip,
+  CATALOG_GAP_COPY,
   ImportProductsDialog,
   ProductFilters,
+  type ProductListFilters,
   ProductsEmptyState,
   ProductsTable,
   ProductsTableSkeleton,
-  SEARCH_DEBOUNCE_MS,
-  type StatusFilter,
   toStatusQuery,
+  useProductListFilters,
   useProducts,
 } from '@/features/catalog';
-import { useCurrentWorkspace } from '@/features/workspaces';
-import { useDebouncedValue } from '@/hooks/useDebouncedValue';
+import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
+
+function AddProductButton() {
+  return (
+    <Button asChild>
+      <Link to={ROUTES.newProduct}>
+        <Plus data-icon="inline-start" />
+        Add product
+      </Link>
+    </Button>
+  );
+}
+
+function AddProductActions({ workspaceId }: { workspaceId: string | undefined }) {
+  return (
+    <>
+      <ImportProductsDialog workspaceId={workspaceId} />
+      <AddProductButton />
+    </>
+  );
+}
 
 export function ProductsPage() {
   const { workspace } = useCurrentWorkspace();
-  const [search, setSearch] = useState('');
-  const [status, setStatus] = useState<StatusFilter>(ALL_STATUSES);
-  const debouncedSearch = useDebouncedValue(search.trim(), SEARCH_DEBOUNCE_MS);
-  const products = useProducts({
-    workspaceId: workspace?.id,
-    search: debouncedSearch,
-    status: toStatusQuery(status),
-  });
-  const importDialog = <ImportProductsDialog workspaceId={workspace?.id} />;
+  const filters = useProductListFilters();
 
   return (
-    <section className="flex flex-col gap-6">
-      <PageHeader
-        title="Products"
-        description="One catalog for every channel you sell on."
-        actions={
-          <>
-            {importDialog}
-            <Button asChild variant="default">
-              <Link to={ROUTES.newProduct}>
-                <Plus />
-                Add product
-              </Link>
-            </Button>
-          </>
-        }
-      />
+    <Page
+      name="Products"
+      description="One catalog for every channel you sell on."
+      actions={<AddProductActions workspaceId={workspace?.id} />}
+    >
       <ProductFilters
-        search={search}
-        onSearchChange={setSearch}
-        status={status}
-        onStatusChange={setStatus}
+        search={filters.search}
+        onSearchChange={filters.setSearch}
+        status={filters.status}
+        onStatusChange={filters.setStatus}
       />
-      {products.isPending ? (
-        <ProductsTableSkeleton />
-      ) : products.products.length === 0 ? (
-        <ProductsEmptyState
-          isFiltered={Boolean(debouncedSearch) || status !== ALL_STATUSES}
-          action={importDialog}
-        />
-      ) : (
-        <ProductsTable products={products.products} currency={workspace?.currency ?? ''} />
+      {filters.gap && (
+        <ActiveFilterChip label={CATALOG_GAP_COPY[filters.gap].label} onClear={filters.clearGap} />
       )}
+      <ProductResults workspace={workspace} filters={filters} />
+    </Page>
+  );
+}
+
+interface ProductResultsProps {
+  workspace: Workspace | undefined;
+  filters: ProductListFilters;
+}
+
+function ProductResults({ workspace, filters }: ProductResultsProps) {
+  const products = useProducts({
+    workspaceId: workspace?.id,
+    search: filters.debouncedSearch,
+    status: toStatusQuery(filters.status),
+    gap: filters.gap,
+  });
+
+  if (products.isError) {
+    return (
+      <ErrorState
+        title="Products could not be loaded"
+        error={products.error}
+        onRetry={products.refetch}
+      />
+    );
+  }
+  if (products.isPending) return <ProductsTableSkeleton />;
+  if (products.products.length === 0) {
+    return (
+      <ProductsEmptyState
+        isFiltered={filters.isFiltered}
+        onClearFilters={filters.clearAll}
+        actions={<AddProductActions workspaceId={workspace?.id} />}
+      />
+    );
+  }
+  return (
+    <>
+      <ProductsTable products={products.products} currency={workspace?.currency ?? ''} />
       {products.hasNextPage && (
         <Button
           variant="outline"
@@ -74,6 +108,6 @@ export function ProductsPage() {
           {products.isFetchingNextPage ? 'Loading…' : 'Load more'}
         </Button>
       )}
-    </section>
+    </>
   );
 }

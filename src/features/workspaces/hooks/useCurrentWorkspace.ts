@@ -7,6 +7,8 @@ interface CurrentWorkspaceState {
   workspace: Workspace | undefined;
   isPending: boolean;
   isError: boolean;
+  error: unknown;
+  refetch: () => unknown;
 }
 
 /**
@@ -14,6 +16,6 @@ interface CurrentWorkspaceState {
  * membership until the workspace switcher for agencies lands.
  */
 export function useCurrentWorkspace(): CurrentWorkspaceState {
-  const { data, isPending, isError } = useMe();
-  return { workspace: data?.workspaces[0], isPending, isError };
+  const { data, isPending, isError, error, refetch } = useMe();
+  return { workspace: data?.workspaces[0], isPending, isError, error, refetch };
 }

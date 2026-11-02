@@ -3,6 +3,7 @@ import { type FormEvent, useState } from 'react';
 import type { WorkspaceRole } from '@/api/schema';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import {
   Dialog,
   DialogContent,
@@ -52,11 +53,16 @@ export function CreateApiKeyDialog({ workspaceId }: { workspaceId: string }) {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         <Button>
-          <Plus />
+          <Plus data-icon="inline-start" />
           Create key
         </Button>
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent
+        // The secret is shown only once: while it is on screen, only Done closes the dialog.
+        showCloseButton={!issued}
+        onEscapeKeyDown={(event) => issued && event.preventDefault()}
+        onInteractOutside={(event) => issued && event.preventDefault()}
+      >
         <DialogHeader>
           <DialogTitle>{issued ? 'Your new API key' : 'Create an API key'}</DialogTitle>
           <DialogDescription>{describe(issued)}</DialogDescription>
@@ -78,12 +84,19 @@ export function CreateApiKeyDialog({ workspaceId }: { workspaceId: string }) {
           {issued ? (
             <Button onClick={() => handleOpenChange(false)}>Done</Button>
           ) : (
-            <Button type="submit" form={FORM_ID} disabled={!name.trim() || createKey.isPending}>
-              {createKey.isPending ? 'Creating…' : 'Create key'}
-            </Button>
+            <SubmitKeyButton disabled={!name.trim()} isPending={createKey.isPending} />
           )}
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+}
+
+function SubmitKeyButton({ disabled, isPending }: { disabled: boolean; isPending: boolean }) {
+  return (
+    <Button type="submit" form={FORM_ID} disabled={disabled || isPending}>
+      {isPending && <Spinner data-icon="inline-start" />}
+      {isPending ? 'Creating…' : 'Create key'}
+    </Button>
   );
 }

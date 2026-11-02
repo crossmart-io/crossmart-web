@@ -9,6 +9,7 @@ export interface SignInCredentials {
 
 export function useSignIn() {
   return useMutation<void, AuthRequestError, SignInCredentials>({
+    meta: { inlineError: true },
     mutationFn: async (credentials) => {
       const { error } = await authClient.signIn.email(credentials);
       if (error) throw AuthRequestError.from(error);

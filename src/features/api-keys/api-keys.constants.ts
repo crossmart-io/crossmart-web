@@ -12,3 +12,10 @@ export const ASSIGNABLE_KEY_ROLES = [
 ] as const;
 
 export const DEFAULT_KEY_ROLE = WorkspaceRole.EDITOR;
+
+/** Toasts after key changes. */
+export const API_KEY_FEEDBACK = {
+  revoked: 'API key revoked',
+  copied: 'Key copied to the clipboard',
+  copyFailed: 'Could not copy. Select the key and copy it yourself.',
+} as const;

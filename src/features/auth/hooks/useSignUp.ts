@@ -10,6 +10,7 @@ export interface SignUpDetails {
 
 export function useSignUp() {
   return useMutation<void, AuthRequestError, SignUpDetails>({
+    meta: { inlineError: true },
     mutationFn: async (details) => {
       const { error } = await authClient.signUp.email(details);
       if (error) throw AuthRequestError.from(error);

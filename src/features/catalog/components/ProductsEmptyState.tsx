@@ -1,28 +1,57 @@
-import { PackageOpen } from 'lucide-react';
+import { PackageOpen, SearchX } from 'lucide-react';
 import type { ReactNode } from 'react';
+import { Button } from '@/components/ui/button';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
 
 interface ProductsEmptyStateProps {
   isFiltered: boolean;
-  action: ReactNode;
+  onClearFilters: () => void;
+  /** Ways to add products, shown when the catalog itself is empty. */
+  actions: ReactNode;
 }
 
-export function ProductsEmptyState({ isFiltered, action }: ProductsEmptyStateProps) {
+export function ProductsEmptyState({
+  isFiltered,
+  onClearFilters,
+  actions,
+}: ProductsEmptyStateProps) {
+  if (isFiltered) {
+    return (
+      <Empty className="border">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <SearchX />
+          </EmptyMedia>
+          <EmptyTitle>No products match</EmptyTitle>
+          <EmptyDescription>Try another search, or clear the filters.</EmptyDescription>
+        </EmptyHeader>
+        <EmptyContent>
+          <Button variant="outline" onClick={onClearFilters}>
+            Clear filters
+          </Button>
+        </EmptyContent>
+      </Empty>
+    );
+  }
   return (
-    <div className="flex flex-col items-center gap-3 rounded-lg border border-dashed px-6 py-16 text-center">
-      <PackageOpen className="size-8 text-muted-foreground" aria-hidden="true" />
-      {isFiltered ? (
-        <p className="text-muted-foreground">No products match these filters.</p>
-      ) : (
-        <>
-          <div className="flex flex-col gap-1">
-            <p className="font-medium">Your catalog is empty</p>
-            <p className="max-w-sm text-sm text-muted-foreground">
-              Import a product export from Shopify to bring in your products, variants and stock.
-            </p>
-          </div>
-          {action}
-        </>
-      )}
-    </div>
+    <Empty className="border">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <PackageOpen />
+        </EmptyMedia>
+        <EmptyTitle>Your catalog is empty</EmptyTitle>
+        <EmptyDescription>
+          Import a product export from Shopify, or add your first product by hand.
+        </EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent className="flex-row justify-center">{actions}</EmptyContent>
+    </Empty>
   );
 }

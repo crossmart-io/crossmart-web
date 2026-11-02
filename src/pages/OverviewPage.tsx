@@ -1,45 +1,52 @@
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
-import { PageHeader } from '@/components/layout/PageHeader';
+import { Page } from '@/components/layout/Page';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/config/routes';
+import { useApiKeys } from '@/features/api-keys';
 import { useSession } from '@/features/auth';
 import { useCatalogStats } from '@/features/catalog';
-import { CatalogStatsGrid, GettingStarted } from '@/features/overview';
-import { SystemStatusCard } from '@/features/system-status';
+import { CatalogHealth, CatalogStatsGrid, GettingStarted } from '@/features/overview';
 import type { Workspace } from '@/features/workspaces';
 
-function Overview({ workspace }: { workspace: Workspace }) {
-  const { data: session } = useSession();
+function OverviewContent({ workspace }: { workspace: Workspace }) {
   const { data: stats } = useCatalogStats(workspace.id);
-  const firstName = session?.user.name.split(' ')[0];
+  const { data: apiKeys } = useApiKeys(workspace.id);
 
   return (
     <>
-      <PageHeader
-        title={firstName ? `Welcome, ${firstName}` : 'Overview'}
-        description={`Here is how ${workspace.name} is doing.`}
-        actions={
-          <Button asChild>
-            <Link to={ROUTES.newProduct}>
-              <Plus />
-              Add product
-            </Link>
-          </Button>
-        }
-      />
-      <div className="flex flex-col gap-6">
-        <CatalogStatsGrid workspaceId={workspace.id} />
-        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
-          <GettingStarted hasProducts={(stats?.products ?? 0) > 0} />
-          <SystemStatusCard />
-        </div>
+      <CatalogStatsGrid workspaceId={workspace.id} />
+      <div className="grid gap-6 lg:grid-cols-2">
+        <GettingStarted
+          hasProducts={(stats?.products ?? 0) > 0}
+          hasApiKey={(apiKeys?.length ?? 0) > 0}
+        />
+        <CatalogHealth workspaceId={workspace.id} />
       </div>
     </>
   );
 }
 
 export function OverviewPage() {
-  return <WorkspaceGate>{(workspace) => <Overview workspace={workspace} />}</WorkspaceGate>;
+  const { data: session } = useSession();
+  const firstName = session?.user.name.split(' ')[0];
+
+  return (
+    <Page
+      name="Overview"
+      title={firstName ? `Welcome, ${firstName}` : 'Overview'}
+      description="Your catalog at a glance, and what to do next."
+      actions={
+        <Button asChild>
+          <Link to={ROUTES.newProduct}>
+            <Plus data-icon="inline-start" />
+            Add product
+          </Link>
+        </Button>
+      }
+    >
+      <WorkspaceGate>{(workspace) => <OverviewContent workspace={workspace} />}</WorkspaceGate>
+    </Page>
+  );
 }

@@ -31,3 +31,16 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     ],
   },
 ];
+
+export interface Crumb {
+  label: string;
+  /** Omit for a group without its own page. */
+  to?: string;
+}
+
+/** The pages above each page, for its breadcrumbs. Module constants keep them stable across renders. */
+export const PAGE_PARENTS = {
+  topLevel: [],
+  products: [{ label: 'Products', to: ROUTES.products }],
+  settings: [{ label: 'Settings' }],
+} as const satisfies Record<string, readonly Crumb[]>;

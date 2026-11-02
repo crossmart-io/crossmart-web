@@ -1,3 +1,4 @@
+import { cn } from 'cn';
 import { pluralize } from '@/lib/format';
 
 interface StockLabelProps {
@@ -11,7 +12,7 @@ export function StockLabel({ totalAvailable, variantCount }: StockLabelProps) {
     return <span className="text-muted-foreground">Not tracked · {variants}</span>;
   }
   return (
-    <span className={totalAvailable <= 0 ? 'text-destructive' : undefined}>
+    <span className={cn('tabular-nums', totalAvailable <= 0 && 'text-destructive')}>
       {totalAvailable.toLocaleString()} in stock{' '}
       <span className="text-muted-foreground">· {variants}</span>
     </span>

@@ -1,17 +1,16 @@
 import { KeyRound } from 'lucide-react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-  AlertDialogTrigger,
-} from '@/components/ui/alert-dialog';
+import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import {
+  Empty,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -30,17 +29,25 @@ function formatDate(value: string | null | undefined, fallback: string): string 
 }
 
 export function ApiKeysTable({ workspaceId }: { workspaceId: string }) {
-  const { data: apiKeys = [], isPending } = useApiKeys(workspaceId);
+  const { data: apiKeys, isPending, error, refetch } = useApiKeys(workspaceId);
 
-  if (!isPending && apiKeys.length === 0) {
+  if (error) {
+    return <ErrorState title="API keys could not be loaded" error={error} onRetry={refetch} />;
+  }
+  if (isPending) return <Skeleton className="h-32 w-full" />;
+  if (apiKeys.length === 0) {
     return (
-      <div className="flex flex-col items-center gap-2 rounded-lg border border-dashed px-6 py-12 text-center">
-        <KeyRound className="size-6 text-muted-foreground" aria-hidden="true" />
-        <p className="font-medium">No API keys yet</p>
-        <p className="max-w-sm text-sm text-muted-foreground">
-          Create a key to let an AI agent or a script read and edit your catalog.
-        </p>
-      </div>
+      <Empty className="border">
+        <EmptyHeader>
+          <EmptyMedia variant="icon">
+            <KeyRound />
+          </EmptyMedia>
+          <EmptyTitle>No API keys yet</EmptyTitle>
+          <EmptyDescription>
+            Create a key to let an AI agent or a script read and edit your catalog.
+          </EmptyDescription>
+        </EmptyHeader>
+      </Empty>
     );
   }
 
@@ -84,26 +91,16 @@ function RevokeButton({ workspaceId, apiKey }: { workspaceId: string; apiKey: Ap
   const revoke = useRevokeApiKey(workspaceId);
 
   return (
-    <AlertDialog>
-      <AlertDialogTrigger asChild>
-        <Button variant="ghost" size="sm" className="text-destructive">
+    <ConfirmDialog
+      trigger={
+        <Button variant="destructive" size="sm" aria-label={`Revoke ${apiKey.name}`}>
           Revoke
         </Button>
-      </AlertDialogTrigger>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Revoke {apiKey.name}?</AlertDialogTitle>
-          <AlertDialogDescription>
-            Anything using this key stops working right away. This cannot be undone.
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel>Cancel</AlertDialogCancel>
-          <AlertDialogAction variant="destructive" onClick={() => revoke.mutate(apiKey.id)}>
-            Revoke key
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+      }
+      title={`Revoke ${apiKey.name}?`}
+      description="Anything using this key stops working right away. This cannot be undone."
+      confirmLabel="Revoke key"
+      onConfirm={() => revoke.mutateAsync(apiKey.id)}
+    />
   );
 }

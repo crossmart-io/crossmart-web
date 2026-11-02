@@ -1,5 +1,6 @@
 import { Boxes, PackageX, Package, Share2 } from 'lucide-react';
-import { ROUTES } from '@/config/routes';
+import { CatalogGap } from '@/api/schema';
+import { ROUTES, toProductsRoute } from '@/config/routes';
 import { useCatalogStats } from '@/features/catalog';
 import { pluralize } from '@/lib/format';
 import { StatTile } from './StatTile';
@@ -34,7 +35,7 @@ export function CatalogStatsGrid({ workspaceId }: { workspaceId: string }) {
             : 'Everything tracked is in stock'
         }
         icon={PackageX}
-        to={ROUTES.products}
+        to={toProductsRoute({ gap: CatalogGap.out_of_stock })}
       />
       <StatTile
         label="Channels"

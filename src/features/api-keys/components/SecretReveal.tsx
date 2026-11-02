@@ -1,6 +1,8 @@
 import { Check, Copy } from 'lucide-react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { API_KEY_FEEDBACK } from '../api-keys.constants';
 
 const COPIED_FEEDBACK_MS = 2000;
 
@@ -8,23 +10,32 @@ const COPIED_FEEDBACK_MS = 2000;
 export function SecretReveal({ secret }: { secret: string }) {
   const [copied, setCopied] = useState(false);
 
+  useEffect(() => {
+    if (!copied) return undefined;
+    const timer = setTimeout(() => setCopied(false), COPIED_FEEDBACK_MS);
+    return () => clearTimeout(timer);
+  }, [copied]);
+
   async function copy() {
-    await navigator.clipboard.writeText(secret);
-    setCopied(true);
-    setTimeout(() => setCopied(false), COPIED_FEEDBACK_MS);
+    try {
+      await navigator.clipboard.writeText(secret);
+      setCopied(true);
+      toast.success(API_KEY_FEEDBACK.copied);
+    } catch {
+      toast.error(API_KEY_FEEDBACK.copyFailed);
+    }
   }
 
   return (
     <div className="flex min-w-0 flex-col gap-2">
       <div className="flex items-center gap-2 rounded-md border bg-muted px-3 py-2">
-        <code className="min-w-0 flex-1 font-mono text-sm break-all">{secret}</code>
+        <code className="min-w-0 flex-1 font-mono text-sm break-all text-foreground">{secret}</code>
         <Button
           type="button"
-          size="icon"
+          size="icon-sm"
           variant="ghost"
-          className="size-7"
           onClick={() => void copy()}
-          aria-label="Copy key"
+          aria-label={copied ? 'Copied' : 'Copy key'}
         >
           {copied ? <Check /> : <Copy />}
         </Button>

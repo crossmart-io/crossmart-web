@@ -1,5 +1,7 @@
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Skeleton } from '@/components/ui/skeleton';
 import {
   Table,
   TableBody,
@@ -14,7 +16,12 @@ import { WORKSPACE_ROLE_DESCRIPTIONS, WORKSPACE_ROLE_LABELS } from '../workspace
 const DATE_FORMAT = new Intl.DateTimeFormat(undefined, { dateStyle: 'medium' });
 
 export function MembersTable({ workspaceId }: { workspaceId: string }) {
-  const { data: members = [] } = useMembers(workspaceId);
+  const { data: members, isPending, error, refetch } = useMembers(workspaceId);
+
+  if (error) {
+    return <ErrorState title="Members could not be loaded" error={error} onRetry={refetch} />;
+  }
+  if (isPending) return <Skeleton className="h-32 w-full" />;
 
   return (
     <div className="rounded-lg border">

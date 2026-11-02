@@ -1,7 +1,7 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
-import { toApiErrorMessage } from '@/api/api-error';
+import { ApiRequestError } from '@/api/api-error';
 import { fetchClient } from '@/api/client';
-import type { ProductStatus } from '@/api/schema';
+import type { CatalogGap, ProductStatus } from '@/api/schema';
 import { PRODUCTS_ENDPOINT, PRODUCTS_PAGE_SIZE } from '../catalog.constants';
 import type { ProductSummary } from '../catalog.types';
 
@@ -12,21 +12,22 @@ interface ProductsFilter {
   workspaceId: string | undefined;
   search: string;
   status: ProductStatus | undefined;
+  gap: CatalogGap | undefined;
 }
 
 async function fetchProductPage(
-  { workspaceId, search, status }: ProductsFilter,
+  { workspaceId, search, status, gap }: ProductsFilter,
   cursor: string | undefined,
   signal: AbortSignal,
 ) {
   const { data, error } = await fetchClient.GET(PRODUCTS_ENDPOINT, {
     params: {
       path: { workspaceId: workspaceId ?? '' },
-      query: { search: search || undefined, status, cursor, limit: PRODUCTS_PAGE_SIZE },
+      query: { search: search || undefined, status, gap, cursor, limit: PRODUCTS_PAGE_SIZE },
     },
     signal,
   });
-  if (error) throw new Error(toApiErrorMessage(error));
+  if (error) throw ApiRequestError.from(error);
   return data;
 }
 
