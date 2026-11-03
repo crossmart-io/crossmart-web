@@ -1,3 +1,4 @@
+import { COST_HELP } from '../../catalog.constants';
 import { EditorCard } from './EditorCard';
 import { MoneyField } from './FormFields';
 
@@ -12,6 +13,12 @@ export function PricingCard({ currency }: { currency: string }) {
           label="Compare-at price"
           currency={currency}
           description="The original price, shown crossed out."
+        />
+        <MoneyField
+          name="variants.0.cost"
+          label="Cost"
+          currency={currency}
+          description={COST_HELP}
         />
       </div>
     </EditorCard>

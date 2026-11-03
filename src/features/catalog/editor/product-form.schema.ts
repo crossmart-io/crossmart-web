@@ -26,6 +26,7 @@ export const variantFormSchema = z.object({
   barcode: optionalText,
   price: amount,
   compareAtPrice: optionalAmount,
+  cost: optionalAmount,
   weightGrams: z
     .string()
     .trim()

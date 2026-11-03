@@ -45,3 +45,6 @@ export const VIEW_FEEDBACK = {
   saved: 'View saved',
   deleted: 'View deleted',
 } as const;
+
+/** Explains the variant cost field wherever it is edited. */
+export const COST_HELP = 'What you pay per unit. Used for pricing floors; never shown to buyers.';
