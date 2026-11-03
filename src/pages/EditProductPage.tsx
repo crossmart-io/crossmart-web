@@ -9,7 +9,8 @@ import { ROUTE_PARAMS } from '@/config/routes';
 import { RecentActivityCard } from '@/features/activity';
 import { ProductStatusBadge, useProduct } from '@/features/catalog';
 import { ProductEditor } from '@/features/catalog/editor';
-import type { Workspace } from '@/features/workspaces';
+import { ProductChannelsCard } from '@/features/listings';
+import { canEditCatalog, type Workspace } from '@/features/workspaces';
 
 const PRODUCT_PAGE_NAME = 'Product';
 
@@ -49,6 +50,13 @@ function EditProduct({ workspace, productId }: { workspace: Workspace; productId
         workspace={workspace}
         product={product}
         aside={<RecentActivityCard workspaceId={workspace.id} productId={product.id} />}
+        channels={
+          <ProductChannelsCard
+            workspaceId={workspace.id}
+            product={product}
+            canEdit={canEditCatalog(workspace.role)}
+          />
+        }
       />
     </Page>
   );

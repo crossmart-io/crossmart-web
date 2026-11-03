@@ -18,6 +18,8 @@ interface ProductEditorLayoutProps {
   onPendingUploadsChange: (count: number) => void;
   /** Extra cards for the side column, such as the product's recent activity. */
   aside?: ReactNode;
+  /** Where the product is listed; a placeholder card until the product exists. */
+  channels?: ReactNode;
 }
 
 /** Content on the left, status and organization on the right. */
@@ -27,6 +29,7 @@ export function ProductEditorLayout({
   hasOptions,
   onPendingUploadsChange,
   aside,
+  channels,
 }: ProductEditorLayoutProps) {
   // On one column, status comes first: it is what sellers check before anything else.
   const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY);
@@ -48,7 +51,7 @@ export function ProductEditorLayout({
       </div>
       <div className="flex flex-col gap-6">
         {isDesktop && <StatusCard />}
-        <ChannelsCard />
+        {channels ?? <ChannelsCard />}
         <OrganizationCard />
         {aside}
       </div>
