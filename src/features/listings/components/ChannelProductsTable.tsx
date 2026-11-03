@@ -1,7 +1,7 @@
 import { Package } from 'lucide-react';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { ListSkeleton } from '@/components/lists/ListSkeleton';
-import { LoadMoreButton } from '@/components/lists/LoadMoreButton';
+import { TablePagination } from '@/components/lists/TablePagination';
 import {
   Empty,
   EmptyDescription,
@@ -10,6 +10,7 @@ import {
   EmptyTitle,
 } from '@/components/ui/empty';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import type { Pagination } from '@/hooks/usePagination';
 import type { useChannelProducts } from '../hooks/useChannelProducts';
 import { ChannelProductRow } from './ChannelProductRow';
 
@@ -17,6 +18,7 @@ const SKELETON_ROWS = 5;
 
 interface ChannelProductsTableProps {
   products: ReturnType<typeof useChannelProducts>;
+  pagination: Pagination;
   onRemove?: (productId: string) => Promise<unknown>;
   onAddBack?: (productId: string) => void;
 }
@@ -38,7 +40,12 @@ function NoProducts() {
 }
 
 /** The store's products with their state there, a page at a time. */
-export function ChannelProductsTable({ products, onRemove, onAddBack }: ChannelProductsTableProps) {
+export function ChannelProductsTable({
+  products,
+  pagination,
+  onRemove,
+  onAddBack,
+}: ChannelProductsTableProps) {
   if (products.isError) {
     return (
       <ErrorState
@@ -76,12 +83,13 @@ export function ChannelProductsTable({ products, onRemove, onAddBack }: ChannelP
           </TableBody>
         </Table>
       </div>
-      {products.hasNextPage && (
-        <LoadMoreButton
-          isLoading={products.isFetchingNextPage}
-          onLoadMore={() => void products.fetchNextPage()}
-        />
-      )}
+      <TablePagination
+        pagination={pagination}
+        total={products.total}
+        pageCount={products.pageCount}
+        noun="product"
+        isFetching={products.isPlaceholderData}
+      />
     </div>
   );
 }

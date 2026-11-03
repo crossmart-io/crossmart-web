@@ -2,7 +2,7 @@ import { ActivityOutcome } from '@/api/schema';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { Page } from '@/components/layout/Page';
-import { LoadMoreButton } from '@/components/lists/LoadMoreButton';
+import { TablePagination } from '@/components/lists/TablePagination';
 import {
   ActivityEmptyState,
   ActivityFilterBar,
@@ -13,6 +13,7 @@ import {
   useActivityFilters,
 } from '@/features/activity';
 import type { Workspace } from '@/features/workspaces';
+import { useUrlPagination } from '@/hooks/usePagination';
 
 export function ActivityPage() {
   const filters = useActivityFilters();
@@ -33,11 +34,15 @@ interface ActivityResultsProps {
 }
 
 function ActivityResults({ workspace, filters }: ActivityResultsProps) {
-  const activity = useActivity({
-    workspaceId: workspace.id,
-    action: filters.action,
-    outcome: filters.failuresOnly ? ActivityOutcome.FAILED : undefined,
-  });
+  const pagination = useUrlPagination();
+  const activity = useActivity(
+    {
+      workspaceId: workspace.id,
+      action: filters.action,
+      outcome: filters.failuresOnly ? ActivityOutcome.FAILED : undefined,
+    },
+    pagination,
+  );
 
   if (activity.isError) {
     return (
@@ -55,12 +60,13 @@ function ActivityResults({ workspace, filters }: ActivityResultsProps) {
   return (
     <>
       <ActivityTimeline events={activity.events} />
-      {activity.hasNextPage && (
-        <LoadMoreButton
-          isLoading={activity.isFetchingNextPage}
-          onLoadMore={() => void activity.fetchNextPage()}
-        />
-      )}
+      <TablePagination
+        pagination={pagination}
+        total={activity.total}
+        pageCount={activity.pageCount}
+        noun="event"
+        isFetching={activity.isPlaceholderData}
+      />
     </>
   );
 }

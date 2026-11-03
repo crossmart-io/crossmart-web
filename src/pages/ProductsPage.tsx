@@ -2,7 +2,7 @@ import { Plus } from 'lucide-react';
 import { Link } from 'react-router';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Page } from '@/components/layout/Page';
-import { LoadMoreButton } from '@/components/lists/LoadMoreButton';
+import { TablePagination } from '@/components/lists/TablePagination';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/config/routes';
 import {
@@ -23,8 +23,8 @@ import {
   useProductListFilters,
   useProducts,
 } from '@/features/catalog';
+import { useUrlPagination } from '@/hooks/usePagination';
 import type { Selection } from '@/hooks/useSelection';
-import { pluralize } from '@/lib/format';
 import { ImportProductsDialog } from '@/features/imports';
 import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
 import { ProductStoreFilterSelect, StoreMembershipMenu } from '@/features/listings';
@@ -100,16 +100,20 @@ interface ProductResultsProps {
 
 function ProductResults({ workspace, filters }: ProductResultsProps) {
   const selection = useListSelection(filters);
-  const products = useProducts({
-    workspaceId: workspace?.id,
-    search: filters.debouncedSearch,
-    status: toStatusQuery(filters.status),
-    gap: filters.gap,
-    storeFilter: filters.store.filter,
-    storeId: filters.store.storeId,
-    sort: filters.sort.sort,
-    direction: filters.sort.direction,
-  });
+  const pagination = useUrlPagination();
+  const products = useProducts(
+    {
+      workspaceId: workspace?.id,
+      search: filters.debouncedSearch,
+      status: toStatusQuery(filters.status),
+      gap: filters.gap,
+      storeFilter: filters.store.filter,
+      storeId: filters.store.storeId,
+      sort: filters.sort.sort,
+      direction: filters.sort.direction,
+    },
+    pagination,
+  );
 
   if (products.isError) {
     return (
@@ -132,31 +136,21 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
   }
   return (
     <>
-      <ResultCount count={products.products.length} hasMore={products.hasNextPage} />
       <ProductsTable
         products={products.products}
         currency={workspace?.currency ?? ''}
         isRefreshing={products.isPlaceholderData}
         selection={selection}
       />
-      {products.hasNextPage && (
-        <LoadMoreButton
-          isLoading={products.isFetchingNextPage}
-          onLoadMore={() => void products.fetchNextPage()}
-        />
-      )}
+      <TablePagination
+        pagination={pagination}
+        total={products.total}
+        pageCount={products.pageCount}
+        noun="product"
+        isFetching={products.isPlaceholderData}
+      />
       {workspace && <SelectionActions workspaceId={workspace.id} selection={selection} />}
     </>
-  );
-}
-
-/** Tells screen readers how many products the filters left. */
-function ResultCount({ count, hasMore }: { count: number; hasMore: boolean }) {
-  return (
-    <p className="sr-only" aria-live="polite">
-      {hasMore ? 'Showing the first ' : 'Showing '}
-      {pluralize(count, 'product')}
-    </p>
   );
 }
 

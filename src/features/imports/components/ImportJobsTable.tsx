@@ -25,7 +25,7 @@ import { ImportJobStatusBadge } from './ImportJobStatusBadge';
 export function ImportJobsTable({ jobs }: { jobs: ImportJob[] }) {
   return (
     <div className="rounded-lg border">
-      <Table className="table-fixed">
+      <Table stickyHeader className="table-fixed">
         <TableHeader>
           <TableRow>
             <TableHead>Source</TableHead>

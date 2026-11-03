@@ -10,6 +10,7 @@ import { useAddStoreProducts, useRemoveStoreProducts } from '../hooks/useStorePr
 import { ALL_CHANNEL_PRODUCTS } from '../listings.constants';
 import { ChannelProductFilters } from './ChannelProductFilters';
 import { ChannelProductsTable } from './ChannelProductsTable';
+import { useUrlPagination } from '@/hooks/usePagination';
 
 interface ChannelProductsCardProps {
   workspaceId: string;
@@ -45,12 +46,17 @@ export function ChannelProductsCard({
 }: ChannelProductsCardProps) {
   const ref = { workspaceId, connectionId };
   const filters = useChannelProductFilters();
-  const products = useChannelProducts(ref, {
-    state: filters.filter === ALL_CHANNEL_PRODUCTS ? undefined : filters.filter,
-    search: filters.search.debouncedValue || undefined,
-    sort: filters.sort.sort,
-    direction: filters.sort.direction,
-  });
+  const pagination = useUrlPagination();
+  const products = useChannelProducts(
+    ref,
+    {
+      state: filters.filter === ALL_CHANNEL_PRODUCTS ? undefined : filters.filter,
+      search: filters.search.debouncedValue || undefined,
+      sort: filters.sort.sort,
+      direction: filters.sort.direction,
+    },
+    pagination,
+  );
   const add = useAddStoreProducts();
   const remove = useRemoveStoreProducts();
 
@@ -63,6 +69,7 @@ export function ChannelProductsCard({
         </div>
         <ChannelProductsTable
           products={products}
+          pagination={pagination}
           onRemove={
             canEdit
               ? (productId) => remove.mutateAsync({ ref, productIds: [productId] })

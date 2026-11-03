@@ -49,6 +49,12 @@ export const ROUTE_QUERY = {
   storeId: 'store',
 } as const;
 
+/** A table's page and rows per page, kept in the URL with its filters. */
+export const PAGINATION_QUERY = {
+  page: 'page',
+  pageSize: 'per',
+} as const;
+
 /** Filters of the activity page, kept in the URL so a filtered log can be shared. */
 export const ACTIVITY_ROUTE_QUERY = {
   action: 'action',

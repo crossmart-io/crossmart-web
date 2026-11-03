@@ -10,8 +10,6 @@ export const PRODUCT_IMPORTS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/produc
 export const IMPORT_JOBS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/import-jobs';
 export const IMPORT_JOB_ENDPOINT = '/api/v1/workspaces/{workspaceId}/import-jobs/{jobId}';
 
-export const IMPORT_JOBS_PAGE_SIZE = 20;
-
 /** Exports are plain CSV; some systems label them as Excel. */
 export const CSV_FILE_ACCEPT = '.csv,text/csv';
 /** Field names of the multipart import form. */

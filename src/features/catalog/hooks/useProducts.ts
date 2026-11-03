@@ -7,8 +7,9 @@ import type {
   ProductStoreFilter,
   SortDirection,
 } from '@/api/schema';
-import { useCursorPages } from '@/hooks/useCursorPages';
-import { PRODUCTS_ENDPOINT, PRODUCTS_PAGE_SIZE } from '../catalog.constants';
+import { usePagedList } from '@/hooks/usePagedList';
+import type { Pagination } from '@/hooks/usePagination';
+import { PRODUCTS_ENDPOINT } from '../catalog.constants';
 import type { ProductSummary } from '../catalog.types';
 
 interface ProductsFilter {
@@ -24,13 +25,13 @@ interface ProductsFilter {
 
 async function fetchProductPage(
   { workspaceId, search, ...filters }: ProductsFilter,
-  cursor: string | undefined,
+  page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
   const { data, error } = await fetchClient.GET(PRODUCTS_ENDPOINT, {
     params: {
       path: { workspaceId: workspaceId ?? '' },
-      query: { ...filters, search: search || undefined, cursor, limit: PRODUCTS_PAGE_SIZE },
+      query: { ...filters, search: search || undefined, ...page },
     },
     signal,
   });
@@ -38,14 +39,14 @@ async function fetchProductPage(
   return data;
 }
 
-/** Product pages in the chosen order, a page at a time (the API pages by cursor). */
-export function useProducts(filter: ProductsFilter) {
-  const query = useCursorPages<ProductSummary>({
+/** One numbered page of products in the chosen order. */
+export function useProducts(filter: ProductsFilter, pagination: Pagination) {
+  const query = usePagedList<ProductSummary>({
     endpoint: PRODUCTS_ENDPOINT,
     params: filter,
-    fetchPage: (cursor, signal) => fetchProductPage(filter, cursor, signal),
+    pagination,
+    fetchPage: (page, signal) => fetchProductPage(filter, page, signal),
     enabled: Boolean(filter.workspaceId),
-    keepPreviousPages: true,
   });
   return { ...query, products: query.items };
 }

@@ -41,7 +41,7 @@ export function ProductsTable({
       className={cn('rounded-lg border transition-opacity', isRefreshing && 'opacity-60')}
       aria-busy={isRefreshing}
     >
-      <Table>
+      <Table stickyHeader>
         <TableHeader>
           <TableRow>
             {selection && (

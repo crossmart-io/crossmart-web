@@ -35,7 +35,6 @@ export const LISTING_OVERRIDE_ENDPOINT =
 export const PREVIEW_DEBOUNCE_MS = 400;
 export const SELECTION_PREVIEW_PAGE_SIZE = 10;
 export const CHANNEL_LISTINGS_PAGE_SIZE = 25;
-export const CHANNEL_PRODUCTS_PAGE_SIZE = 25;
 export const CHANNEL_PRODUCTS_SEARCH_DEBOUNCE_MS = 300;
 /** Products added to a store in one request; the API allows no more. */
 export const STORE_PRODUCTS_BATCH_SIZE = 250;

@@ -1,7 +1,8 @@
 import { History } from 'lucide-react';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { ListSkeleton } from '@/components/lists/ListSkeleton';
-import { LoadMoreButton } from '@/components/lists/LoadMoreButton';
+import { TablePagination } from '@/components/lists/TablePagination';
+import { useLocalPagination } from '@/hooks/usePagination';
 import {
   Empty,
   EmptyDescription,
@@ -66,7 +67,8 @@ function HistoryBody({
   workspaceId: string;
   inventoryItemId: string;
 }) {
-  const history = useStockMovements({ workspaceId, inventoryItemId });
+  const pagination = useLocalPagination(inventoryItemId);
+  const history = useStockMovements({ workspaceId, inventoryItemId }, pagination);
 
   if (history.isError) {
     return (
@@ -84,12 +86,13 @@ function HistoryBody({
   return (
     <>
       <MovementList movements={history.movements} />
-      {history.hasNextPage && (
-        <LoadMoreButton
-          isLoading={history.isFetchingNextPage}
-          onLoadMore={() => void history.fetchNextPage()}
-        />
-      )}
+      <TablePagination
+        pagination={pagination}
+        total={history.total}
+        pageCount={history.pageCount}
+        noun="change"
+        isFetching={history.isPlaceholderData}
+      />
     </>
   );
 }

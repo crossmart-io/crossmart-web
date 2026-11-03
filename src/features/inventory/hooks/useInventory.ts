@@ -1,8 +1,9 @@
 import { ApiRequestError } from '@/api/api-error';
 import { fetchClient } from '@/api/client';
 import type { StockLevel } from '@/api/schema';
-import { useCursorPages } from '@/hooks/useCursorPages';
-import { INVENTORY_ITEMS_ENDPOINT, INVENTORY_PAGE_SIZE } from '../inventory.constants';
+import { usePagedList } from '@/hooks/usePagedList';
+import type { Pagination } from '@/hooks/usePagination';
+import { INVENTORY_ITEMS_ENDPOINT } from '../inventory.constants';
 import type { InventoryItem } from '../inventory.types';
 
 interface InventoryFilter {
@@ -13,13 +14,13 @@ interface InventoryFilter {
 
 async function fetchInventoryPage(
   { workspaceId, search, stockLevel }: InventoryFilter,
-  cursor: string | undefined,
+  page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
   const { data, error } = await fetchClient.GET(INVENTORY_ITEMS_ENDPOINT, {
     params: {
       path: { workspaceId: workspaceId ?? '' },
-      query: { search: search || undefined, stockLevel, cursor, limit: INVENTORY_PAGE_SIZE },
+      query: { search: search || undefined, stockLevel, ...page },
     },
     signal,
   });
@@ -27,14 +28,14 @@ async function fetchInventoryPage(
   return data;
 }
 
-/** Stock rows by product title, a page at a time (the API pages by cursor). */
-export function useInventory(filter: InventoryFilter) {
-  const query = useCursorPages<InventoryItem>({
+/** One numbered page of stock rows, by product title. */
+export function useInventory(filter: InventoryFilter, pagination: Pagination) {
+  const query = usePagedList<InventoryItem>({
     endpoint: INVENTORY_ITEMS_ENDPOINT,
     params: filter,
-    fetchPage: (cursor, signal) => fetchInventoryPage(filter, cursor, signal),
+    pagination,
+    fetchPage: (page, signal) => fetchInventoryPage(filter, page, signal),
     enabled: Boolean(filter.workspaceId),
-    keepPreviousPages: true,
     // Stock also changes in the product editor, so refetch on every visit.
     staleTime: 0,
   });

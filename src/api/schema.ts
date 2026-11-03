@@ -846,6 +846,8 @@ export interface components {
       items: components['schemas']['ProductSummaryDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
     /** @enum {string} */
     OutOfStockPolicy: OutOfStockPolicy;
@@ -1151,6 +1153,8 @@ export interface components {
       items: components['schemas']['ImportJobDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
     /** @enum {string} */
     ImportIssueOutcome: ImportIssueOutcome;
@@ -1260,6 +1264,8 @@ export interface components {
       items: components['schemas']['ActivityEventDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
     /** @enum {string} */
     StockLevel: StockLevel;
@@ -1292,6 +1298,8 @@ export interface components {
       items: components['schemas']['InventoryItemDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
     /** @enum {string} */
     StockAdjustmentMode: StockAdjustmentMode;
@@ -1328,6 +1336,8 @@ export interface components {
       items: components['schemas']['InventoryMovementDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
     /**
      * @description Set when connecting failed
@@ -1494,6 +1504,8 @@ export interface components {
       items: components['schemas']['ChannelProductDto'][];
       counts: components['schemas']['ChannelProductCountsDto'];
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
     UpdatePricingDto: {
       /** @description The rule; null removes it, so catalog prices are sent as they are */
@@ -1604,6 +1616,8 @@ export interface components {
     ChannelListingPageDto: {
       items: components['schemas']['ChannelListingDto'][];
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
     StoreProductsDto: {
       productIds: string[];
@@ -1979,6 +1993,8 @@ export interface operations {
         direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;
@@ -2219,6 +2235,8 @@ export interface operations {
       query?: {
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;
@@ -2321,6 +2339,8 @@ export interface operations {
         outcome?: components['schemas']['ActivityOutcome'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
         subjectType?: components['schemas']['ActivitySubjectType'];
         /** @description Events about this record, including bulk actions that touched it */
@@ -2356,6 +2376,8 @@ export interface operations {
         outcome?: components['schemas']['ActivityOutcome'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;
@@ -2385,6 +2407,8 @@ export interface operations {
         stockLevel?: components['schemas']['StockLevel'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;
@@ -2436,6 +2460,8 @@ export interface operations {
       query?: {
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;
@@ -2578,6 +2604,8 @@ export interface operations {
         sort?: components['schemas']['ChannelProductSort'];
         direction?: components['schemas']['SortDirection'];
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;
@@ -2734,6 +2762,8 @@ export interface operations {
       query?: {
         status?: components['schemas']['ListingStatus'];
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;

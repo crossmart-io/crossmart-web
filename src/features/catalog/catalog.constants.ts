@@ -3,7 +3,6 @@ import { ProductSort, SortDirection } from '@/api/schema';
 export const PRODUCTS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/products';
 export const PRODUCT_ENDPOINT = '/api/v1/workspaces/{workspaceId}/products/{productId}';
 
-export const PRODUCTS_PAGE_SIZE = 25;
 export const SEARCH_DEBOUNCE_MS = 300;
 
 export const UPLOAD_FILE_FIELD = 'file';
