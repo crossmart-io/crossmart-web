@@ -33,6 +33,7 @@ import {
   StockOverrideFields,
   VisibilityField,
 } from './OverrideFields';
+import { MediaOverrideField, TagsOverrideField } from './OverrideTagsAndMediaFields';
 
 export interface OverrideProduct extends ProductDefaults {
   id: string;
@@ -104,6 +105,31 @@ function OverrideSheetHeader({ isAdding, store }: { isAdding: boolean; store: st
   );
 }
 
+/** Every field the store can show differently, in the order a merchant reads the listing. */
+function OverrideFieldList({
+  product,
+  channel,
+  error,
+}: {
+  product: OverrideProduct;
+  channel: ProductChannel;
+  error: Error | null;
+}) {
+  return (
+    <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pb-4">
+      <ContentOverrideFields productTitle={product.title} />
+      <TagsOverrideField />
+      <MediaOverrideField imageUrls={product.media.map(({ url }) => url)} />
+      <Separator />
+      <PriceOverrideFields variants={channel.variants} currency={channel.connection.currencyCode} />
+      <Separator />
+      <VisibilityField />
+      <StockOverrideFields />
+      <SaveError error={error} />
+    </div>
+  );
+}
+
 /** What this product shows differently on one channel. Saving queues an update when it is listed. */
 export function ChannelOverrideSheet({
   workspaceId,
@@ -125,7 +151,7 @@ export function ChannelOverrideSheet({
   const add = useAddToStore(ref);
   const submit = form.handleSubmit(async (values) => {
     if (!isAdding || form.formState.isDirty) {
-      await save.mutateAsync(toOverrideBody(values, channel.override));
+      await save.mutateAsync(toOverrideBody(values));
     }
     if (isAdding) await add.mutateAsync();
     onOpenChange(false);
@@ -141,18 +167,11 @@ export function ChannelOverrideSheet({
             noValidate
             className="flex min-h-0 flex-1 flex-col"
           >
-            <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pb-4">
-              <ContentOverrideFields productTitle={product.title} />
-              <Separator />
-              <PriceOverrideFields
-                variants={channel.variants}
-                currency={channel.connection.currencyCode}
-              />
-              <Separator />
-              <VisibilityField />
-              <StockOverrideFields />
-              <SaveError error={save.error ?? add.error} />
-            </div>
+            <OverrideFieldList
+              product={product}
+              channel={channel}
+              error={save.error ?? add.error}
+            />
             <OverrideSheetFooter
               canClear={Boolean(channel.override)}
               isClearing={clear.isPending}

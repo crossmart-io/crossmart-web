@@ -22,6 +22,10 @@ export const overrideFormSchema = z.object({
   title: z.string().trim().max(OVERRIDE_TITLE_MAX_LENGTH),
   customDescription: z.boolean(),
   descriptionHtml: z.string(),
+  customTags: z.boolean(),
+  tags: z.array(z.string()),
+  customMedia: z.boolean(),
+  mediaUrls: z.array(z.string()),
   visibility: z.enum([FOLLOW_PRODUCT, ListingVisibility.VISIBLE, ListingVisibility.HIDDEN]),
   inventoryBuffer: optionalCount,
   maxQuantity: optionalCount,
@@ -33,6 +37,8 @@ export type OverrideFormValues = z.infer<typeof overrideFormSchema>;
 /** What the product says where the listing does not override it. */
 export interface ProductDefaults {
   descriptionHtml: string;
+  tags: string[];
+  media: { url: string }[];
 }
 
 function countText(value: number | null | undefined): string {
@@ -60,6 +66,19 @@ function toDescriptionFields(
   };
 }
 
+/** Tags and images: the store's own once overridden, the product's to start from otherwise. */
+function toTagAndMediaFields(
+  override: ListingOverrideView | null,
+  product: ProductDefaults,
+): Pick<OverrideFormValues, 'customTags' | 'tags' | 'customMedia' | 'mediaUrls'> {
+  return {
+    customTags: (override?.tags ?? null) !== null,
+    tags: override?.tags ?? product.tags,
+    customMedia: (override?.mediaUrls ?? null) !== null,
+    mediaUrls: override?.mediaUrls ?? product.media.map(({ url }) => url),
+  };
+}
+
 export function toOverrideForm(
   channel: ProductChannel,
   product: ProductDefaults,
@@ -68,6 +87,7 @@ export function toOverrideForm(
   return {
     title: override?.title ?? '',
     ...toDescriptionFields(override, product),
+    ...toTagAndMediaFields(override, product),
     visibility: (override?.visibility ?? FOLLOW_PRODUCT) as VisibilityChoice,
     inventoryBuffer: countText(override?.inventoryBuffer),
     maxQuantity: countText(override?.maxQuantity),
@@ -79,16 +99,13 @@ function toCount(value: string): number | null {
   return value.trim() === '' ? null : Number.parseInt(value, 10);
 }
 
-/** The override body. Tags and images the sheet does not edit are kept as they are. */
-export function toOverrideBody(
-  values: OverrideFormValues,
-  current: ListingOverrideView | null | undefined,
-): ListingOverride {
+/** The override body. Unticked tags and images follow the product again. */
+export function toOverrideBody(values: OverrideFormValues): ListingOverride {
   return {
     title: values.title.trim() || null,
     descriptionHtml: values.customDescription ? values.descriptionHtml : null,
-    tags: current?.tags ?? null,
-    mediaUrls: current?.mediaUrls ?? null,
+    tags: values.customTags ? values.tags : null,
+    mediaUrls: values.customMedia ? values.mediaUrls : null,
     visibility: values.visibility === FOLLOW_PRODUCT ? null : values.visibility,
     inventoryBuffer: toCount(values.inventoryBuffer),
     maxQuantity: toCount(values.maxQuantity),

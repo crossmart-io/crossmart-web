@@ -34,9 +34,15 @@ function channel(overrides: Partial<ProductChannel> = {}): ProductChannel {
   };
 }
 
+const PRODUCT = {
+  descriptionHtml: '<p>Hi</p>',
+  tags: ['linen'],
+  media: [{ url: 'https://cdn.example.com/a.jpg' }, { url: 'https://cdn.example.com/b.jpg' }],
+};
+
 describe('override form', () => {
   it('starts empty, following the product, with its description ready to edit', () => {
-    const form = toOverrideForm(channel(), { descriptionHtml: '<p>Hi</p>' });
+    const form = toOverrideForm(channel(), PRODUCT);
 
     expect(form).toMatchObject({
       title: '',
@@ -44,8 +50,12 @@ describe('override form', () => {
       descriptionHtml: '<p>Hi</p>',
       visibility: FOLLOW_PRODUCT,
       prices: [{ variantId: 'v1', price: '' }],
+      customTags: false,
+      tags: ['linen'],
+      customMedia: false,
+      mediaUrls: ['https://cdn.example.com/a.jpg', 'https://cdn.example.com/b.jpg'],
     });
-    expect(toOverrideBody(form, null)).toEqual({
+    expect(toOverrideBody(form)).toEqual({
       title: null,
       descriptionHtml: null,
       tags: null,
@@ -57,7 +67,7 @@ describe('override form', () => {
     });
   });
 
-  it('sends what the merchant set and keeps tags and images it does not edit', () => {
+  it('sends what the merchant set, with the store’s own tags and images', () => {
     const current = {
       title: 'Old',
       descriptionHtml: null,
@@ -69,18 +79,16 @@ describe('override form', () => {
       variantPrices: [],
       updatedAt: '2026-11-03T09:00:00Z',
     };
-    const form = toOverrideForm(channel({ override: current }), { descriptionHtml: '' });
+    const form = toOverrideForm(channel({ override: current }), PRODUCT);
 
-    const body = toOverrideBody(
-      {
-        ...form,
-        title: ' Shopify title ',
-        visibility: ListingVisibility.HIDDEN,
-        inventoryBuffer: '2',
-        prices: [{ variantId: 'v1', price: '9.50' }],
-      },
-      current,
-    );
+    const body = toOverrideBody({
+      ...form,
+      title: ' Shopify title ',
+      visibility: ListingVisibility.HIDDEN,
+      inventoryBuffer: '2',
+      prices: [{ variantId: 'v1', price: '9.50' }],
+    });
+    expect(form).toMatchObject({ customTags: true, tags: ['shopify'], customMedia: true });
 
     expect(body).toMatchObject({
       title: 'Shopify title',
@@ -90,5 +98,13 @@ describe('override form', () => {
       inventoryBuffer: 2,
       variantPrices: [{ variantId: 'v1', price: '9.50', compareAtPrice: null }],
     });
+  });
+
+  it('follows the product again once tags or images are unticked', () => {
+    const form = toOverrideForm(channel(), PRODUCT);
+
+    expect(
+      toOverrideBody({ ...form, customTags: true, tags: [], customMedia: false }),
+    ).toMatchObject({ tags: [], mediaUrls: null });
   });
 });
