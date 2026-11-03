@@ -1,10 +1,5 @@
 import type { CatalogGap, ProductStatus } from '@/api/schema';
-import { pluralize } from '@/lib/format';
-import {
-  SELECTION_MODE_LABELS,
-  SELECTION_SUMMARY_SEPARATOR,
-  SelectionMode,
-} from './listings.constants';
+import { SelectionMode } from './listings.constants';
 import type { ProductSelectionFilter, ProductSelectionRule } from './listings.types';
 
 /** The selection as the editor holds it. */
@@ -26,8 +21,7 @@ function hasFilters(filter: ProductSelectionFilter): boolean {
 }
 
 function modeOf(rule: ProductSelectionRule | null | undefined): SelectionMode {
-  if (!rule) return SelectionMode.All;
-  if (rule.filter === null) return SelectionMode.Picked;
+  if (!rule || rule.filter === null) return SelectionMode.Off;
   return hasFilters(rule.filter) ? SelectionMode.Filtered : SelectionMode.All;
 }
 
@@ -57,7 +51,7 @@ function toFilter(draft: SelectionDraft): ProductSelectionFilter | null {
   switch (draft.mode) {
     case SelectionMode.All:
       return {};
-    case SelectionMode.Picked:
+    case SelectionMode.Off:
       return null;
     case SelectionMode.Filtered:
       return {
@@ -84,7 +78,7 @@ export function excludeProduct(draft: SelectionDraft, productId: string): Select
     ...draft,
     includeProductIds: draft.includeProductIds.filter((id) => id !== productId),
     excludeProductIds:
-      draft.mode === SelectionMode.Picked
+      draft.mode === SelectionMode.Off
         ? draft.excludeProductIds
         : [...new Set([...draft.excludeProductIds, productId])],
   };
@@ -97,32 +91,4 @@ export function includeProduct(draft: SelectionDraft, productId: string): Select
     includeProductIds: [...new Set([...draft.includeProductIds, productId])],
     excludeProductIds: draft.excludeProductIds.filter((id) => id !== productId),
   };
-}
-
-/** The rule after adding or removing one product by hand, as a store's product list does. */
-export function toggleProductInRule(
-  rule: ProductSelectionRule | null,
-  productId: string,
-  include: boolean,
-): ProductSelectionRule {
-  const draft = toSelectionDraft(rule);
-  return toSelectionRule(
-    include ? includeProduct(draft, productId) : excludeProduct(draft, productId),
-  );
-}
-
-/** One line for a rule: how products are chosen, and how many were changed by hand. */
-export function describeSelection(rule: ProductSelectionRule | null): string {
-  const draft = toSelectionDraft(rule);
-  const parts: string[] = [SELECTION_MODE_LABELS[draft.mode]];
-  if (draft.mode !== SelectionMode.Picked && draft.includeProductIds.length > 0) {
-    parts.push(`${pluralize(draft.includeProductIds.length, 'product')} added by hand`);
-  }
-  if (draft.mode === SelectionMode.Picked) {
-    parts.push(pluralize(draft.includeProductIds.length, 'product'));
-  }
-  if (draft.excludeProductIds.length > 0) {
-    parts.push(`${pluralize(draft.excludeProductIds.length, 'product')} removed by hand`);
-  }
-  return parts.join(SELECTION_SUMMARY_SEPARATOR);
 }

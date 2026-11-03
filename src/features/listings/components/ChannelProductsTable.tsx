@@ -17,8 +17,7 @@ const SKELETON_ROWS = 5;
 
 interface ChannelProductsTableProps {
   products: ReturnType<typeof useChannelProducts>;
-  onToggle?: (productId: string, include: boolean) => void;
-  isSaving: boolean;
+  onRemove?: (productId: string) => Promise<unknown>;
 }
 
 function NoProducts() {
@@ -29,14 +28,16 @@ function NoProducts() {
           <Package />
         </EmptyMedia>
         <EmptyTitle>No products here</EmptyTitle>
-        <EmptyDescription>Try another filter, or clear the search.</EmptyDescription>
+        <EmptyDescription>
+          Add products from their page or from the products table, or try another filter.
+        </EmptyDescription>
       </EmptyHeader>
     </Empty>
   );
 }
 
-/** Every product with its state in this store, a page at a time. */
-export function ChannelProductsTable({ products, onToggle, isSaving }: ChannelProductsTableProps) {
+/** The store's products with their state there, a page at a time. */
+export function ChannelProductsTable({ products, onRemove }: ChannelProductsTableProps) {
   if (products.isError) {
     return (
       <ErrorState
@@ -64,12 +65,7 @@ export function ChannelProductsTable({ products, onToggle, isSaving }: ChannelPr
           </TableHeader>
           <TableBody>
             {products.items.map((row) => (
-              <ChannelProductRow
-                key={row.product.id}
-                row={row}
-                onToggle={onToggle}
-                isSaving={isSaving}
-              />
+              <ChannelProductRow key={row.product.id} row={row} onRemove={onRemove} />
             ))}
           </TableBody>
         </Table>

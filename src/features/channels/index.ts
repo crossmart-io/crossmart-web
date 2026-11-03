@@ -8,3 +8,4 @@ export { ConnectionSettings } from './components/ConnectionSettings';
 export type { ChannelConnection } from './channels.types';
 export { ConnectionSwitcher } from './components/ConnectionSwitcher';
 export { connectionName } from './connection-name';
+export { useChannelConnections } from './hooks/useChannelConnections';

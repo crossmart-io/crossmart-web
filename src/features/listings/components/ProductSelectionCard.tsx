@@ -1,19 +1,11 @@
 import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardAction,
-  CardContent,
-  CardDescription,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { pluralize } from '@/lib/format';
 import { useSelectionEditor } from '../hooks/useSelectionEditor';
 import { SELECTION_MODE_LABELS, SelectionMode } from '../listings.constants';
 import type { ProductSelectionRule } from '../listings.types';
 import type { SelectionDraft } from '../selection-draft';
-import { AddProductsPopover } from './AddProductsPopover';
 import { CardSaveFooter } from './CardSaveFooter';
 import { SelectionFilters } from './SelectionFilters';
 import { SelectionPreviewList } from './SelectionPreviewList';
@@ -39,7 +31,7 @@ function ModePicker({ draft, onChange, disabled }: DraftProps) {
       value={draft.mode}
       disabled={disabled}
       onValueChange={(mode) => mode && onChange({ ...draft, mode: mode as SelectionMode })}
-      aria-label="Which products to list"
+      aria-label="What the store adds automatically"
       className="flex-wrap"
     >
       {Object.values(SelectionMode).map((mode) => (
@@ -62,7 +54,7 @@ function RemovedNote({ count, onRestore }: { count: number; onRestore: () => voi
   );
 }
 
-/** Which products this channel lists: filters, hand-picked products, and a live preview. */
+/** The store's automatic rule: off, all products or filters, with a live preview of the store. */
 export function ProductSelectionCard({
   workspaceId,
   connectionId,
@@ -71,29 +63,17 @@ export function ProductSelectionCard({
 }: ProductSelectionCardProps) {
   const editor = useSelectionEditor({ workspaceId, connectionId }, rule);
   const { draft, setDraft } = editor;
-  const listedIds = new Set([
-    ...(editor.preview?.items.map((item) => item.id) ?? []),
-    ...draft.includeProductIds,
-  ]);
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>
-          <h2>Products</h2>
+          <h2>Add products automatically</h2>
         </CardTitle>
         <CardDescription>
-          Choose which products this channel lists. “Sync now” applies it.
+          Besides the products you add by hand, the store can get all products or those matching
+          filters. Products you remove by hand stay out. Sync now applies a change.
         </CardDescription>
-        {canManage && (
-          <CardAction>
-            <AddProductsPopover
-              workspaceId={workspaceId}
-              selectedIds={listedIds}
-              onAdd={editor.include}
-            />
-          </CardAction>
-        )}
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         <ModePicker draft={draft} onChange={setDraft} disabled={!canManage} />

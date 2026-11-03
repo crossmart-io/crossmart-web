@@ -36,12 +36,12 @@ function row(state: ChannelProductState, lastError: string | null = null): Chann
   };
 }
 
-function renderRow(product: ChannelProduct, onToggle?: (id: string, include: boolean) => void) {
+function renderRow(product: ChannelProduct, onRemove?: (id: string) => Promise<unknown>) {
   render(
     <MemoryRouter>
       <Table>
         <TableBody>
-          <ChannelProductRow row={product} onToggle={onToggle} isSaving={false} />
+          <ChannelProductRow row={product} onRemove={onRemove} />
         </TableBody>
       </Table>
     </MemoryRouter>,
@@ -49,9 +49,9 @@ function renderRow(product: ChannelProduct, onToggle?: (id: string, include: boo
 }
 
 describe('ChannelProductRow', () => {
-  it('shows a live product with a link to it on the channel, and removes it', async () => {
-    const onToggle = vi.fn<(id: string, include: boolean) => void>();
-    renderRow(row(ChannelProductState.listed), onToggle);
+  it('shows a live product with a link to it on the channel, and removes it once confirmed', async () => {
+    const onRemove = vi.fn<(id: string) => Promise<unknown>>().mockResolvedValue(undefined);
+    renderRow(row(ChannelProductState.listed), onRemove);
 
     expect(screen.getByText('Live')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open Linen shirt on the channel' })).toHaveAttribute(
@@ -61,17 +61,10 @@ describe('ChannelProductRow', () => {
     await userEvent.click(
       screen.getByRole('button', { name: 'Remove Linen shirt from this store' }),
     );
+    expect(onRemove).not.toHaveBeenCalled();
+    await userEvent.click(screen.getByRole('button', { name: 'Remove' }));
 
-    expect(onToggle).toHaveBeenCalledWith('p-1', false);
-  });
-
-  it('adds back a product that is not in the store', async () => {
-    const onToggle = vi.fn<(id: string, include: boolean) => void>();
-    renderRow(row(ChannelProductState.excluded), onToggle);
-
-    await userEvent.click(screen.getByRole('button', { name: 'Add Linen shirt to this store' }));
-
-    expect(onToggle).toHaveBeenCalledWith('p-1', true);
+    expect(onRemove).toHaveBeenCalledWith('p-1');
   });
 
   it('says why the last sync failed', () => {
@@ -80,9 +73,10 @@ describe('ChannelProductRow', () => {
     expect(screen.getByText('Handle already taken')).toBeInTheDocument();
   });
 
-  it('offers no changes to members who cannot manage the workspace', () => {
+  it('offers no removal while it is being removed, or to members who may not', () => {
+    renderRow(row(ChannelProductState.removing), vi.fn<(id: string) => Promise<unknown>>());
     renderRow(row(ChannelProductState.listed));
 
-    expect(screen.queryByRole('button', { name: /this store/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /from this store/ })).not.toBeInTheDocument();
   });
 });

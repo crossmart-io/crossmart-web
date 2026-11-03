@@ -26,6 +26,7 @@ import type { Selection } from '@/hooks/useSelection';
 import { pluralize } from '@/lib/format';
 import { ImportProductsDialog } from '@/features/imports';
 import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
+import { StoreMembershipMenu } from '@/features/listings';
 
 function AddProductButton() {
   return (
@@ -150,7 +151,13 @@ function SelectionActions({
     <>
       {/* Room under the last row, so the floating bar never covers it. */}
       <div className="h-16" aria-hidden="true" />
-      <BulkActionBar workspaceId={workspaceId} selection={selection} />
+      <BulkActionBar
+        workspaceId={workspaceId}
+        selection={selection}
+        renderActions={(productIds) => (
+          <StoreMembershipMenu workspaceId={workspaceId} productIds={productIds} />
+        )}
+      />
     </>
   );
 }

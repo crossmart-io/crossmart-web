@@ -489,8 +489,8 @@ export interface paths {
       cookie?: never;
     };
     /**
-     * Every product with its state on the connection
-     * @description Each product says whether the selection includes it and whether the channel has it: listed, pending (the next sync publishes it), failed, removing (the next sync delists it) or excluded. Counts per state follow `search`, so they can label filter tabs.
+     * The store’s products with their state on the channel
+     * @description Products the store should have or still has: listed, pending (being published), failed or removing (being delisted). Pass `state=excluded` for the catalog products it does not have. Counts per state follow `search`, so they can label filter tabs.
      */
     get: operations['ChannelProductsController_listProducts_v1'];
     put?: never;
@@ -615,6 +615,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/products/add': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add products to the store
+     * @description They stay until removed and are published at once.
+     */
+    post: operations['StoreProductsController_add_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/products/remove': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Remove products from the store
+     * @description They are delisted at once, and the automatic rule leaves them out.
+     */
+    post: operations['StoreProductsController_remove_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/workspaces/{workspaceId}/products/{productId}/channels': {
     parameters: {
       query?: never;
@@ -630,6 +670,30 @@ export interface paths {
     put?: never;
     post?: never;
     delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add the product to a store
+     * @description The product stays in the store until it is removed, whatever the automatic rule says, and is published there at once.
+     */
+    post: operations['ProductChannelsController_add_v1'];
+    /**
+     * Remove the product from a store
+     * @description The product is delisted there at once, and the automatic rule leaves it out.
+     */
+    delete: operations['ProductChannelsController_remove_v1'];
     options?: never;
     head?: never;
     patch?: never;
@@ -1514,6 +1578,13 @@ export interface components {
     ChannelListingPageDto: {
       items: components['schemas']['ChannelListingDto'][];
       nextCursor: string | null;
+    };
+    StoreProductsDto: {
+      productIds: string[];
+    };
+    StoreProductsResultDto: {
+      /** @description Products added or removed */
+      count: number;
     };
     ConnectionSummaryDto: {
       /** Format: uuid */
@@ -2652,6 +2723,58 @@ export interface operations {
       };
     };
   };
+  StoreProductsController_add_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['StoreProductsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoreProductsResultDto'];
+        };
+      };
+    };
+  };
+  StoreProductsController_remove_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['StoreProductsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoreProductsResultDto'];
+        };
+      };
+    };
+  };
   ProductChannelsController_list_v1: {
     parameters: {
       query?: never;
@@ -2670,6 +2793,52 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['ProductChannelDto'][];
+        };
+      };
+    };
+  };
+  ProductChannelsController_add_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductChannelDto'];
+        };
+      };
+    };
+  };
+  ProductChannelsController_remove_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductChannelDto'];
         };
       };
     };
@@ -2854,6 +3023,8 @@ export enum ActivityAction {
   listing_updated = 'listing_updated',
   listing_sync_failed = 'listing_sync_failed',
   listing_delisted = 'listing_delisted',
+  listing_added = 'listing_added',
+  listing_removed = 'listing_removed',
   listing_override_updated = 'listing_override_updated',
   channel_pricing_updated = 'channel_pricing_updated',
   channel_selection_updated = 'channel_selection_updated',

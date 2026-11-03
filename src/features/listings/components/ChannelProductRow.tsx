@@ -1,6 +1,7 @@
-import { ExternalLink, Minus, Plus } from 'lucide-react';
+import { ExternalLink, X } from 'lucide-react';
 import { Link } from 'react-router';
 import { ChannelProductState } from '@/api/schema';
+import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
 import { useReturnToState } from '@/components/navigation/return-to';
 import { RelativeTime } from '@/components/time/RelativeTime';
 import { Button } from '@/components/ui/button';
@@ -11,18 +12,10 @@ import { CHANNEL_PRODUCT_STATE_HINTS } from '../listings.constants';
 import type { ChannelProduct } from '../listings.types';
 import { ChannelProductStateBadge } from './ChannelProductStateBadge';
 
-/** States of products the selection includes; the others can be added back. */
-const SELECTED_STATES: ReadonlySet<ChannelProductState> = new Set([
-  ChannelProductState.listed,
-  ChannelProductState.pending,
-  ChannelProductState.failed,
-]);
-
 interface ChannelProductRowProps {
   row: ChannelProduct;
-  /** Adds or removes the product from this store's selection; absent for read-only members. */
-  onToggle?: (productId: string, include: boolean) => void;
-  isSaving: boolean;
+  /** Removes the product from the store; absent for members who may not. */
+  onRemove?: (productId: string) => Promise<unknown>;
 }
 
 function ProductCell({ row }: { row: ChannelProduct }) {
@@ -49,26 +42,25 @@ function ProductCell({ row }: { row: ChannelProduct }) {
   );
 }
 
-function ToggleButton({ row, onToggle, isSaving }: Required<ChannelProductRowProps>) {
-  const include = !SELECTED_STATES.has(row.state);
-  const label = `${include ? 'Add' : 'Remove'} ${row.product.title} ${include ? 'to' : 'from'} this store`;
+function RemoveButton({ row, onRemove }: Required<ChannelProductRowProps>) {
+  const label = `Remove ${row.product.title} from this store`;
   return (
-    <Button
-      type="button"
-      variant="ghost"
-      size="icon-sm"
-      disabled={isSaving}
-      aria-label={label}
-      title={label}
-      onClick={() => onToggle(row.product.id, include)}
-    >
-      {include ? <Plus /> : <Minus />}
-    </Button>
+    <ConfirmDialog
+      trigger={
+        <Button type="button" variant="ghost" size="icon-sm" aria-label={label} title={label}>
+          <X />
+        </Button>
+      }
+      title={`Remove ${row.product.title}?`}
+      description="It is taken off this store now. The product stays in your catalog and in your other stores."
+      confirmLabel="Remove"
+      onConfirm={() => onRemove(row.product.id)}
+    />
   );
 }
 
-/** One product as this store sees it: its state, the last sync, and adding or removing it. */
-export function ChannelProductRow({ row, onToggle, isSaving }: ChannelProductRowProps) {
+/** One product in this store: its state, the last sync, a link to it there, and removing it. */
+export function ChannelProductRow({ row, onRemove }: ChannelProductRowProps) {
   const externalUrl = row.listing?.externalUrl;
   return (
     <TableRow className="align-top">
@@ -100,7 +92,9 @@ export function ChannelProductRow({ row, onToggle, isSaving }: ChannelProductRow
               </a>
             </Button>
           )}
-          {onToggle && <ToggleButton row={row} onToggle={onToggle} isSaving={isSaving} />}
+          {onRemove && row.state !== ChannelProductState.removing && (
+            <RemoveButton row={row} onRemove={onRemove} />
+          )}
         </div>
       </TableCell>
     </TableRow>

@@ -1,5 +1,4 @@
 import { useSearchParams } from 'react-router';
-import { ChannelProductState } from '@/api/schema';
 import { toSortOption } from '@/components/lists/sort-options';
 import { ROUTE_QUERY } from '@/config/routes';
 import { useDebouncedSearchParam } from '@/hooks/useDebouncedSearchParam';
@@ -10,12 +9,11 @@ import {
   CHANNEL_PRODUCT_SORTS,
   CHANNEL_PRODUCTS_SEARCH_DEBOUNCE_MS,
   type ChannelProductFilter,
+  IN_STORE_STATES,
 } from '../listings.constants';
 
 function toFilter(value: string | null): ChannelProductFilter {
-  return (
-    Object.values(ChannelProductState).find((state) => state === value) ?? ALL_CHANNEL_PRODUCTS
-  );
+  return IN_STORE_STATES.find((state) => state === value) ?? ALL_CHANNEL_PRODUCTS;
 }
 
 /** The products tab's filter, search and sort, kept in the URL so a view can be shared. */

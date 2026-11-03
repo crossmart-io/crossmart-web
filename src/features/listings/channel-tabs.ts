@@ -1,8 +1,8 @@
-import { type LucideIcon, Package, Settings, Tag } from 'lucide-react';
+import { ListChecks, type LucideIcon, Settings, Tag } from 'lucide-react';
 
 /** The sections of a channel connection's page, as they appear in its URL. */
 export enum ChannelTab {
-  Products = 'products',
+  Listings = 'listings',
   Pricing = 'pricing',
   Settings = 'settings',
 }
@@ -13,14 +13,14 @@ export interface ChannelTabInfo {
   icon: LucideIcon;
 }
 
-/** In page order: the store's products and where they stand, their prices, then the connection. */
+/** In page order: the store's listings, their prices, then the connection and its rules. */
 export const CHANNEL_TABS: readonly ChannelTabInfo[] = [
-  { value: ChannelTab.Products, label: 'Products', icon: Package },
+  { value: ChannelTab.Listings, label: 'Listings', icon: ListChecks },
   { value: ChannelTab.Pricing, label: 'Pricing', icon: Tag },
   { value: ChannelTab.Settings, label: 'Settings', icon: Settings },
 ];
 
-export const DEFAULT_CHANNEL_TAB = ChannelTab.Products;
+export const DEFAULT_CHANNEL_TAB = ChannelTab.Listings;
 
 /** The tab a URL segment names, or the default tab for a missing or unknown one. */
 export function toChannelTab(segment: string | undefined): ChannelTab {

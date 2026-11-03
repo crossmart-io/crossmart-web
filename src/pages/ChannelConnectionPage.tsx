@@ -22,6 +22,7 @@ import {
   ChannelSyncButton,
   ChannelTab,
   PricingRuleCard,
+  ProductSelectionCard,
   toChannelTab,
   useChannelConnection,
 } from '@/features/listings';
@@ -39,6 +40,7 @@ interface ChannelConnectionTabsProps {
 function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnectionTabsProps) {
   const navigate = useNavigate();
   const canManage = canManageWorkspace(workspace.role);
+  const canEdit = canEditCatalog(workspace.role);
   const currency = connection.shopify?.currencyCode ?? workspace.currency;
   const ref = { workspaceId: workspace.id, connectionId: connection.id };
   return (
@@ -55,8 +57,8 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
           </TabsTrigger>
         ))}
       </TabsList>
-      <TabsContent value={ChannelTab.Products}>
-        <ChannelProductsCard {...ref} rule={connection.productSelection} canManage={canManage} />
+      <TabsContent value={ChannelTab.Listings}>
+        <ChannelProductsCard {...ref} canEdit={canEdit} />
       </TabsContent>
       <TabsContent value={ChannelTab.Pricing}>
         <PricingRuleCard
@@ -71,8 +73,15 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
           workspaceId={workspace.id}
           connection={connection}
           canManage={canManage}
-          canEditCatalog={canEditCatalog(workspace.role)}
+          canEditCatalog={canEdit}
           onDisconnected={() => void navigate(ROUTES.channels)}
+          automaticRule={
+            <ProductSelectionCard
+              {...ref}
+              rule={connection.productSelection}
+              canManage={canManage}
+            />
+          }
         />
       </TabsContent>
     </Tabs>

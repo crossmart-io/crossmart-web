@@ -23,6 +23,8 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.listing_updated]: 'Listing updated',
   [ActivityAction.listing_sync_failed]: 'Listing sync failed',
   [ActivityAction.listing_delisted]: 'Listing delisted',
+  [ActivityAction.listing_added]: 'Added to a store',
+  [ActivityAction.listing_removed]: 'Removed from a store',
   [ActivityAction.listing_override_updated]: 'Channel overrides changed',
   [ActivityAction.channel_pricing_updated]: 'Pricing rule changed',
   [ActivityAction.channel_selection_updated]: 'Product selection changed',

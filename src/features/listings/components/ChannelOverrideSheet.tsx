@@ -13,7 +13,12 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Spinner } from '@/components/ui/spinner';
-import { useClearListingOverride, useSaveListingOverride } from '../hooks/useProductChannels';
+import {
+  useAddToStore,
+  useClearListingOverride,
+  useSaveListingOverride,
+} from '../hooks/useProductChannels';
+import { OverrideSheetMode } from '../listings.constants';
 import type { ProductChannel } from '../listings.types';
 import {
   overrideFormSchema,
@@ -40,6 +45,8 @@ interface ChannelOverrideSheetProps {
   channel: ProductChannel;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  /** Adding saves any overrides first, then adds the product, so it is published with them. */
+  mode?: OverrideSheetMode;
 }
 
 function SaveError({ error }: { error: Error | null }) {
@@ -57,6 +64,7 @@ interface OverrideSheetFooterProps {
   isClearing: boolean;
   isSaving: boolean;
   onClear: () => void;
+  submitLabel: string;
 }
 
 function OverrideSheetFooter({
@@ -64,6 +72,7 @@ function OverrideSheetFooter({
   isClearing,
   isSaving,
   onClear,
+  submitLabel,
 }: OverrideSheetFooterProps) {
   return (
     <SheetFooter className="flex-row justify-between border-t">
@@ -76,9 +85,22 @@ function OverrideSheetFooter({
       )}
       <Button type="submit" disabled={isSaving}>
         {isSaving && <Spinner data-icon="inline-start" />}
-        Save
+        {submitLabel}
       </Button>
     </SheetFooter>
+  );
+}
+
+function OverrideSheetHeader({ isAdding, store }: { isAdding: boolean; store: string }) {
+  return (
+    <SheetHeader className="pr-12">
+      <SheetTitle>{isAdding ? `Add to ${store}` : `Override for ${store}`}</SheetTitle>
+      <SheetDescription>
+        {isAdding
+          ? 'It is published there once you add it. Change anything this store should show differently; empty fields follow the product.'
+          : 'Only this channel changes. Empty fields follow the product.'}
+      </SheetDescription>
+    </SheetHeader>
   );
 }
 
@@ -89,28 +111,30 @@ export function ChannelOverrideSheet({
   channel,
   open,
   onOpenChange,
+  mode = OverrideSheetMode.Edit,
 }: ChannelOverrideSheetProps) {
   const ref = { workspaceId, productId: product.id, connectionId: channel.connection.id };
+  const isAdding = mode === OverrideSheetMode.Add;
+  const store = channel.connection.displayName;
   const form = useForm<OverrideFormValues>({
     resolver: zodResolver(overrideFormSchema),
     defaultValues: toOverrideForm(channel, product),
   });
   const save = useSaveListingOverride(ref);
   const clear = useClearListingOverride(ref);
+  const add = useAddToStore(ref);
   const submit = form.handleSubmit(async (values) => {
-    await save.mutateAsync(toOverrideBody(values, channel.override));
+    if (!isAdding || form.formState.isDirty) {
+      await save.mutateAsync(toOverrideBody(values, channel.override));
+    }
+    if (isAdding) await add.mutateAsync();
     onOpenChange(false);
   });
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-lg">
-        <SheetHeader className="pr-12">
-          <SheetTitle>Override for {channel.connection.displayName}</SheetTitle>
-          <SheetDescription>
-            Only this channel changes. Empty fields follow the product.
-          </SheetDescription>
-        </SheetHeader>
+        <OverrideSheetHeader isAdding={isAdding} store={store} />
         <FormProvider {...form}>
           <form
             onSubmit={(event) => void submit(event)}
@@ -127,13 +151,14 @@ export function ChannelOverrideSheet({
               <Separator />
               <VisibilityField />
               <StockOverrideFields />
-              <SaveError error={save.error} />
+              <SaveError error={save.error ?? add.error} />
             </div>
             <OverrideSheetFooter
               canClear={Boolean(channel.override)}
               isClearing={clear.isPending}
               isSaving={form.formState.isSubmitting}
               onClear={() => void clear.mutateAsync().then(() => onOpenChange(false))}
+              submitLabel={isAdding ? 'Add to store' : 'Save'}
             />
           </form>
         </FormProvider>

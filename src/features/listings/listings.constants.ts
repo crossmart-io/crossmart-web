@@ -22,6 +22,10 @@ export const CHANNEL_LISTINGS_ENDPOINT = `${CONNECTION_ENDPOINT}/listings` as co
 export const CHANNEL_PRODUCTS_ENDPOINT = `${CONNECTION_ENDPOINT}/products` as const;
 export const PRODUCT_CHANNELS_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/products/{productId}/channels';
+export const PRODUCT_CHANNEL_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}';
+export const ADD_STORE_PRODUCTS_ENDPOINT = `${CONNECTION_ENDPOINT}/products/add` as const;
+export const REMOVE_STORE_PRODUCTS_ENDPOINT = `${CONNECTION_ENDPOINT}/products/remove` as const;
 export const LISTING_OVERRIDE_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/override';
 
@@ -31,6 +35,8 @@ export const SELECTION_PREVIEW_PAGE_SIZE = 10;
 export const CHANNEL_LISTINGS_PAGE_SIZE = 25;
 export const CHANNEL_PRODUCTS_PAGE_SIZE = 25;
 export const CHANNEL_PRODUCTS_SEARCH_DEBOUNCE_MS = 300;
+/** Products added to a store in one request; the API allows no more. */
+export const STORE_PRODUCTS_BATCH_SIZE = 250;
 /** Mirrors the API's bounds, so the form can say so before a round trip. */
 export const PRICING_MIN_PERCENT = -90;
 export const PRICING_MAX_PERCENT = 500;
@@ -44,6 +50,7 @@ export const LISTINGS_FEEDBACK = {
   selectionSaved: 'Product selection saved',
   overrideSaved: 'Channel overrides saved',
   overrideCleared: 'Channel overrides removed',
+  removedFromStore: 'Removed from the store',
 } as const;
 
 export const ROUNDING_OPTIONS: readonly { value: PriceRounding; label: string; example: string }[] =
@@ -85,24 +92,30 @@ export const VISIBILITY_OPTIONS: readonly { value: VisibilityChoice; label: stri
   { value: ListingVisibility.HIDDEN, label: 'Hide on this channel' },
 ];
 
-/** Which products a connection lists, as the selection editor offers it. */
+/** What a store's automatic rule adds, besides the products added to it by hand. */
 export enum SelectionMode {
+  Off = 'off',
   All = 'all',
   Filtered = 'filtered',
-  Picked = 'picked',
 }
 
-export const SELECTION_SUMMARY_SEPARATOR = ' · ';
-
 export const SELECTION_MODE_LABELS: Record<SelectionMode, string> = {
+  [SelectionMode.Off]: 'Off',
   [SelectionMode.All]: 'All products',
   [SelectionMode.Filtered]: 'Products matching filters',
-  [SelectionMode.Picked]: 'Only products I pick',
 };
 
-/** The products tab's filter: every product, or those in one state. */
+/** The listings tab's filter: every product in the store, or those in one state. */
 export const ALL_CHANNEL_PRODUCTS = 'all';
-export type ChannelProductFilter = ChannelProductState | typeof ALL_CHANNEL_PRODUCTS;
+/** States of products in the store; excluded ones are not, so the tab does not offer them. */
+export const IN_STORE_STATES = [
+  ChannelProductState.listed,
+  ChannelProductState.pending,
+  ChannelProductState.failed,
+  ChannelProductState.removing,
+] as const;
+export type InStoreState = (typeof IN_STORE_STATES)[number];
+export type ChannelProductFilter = InStoreState | typeof ALL_CHANNEL_PRODUCTS;
 
 export const CHANNEL_PRODUCT_STATE_LABELS: Record<ChannelProductState, string> = {
   [ChannelProductState.listed]: 'Live',
@@ -123,7 +136,7 @@ export const CHANNEL_PRODUCT_STATE_HINTS: Record<ChannelProductState, string> = 
 
 export const CHANNEL_PRODUCT_FILTERS: readonly { value: ChannelProductFilter; label: string }[] = [
   { value: ALL_CHANNEL_PRODUCTS, label: 'All' },
-  ...Object.values(ChannelProductState).map((state) => ({
+  ...IN_STORE_STATES.map((state) => ({
     value: state,
     label: CHANNEL_PRODUCT_STATE_LABELS[state],
   })),
@@ -158,3 +171,9 @@ export const CHANNEL_PRODUCT_SORTS: readonly [
     direction: SortDirection.asc,
   },
 ];
+
+/** Whether the override sheet edits a product in a store, or adds it to one with its overrides. */
+export enum OverrideSheetMode {
+  Edit = 'edit',
+  Add = 'add',
+}

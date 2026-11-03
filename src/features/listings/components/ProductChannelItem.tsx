@@ -1,12 +1,14 @@
-import { ExternalLink, PencilLine } from 'lucide-react';
+import { ExternalLink, PencilLine, Plus, X } from 'lucide-react';
 import { useState } from 'react';
 import { Link } from 'react-router';
 import { PriceSource } from '@/api/schema';
+import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { toChannelConnectionRoute } from '@/config/routes';
 import { formatMoney, pluralize } from '@/lib/format';
-import { CHANNEL_CARD_VARIANT_LIMIT } from '../listings.constants';
+import { useRemoveFromStore } from '../hooks/useProductChannels';
+import { CHANNEL_CARD_VARIANT_LIMIT, OverrideSheetMode } from '../listings.constants';
 import type { ChannelVariant, ProductChannel } from '../listings.types';
 import { ChannelOverrideSheet, type OverrideProduct } from './ChannelOverrideSheet';
 import { ListingStatusBadge } from './ListingStatusBadge';
@@ -52,23 +54,74 @@ function VariantPrice({
 }
 
 function ListingState({ channel }: { channel: ProductChannel }) {
+  if (!channel.selected) return <Badge variant="outline">Not in this store</Badge>;
   if (channel.listing) return <ListingStatusBadge status={channel.listing.status} />;
-  return <Badge variant="outline">{channel.selected ? 'Not published yet' : 'Not selected'}</Badge>;
+  return <Badge variant="outline">Waiting to publish</Badge>;
 }
 
 interface ChannelItemActionsProps {
+  workspaceId: string;
+  productId: string;
+  channel: ProductChannel;
   canEdit: boolean;
-  externalUrl: string | null;
-  onEdit: () => void;
+  onOpen: (mode: OverrideSheetMode) => void;
 }
 
-function ChannelItemActions({ canEdit, externalUrl, onEdit }: ChannelItemActionsProps) {
+function RemoveFromStoreButton({
+  workspaceId,
+  productId,
+  channel,
+}: Omit<ChannelItemActionsProps, 'canEdit' | 'onOpen'>) {
+  const remove = useRemoveFromStore({
+    workspaceId,
+    productId,
+    connectionId: channel.connection.id,
+  });
+  const store = channel.connection.displayName;
+  return (
+    <ConfirmDialog
+      trigger={
+        <Button type="button" variant="ghost" size="sm">
+          <X data-icon="inline-start" />
+          Remove
+        </Button>
+      }
+      title={`Remove from ${store}?`}
+      description={`It is taken off ${store} now. The product stays in your catalog and in your other stores.`}
+      confirmLabel="Remove"
+      onConfirm={() => remove.mutateAsync()}
+    />
+  );
+}
+
+/** Adding the product to the store, or, once it is there, overriding, viewing or removing it. */
+function ChannelItemActions(props: ChannelItemActionsProps) {
+  const { channel, canEdit, onOpen } = props;
+  const externalUrl = channel.listing?.externalUrl;
+  if (!channel.selected) {
+    return canEdit ? (
+      <Button
+        type="button"
+        size="sm"
+        className="w-fit"
+        onClick={() => onOpen(OverrideSheetMode.Add)}
+      >
+        <Plus data-icon="inline-start" />
+        Add to store
+      </Button>
+    ) : null;
+  }
   return (
     <div className="flex flex-wrap gap-2">
       {canEdit && (
-        <Button type="button" variant="outline" size="sm" onClick={onEdit}>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => onOpen(OverrideSheetMode.Edit)}
+        >
           <PencilLine data-icon="inline-start" />
-          Override for this channel
+          Override for this store
         </Button>
       )}
       {externalUrl && (
@@ -79,6 +132,7 @@ function ChannelItemActions({ canEdit, externalUrl, onEdit }: ChannelItemActions
           </a>
         </Button>
       )}
+      {canEdit && <RemoveFromStoreButton {...props} />}
     </div>
   );
 }
@@ -90,7 +144,7 @@ export function ProductChannelItem({
   channel,
   canEdit,
 }: ProductChannelItemProps) {
-  const [editing, setEditing] = useState(false);
+  const [sheetMode, setSheetMode] = useState<OverrideSheetMode | null>(null);
   const { connection, listing, variants } = channel;
   const shown = variants.slice(0, CHANNEL_CARD_VARIANT_LIMIT);
   const hidden = variants.length - shown.length;
@@ -123,17 +177,20 @@ export function ProductChannelItem({
         <p className="text-xs text-muted-foreground">and {pluralize(hidden, 'more variant')}</p>
       )}
       <ChannelItemActions
+        workspaceId={workspaceId}
+        productId={product.id}
+        channel={channel}
         canEdit={canEdit}
-        externalUrl={listing?.externalUrl ?? null}
-        onEdit={() => setEditing(true)}
+        onOpen={setSheetMode}
       />
-      {editing && (
+      {sheetMode && (
         <ChannelOverrideSheet
           workspaceId={workspaceId}
           product={product}
           channel={channel}
-          open={editing}
-          onOpenChange={setEditing}
+          mode={sheetMode}
+          open
+          onOpenChange={(open) => !open && setSheetMode(null)}
         />
       )}
     </li>
