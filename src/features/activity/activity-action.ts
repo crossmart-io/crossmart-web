@@ -15,6 +15,9 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.api_key_created]: 'API key created',
   [ActivityAction.api_key_revoked]: 'API key revoked',
   [ActivityAction.inventory_adjusted]: 'Stock adjusted',
+  [ActivityAction.channel_connected]: 'Channel connected',
+  [ActivityAction.channel_disconnected]: 'Channel disconnected',
+  [ActivityAction.channel_connect_failed]: 'Channel connection failed',
 };
 
 export function toActivityAction(value: string | null): ActivityAction | undefined {
