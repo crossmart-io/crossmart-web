@@ -30,7 +30,7 @@ export function DeleteProductSection({ workspaceId, productId, title }: DeletePr
           </Button>
         }
         title={`Delete ${title}?`}
-        description="Its variants, images and stock history are deleted too. This cannot be undone."
+        description="Its variants, images and stock history are deleted too, and it is archived in every store that lists it. This cannot be undone."
         confirmLabel="Delete product"
         onConfirm={confirmDelete}
       />

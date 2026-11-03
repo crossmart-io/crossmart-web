@@ -60,7 +60,7 @@ export function BulkActionBar({ workspaceId, selection, renderActions }: BulkAct
           </Button>
         }
         title={`Delete ${count}?`}
-        description="Their variants, images and stock history are deleted too. This cannot be undone."
+        description="Their variants, images and stock history are deleted too, and they are archived in every store that lists them. This cannot be undone."
         confirmLabel={`Delete ${count}`}
         onConfirm={async () => {
           await run({ action: BulkProductAction.delete });
