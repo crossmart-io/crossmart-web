@@ -57,4 +57,5 @@ export const PAGE_PARENTS = {
   products: [{ label: 'Products', to: ROUTES.products }],
   settings: [{ label: 'Settings' }],
   imports: [{ label: 'Imports', to: ROUTES.imports }],
+  channels: [{ label: 'Channels', to: ROUTES.channels }],
 } as const satisfies Record<string, readonly Crumb[]>;

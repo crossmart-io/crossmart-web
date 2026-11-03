@@ -1,7 +1,9 @@
-import { RefreshCw, Unplug } from 'lucide-react';
+import { RefreshCw, Settings2, Unplug } from 'lucide-react';
+import { Link } from 'react-router';
 import { ChannelConnectionStatus } from '@/api/schema';
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
 import { Button } from '@/components/ui/button';
+import { toChannelConnectionRoute } from '@/config/routes';
 import type { ChannelInfo, ConnectableChannel } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
 import { useDisconnectChannel } from '../hooks/useChannelConnections';
@@ -30,15 +32,25 @@ export function ChannelConnectionItem({
   const needsReauth = connection.status === ChannelConnectionStatus.NEEDS_REAUTH;
   const canImport = canEditCatalog && connection.status === ChannelConnectionStatus.CONNECTED;
   const name = connection.shopify?.shopName ?? connection.displayName;
-  const actions = canManage ? (
-    <ConnectionActions
-      workspaceId={workspaceId}
-      channel={channel}
-      connect={connect}
-      connection={connection}
-      name={name}
-    />
-  ) : null;
+  const actions = (
+    <>
+      <Button asChild variant="outline" size="sm">
+        <Link to={toChannelConnectionRoute(connection.id)}>
+          <Settings2 data-icon="inline-start" />
+          Pricing and listings
+        </Link>
+      </Button>
+      {canManage && (
+        <ConnectionActions
+          workspaceId={workspaceId}
+          channel={channel}
+          connect={connect}
+          connection={connection}
+          name={name}
+        />
+      )}
+    </>
+  );
 
   return (
     <li className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-3">
@@ -65,7 +77,7 @@ export function ChannelConnectionItem({
           {actions}
         </ChannelImportSection>
       ) : (
-        actions && <div className="flex flex-wrap gap-2">{actions}</div>
+        <div className="flex flex-wrap gap-2">{actions}</div>
       )}
     </li>
   );

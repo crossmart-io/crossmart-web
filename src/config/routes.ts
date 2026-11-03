@@ -1,6 +1,7 @@
 export const ROUTE_PARAMS = {
   productId: 'productId',
   jobId: 'jobId',
+  connectionId: 'connectionId',
 } as const;
 
 export const ROUTES = {
@@ -12,6 +13,7 @@ export const ROUTES = {
   product: `/products/:${ROUTE_PARAMS.productId}`,
   inventory: '/inventory',
   channels: '/channels',
+  channelConnection: `/channels/:${ROUTE_PARAMS.connectionId}`,
   activity: '/activity',
   imports: '/imports',
   importJob: `/imports/:${ROUTE_PARAMS.jobId}`,
@@ -21,6 +23,10 @@ export const ROUTES = {
 
 export function toProductRoute(productId: string): string {
   return ROUTES.product.replace(`:${ROUTE_PARAMS.productId}`, productId);
+}
+
+export function toChannelConnectionRoute(connectionId: string): string {
+  return ROUTES.channelConnection.replace(`:${ROUTE_PARAMS.connectionId}`, connectionId);
 }
 
 export function toImportJobRoute(jobId: string): string {
