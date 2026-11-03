@@ -44,6 +44,8 @@ export const PRICING_MAX_MARGIN_PERCENT = 1000;
 export const OVERRIDE_TITLE_MAX_LENGTH = 255;
 /** Variants shown on a channel card before "and N more". */
 export const CHANNEL_CARD_VARIANT_LIMIT = 3;
+/** Store icons a products table row shows before "+N". */
+export const PRODUCT_STORE_ICONS_SHOWN = 4;
 
 export const LISTINGS_FEEDBACK = {
   pricingSaved: 'Pricing rule saved',

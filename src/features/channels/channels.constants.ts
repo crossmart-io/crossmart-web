@@ -147,3 +147,9 @@ export const CHANNELS: readonly ChannelInfo[] = [
 export function channelInfoFor(type: ChannelType): ChannelInfo | undefined {
   return CHANNELS.find((channel) => channel.connect?.type === type);
 }
+
+/** A channel card's logo tile, or the small one a table row shows per store. */
+export enum ChannelLogoSize {
+  Default = 'default',
+  Small = 'small',
+}

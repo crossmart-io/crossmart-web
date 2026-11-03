@@ -17,3 +17,4 @@ export type ListingOverrideView = Schemas['ListingOverrideViewDto'];
 export type ChannelProduct = components['schemas']['ChannelProductDto'];
 export type ChannelProductCounts = components['schemas']['ChannelProductCountsDto'];
 export type ChannelProductPage = components['schemas']['ChannelProductPageDto'];
+export type ProductStore = components['schemas']['ProductStoreBadgeDto'];

@@ -803,6 +803,18 @@ export interface components {
       /** @example 89.00 */
       max: string;
     };
+    /** @enum {string} */
+    ChannelType: ChannelType;
+    /** @enum {string} */
+    ListingStatus: ListingStatus;
+    ProductStoreBadgeDto: {
+      /** Format: uuid */
+      connectionId: string;
+      channel: components['schemas']['ChannelType'];
+      /** @example Demo Store */
+      storeName: string;
+      status: components['schemas']['ListingStatus'];
+    };
     ProductSummaryDto: {
       /** Format: uuid */
       id: string;
@@ -816,6 +828,8 @@ export interface components {
       totalAvailable: number | null;
       priceRange: components['schemas']['PriceRangeDto'] | null;
       imageUrl: string | null;
+      /** @description The stores it is in, in the order it joined them */
+      stores: components['schemas']['ProductStoreBadgeDto'][];
       /** Format: date-time */
       updatedAt: string;
     };
@@ -1307,11 +1321,6 @@ export interface components {
       nextCursor: string | null;
     };
     /**
-     * @description Set when the account was connected
-     * @enum {string}
-     */
-    ChannelType: ChannelType;
-    /**
      * @description Set when connecting failed
      * @enum {string}
      */
@@ -1438,8 +1447,6 @@ export interface components {
     ChannelProductSort: ChannelProductSort;
     /** @enum {string} */
     SortDirection: SortDirection;
-    /** @enum {string} */
-    ListingStatus: ListingStatus;
     ListingSummaryDto: {
       /** Format: uuid */
       id: string;
@@ -2951,6 +2958,21 @@ export enum CatalogGap {
   barcode = 'barcode',
   out_of_stock = 'out_of_stock',
 }
+export enum ChannelType {
+  shopify = 'shopify',
+  ebay = 'ebay',
+  google_merchant = 'google_merchant',
+  etsy = 'etsy',
+  amazon = 'amazon',
+  walmart = 'walmart',
+}
+export enum ListingStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  ERROR = 'ERROR',
+  DELISTED = 'DELISTED',
+}
 export enum OutOfStockPolicy {
   STOP_SELLING = 'STOP_SELLING',
   CONTINUE_SELLING = 'CONTINUE_SELLING',
@@ -3067,14 +3089,6 @@ export enum InventoryMovementReason {
   SOLD = 'SOLD',
   IMPORTED = 'IMPORTED',
 }
-export enum ChannelType {
-  shopify = 'shopify',
-  ebay = 'ebay',
-  google_merchant = 'google_merchant',
-  etsy = 'etsy',
-  amazon = 'amazon',
-  walmart = 'walmart',
-}
 export enum ConnectFailure {
   invalid_state = 'invalid_state',
   expired_state = 'expired_state',
@@ -3117,13 +3131,6 @@ export enum ChannelProductSort {
 export enum SortDirection {
   asc = 'asc',
   desc = 'desc',
-}
-export enum ListingStatus {
-  PENDING = 'PENDING',
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  ERROR = 'ERROR',
-  DELISTED = 'DELISTED',
 }
 export enum PriceSource {
   override = 'override',

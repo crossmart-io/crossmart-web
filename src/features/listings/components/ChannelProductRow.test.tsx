@@ -19,6 +19,7 @@ function row(state: ChannelProductState, lastError: string | null = null): Chann
       totalAvailable: 4,
       priceRange: null,
       imageUrl: null,
+      stores: [],
       updatedAt: '2026-11-03T09:00:00Z',
     },
     state,
