@@ -2,7 +2,7 @@ import { ApiRequestError } from '@/api/api-error';
 import { api, fetchClient } from '@/api/client';
 import { usePagedList } from '@/hooks/usePagedList';
 import type { Pagination } from '@/hooks/usePagination';
-import { ImportJobStatus } from '@/api/schema';
+import { type CatalogImportFormat, ImportJobStatus, type SortDirection } from '@/api/schema';
 import {
   IMPORT_JOB_ENDPOINT,
   IMPORT_JOB_POLL_INTERVAL_MS,
@@ -10,13 +10,20 @@ import {
 } from '../imports.constants';
 import type { ImportJob } from '../imports.types';
 
+export interface ImportJobsQuery {
+  status?: ImportJobStatus;
+  format?: CatalogImportFormat;
+  direction: SortDirection;
+}
+
 async function fetchImportJobPage(
   workspaceId: string,
+  query: ImportJobsQuery,
   page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
   const { data, error } = await fetchClient.GET(IMPORT_JOBS_ENDPOINT, {
-    params: { path: { workspaceId }, query: page },
+    params: { path: { workspaceId }, query: { ...query, ...page } },
     signal,
   });
   if (error) throw ApiRequestError.from(error);
@@ -24,12 +31,16 @@ async function fetchImportJobPage(
 }
 
 /** One numbered page of the import history, newest first. */
-export function useImportJobs(workspaceId: string, pagination: Pagination) {
+export function useImportJobs(
+  workspaceId: string,
+  filters: ImportJobsQuery,
+  pagination: Pagination,
+) {
   const query = usePagedList<ImportJob>({
     endpoint: IMPORT_JOBS_ENDPOINT,
-    params: { workspaceId },
+    params: { workspaceId, ...filters },
     pagination,
-    fetchPage: (page, signal) => fetchImportJobPage(workspaceId, page, signal),
+    fetchPage: (page, signal) => fetchImportJobPage(workspaceId, filters, page, signal),
   });
   return { ...query, jobs: query.items };
 }

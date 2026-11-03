@@ -1,4 +1,4 @@
-import type { SortDirection } from '@/api/schema';
+import { SortDirection } from '@/api/schema';
 
 /** One way to sort a list: a field and a direction, under one label and one URL value. */
 export interface SortOption<Field extends string> {
@@ -16,3 +16,12 @@ export function toSortOption<Field extends string>(
 ): SortOption<Field> {
   return options.find((option) => option.value === value) ?? options[0];
 }
+
+/** Lists that sort only by when things happened; the field is each list's own timestamp. */
+export const BY_TIME = 'time';
+export type ByTime = typeof BY_TIME;
+
+export const TIME_SORTS: readonly [SortOption<ByTime>, ...SortOption<ByTime>[]] = [
+  { value: 'newest', label: 'Newest first', sort: BY_TIME, direction: SortDirection.desc },
+  { value: 'oldest', label: 'Oldest first', sort: BY_TIME, direction: SortDirection.asc },
+];

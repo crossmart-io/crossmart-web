@@ -1,6 +1,6 @@
 import { ApiRequestError } from '@/api/api-error';
 import { fetchClient } from '@/api/client';
-import type { StockLevel } from '@/api/schema';
+import type { InventorySort, SortDirection, StockLevel } from '@/api/schema';
 import { usePagedList } from '@/hooks/usePagedList';
 import type { Pagination } from '@/hooks/usePagination';
 import { INVENTORY_ITEMS_ENDPOINT } from '../inventory.constants';
@@ -10,17 +10,19 @@ interface InventoryFilter {
   workspaceId: string | undefined;
   search: string;
   stockLevel: StockLevel | undefined;
+  sort: InventorySort;
+  direction: SortDirection;
 }
 
 async function fetchInventoryPage(
-  { workspaceId, search, stockLevel }: InventoryFilter,
+  { workspaceId, search, ...filters }: InventoryFilter,
   page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
   const { data, error } = await fetchClient.GET(INVENTORY_ITEMS_ENDPOINT, {
     params: {
       path: { workspaceId: workspaceId ?? '' },
-      query: { search: search || undefined, stockLevel, ...page },
+      query: { search: search || undefined, ...filters, ...page },
     },
     signal,
   });

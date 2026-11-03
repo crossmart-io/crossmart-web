@@ -1269,6 +1269,8 @@ export interface components {
     };
     /** @enum {string} */
     StockLevel: StockLevel;
+    /** @enum {string} */
+    InventorySort: InventorySort;
     InventoryItemDto: {
       /** Format: uuid */
       inventoryItemId: string;
@@ -2240,6 +2242,10 @@ export interface operations {
   ImportJobsController_list_v1: {
     parameters: {
       query?: {
+        status?: components['schemas']['ImportJobStatus'];
+        /** @description Where the records came from: a file of this format, or a channel */
+        format?: components['schemas']['CatalogImportFormat'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
         /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
@@ -2344,6 +2350,7 @@ export interface operations {
         action?: components['schemas']['ActivityAction'];
         /** @description `FAILED` lists only what went wrong */
         outcome?: components['schemas']['ActivityOutcome'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
         /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
@@ -2381,6 +2388,7 @@ export interface operations {
         action?: components['schemas']['ActivityAction'];
         /** @description `FAILED` lists only what went wrong */
         outcome?: components['schemas']['ActivityOutcome'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
         /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
@@ -2412,6 +2420,8 @@ export interface operations {
         /** @description Matches the SKU or the product title */
         search?: string;
         stockLevel?: components['schemas']['StockLevel'];
+        sort?: components['schemas']['InventorySort'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
         /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
@@ -2465,6 +2475,8 @@ export interface operations {
   InventoryItemsController_history_v1: {
     parameters: {
       query?: {
+        reason?: components['schemas']['InventoryMovementReason'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
         /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
@@ -3155,6 +3167,11 @@ export enum StockLevel {
   low_stock = 'low_stock',
   out_of_stock = 'out_of_stock',
   untracked = 'untracked',
+}
+export enum InventorySort {
+  title = 'title',
+  available = 'available',
+  updated_at = 'updated_at',
 }
 export enum StockAdjustmentMode {
   delta = 'delta',

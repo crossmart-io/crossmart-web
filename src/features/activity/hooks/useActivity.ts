@@ -1,6 +1,6 @@
 import { ApiRequestError } from '@/api/api-error';
 import { fetchClient } from '@/api/client';
-import type { ActivityAction, ActivityOutcome } from '@/api/schema';
+import type { ActivityAction, ActivityOutcome, SortDirection } from '@/api/schema';
 import { usePagedList } from '@/hooks/usePagedList';
 import type { Pagination } from '@/hooks/usePagination';
 import { ACTIVITY_ENDPOINT } from '../activity.constants';
@@ -10,17 +10,18 @@ interface ActivityFilter {
   workspaceId: string;
   action: ActivityAction | undefined;
   outcome: ActivityOutcome | undefined;
+  direction: SortDirection;
 }
 
 async function fetchActivityPage(
-  { workspaceId, action, outcome }: ActivityFilter,
+  { workspaceId, action, outcome, direction }: ActivityFilter,
   page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
   const { data, error } = await fetchClient.GET(ACTIVITY_ENDPOINT, {
     params: {
       path: { workspaceId },
-      query: { action, outcome, ...page },
+      query: { action, outcome, direction, ...page },
     },
     signal,
   });

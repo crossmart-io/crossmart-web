@@ -59,6 +59,7 @@ export const PAGINATION_QUERY = {
 export const ACTIVITY_ROUTE_QUERY = {
   action: 'action',
   outcome: 'outcome',
+  sort: 'sort',
 } as const;
 
 export function toProductsRoute(

@@ -40,6 +40,7 @@ function ActivityResults({ workspace, filters }: ActivityResultsProps) {
       workspaceId: workspace.id,
       action: filters.action,
       outcome: filters.failuresOnly ? ActivityOutcome.FAILED : undefined,
+      direction: filters.sort.direction,
     },
     pagination,
   );

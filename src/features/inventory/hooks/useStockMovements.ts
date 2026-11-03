@@ -2,6 +2,7 @@ import { ApiRequestError } from '@/api/api-error';
 import { fetchClient } from '@/api/client';
 import { usePagedList } from '@/hooks/usePagedList';
 import type { Pagination } from '@/hooks/usePagination';
+import type { InventoryMovementReason, SortDirection } from '@/api/schema';
 import { INVENTORY_MOVEMENTS_ENDPOINT } from '../inventory.constants';
 import type { InventoryMovement } from '../inventory.types';
 
@@ -9,17 +10,19 @@ interface MovementsTarget {
   workspaceId: string;
   /** Null while no history is open. */
   inventoryItemId: string | null;
+  reason?: InventoryMovementReason;
+  direction: SortDirection;
 }
 
 async function fetchMovementPage(
-  { workspaceId, inventoryItemId }: MovementsTarget,
+  { workspaceId, inventoryItemId, ...filters }: MovementsTarget,
   page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
   const { data, error } = await fetchClient.GET(INVENTORY_MOVEMENTS_ENDPOINT, {
     params: {
       path: { workspaceId, inventoryItemId: inventoryItemId ?? '' },
-      query: page,
+      query: { ...filters, ...page },
     },
     signal,
   });

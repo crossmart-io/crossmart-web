@@ -42,6 +42,8 @@ function InventoryResults({ workspace, filters }: InventoryResultsProps) {
       workspaceId: workspace.id,
       search: filters.debouncedSearch,
       stockLevel: toStockLevelQuery(filters.stockLevel),
+      sort: filters.sort.sort,
+      direction: filters.sort.direction,
     },
     pagination,
   );

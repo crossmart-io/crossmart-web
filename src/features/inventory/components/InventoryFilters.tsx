@@ -1,6 +1,8 @@
 import { Search } from 'lucide-react';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
+import { SortSelect } from '@/components/lists/SortSelect';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { INVENTORY_SORTS } from '../inventory.constants';
 import type { InventoryListFilters } from '../hooks/useInventoryListFilters';
 import { STOCK_LEVEL_FILTERS, type StockLevelFilter } from '../stock-level';
 
@@ -26,19 +28,26 @@ export function InventoryFilters({ filters }: { filters: InventoryListFilters })
           </ToggleGroupItem>
         ))}
       </ToggleGroup>
-      <InputGroup className="lg:w-72">
-        <InputGroupAddon>
-          <Search aria-hidden="true" />
-        </InputGroupAddon>
-        <InputGroupInput
-          type="search"
-          value={filters.search}
-          onChange={(event) => filters.setSearch(event.target.value)}
-          placeholder="Search SKU or product"
-          aria-label="Search inventory"
-          spellCheck={false}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+        <SortSelect
+          options={INVENTORY_SORTS}
+          value={filters.sort.value}
+          onChange={filters.setSort}
         />
-      </InputGroup>
+        <InputGroup className="lg:w-72">
+          <InputGroupAddon>
+            <Search aria-hidden="true" />
+          </InputGroupAddon>
+          <InputGroupInput
+            type="search"
+            value={filters.search}
+            onChange={(event) => filters.setSearch(event.target.value)}
+            placeholder="Search SKU or product"
+            aria-label="Search inventory"
+            spellCheck={false}
+          />
+        </InputGroup>
+      </div>
     </div>
   );
 }
