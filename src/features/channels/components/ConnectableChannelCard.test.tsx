@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
+import { MemoryRouter } from 'react-router';
 import { ChannelConnectionStatus, ChannelType } from '@/api/schema';
 import { CHANNELS, type ChannelInfo, type ConnectableChannel } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
@@ -32,6 +33,7 @@ function connection(overrides: Partial<ChannelConnection> = {}): ChannelConnecti
       primaryLocation: null,
     },
     productSelection: null,
+    pricing: null,
     connectedAt: '2026-11-03T09:00:00Z',
     disconnectedAt: null,
     lastSyncedAt: null,
@@ -44,14 +46,16 @@ function connection(overrides: Partial<ChannelConnection> = {}): ChannelConnecti
 function renderCard(connections: ChannelConnection[], canManage = true, canEditCatalog = false) {
   const element: ReactElement = (
     <QueryClientProvider client={new QueryClient()}>
-      <ConnectableChannelCard
-        workspaceId="ws-1"
-        channel={SHOPIFY}
-        connect={CONNECT}
-        connections={connections}
-        canManage={canManage}
-        canEditCatalog={canEditCatalog}
-      />
+      <MemoryRouter>
+        <ConnectableChannelCard
+          workspaceId="ws-1"
+          channel={SHOPIFY}
+          connect={CONNECT}
+          connections={connections}
+          canManage={canManage}
+          canEditCatalog={canEditCatalog}
+        />
+      </MemoryRouter>
     </QueryClientProvider>
   );
   return render(element);
@@ -109,5 +113,14 @@ describe('ConnectableChannelCard', () => {
     );
 
     expect(screen.getAllByRole('button', { name: 'Import products from Shopify' })).toHaveLength(1);
+  });
+
+  it('links every connected store to its pricing and listings, whoever views it', () => {
+    renderCard([connection()], false);
+
+    expect(screen.getByRole('link', { name: 'Pricing and listings' })).toHaveAttribute(
+      'href',
+      '/channels/c-1',
+    );
   });
 });

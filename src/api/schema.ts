@@ -481,6 +481,161 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/pricing': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Set the connection’s pricing rule
+     * @description Listings get the new prices on their next sync. A null rule removes it.
+     */
+    put: operations['ChannelRulesController_updatePricing_v1'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/pricing/preview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Price a real product with a rule, saved or not
+     * @description Without `productId`, the first product of the selection is priced.
+     */
+    post: operations['ChannelRulesController_previewPricing_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/product-selection': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Choose which products the connection lists
+     * @description “Sync now” publishes newly selected products and delists the rest.
+     */
+    put: operations['ChannelRulesController_updateSelection_v1'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/product-selection/preview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** The products a selection lists, with counts, saved or not */
+    post: operations['ChannelRulesController_previewSelection_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/sync': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Publish the selected products and sync the connection
+     * @description Queues every selected product to be published (or updated when the channel has it) and every listing that is no longer selected to be delisted. Jobs run in the background; follow them in the listings.
+     */
+    post: operations['ChannelSyncController_requestSync_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/listings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The connection’s listings, most recently changed first */
+    get: operations['ChannelSyncController_listListings_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The product on each connected channel
+     * @description Listing status, channel prices with their explanation, shown stock and overrides.
+     */
+    get: operations['ProductChannelsController_list_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/override': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Override the product on one channel
+     * @description Replaces the overrides: absent or null fields follow the product. When the channel already lists the product, an update is queued.
+     */
+    put: operations['ProductChannelsController_saveOverride_v1'];
+    post?: never;
+    /** Remove the product’s overrides on one channel */
+    delete: operations['ProductChannelsController_clearOverride_v1'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -603,6 +758,11 @@ export interface components {
       price: string;
       /** @example 99.00 */
       compareAtPrice: string | null;
+      /**
+       * @description What you pay per unit; never shown to buyers
+       * @example 40.00
+       */
+      cost: string | null;
       weightGrams: number | null;
       requiresShipping: boolean;
       taxable: boolean;
@@ -657,6 +817,11 @@ export interface components {
       price: string;
       /** @example 24.90 */
       compareAtPrice?: string;
+      /**
+       * @description What you pay per unit. Used for pricing floors; never shown to buyers.
+       * @example 40.00
+       */
+      cost?: string;
       weightGrams?: number;
       /** @default true */
       requiresShipping: boolean;
@@ -705,6 +870,11 @@ export interface components {
       price: string;
       /** @example 24.90 */
       compareAtPrice?: string;
+      /**
+       * @description What you pay per unit. Used for pricing floors; never shown to buyers.
+       * @example 40.00
+       */
+      cost?: string;
       weightGrams?: number;
       /** @default true */
       requiresShipping: boolean;
@@ -1092,16 +1262,45 @@ export interface components {
       primaryLocation: components['schemas']['ShopifyLocationDto'] | null;
     };
     ProductSelectionFilterDto: {
+      /** @description Matches title, handle or SKU */
       search?: string;
       status?: components['schemas']['ProductStatus'];
       gap?: components['schemas']['CatalogGap'];
+      /** @description Products with any of these tags */
       tags?: string[];
+      /** @description Products of this vendor, ignoring case */
       vendor?: string;
     };
     ProductSelectionRuleDto: {
-      filter: components['schemas']['ProductSelectionFilterDto'];
+      filter: components['schemas']['ProductSelectionFilterDto'] | null;
       includeProductIds: string[];
       excludeProductIds: string[];
+    };
+    /** @enum {string} */
+    PriceRounding: PriceRounding;
+    PricingFloorDto: {
+      /**
+       * @description Never price below cost plus this percentage (0 to 1000)
+       * @example 30
+       */
+      minMarginPercent: string;
+    };
+    /** @enum {string} */
+    CompareAtMode: CompareAtMode;
+    PricingRuleDto: {
+      /**
+       * @description Markup (positive) or discount (negative), -90 to 500
+       * @example 15
+       */
+      adjustmentPercent: string;
+      /**
+       * @description Added after the percentage; may be negative
+       * @example 0
+       */
+      fixedAmount: string;
+      rounding: components['schemas']['PriceRounding'];
+      floor: components['schemas']['PricingFloorDto'] | null;
+      compareAt: components['schemas']['CompareAtMode'];
     };
     ChannelConnectionDto: {
       /** Format: uuid */
@@ -1122,6 +1321,8 @@ export interface components {
       shopify: components['schemas']['ShopifySettingsDto'] | null;
       /** @description Which products the connection lists; null lists every product */
       productSelection: components['schemas']['ProductSelectionRuleDto'] | null;
+      /** @description How the connection prices variants; null sends catalog prices */
+      pricing: components['schemas']['PricingRuleDto'] | null;
       /** Format: date-time */
       connectedAt: string;
       /** Format: date-time */
@@ -1146,6 +1347,188 @@ export interface components {
       authorizationUrl: string;
       /** @example demo-store.myshopify.com */
       externalAccountId: string;
+    };
+    UpdatePricingDto: {
+      /** @description The rule; null removes it, so catalog prices are sent as they are */
+      rule: components['schemas']['PricingRuleDto'] | null;
+    };
+    PricingPreviewRequestDto: {
+      /** @description The rule to try, saved or not; null shows catalog prices */
+      rule: components['schemas']['PricingRuleDto'] | null;
+      /**
+       * Format: uuid
+       * @description The product to price; defaults to the first selected product
+       */
+      productId?: string;
+    };
+    PricingPreviewProductDto: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+    };
+    /** @enum {string} */
+    PriceSource: PriceSource;
+    /** @enum {string} */
+    PriceStepKind: PriceStepKind;
+    PriceStepDto: {
+      kind: components['schemas']['PriceStepKind'];
+      /** @example +15% */
+      label: string;
+      /**
+       * @description The price after this step
+       * @example 102.35
+       */
+      amount: string;
+    };
+    /** @enum {string} */
+    PriceWarning: PriceWarning;
+    ResolvedPriceDto: {
+      /** @example 102.99 */
+      price: string;
+      compareAtPrice: string | null;
+      source: components['schemas']['PriceSource'];
+      steps: components['schemas']['PriceStepDto'][];
+      /** @example $89.00 → +15% → .99 = $102.99 */
+      explanation: string;
+      warnings: components['schemas']['PriceWarning'][];
+    };
+    PricingPreviewVariantDto: {
+      /** Format: uuid */
+      variantId: string;
+      /** @example Blue / Large */
+      title: string;
+      /** @example 89.00 */
+      basePrice: string;
+      cost: string | null;
+      resolved: components['schemas']['ResolvedPriceDto'];
+    };
+    PricingPreviewDto: {
+      /** @example USD */
+      currencyCode: string;
+      product: components['schemas']['PricingPreviewProductDto'] | null;
+      variants: components['schemas']['PricingPreviewVariantDto'][];
+    };
+    UpdateProductSelectionDto: {
+      /** @description The selection; null lists every product */
+      rule: components['schemas']['ProductSelectionRuleDto'] | null;
+    };
+    SelectionPreviewDto: {
+      /** @description Products the selection lists */
+      total: number;
+      /** @description Products the filter matches, before the manual lists */
+      matchingFilter: number;
+      /** @description Products added by hand that the filter does not match */
+      addedManually: number;
+      /** @description Products the filter matches that were removed by hand */
+      removedManually: number;
+      items: components['schemas']['ProductSummaryDto'][];
+      nextCursor: string | null;
+    };
+    SyncRequestResultDto: {
+      /** @description Selected products queued to be published or updated */
+      queued: number;
+      /** @description Listings queued to be delisted, as they are no longer selected */
+      delisting: number;
+    };
+    /** @enum {string} */
+    ListingStatus: ListingStatus;
+    ChannelListingDto: {
+      /** Format: uuid */
+      id: string;
+      status: components['schemas']['ListingStatus'];
+      /** @description The product’s id on the channel */
+      externalId: string | null;
+      /** @description Where to see it on the channel */
+      externalUrl: string | null;
+      /** @description Why the last sync failed */
+      lastError: string | null;
+      /** Format: date-time */
+      lastSyncedAt: string | null;
+      /** Format: uuid */
+      productId: string;
+      productTitle: string;
+      imageUrl: string | null;
+      variantCount: number;
+    };
+    ChannelListingPageDto: {
+      items: components['schemas']['ChannelListingDto'][];
+      nextCursor: string | null;
+    };
+    ConnectionSummaryDto: {
+      /** Format: uuid */
+      id: string;
+      channel: components['schemas']['ChannelType'];
+      displayName: string;
+      status: components['schemas']['ChannelConnectionStatus'];
+      /** @example USD */
+      currencyCode: string;
+    };
+    ListingSummaryDto: {
+      /** Format: uuid */
+      id: string;
+      status: components['schemas']['ListingStatus'];
+      /** @description The product’s id on the channel */
+      externalId: string | null;
+      /** @description Where to see it on the channel */
+      externalUrl: string | null;
+      /** @description Why the last sync failed */
+      lastError: string | null;
+      /** Format: date-time */
+      lastSyncedAt: string | null;
+    };
+    /** @enum {string} */
+    ListingVisibility: ListingVisibility;
+    VariantPriceOverrideDto: {
+      /** Format: uuid */
+      variantId: string;
+      /** @example 79.00 */
+      price: string | null;
+      /** @example 99.00 */
+      compareAtPrice: string | null;
+    };
+    ListingOverrideViewDto: {
+      title: string | null;
+      descriptionHtml: string | null;
+      tags: string[] | null;
+      mediaUrls: string[] | null;
+      visibility: components['schemas']['ListingVisibility'] | null;
+      inventoryBuffer: number | null;
+      maxQuantity: number | null;
+      variantPrices: components['schemas']['VariantPriceOverrideDto'][];
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    ChannelVariantDto: {
+      /** Format: uuid */
+      variantId: string;
+      /** @example Blue / Large */
+      title: string;
+      price: components['schemas']['ResolvedPriceDto'];
+      /** @description The stock the channel shows; null when the variant does not track stock */
+      quantity: number | null;
+    };
+    ProductChannelDto: {
+      connection: components['schemas']['ConnectionSummaryDto'];
+      /** @description Whether the connection’s product selection includes it */
+      selected: boolean;
+      listing: components['schemas']['ListingSummaryDto'] | null;
+      override: components['schemas']['ListingOverrideViewDto'] | null;
+      variants: components['schemas']['ChannelVariantDto'][];
+    };
+    ListingOverrideDto: {
+      title?: string | null;
+      descriptionHtml?: string | null;
+      /** @description Replaces the product’s tags */
+      tags?: string[] | null;
+      /** @description The product’s image URLs to show, in order */
+      mediaUrls?: string[] | null;
+      /** @description Show or hide on this channel, whatever the product’s status */
+      visibility?: components['schemas']['ListingVisibility'] | null;
+      /** @description Units held back */
+      inventoryBuffer?: number | null;
+      /** @description Most units shown */
+      maxQuantity?: number | null;
+      variantPrices?: components['schemas']['VariantPriceOverrideDto'][];
     };
   };
   responses: never;
@@ -1439,6 +1822,10 @@ export interface operations {
         status?: components['schemas']['ProductStatus'];
         /** @description Only products that lack this value */
         gap?: components['schemas']['CatalogGap'];
+        /** @description Only products with any of these tags. Repeat the parameter for several. */
+        tags?: string[];
+        /** @description Only products of this vendor, ignoring case */
+        vendor?: string;
         /** @description `nextCursor` from the previous page */
         cursor?: string;
         limit?: number;
@@ -2031,6 +2418,234 @@ export interface operations {
       };
     };
   };
+  ChannelRulesController_updatePricing_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdatePricingDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
+  ChannelRulesController_previewPricing_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PricingPreviewRequestDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PricingPreviewDto'];
+        };
+      };
+    };
+  };
+  ChannelRulesController_updateSelection_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateProductSelectionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
+  ChannelRulesController_previewSelection_v1: {
+    parameters: {
+      query?: {
+        /** @description `nextCursor` from the previous page */
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateProductSelectionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SelectionPreviewDto'];
+        };
+      };
+    };
+  };
+  ChannelSyncController_requestSync_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SyncRequestResultDto'];
+        };
+      };
+    };
+  };
+  ChannelSyncController_listListings_v1: {
+    parameters: {
+      query?: {
+        status?: components['schemas']['ListingStatus'];
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelListingPageDto'];
+        };
+      };
+    };
+  };
+  ProductChannelsController_list_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductChannelDto'][];
+        };
+      };
+    };
+  };
+  ProductChannelsController_saveOverride_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ListingOverrideDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductChannelDto'];
+        };
+      };
+    };
+  };
+  ProductChannelsController_clearOverride_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductChannelDto'];
+        };
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -2157,6 +2772,14 @@ export enum ActivityAction {
   channel_connected = 'channel_connected',
   channel_disconnected = 'channel_disconnected',
   channel_connect_failed = 'channel_connect_failed',
+  listing_published = 'listing_published',
+  listing_updated = 'listing_updated',
+  listing_sync_failed = 'listing_sync_failed',
+  listing_delisted = 'listing_delisted',
+  listing_override_updated = 'listing_override_updated',
+  channel_pricing_updated = 'channel_pricing_updated',
+  channel_selection_updated = 'channel_selection_updated',
+  channel_sync_requested = 'channel_sync_requested',
 }
 export enum ActivityOutcome {
   SUCCEEDED = 'SUCCEEDED',
@@ -2219,4 +2842,45 @@ export enum ChannelConnectionStatus {
   NEEDS_REAUTH = 'NEEDS_REAUTH',
   DISCONNECTED = 'DISCONNECTED',
   ERROR = 'ERROR',
+}
+export enum PriceRounding {
+  none = 'none',
+  ending_99 = 'ending_99',
+  ending_95 = 'ending_95',
+  whole = 'whole',
+}
+export enum CompareAtMode {
+  adjust = 'adjust',
+  keep = 'keep',
+  omit = 'omit',
+}
+export enum PriceSource {
+  override = 'override',
+  rule = 'rule',
+  base = 'base',
+}
+export enum PriceStepKind {
+  base = 'base',
+  percent = 'percent',
+  fixed_amount = 'fixed_amount',
+  rounding = 'rounding',
+  floor = 'floor',
+  override = 'override',
+}
+export enum PriceWarning {
+  missing_cost = 'missing_cost',
+  below_floor = 'below_floor',
+  compare_at_dropped = 'compare_at_dropped',
+  clamped_to_zero = 'clamped_to_zero',
+}
+export enum ListingStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  ERROR = 'ERROR',
+  DELISTED = 'DELISTED',
+}
+export enum ListingVisibility {
+  VISIBLE = 'VISIBLE',
+  HIDDEN = 'HIDDEN',
 }
