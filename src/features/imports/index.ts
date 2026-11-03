@@ -4,4 +4,7 @@ export { ImportJobStatusBadge } from './components/ImportJobStatusBadge';
 export { ImportProductsDialog } from './components/ImportProductsDialog';
 export { useImportJob } from './hooks/useImportJobs';
 export { describeActor } from './import-summary';
-export { IMPORT_MODE_COPY } from './imports.constants';
+export { IMPORT_FORMAT_LABELS, IMPORT_JOBS_ENDPOINT, IMPORT_MODE_COPY } from './imports.constants';
+export { ImportJobProgress } from './components/ImportJobProgress';
+export { describeCounts } from './import-summary';
+export type { ImportJob, ImportJobDetail } from './imports.types';

@@ -461,6 +461,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/imports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Import the connected channel’s catalog
+     * @description Queues an import of every product of the channel account. Products already linked to it are refreshed, products that match the catalog by handle or SKU are linked, and the rest are created with their stock. Returns the import history entry; poll it with `GET /import-jobs/{jobId}` to follow the progress. While an import of the connection runs, this returns that import instead of starting another. 409 when the connection is not connected.
+     */
+    post: operations['ChannelImportsController_start_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -808,6 +828,9 @@ export interface components {
     ImportJobStatus: ImportJobStatus;
     ImportJobCountsDto: {
       created: number;
+      /** @description Channel products linked to catalog products they matched; zero for file imports */
+      linked: number;
+      /** @description Products replaced by an update import, variants whose stock an inventory import set, or products a channel import found already linked */
       updated: number;
       skipped: number;
       failed: number;
@@ -827,7 +850,15 @@ export interface components {
       id: string;
       mode: components['schemas']['CatalogImportMode'];
       format: components['schemas']['CatalogImportFormat'];
+      /** @description The file name, or the channel account a channel import read */
       fileName: string;
+      /**
+       * Format: uuid
+       * @description The channel connection a channel import reads; null for file imports
+       */
+      connectionId: string | null;
+      /** @description Records the source holds, when it reports them, to show progress */
+      totalCount: number | null;
       status: components['schemas']['ImportJobStatus'];
       /** @description Products for create and update imports; stock rows for inventory imports */
       counts: components['schemas']['ImportJobCountsDto'];
@@ -860,7 +891,15 @@ export interface components {
       id: string;
       mode: components['schemas']['CatalogImportMode'];
       format: components['schemas']['CatalogImportFormat'];
+      /** @description The file name, or the channel account a channel import read */
       fileName: string;
+      /**
+       * Format: uuid
+       * @description The channel connection a channel import reads; null for file imports
+       */
+      connectionId: string | null;
+      /** @description Records the source holds, when it reports them, to show progress */
+      totalCount: number | null;
       status: components['schemas']['ImportJobStatus'];
       /** @description Products for create and update imports; stock rows for inventory imports */
       counts: components['schemas']['ImportJobCountsDto'];
@@ -1970,6 +2009,28 @@ export interface operations {
       };
     };
   };
+  ChannelImportsController_start_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ImportJobDetailDto'];
+        };
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -2042,11 +2103,13 @@ export enum BulkProductAction {
 export enum CatalogImportFormat {
   shopify_csv = 'shopify_csv',
   inventory_csv = 'inventory_csv',
+  shopify_api = 'shopify_api',
 }
 export enum CatalogImportMode {
   create = 'create',
   update = 'update',
   inventory = 'inventory',
+  create_or_link = 'create_or_link',
 }
 export enum ImportIssueCode {
   already_exists = 'already_exists',
@@ -2059,6 +2122,7 @@ export enum ImportIssueCode {
   not_tracked = 'not_tracked',
   duplicate_row = 'duplicate_row',
   unmatched_variant = 'unmatched_variant',
+  already_linked = 'already_linked',
 }
 export enum ImportJobStatus {
   PROCESSING = 'PROCESSING',
@@ -2084,6 +2148,7 @@ export enum ActivityAction {
   products_imported = 'products_imported',
   products_updated_by_import = 'products_updated_by_import',
   stock_imported = 'stock_imported',
+  channel_catalog_imported = 'channel_catalog_imported',
   product_view_created = 'product_view_created',
   product_view_deleted = 'product_view_deleted',
   api_key_created = 'api_key_created',

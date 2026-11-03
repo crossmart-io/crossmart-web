@@ -1,8 +1,10 @@
 import { ApiRequestError } from '@/api/api-error';
 import { api, fetchClient } from '@/api/client';
 import { useCursorPages } from '@/hooks/useCursorPages';
+import { ImportJobStatus } from '@/api/schema';
 import {
   IMPORT_JOB_ENDPOINT,
+  IMPORT_JOB_POLL_INTERVAL_MS,
   IMPORT_JOBS_ENDPOINT,
   IMPORT_JOBS_PAGE_SIZE,
 } from '../imports.constants';
@@ -31,6 +33,16 @@ export function useImportJobs(workspaceId: string) {
   return { ...query, jobs: query.items };
 }
 
-export function useImportJob(workspaceId: string, jobId: string) {
-  return api.useQuery('get', IMPORT_JOB_ENDPOINT, { params: { path: { workspaceId, jobId } } });
+/** One import. While it runs (channel imports run in the background), it is polled. */
+export function useImportJob(workspaceId: string, jobId: string | undefined) {
+  return api.useQuery(
+    'get',
+    IMPORT_JOB_ENDPOINT,
+    { params: { path: { workspaceId, jobId: jobId ?? '' } } },
+    {
+      enabled: Boolean(jobId),
+      refetchInterval: (query) =>
+        query.state.data?.status === ImportJobStatus.PROCESSING && IMPORT_JOB_POLL_INTERVAL_MS,
+    },
+  );
 }

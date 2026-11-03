@@ -9,7 +9,7 @@ export function ImportsPage() {
   return (
     <Page
       name="Imports"
-      description="Every CSV imported into this workspace, and the rows that need a fix."
+      description="Every file and store imported into this workspace, and the records that need a fix."
       actions={workspace && <ImportProductsDialog workspaceId={workspace.id} />}
     >
       <WorkspaceGate>{(current) => <ImportJobHistory workspaceId={current.id} />}</WorkspaceGate>

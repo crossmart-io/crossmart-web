@@ -1,6 +1,6 @@
 import { ChannelConnectionStatus } from '@/api/schema';
 import type { Workspace } from '@/features/workspaces';
-import { canManageWorkspace } from '@/features/workspaces';
+import { canEditCatalog, canManageWorkspace } from '@/features/workspaces';
 import { CHANNELS } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
 import { useChannelConnections } from '../hooks/useChannelConnections';
@@ -16,6 +16,7 @@ export function ChannelGrid({ workspace }: { workspace: Workspace }) {
     (connection) => connection.status !== ChannelConnectionStatus.DISCONNECTED,
   );
   const canManage = canManageWorkspace(workspace.role);
+  const canEdit = canEditCatalog(workspace.role);
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
@@ -30,6 +31,7 @@ export function ChannelGrid({ workspace }: { workspace: Workspace }) {
               (connection) => connection.channel === channel.connect?.type,
             )}
             canManage={canManage}
+            canEditCatalog={canEdit}
           />
         ) : (
           <ChannelCard key={channel.name} channel={channel} />

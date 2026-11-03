@@ -1,6 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
 import { fetchClient } from '@/api/client';
-import type { CatalogImportMode } from '@/api/schema';
 import { ApiRequestError } from '@/api/api-error';
 import { useInvalidateActivity } from '@/features/activity';
 import { useInvalidateCatalog } from '@/features/catalog';
@@ -8,8 +7,9 @@ import { useInvalidateStock } from '@/features/inventory';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
   IMPORT_FORM_FIELDS,
+  FILE_IMPORT_MODE_COPY,
+  type FileImportMode,
   IMPORT_JOBS_ENDPOINT,
-  IMPORT_MODE_COPY,
   PRODUCT_IMPORTS_ENDPOINT,
 } from '../imports.constants';
 import type { CatalogImportResult } from '../imports.types';
@@ -17,14 +17,14 @@ import type { CatalogImportResult } from '../imports.types';
 const IMPORT_HISTORY_ENDPOINTS = [IMPORT_JOBS_ENDPOINT];
 
 export interface ImportFile {
-  mode: CatalogImportMode;
+  mode: FileImportMode;
   file: File;
 }
 
 function toImportForm({ mode, file }: ImportFile): FormData {
   const form = new FormData();
   form.append(IMPORT_FORM_FIELDS.mode, mode);
-  form.append(IMPORT_FORM_FIELDS.format, IMPORT_MODE_COPY[mode].format);
+  form.append(IMPORT_FORM_FIELDS.format, FILE_IMPORT_MODE_COPY[mode].format);
   form.append(IMPORT_FORM_FIELDS.file, file);
   return form;
 }
@@ -44,7 +44,7 @@ export function useImportProducts(workspaceId: string | undefined) {
         // The generated type describes the form; the browser sends it as multipart.
         body: {
           mode: upload.mode,
-          format: IMPORT_MODE_COPY[upload.mode].format,
+          format: FILE_IMPORT_MODE_COPY[upload.mode].format,
           file: upload.file.name,
         },
         bodySerializer: () => toImportForm(upload),

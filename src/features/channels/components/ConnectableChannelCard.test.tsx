@@ -41,7 +41,7 @@ function connection(overrides: Partial<ChannelConnection> = {}): ChannelConnecti
   };
 }
 
-function renderCard(connections: ChannelConnection[], canManage = true) {
+function renderCard(connections: ChannelConnection[], canManage = true, canEditCatalog = false) {
   const element: ReactElement = (
     <QueryClientProvider client={new QueryClient()}>
       <ConnectableChannelCard
@@ -50,6 +50,7 @@ function renderCard(connections: ChannelConnection[], canManage = true) {
         connect={CONNECT}
         connections={connections}
         canManage={canManage}
+        canEditCatalog={canEditCatalog}
       />
     </QueryClientProvider>
   );
@@ -95,5 +96,18 @@ describe('ConnectableChannelCard', () => {
 
     expect(screen.queryByRole('button', { name: 'Disconnect' })).not.toBeInTheDocument();
     expect(screen.getByText('Ask a workspace admin to connect it.')).toBeInTheDocument();
+  });
+
+  it('offers catalog editors an import of a connected store, but not of one needing re-auth', () => {
+    renderCard(
+      [
+        connection(),
+        connection({ id: 'c-2', status: ChannelConnectionStatus.NEEDS_REAUTH, shopify: null }),
+      ],
+      false,
+      true,
+    );
+
+    expect(screen.getAllByRole('button', { name: 'Import products from Shopify' })).toHaveLength(1);
   });
 });

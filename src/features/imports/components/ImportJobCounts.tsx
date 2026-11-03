@@ -1,23 +1,33 @@
+import { cn } from 'cn';
+import type { CatalogImportMode } from '@/api/schema';
 import { Card, CardContent } from '@/components/ui/card';
+import { importCountsOf } from '../import-summary';
 import type { ImportJobCounts as Counts } from '../imports.types';
 
-const COUNT_TILES = [
-  { key: 'created', label: 'Created' },
-  { key: 'updated', label: 'Updated' },
-  { key: 'skipped', label: 'Skipped' },
-  { key: 'failed', label: 'Failed' },
-] as const satisfies readonly { key: keyof Counts; label: string }[];
+/** Five tiles (channel imports) wrap three to a row before they fit on one line. */
+const GRID_COLUMNS: Record<number, string> = {
+  4: 'sm:grid-cols-4',
+  5: 'sm:grid-cols-3 lg:grid-cols-5',
+};
 
-/** What an import did, one tile per outcome. `record` names what was counted. */
-export function ImportJobCounts({ counts, record }: { counts: Counts; record: string }) {
+interface ImportJobCountsProps {
+  counts: Counts;
+  mode: CatalogImportMode;
+  /** Names what was counted, for screen readers. */
+  record: string;
+}
+
+/** What an import did, one tile per outcome its mode reports. */
+export function ImportJobCounts({ counts, mode, record }: ImportJobCountsProps) {
+  const tiles = importCountsOf(counts, mode);
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-      {COUNT_TILES.map((tile) => (
+    <div className={cn('grid grid-cols-2 gap-3', GRID_COLUMNS[tiles.length])}>
+      {tiles.map((tile) => (
         <Card key={tile.key} className="py-4">
           <CardContent className="flex flex-col gap-1 px-4">
             <span className="text-sm text-muted-foreground">{tile.label}</span>
             <span className="font-heading text-2xl font-semibold tabular-nums tracking-tight">
-              {counts[tile.key].toLocaleString()}
+              {tile.value.toLocaleString()}
             </span>
             <span className="sr-only">{record}s</span>
           </CardContent>

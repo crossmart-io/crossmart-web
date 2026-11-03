@@ -1,5 +1,7 @@
 import { CatalogImportMode } from '@/api/schema';
-import { describeActor, describeCounts, describeResult } from './import-summary';
+import { describeActor, describeCounts, describeResult, processedCount } from './import-summary';
+
+const NO_COUNTS = { created: 0, linked: 0, updated: 0, skipped: 0, failed: 0 };
 
 const EMPTY_RESULT = {
   jobId: 'job-1',
@@ -13,12 +15,18 @@ const EMPTY_RESULT = {
 
 describe('import summaries', () => {
   it('lists only the counts that are not zero', () => {
-    expect(describeCounts({ created: 8, updated: 0, skipped: 0, failed: 2 })).toBe(
+    expect(describeCounts({ ...NO_COUNTS, created: 8, failed: 2 }, CatalogImportMode.create)).toBe(
       '8 created · 2 failed',
     );
-    expect(describeCounts({ created: 0, updated: 0, skipped: 0, failed: 0 })).toBe(
-      'Nothing imported',
+    expect(describeCounts(NO_COUNTS, CatalogImportMode.update)).toBe('Nothing imported');
+  });
+
+  it('words channel imports in terms of links', () => {
+    const counts = { ...NO_COUNTS, created: 3, linked: 2, updated: 5 };
+    expect(describeCounts(counts, CatalogImportMode.create_or_link)).toBe(
+      '3 created · 2 linked · 5 already linked',
     );
+    expect(processedCount({ ...counts, skipped: 1, failed: 1 })).toBe(12);
   });
 
   it('names the API key a program used, and a removed member', () => {

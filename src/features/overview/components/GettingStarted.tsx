@@ -4,6 +4,7 @@ import { cn } from 'cn';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ROUTES } from '@/config/routes';
+import { ChannelSetup } from '@/features/channels';
 
 const PERCENT = 100;
 
@@ -17,9 +18,28 @@ interface Step {
 interface GettingStartedProps {
   hasProducts: boolean;
   hasApiKey: boolean;
+  channelSetup: ChannelSetup | undefined;
 }
 
-function toSteps({ hasProducts, hasApiKey }: GettingStartedProps): Step[] {
+/** A connected store whose products were never imported gets its own nudge. */
+function channelStep(setup: ChannelSetup | undefined): Step {
+  if (setup === ChannelSetup.Connected) {
+    return {
+      title: 'Import products from your store',
+      description: 'Your store is connected. Import its products to link them to your catalog.',
+      to: ROUTES.channels,
+      done: false,
+    };
+  }
+  return {
+    title: 'Connect a channel',
+    description: 'Connect your Shopify store to sync products and stock.',
+    to: ROUTES.channels,
+    done: setup === ChannelSetup.Imported,
+  };
+}
+
+function toSteps({ hasProducts, hasApiKey, channelSetup }: GettingStartedProps): Step[] {
   return [
     {
       title: 'Add your products',
@@ -27,12 +47,7 @@ function toSteps({ hasProducts, hasApiKey }: GettingStartedProps): Step[] {
       to: ROUTES.products,
       done: hasProducts,
     },
-    {
-      title: 'Connect a channel',
-      description: 'Shopify and eBay connections are in development.',
-      to: ROUTES.channels,
-      done: false,
-    },
+    channelStep(channelSetup),
     {
       title: 'Give your AI agent a key',
       description: 'Let Claude or your own agent work with your catalog.',

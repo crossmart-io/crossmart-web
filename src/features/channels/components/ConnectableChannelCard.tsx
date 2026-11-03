@@ -22,6 +22,7 @@ interface ConnectableChannelCardProps {
   /** This channel's connections that are not disconnected. */
   connections: readonly ChannelConnection[];
   canManage: boolean;
+  canEditCatalog: boolean;
 }
 
 interface ConnectButtonProps extends ComponentProps<typeof Button> {
@@ -50,6 +51,7 @@ export function ConnectableChannelCard({
   connect,
   connections,
   canManage,
+  canEditCatalog,
 }: ConnectableChannelCardProps) {
   const status = headlineStatus(connections);
 
@@ -76,6 +78,7 @@ export function ConnectableChannelCard({
                 connect={connect}
                 connection={connection}
                 canManage={canManage}
+                canEditCatalog={canEditCatalog}
               />
             ))}
           </ul>

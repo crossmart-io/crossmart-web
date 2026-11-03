@@ -7,12 +7,14 @@ import { ROUTES } from '@/config/routes';
 import { useApiKeys } from '@/features/api-keys';
 import { useSession } from '@/features/auth';
 import { useCatalogStats } from '@/features/catalog';
+import { useChannelSetup } from '@/features/channels';
 import { CatalogHealth, CatalogStatsGrid, GettingStarted } from '@/features/overview';
 import type { Workspace } from '@/features/workspaces';
 
 function OverviewContent({ workspace }: { workspace: Workspace }) {
   const { data: stats } = useCatalogStats(workspace.id);
   const { data: apiKeys } = useApiKeys(workspace.id);
+  const channelSetup = useChannelSetup(workspace.id);
 
   return (
     <>
@@ -21,6 +23,7 @@ function OverviewContent({ workspace }: { workspace: Workspace }) {
         <GettingStarted
           hasProducts={(stats?.products ?? 0) > 0}
           hasApiKey={(apiKeys?.length ?? 0) > 0}
+          channelSetup={channelSetup}
         />
         <CatalogHealth workspaceId={workspace.id} />
       </div>

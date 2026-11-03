@@ -17,3 +17,21 @@ export function headlineStatus(
     connections.some((connection) => connection.status === status),
   );
 }
+
+/** How far the workspace is with channels, for onboarding. */
+export enum ChannelSetup {
+  NotConnected = 'not_connected',
+  /** A store is connected, but its products were never imported. */
+  Connected = 'connected',
+  Imported = 'imported',
+}
+
+export function channelSetupOf(connections: readonly ChannelConnection[]): ChannelSetup {
+  const connected = connections.filter(
+    (connection) => connection.status === ChannelConnectionStatus.CONNECTED,
+  );
+  if (connected.length === 0) return ChannelSetup.NotConnected;
+  return connected.some((connection) => connection.lastSyncedAt !== null)
+    ? ChannelSetup.Imported
+    : ChannelSetup.Connected;
+}
