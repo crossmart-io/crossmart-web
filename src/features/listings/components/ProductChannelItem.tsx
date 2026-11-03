@@ -13,6 +13,8 @@ import type { ChannelVariant, ProductChannel } from '../listings.types';
 import { ChannelOverrideSheet, type OverrideProduct } from './ChannelOverrideSheet';
 import { ListingStatusBadge } from './ListingStatusBadge';
 import { PriceExplanation } from './PriceExplanation';
+import { ChannelLogoSize, channelInfoFor } from '@/features/channels/channels.constants';
+import { ChannelLogo } from '@/features/channels/components/ChannelLogo';
 
 interface ProductChannelItemProps {
   workspaceId: string;
@@ -57,6 +59,11 @@ function ListingState({ channel }: { channel: ProductChannel }) {
   if (!channel.selected) return <Badge variant="outline">Not in this store</Badge>;
   if (channel.listing) return <ListingStatusBadge status={channel.listing.status} />;
   return <Badge variant="outline">Waiting to publish</Badge>;
+}
+
+function StoreLogo({ channel }: { channel: ProductChannel['connection']['channel'] }) {
+  const info = channelInfoFor(channel);
+  return info ? <ChannelLogo logo={info.logo} size={ChannelLogoSize.Small} /> : null;
 }
 
 interface ChannelItemActionsProps {
@@ -153,9 +160,10 @@ export function ProductChannelItem({
       <div className="flex flex-wrap items-center justify-between gap-2">
         <Link
           to={toChannelConnectionRoute(connection.id)}
-          className="truncate font-medium hover:underline"
+          className="flex min-w-0 items-center gap-2 font-medium hover:underline"
         >
-          {connection.displayName}
+          <StoreLogo channel={connection.channel} />
+          <span className="truncate">{connection.displayName}</span>
         </Link>
         <div className="flex items-center gap-1.5">
           {channel.override && <Badge variant="secondary">Overridden</Badge>}
