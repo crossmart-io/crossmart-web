@@ -2,6 +2,7 @@ import { X } from 'lucide-react';
 import { Link } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useReturnToState } from '@/components/navigation/return-to';
 import { toProductRoute } from '@/config/routes';
 import { ProductStatusBadge, ProductThumbnail } from '@/features/catalog';
 import { pluralize } from '@/lib/format';
@@ -32,6 +33,7 @@ function PreviewCounts({ preview }: { preview: SelectionPreview }) {
 
 /** What the selection lists: the count, and its first products in title order. */
 export function SelectionPreviewList({ preview, canEdit, onRemove }: SelectionPreviewListProps) {
+  const returnTo = useReturnToState();
   if (!preview) {
     return (
       <div className="flex flex-col gap-2">
@@ -51,6 +53,7 @@ export function SelectionPreviewList({ preview, canEdit, onRemove }: SelectionPr
             <ProductThumbnail url={product.imageUrl} alt="" className="size-8" />
             <Link
               to={toProductRoute(product.id)}
+              state={returnTo}
               className="min-w-0 flex-1 truncate text-sm hover:underline"
             >
               {product.title}

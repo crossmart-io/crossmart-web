@@ -5,6 +5,7 @@ import { ContentLoader } from '@/components/feedback/ContentLoader';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { Page } from '@/components/layout/Page';
+import { ReturnToProvider } from '@/components/navigation/ReturnToProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PAGE_PARENTS } from '@/config/navigation';
 import { ROUTE_PARAMS, ROUTES, toChannelConnectionRoute } from '@/config/routes';
@@ -134,7 +135,9 @@ function ChannelConnection({ workspace, connectionId, tab }: ChannelConnectionPr
       description={connection.externalAccountId}
       actions={canManage && <ChannelSyncButton {...ref} disabled={!isConnected} />}
     >
-      <ChannelConnectionTabs workspace={workspace} connection={connection} tab={tab} />
+      <ReturnToProvider parents={PAGE_PARENTS.channels} label={name}>
+        <ChannelConnectionTabs workspace={workspace} connection={connection} tab={tab} />
+      </ReturnToProvider>
     </Page>
   );
 }

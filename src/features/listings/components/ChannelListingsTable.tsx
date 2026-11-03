@@ -19,6 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { useReturnToState } from '@/components/navigation/return-to';
 import { toProductRoute } from '@/config/routes';
 import { ProductThumbnail } from '@/features/catalog';
 import type { useChannelListings } from '../hooks/useChannelListings';
@@ -28,6 +29,7 @@ import { ListingStatusBadge } from './ListingStatusBadge';
 const LISTINGS_SKELETON_ROWS = 5;
 
 function ListingRow({ listing }: { listing: ChannelListing }) {
+  const returnTo = useReturnToState();
   return (
     <TableRow className="align-top">
       <TableCell>
@@ -36,6 +38,7 @@ function ListingRow({ listing }: { listing: ChannelListing }) {
           <div className="flex min-w-0 flex-col">
             <Link
               to={toProductRoute(listing.productId)}
+              state={returnTo}
               className="truncate font-medium hover:underline"
             >
               {listing.productTitle}

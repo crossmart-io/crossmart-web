@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useReturnToState } from '@/components/navigation/return-to';
 import { toProductRoute } from '@/config/routes';
 import { formatMoney } from '@/lib/format';
 import { usePricingPreview } from '../hooks/usePreviews';
@@ -15,6 +16,7 @@ interface PricingExampleProps {
 
 /** The rule applied live to a real product, the first one the connection lists. */
 export function PricingExample({ workspaceId, connectionId, rule }: PricingExampleProps) {
+  const returnTo = useReturnToState();
   const preview = usePricingPreview({ workspaceId, connectionId }, rule, rule !== null);
 
   if (!preview.data) {
@@ -35,7 +37,7 @@ export function PricingExample({ workspaceId, connectionId, rule }: PricingExamp
     >
       <p className="text-sm">
         Example:{' '}
-        <Link to={toProductRoute(product.id)} className="font-medium underline">
+        <Link to={toProductRoute(product.id)} state={returnTo} className="font-medium underline">
           {product.title}
         </Link>
       </p>
