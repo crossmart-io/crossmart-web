@@ -1,30 +1,92 @@
-import { useParams } from 'react-router';
+import { useNavigate, useParams } from 'react-router';
 import { isNotFoundError } from '@/api/api-error';
 import { ChannelConnectionStatus } from '@/api/schema';
 import { ContentLoader } from '@/components/feedback/ContentLoader';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { Page } from '@/components/layout/Page';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PAGE_PARENTS } from '@/config/navigation';
-import { ROUTE_PARAMS } from '@/config/routes';
-import { ConnectionStatusBadge } from '@/features/channels';
+import { ROUTE_PARAMS, ROUTES, toChannelConnectionRoute } from '@/config/routes';
 import {
+  type ChannelConnection,
+  ConnectionSettings,
+  ConnectionStatusBadge,
+} from '@/features/channels';
+import {
+  CHANNEL_TABS,
   ChannelListingsCard,
+  ChannelSyncButton,
+  ChannelTab,
   PricingRuleCard,
   ProductSelectionCard,
+  toChannelTab,
   useChannelConnection,
 } from '@/features/listings';
-import { canManageWorkspace, type Workspace } from '@/features/workspaces';
+import { canEditCatalog, canManageWorkspace, type Workspace } from '@/features/workspaces';
 
 const CONNECTION_PAGE_NAME = 'Channel';
 
-function ChannelConnection({
-  workspace,
-  connectionId,
-}: {
+interface ChannelConnectionTabsProps {
+  workspace: Workspace;
+  connection: ChannelConnection;
+  tab: ChannelTab;
+}
+
+/** One tab per part of the connection; each tab has its own URL so it can be linked to. */
+function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnectionTabsProps) {
+  const navigate = useNavigate();
+  const canManage = canManageWorkspace(workspace.role);
+  const currency = connection.shopify?.currencyCode ?? workspace.currency;
+  const ref = { workspaceId: workspace.id, connectionId: connection.id };
+  return (
+    <Tabs
+      value={tab}
+      onValueChange={(value) => void navigate(toChannelConnectionRoute(connection.id, value))}
+      className="gap-6"
+    >
+      <TabsList variant="line" className="w-full justify-start border-b">
+        {CHANNEL_TABS.map(({ value, label, icon: Icon }) => (
+          <TabsTrigger key={value} value={value} className="flex-none">
+            <Icon data-icon="inline-start" />
+            {label}
+          </TabsTrigger>
+        ))}
+      </TabsList>
+      <TabsContent value={ChannelTab.Listings}>
+        <ChannelListingsCard {...ref} />
+      </TabsContent>
+      <TabsContent value={ChannelTab.Products}>
+        <ProductSelectionCard {...ref} rule={connection.productSelection} canManage={canManage} />
+      </TabsContent>
+      <TabsContent value={ChannelTab.Pricing}>
+        <PricingRuleCard
+          {...ref}
+          currency={currency}
+          rule={connection.pricing}
+          canManage={canManage}
+        />
+      </TabsContent>
+      <TabsContent value={ChannelTab.Settings}>
+        <ConnectionSettings
+          workspaceId={workspace.id}
+          connection={connection}
+          canManage={canManage}
+          canEditCatalog={canEditCatalog(workspace.role)}
+          onDisconnected={() => void navigate(ROUTES.channels)}
+        />
+      </TabsContent>
+    </Tabs>
+  );
+}
+
+interface ChannelConnectionProps {
   workspace: Workspace;
   connectionId: string;
-}) {
+  tab: ChannelTab;
+}
+
+function ChannelConnection({ workspace, connectionId, tab }: ChannelConnectionProps) {
   const {
     data: connection,
     isPending,
@@ -50,7 +112,7 @@ function ChannelConnection({
 
   const name = connection.shopify?.shopName ?? connection.displayName;
   const canManage = canManageWorkspace(workspace.role);
-  const currency = connection.shopify?.currencyCode ?? workspace.currency;
+  const isConnected = connection.status === ChannelConnectionStatus.CONNECTED;
   const ref = { workspaceId: workspace.id, connectionId };
   return (
     <Page
@@ -63,28 +125,22 @@ function ChannelConnection({
         </>
       }
       description={connection.externalAccountId}
+      actions={canManage && <ChannelSyncButton {...ref} disabled={!isConnected} />}
     >
-      <ChannelListingsCard
-        {...ref}
-        canManage={canManage}
-        isConnected={connection.status === ChannelConnectionStatus.CONNECTED}
-      />
-      <PricingRuleCard
-        {...ref}
-        currency={currency}
-        rule={connection.pricing}
-        canManage={canManage}
-      />
-      <ProductSelectionCard {...ref} rule={connection.productSelection} canManage={canManage} />
+      <ChannelConnectionTabs workspace={workspace} connection={connection} tab={tab} />
     </Page>
   );
 }
 
 export function ChannelConnectionPage() {
-  const connectionId = useParams()[ROUTE_PARAMS.connectionId] ?? '';
+  const params = useParams();
+  const connectionId = params[ROUTE_PARAMS.connectionId] ?? '';
+  const tab = toChannelTab(params[ROUTE_PARAMS.tab]);
   return (
     <WorkspaceGate>
-      {(workspace) => <ChannelConnection workspace={workspace} connectionId={connectionId} />}
+      {(workspace) => (
+        <ChannelConnection workspace={workspace} connectionId={connectionId} tab={tab} />
+      )}
     </WorkspaceGate>
   );
 }

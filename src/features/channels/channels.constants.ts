@@ -142,3 +142,8 @@ export const CHANNELS: readonly ChannelInfo[] = [
     logo: { src: tiktokLogo, tint: FOREGROUND_TINT },
   },
 ];
+
+/** The channel a connection belongs to, for its name, logo and how to reconnect it. */
+export function channelInfoFor(type: ChannelType): ChannelInfo | undefined {
+  return CHANNELS.find((channel) => channel.connect?.type === type);
+}

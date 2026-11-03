@@ -2,6 +2,7 @@ export const ROUTE_PARAMS = {
   productId: 'productId',
   jobId: 'jobId',
   connectionId: 'connectionId',
+  tab: 'tab',
 } as const;
 
 export const ROUTES = {
@@ -14,6 +15,7 @@ export const ROUTES = {
   inventory: '/inventory',
   channels: '/channels',
   channelConnection: `/channels/:${ROUTE_PARAMS.connectionId}`,
+  channelConnectionTab: `/channels/:${ROUTE_PARAMS.connectionId}/:${ROUTE_PARAMS.tab}`,
   activity: '/activity',
   imports: '/imports',
   importJob: `/imports/:${ROUTE_PARAMS.jobId}`,
@@ -25,8 +27,10 @@ export function toProductRoute(productId: string): string {
   return ROUTES.product.replace(`:${ROUTE_PARAMS.productId}`, productId);
 }
 
-export function toChannelConnectionRoute(connectionId: string): string {
-  return ROUTES.channelConnection.replace(`:${ROUTE_PARAMS.connectionId}`, connectionId);
+/** A channel connection's page, opened on `tab` when one is given. */
+export function toChannelConnectionRoute(connectionId: string, tab?: string): string {
+  const route = ROUTES.channelConnection.replace(`:${ROUTE_PARAMS.connectionId}`, connectionId);
+  return tab ? `${route}/${tab}` : route;
 }
 
 export function toImportJobRoute(jobId: string): string {

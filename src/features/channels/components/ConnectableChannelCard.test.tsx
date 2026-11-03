@@ -6,6 +6,7 @@ import { MemoryRouter } from 'react-router';
 import { ChannelConnectionStatus, ChannelType } from '@/api/schema';
 import { CHANNELS, type ChannelInfo, type ConnectableChannel } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
+import { connectionFixture as connection } from '../testing/channel-connection.fixture';
 import { ConnectableChannelCard } from './ConnectableChannelCard';
 
 function shopifyChannel(): { channel: ChannelInfo; connect: ConnectableChannel } {
@@ -15,33 +16,6 @@ function shopifyChannel(): { channel: ChannelInfo; connect: ConnectableChannel }
 }
 
 const { channel: SHOPIFY, connect: CONNECT } = shopifyChannel();
-
-function connection(overrides: Partial<ChannelConnection> = {}): ChannelConnection {
-  return {
-    id: 'c-1',
-    channel: ChannelType.shopify,
-    externalAccountId: 'demo-store.myshopify.com',
-    displayName: 'Demo Store',
-    status: ChannelConnectionStatus.CONNECTED,
-    statusReason: null,
-    grantedScopes: [],
-    shopify: {
-      shopName: 'Demo Store',
-      currencyCode: 'USD',
-      ianaTimezone: null,
-      primaryDomainUrl: null,
-      primaryLocation: null,
-    },
-    productSelection: null,
-    pricing: null,
-    connectedAt: '2026-11-03T09:00:00Z',
-    disconnectedAt: null,
-    lastSyncedAt: null,
-    createdAt: '2026-11-03T09:00:00Z',
-    updatedAt: '2026-11-03T09:00:00Z',
-    ...overrides,
-  };
-}
 
 function renderCard(connections: ChannelConnection[], canManage = true, canEditCatalog = false) {
   const element: ReactElement = (
@@ -115,12 +89,9 @@ describe('ConnectableChannelCard', () => {
     expect(screen.getAllByRole('button', { name: 'Import products from Shopify' })).toHaveLength(1);
   });
 
-  it('links every connected store to its pricing and listings, whoever views it', () => {
+  it('links every connected store to its page, whoever views it', () => {
     renderCard([connection()], false);
 
-    expect(screen.getByRole('link', { name: 'Pricing and listings' })).toHaveAttribute(
-      'href',
-      '/channels/c-1',
-    );
+    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-1');
   });
 });

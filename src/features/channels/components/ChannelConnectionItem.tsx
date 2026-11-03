@@ -1,14 +1,12 @@
-import { RefreshCw, Settings2, Unplug } from 'lucide-react';
+import { Settings2 } from 'lucide-react';
 import { Link } from 'react-router';
 import { ChannelConnectionStatus } from '@/api/schema';
-import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import { toChannelConnectionRoute } from '@/config/routes';
 import type { ChannelInfo, ConnectableChannel } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
-import { useDisconnectChannel } from '../hooks/useChannelConnections';
 import { ChannelImportSection } from './ChannelImportSection';
-import { ConnectChannelDialog } from './ConnectChannelDialog';
+import { ConnectionActions } from './ConnectionActions';
 import { ConnectionStatusBadge } from './ConnectionStatusBadge';
 
 interface ChannelConnectionItemProps {
@@ -37,7 +35,7 @@ export function ChannelConnectionItem({
       <Button asChild variant="outline" size="sm">
         <Link to={toChannelConnectionRoute(connection.id)}>
           <Settings2 data-icon="inline-start" />
-          Pricing and listings
+          Manage
         </Link>
       </Button>
       {canManage && (
@@ -80,56 +78,5 @@ export function ChannelConnectionItem({
         <div className="flex flex-wrap gap-2">{actions}</div>
       )}
     </li>
-  );
-}
-
-interface ConnectionActionsProps {
-  workspaceId: string;
-  channel: ChannelInfo;
-  connect: ConnectableChannel;
-  connection: ChannelConnection;
-  name: string;
-}
-
-/** What a workspace admin can do with a connection: reconnect it, or disconnect it. */
-function ConnectionActions({
-  workspaceId,
-  channel,
-  connect,
-  connection,
-  name,
-}: ConnectionActionsProps) {
-  const disconnect = useDisconnectChannel(workspaceId);
-  const needsReauth = connection.status === ChannelConnectionStatus.NEEDS_REAUTH;
-
-  return (
-    <>
-      {needsReauth && (
-        <ConnectChannelDialog
-          workspaceId={workspaceId}
-          channel={channel}
-          connect={connect}
-          initialAccount={connection.externalAccountId}
-          trigger={
-            <Button size="sm">
-              <RefreshCw data-icon="inline-start" />
-              Reconnect
-            </Button>
-          }
-        />
-      )}
-      <ConfirmDialog
-        trigger={
-          <Button variant="outline" size="sm">
-            <Unplug data-icon="inline-start" />
-            Disconnect
-          </Button>
-        }
-        title={`Disconnect ${name}?`}
-        description={`Crossmart stops syncing with this store and removes its access. Your products stay in Crossmart and on ${channel.name}.`}
-        confirmLabel="Disconnect"
-        onConfirm={() => disconnect.mutateAsync(connection.id)}
-      />
-    </>
   );
 }
