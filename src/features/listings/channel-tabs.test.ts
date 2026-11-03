@@ -5,8 +5,9 @@ describe('channel tabs', () => {
   it.each([
     ['pricing', ChannelTab.Pricing],
     ['settings', ChannelTab.Settings],
-    [undefined, ChannelTab.Listings],
-    ['unknown', ChannelTab.Listings],
+    [undefined, ChannelTab.Products],
+    ['unknown', ChannelTab.Products],
+    ['listings', ChannelTab.Products],
   ])('opens the tab the URL names (%s)', (segment, expected) => {
     expect(toChannelTab(segment)).toBe(expected);
   });

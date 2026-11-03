@@ -7,6 +7,7 @@ import { pluralize } from '@/lib/format';
 import {
   CHANNEL_LISTINGS_ENDPOINT,
   CHANNEL_LISTINGS_PAGE_SIZE,
+  CHANNEL_PRODUCTS_ENDPOINT,
   PRODUCT_CHANNELS_ENDPOINT,
   SYNC_ENDPOINT,
 } from '../listings.constants';
@@ -18,7 +19,11 @@ interface ConnectionRef {
   connectionId: string;
 }
 
-const SYNC_ENDPOINTS = [CHANNEL_LISTINGS_ENDPOINT, PRODUCT_CHANNELS_ENDPOINT] as const;
+const SYNC_ENDPOINTS = [
+  CHANNEL_LISTINGS_ENDPOINT,
+  CHANNEL_PRODUCTS_ENDPOINT,
+  PRODUCT_CHANNELS_ENDPOINT,
+] as const;
 
 /** The connection's listings, most recently changed first, a page at a time. */
 export function useChannelListings(ref: ConnectionRef) {

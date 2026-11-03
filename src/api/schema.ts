@@ -481,6 +481,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/products': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Every product with its state on the connection
+     * @description Each product says whether the selection includes it and whether the channel has it: listed, pending (the next sync publishes it), failed, removing (the next sync delists it) or excluded. Counts per state follow `search`, so they can label filter tabs.
+     */
+    get: operations['ChannelProductsController_listProducts_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/pricing': {
     parameters: {
       query?: never;
@@ -1348,6 +1368,49 @@ export interface components {
       /** @example demo-store.myshopify.com */
       externalAccountId: string;
     };
+    /** @enum {string} */
+    ChannelProductState: ChannelProductState;
+    /** @enum {string} */
+    ChannelProductSort: ChannelProductSort;
+    /** @enum {string} */
+    SortDirection: SortDirection;
+    /** @enum {string} */
+    ListingStatus: ListingStatus;
+    ListingSummaryDto: {
+      /** Format: uuid */
+      id: string;
+      status: components['schemas']['ListingStatus'];
+      /** @description The product’s id on the channel */
+      externalId: string | null;
+      /** @description Where to see it on the channel */
+      externalUrl: string | null;
+      /** @description Why the last sync failed */
+      lastError: string | null;
+      /** Format: date-time */
+      lastSyncedAt: string | null;
+    };
+    ChannelProductDto: {
+      product: components['schemas']['ProductSummaryDto'];
+      state: components['schemas']['ChannelProductState'];
+      listing: components['schemas']['ListingSummaryDto'] | null;
+    };
+    ChannelProductCountsDto: {
+      /** @description Selected and on the channel */
+      listed: number;
+      /** @description Selected, waiting for the next sync to publish them */
+      pending: number;
+      /** @description Their last sync failed */
+      failed: number;
+      /** @description On the channel but no longer selected; the next sync delists them */
+      removing: number;
+      /** @description Neither selected nor on the channel */
+      excluded: number;
+    };
+    ChannelProductPageDto: {
+      items: components['schemas']['ChannelProductDto'][];
+      counts: components['schemas']['ChannelProductCountsDto'];
+      nextCursor: string | null;
+    };
     UpdatePricingDto: {
       /** @description The rule; null removes it, so catalog prices are sent as they are */
       rule: components['schemas']['PricingRuleDto'] | null;
@@ -1430,8 +1493,6 @@ export interface components {
       /** @description Listings queued to be delisted, as they are no longer selected */
       delisting: number;
     };
-    /** @enum {string} */
-    ListingStatus: ListingStatus;
     ChannelListingDto: {
       /** Format: uuid */
       id: string;
@@ -1462,19 +1523,6 @@ export interface components {
       status: components['schemas']['ChannelConnectionStatus'];
       /** @example USD */
       currencyCode: string;
-    };
-    ListingSummaryDto: {
-      /** Format: uuid */
-      id: string;
-      status: components['schemas']['ListingStatus'];
-      /** @description The product’s id on the channel */
-      externalId: string | null;
-      /** @description Where to see it on the channel */
-      externalUrl: string | null;
-      /** @description Why the last sync failed */
-      lastError: string | null;
-      /** Format: date-time */
-      lastSyncedAt: string | null;
     };
     /** @enum {string} */
     ListingVisibility: ListingVisibility;
@@ -2418,6 +2466,36 @@ export interface operations {
       };
     };
   };
+  ChannelProductsController_listProducts_v1: {
+    parameters: {
+      query?: {
+        state?: components['schemas']['ChannelProductState'];
+        /** @description Matches title, handle or SKU */
+        search?: string;
+        sort?: components['schemas']['ChannelProductSort'];
+        direction?: components['schemas']['SortDirection'];
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelProductPageDto'];
+        };
+      };
+    };
+  };
   ChannelRulesController_updatePricing_v1: {
     parameters: {
       query?: never;
@@ -2854,6 +2932,28 @@ export enum CompareAtMode {
   keep = 'keep',
   omit = 'omit',
 }
+export enum ChannelProductState {
+  listed = 'listed',
+  pending = 'pending',
+  failed = 'failed',
+  removing = 'removing',
+  excluded = 'excluded',
+}
+export enum ChannelProductSort {
+  title = 'title',
+  updatedAt = 'updatedAt',
+}
+export enum SortDirection {
+  asc = 'asc',
+  desc = 'desc',
+}
+export enum ListingStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  ERROR = 'ERROR',
+  DELISTED = 'DELISTED',
+}
 export enum PriceSource {
   override = 'override',
   rule = 'rule',
@@ -2872,13 +2972,6 @@ export enum PriceWarning {
   below_floor = 'below_floor',
   compare_at_dropped = 'compare_at_dropped',
   clamped_to_zero = 'clamped_to_zero',
-}
-export enum ListingStatus {
-  PENDING = 'PENDING',
-  ACTIVE = 'ACTIVE',
-  INACTIVE = 'INACTIVE',
-  ERROR = 'ERROR',
-  DELISTED = 'DELISTED',
 }
 export enum ListingVisibility {
   VISIBLE = 'VISIBLE',

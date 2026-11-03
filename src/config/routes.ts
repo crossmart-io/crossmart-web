@@ -43,6 +43,8 @@ export const ROUTE_QUERY = {
   search: 'q',
   status: 'status',
   stockLevel: 'stock',
+  state: 'state',
+  sort: 'sort',
 } as const;
 
 /** Filters of the activity page, kept in the URL so a filtered log can be shared. */

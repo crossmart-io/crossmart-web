@@ -5,6 +5,7 @@ import type { ChannelConnection } from '@/features/channels/channels.types';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
   CHANNEL_CONNECTION_ENDPOINT,
+  CHANNEL_PRODUCTS_ENDPOINT,
   LISTINGS_FEEDBACK,
   PRODUCT_CHANNELS_ENDPOINT,
   PRICING_ENDPOINT,
@@ -13,7 +14,11 @@ import {
 import type { PricingRule, ProductSelectionRule } from '../listings.types';
 
 /** Rules change prices and selections everywhere they are shown. */
-const RULE_ENDPOINTS = [CHANNEL_CONNECTION_ENDPOINT, PRODUCT_CHANNELS_ENDPOINT] as const;
+const RULE_ENDPOINTS = [
+  CHANNEL_CONNECTION_ENDPOINT,
+  PRODUCT_CHANNELS_ENDPOINT,
+  CHANNEL_PRODUCTS_ENDPOINT,
+] as const;
 
 interface ConnectionRef {
   workspaceId: string;

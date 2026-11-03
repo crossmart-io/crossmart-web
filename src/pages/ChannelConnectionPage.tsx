@@ -18,11 +18,10 @@ import {
 } from '@/features/channels';
 import {
   CHANNEL_TABS,
-  ChannelListingsCard,
+  ChannelProductsCard,
   ChannelSyncButton,
   ChannelTab,
   PricingRuleCard,
-  ProductSelectionCard,
   toChannelTab,
   useChannelConnection,
 } from '@/features/listings';
@@ -56,11 +55,8 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
           </TabsTrigger>
         ))}
       </TabsList>
-      <TabsContent value={ChannelTab.Listings}>
-        <ChannelListingsCard {...ref} />
-      </TabsContent>
       <TabsContent value={ChannelTab.Products}>
-        <ProductSelectionCard {...ref} rule={connection.productSelection} canManage={canManage} />
+        <ChannelProductsCard {...ref} rule={connection.productSelection} canManage={canManage} />
       </TabsContent>
       <TabsContent value={ChannelTab.Pricing}>
         <PricingRuleCard
