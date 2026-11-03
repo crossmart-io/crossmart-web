@@ -1,8 +1,10 @@
-import type { ComponentProps } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Settings2 } from 'lucide-react';
+import { Link } from 'react-router';
+import { ChannelConnectionStatus } from '@/api/schema';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
+import { toChannelConnectionRoute } from '@/config/routes';
 import {
   CHANNEL_STATUS_LABELS,
   type ChannelInfo,
@@ -22,37 +24,58 @@ interface ConnectableChannelCardProps {
   /** This channel's connections that are not disconnected. */
   connections: readonly ChannelConnection[];
   canManage: boolean;
-  canEditCatalog: boolean;
 }
 
-interface ConnectButtonProps extends ComponentProps<typeof Button> {
-  hasConnections: boolean;
-}
-
-/** Forwards its props, so a dialog trigger can open the dialog with it. */
-function ConnectButton({ hasConnections, ...props }: ConnectButtonProps) {
+/** The store to open first: one that needs attention, else the first connected. */
+function storeToManage(connections: readonly ChannelConnection[]): ChannelConnection | undefined {
   return (
-    <Button
-      {...props}
-      variant={hasConnections ? 'ghost' : 'default'}
-      size="sm"
-      className={hasConnections ? '-ml-2' : undefined}
-    >
-      <Plus data-icon="inline-start" />
-      {hasConnections ? 'Connect another store' : 'Connect'}
-    </Button>
+    connections.find((connection) => connection.status !== ChannelConnectionStatus.CONNECTED) ??
+    connections[0]
   );
 }
 
-/** A channel whose connector has shipped: its connected accounts, and a way to add one. */
-export function ConnectableChannelCard({
+function CardActions({
   workspaceId,
   channel,
   connect,
   connections,
   canManage,
-  canEditCatalog,
 }: ConnectableChannelCardProps) {
+  const store = storeToManage(connections);
+  if (store) {
+    return (
+      <Button asChild variant="outline" size="sm">
+        <Link to={toChannelConnectionRoute(store.id)}>
+          <Settings2 data-icon="inline-start" />
+          Manage
+        </Link>
+      </Button>
+    );
+  }
+  if (!canManage) {
+    return <p className="text-sm text-muted-foreground">Ask a workspace admin to connect it.</p>;
+  }
+  return (
+    <ConnectChannelDialog
+      workspaceId={workspaceId}
+      channel={channel}
+      connect={connect}
+      trigger={
+        <Button size="sm">
+          <Plus data-icon="inline-start" />
+          Connect
+        </Button>
+      }
+    />
+  );
+}
+
+/**
+ * A channel whose connector has shipped, at a glance: its connected stores and their status.
+ * Stores are managed, and more are connected, on a store's own page.
+ */
+export function ConnectableChannelCard(props: ConnectableChannelCardProps) {
+  const { channel, connections } = props;
   const status = headlineStatus(connections);
 
   return (
@@ -73,28 +96,15 @@ export function ConnectableChannelCard({
             {connections.map((connection) => (
               <ChannelConnectionItem
                 key={connection.id}
-                workspaceId={workspaceId}
                 channel={channel}
-                connect={connect}
                 connection={connection}
-                canManage={canManage}
-                canEditCatalog={canEditCatalog}
               />
             ))}
           </ul>
         )}
       </CardContent>
       <CardFooter className="mt-auto">
-        {canManage ? (
-          <ConnectChannelDialog
-            workspaceId={workspaceId}
-            channel={channel}
-            connect={connect}
-            trigger={<ConnectButton hasConnections={connections.length > 0} />}
-          />
-        ) : (
-          <p className="text-sm text-muted-foreground">Ask a workspace admin to connect it.</p>
-        )}
+        <CardActions {...props} />
       </CardFooter>
     </Card>
   );

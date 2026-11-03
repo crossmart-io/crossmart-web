@@ -6,3 +6,5 @@ export { useChannelSetup } from './hooks/useChannelSetup';
 export { ConnectionStatusBadge } from './components/ConnectionStatusBadge';
 export { ConnectionSettings } from './components/ConnectionSettings';
 export type { ChannelConnection } from './channels.types';
+export { ConnectionSwitcher } from './components/ConnectionSwitcher';
+export { connectionName } from './connection-name';

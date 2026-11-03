@@ -5,6 +5,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { formatDate } from '@/lib/format';
 import { channelInfoFor } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
+import { connectionName } from '../connection-name';
 import { ChannelImportSection } from './ChannelImportSection';
 import { ConnectionActions } from './ConnectionActions';
 
@@ -38,7 +39,7 @@ function StoreDetailsCard({ connection }: { connection: ChannelConnection }) {
       </CardHeader>
       <CardContent>
         <dl className="grid gap-4 sm:grid-cols-2">
-          <Detail label="Name">{shopify?.shopName ?? connection.displayName}</Detail>
+          <Detail label="Name">{connectionName(connection)}</Detail>
           <Detail label="Domain">{connection.externalAccountId}</Detail>
           {shopify?.primaryDomainUrl && (
             <Detail label="Storefront">
@@ -125,7 +126,7 @@ function ConnectionCard({
           channel={channel}
           connect={channel.connect}
           connection={connection}
-          name={connection.shopify?.shopName ?? connection.displayName}
+          name={connectionName(connection)}
           onDisconnected={onDisconnected}
         />
       </CardContent>

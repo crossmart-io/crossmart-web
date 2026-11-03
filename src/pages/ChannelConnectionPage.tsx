@@ -12,6 +12,8 @@ import {
   type ChannelConnection,
   ConnectionSettings,
   ConnectionStatusBadge,
+  ConnectionSwitcher,
+  connectionName,
 } from '@/features/channels';
 import {
   CHANNEL_TABS,
@@ -110,7 +112,7 @@ function ChannelConnection({ workspace, connectionId, tab }: ChannelConnectionPr
   }
   if (isPending) return <ContentLoader />;
 
-  const name = connection.shopify?.shopName ?? connection.displayName;
+  const name = connectionName(connection);
   const canManage = canManageWorkspace(workspace.role);
   const isConnected = connection.status === ChannelConnectionStatus.CONNECTED;
   const ref = { workspaceId: workspace.id, connectionId };
@@ -120,7 +122,12 @@ function ChannelConnection({ workspace, connectionId, tab }: ChannelConnectionPr
       parents={PAGE_PARENTS.channels}
       title={
         <>
-          {name}
+          <ConnectionSwitcher
+            workspaceId={workspace.id}
+            connection={connection}
+            tab={tab}
+            canManage={canManage}
+          />
           <ConnectionStatusBadge status={connection.status} />
         </>
       }

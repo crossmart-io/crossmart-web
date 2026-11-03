@@ -17,7 +17,7 @@ function shopifyChannel(): { channel: ChannelInfo; connect: ConnectableChannel }
 
 const { channel: SHOPIFY, connect: CONNECT } = shopifyChannel();
 
-function renderCard(connections: ChannelConnection[], canManage = true, canEditCatalog = false) {
+function renderCard(connections: ChannelConnection[], canManage = true) {
   const element: ReactElement = (
     <QueryClientProvider client={new QueryClient()}>
       <MemoryRouter>
@@ -27,7 +27,6 @@ function renderCard(connections: ChannelConnection[], canManage = true, canEditC
           connect={CONNECT}
           connections={connections}
           canManage={canManage}
-          canEditCatalog={canEditCatalog}
         />
       </MemoryRouter>
     </QueryClientProvider>
@@ -47,49 +46,39 @@ describe('ConnectableChannelCard', () => {
     expect(screen.getByRole('button', { name: 'Continue to Shopify' })).toBeDisabled();
   });
 
-  it('shows a connected store with its status and a disconnect action', () => {
+  it('shows a connected store at a glance, managed on its own page', () => {
     renderCard([connection()]);
 
     expect(screen.getByText('demo-store.myshopify.com')).toBeInTheDocument();
     expect(screen.getAllByText('Connected')).not.toHaveLength(0);
-    expect(screen.getByRole('button', { name: 'Disconnect' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Connect another store' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-1');
+    expect(screen.queryByRole('button', { name: 'Disconnect' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Import products/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Connect/ })).not.toBeInTheDocument();
   });
 
-  it('asks to reconnect a store that needs re-auth', () => {
+  it('opens the store that needs attention first, and says why', () => {
     renderCard([
+      connection(),
       connection({
+        id: 'c-2',
         status: ChannelConnectionStatus.NEEDS_REAUTH,
         statusReason: 'Connect the store again.',
       }),
     ]);
 
-    expect(screen.getAllByText('Needs re-auth')).not.toHaveLength(0);
     expect(screen.getByText('Connect the store again.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reconnect' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-2');
   });
 
-  it('hides management actions from members who cannot manage the workspace', () => {
-    renderCard([connection()], false);
+  it('asks members who cannot manage the workspace to have an admin connect a store', () => {
+    renderCard([], false);
 
-    expect(screen.queryByRole('button', { name: 'Disconnect' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Connect' })).not.toBeInTheDocument();
     expect(screen.getByText('Ask a workspace admin to connect it.')).toBeInTheDocument();
   });
 
-  it('offers catalog editors an import of a connected store, but not of one needing re-auth', () => {
-    renderCard(
-      [
-        connection(),
-        connection({ id: 'c-2', status: ChannelConnectionStatus.NEEDS_REAUTH, shopify: null }),
-      ],
-      false,
-      true,
-    );
-
-    expect(screen.getAllByRole('button', { name: 'Import products from Shopify' })).toHaveLength(1);
-  });
-
-  it('links every connected store to its page, whoever views it', () => {
+  it('lets anyone open a connected store, whoever views it', () => {
     renderCard([connection()], false);
 
     expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-1');
