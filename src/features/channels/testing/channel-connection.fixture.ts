@@ -11,6 +11,7 @@ export function connectionFixture(overrides: Partial<ChannelConnection> = {}): C
     status: ChannelConnectionStatus.CONNECTED,
     statusReason: null,
     grantedScopes: [],
+    missingFeatures: [],
     shopify: {
       shopName: 'Demo Store',
       currencyCode: 'USD',

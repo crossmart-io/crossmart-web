@@ -15,6 +15,7 @@ import {
   ConnectionStatusBadge,
   ConnectionSwitcher,
   connectionName,
+  MissingFeaturesAlert,
 } from '@/features/channels';
 import {
   CHANNEL_TABS,
@@ -143,6 +144,11 @@ function ChannelConnection({ workspace, connectionId, tab }: ChannelConnectionPr
       }
       description={connection.externalAccountId}
     >
+      <MissingFeaturesAlert
+        workspaceId={workspace.id}
+        connection={connection}
+        canManage={canManage}
+      />
       <ReturnToProvider parents={PAGE_PARENTS.channels} label={name}>
         <ChannelConnectionTabs workspace={workspace} connection={connection} tab={tab} />
       </ReturnToProvider>

@@ -1354,6 +1354,11 @@ export interface components {
     };
     /** @enum {string} */
     ChannelConnectionStatus: ChannelConnectionStatus;
+    /**
+     * @description What the connection cannot do until the merchant approves the app again
+     * @enum {string}
+     */
+    ChannelFeature: ChannelFeature;
     ShopifyLocationDto: {
       /** @example gid://shopify/Location/1001 */
       id: string;
@@ -1429,6 +1434,8 @@ export interface components {
       /** @description Why it needs re-auth or failed */
       statusReason: string | null;
       grantedScopes: string[];
+      /** @description What the connection cannot do until the merchant approves the app again */
+      missingFeatures: components['schemas']['ChannelFeature'][];
       /** @description The store’s details, for Shopify connections */
       shopify: components['schemas']['ShopifySettingsDto'] | null;
       /** @description Which products the connection lists; null lists every product */
@@ -3180,6 +3187,9 @@ export enum ChannelConnectionStatus {
   NEEDS_REAUTH = 'NEEDS_REAUTH',
   DISCONNECTED = 'DISCONNECTED',
   ERROR = 'ERROR',
+}
+export enum ChannelFeature {
+  storefront_visibility = 'storefront_visibility',
 }
 export enum PriceRounding {
   none = 'none',
