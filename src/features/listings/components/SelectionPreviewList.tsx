@@ -64,7 +64,7 @@ export function SelectionPreviewList({ preview, canEdit, onRemove }: SelectionPr
                 type="button"
                 variant="ghost"
                 size="icon-sm"
-                aria-label={`Remove ${product.title} from this channel`}
+                aria-label={`Remove ${product.title} from this store`}
                 onClick={() => onRemove(product.id)}
               >
                 <X />

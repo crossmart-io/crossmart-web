@@ -9,6 +9,7 @@ import {
   ActiveFilterChip,
   BulkActionBar,
   CATALOG_GAP_COPY,
+  PRODUCT_SORTS,
   ProductFilters,
   type ProductListFilters,
   ProductsEmptyState,
@@ -26,7 +27,8 @@ import type { Selection } from '@/hooks/useSelection';
 import { pluralize } from '@/lib/format';
 import { ImportProductsDialog } from '@/features/imports';
 import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
-import { StoreMembershipMenu } from '@/features/listings';
+import { ProductStoreFilterSelect, StoreMembershipMenu } from '@/features/listings';
+import { SortSelect } from '@/components/lists/SortSelect';
 
 function AddProductButton() {
   return (
@@ -68,9 +70,24 @@ export function ProductsPage() {
         onStatusChange={filters.setStatus}
         counts={counts}
       />
-      {filters.gap && (
-        <ActiveFilterChip label={CATALOG_GAP_COPY[filters.gap].label} onClear={filters.clearGap} />
-      )}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          {workspace && (
+            <ProductStoreFilterSelect
+              workspaceId={workspace.id}
+              value={filters.store}
+              onChange={filters.setStore}
+            />
+          )}
+          {filters.gap && (
+            <ActiveFilterChip
+              label={CATALOG_GAP_COPY[filters.gap].label}
+              onClear={filters.clearGap}
+            />
+          )}
+        </div>
+        <SortSelect options={PRODUCT_SORTS} value={filters.sort.value} onChange={filters.setSort} />
+      </div>
       <ProductResults workspace={workspace} filters={filters} />
     </Page>
   );
@@ -88,6 +105,10 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
     search: filters.debouncedSearch,
     status: toStatusQuery(filters.status),
     gap: filters.gap,
+    storeFilter: filters.store.filter,
+    storeId: filters.store.storeId,
+    sort: filters.sort.sort,
+    direction: filters.sort.direction,
   });
 
   if (products.isError) {

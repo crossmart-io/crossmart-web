@@ -28,6 +28,11 @@ const ATTENTION_LABELS: Partial<Record<ChannelConnectionStatus, (count: number) 
   [ChannelConnectionStatus.ERROR]: (count) => `${count} with errors`,
 };
 
+/** Listings whose last sync failed, across the stores. */
+export function totalFailedListings(connections: readonly ChannelConnection[]): number {
+  return connections.reduce((sum, connection) => sum + connection.failedListings, 0);
+}
+
 /** One line for a channel's stores, however many: "3 stores connected · 1 needs re-auth". */
 export function connectionsSummary(connections: readonly ChannelConnection[]): string {
   const parts = [`${pluralize(connections.length, 'store')} connected`];
@@ -35,6 +40,8 @@ export function connectionsSummary(connections: readonly ChannelConnection[]): s
     const count = connections.filter((connection) => connection.status === status).length;
     if (count > 0) parts.push(label(count));
   }
+  const failed = totalFailedListings(connections);
+  if (failed > 0) parts.push(pluralize(failed, 'listing error'));
   return parts.join(SUMMARY_SEPARATOR);
 }
 

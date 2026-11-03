@@ -1,5 +1,5 @@
 import { render, screen } from '@testing-library/react';
-import { ChannelType, ListingStatus } from '@/api/schema';
+import { ChannelType, ListingSource, ListingStatus } from '@/api/schema';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { ProductStore } from '../listings.types';
 import { ProductStoreIcons } from './ProductStoreIcons';
@@ -10,6 +10,7 @@ function store(index: number, status = ListingStatus.ACTIVE): ProductStore {
     channel: ChannelType.shopify,
     storeName: `Store ${index}`,
     status,
+    source: ListingSource.MANUAL,
   };
 }
 

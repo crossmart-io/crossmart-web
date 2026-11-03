@@ -67,7 +67,7 @@ export function useClearListingOverride(ref: ProductChannelRef) {
 export function useAddToStore(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(MEMBERSHIP_ENDPOINTS);
   return useMutation<ProductChannel, Error>({
-    meta: { inlineError: true },
+    meta: { successMessage: LISTINGS_FEEDBACK.addedToStore },
     mutationFn: async () => {
       const { data, error } = await fetchClient.POST(PRODUCT_CHANNEL_ENDPOINT, {
         params: { path: ref },

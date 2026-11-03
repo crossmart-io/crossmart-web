@@ -4,7 +4,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { pluralize } from '@/lib/format';
 import { useSelectionEditor } from '../hooks/useSelectionEditor';
 import { SELECTION_MODE_LABELS, SelectionMode } from '../listings.constants';
-import type { ProductSelectionRule } from '../listings.types';
+import type { ProductSelectionRule, SelectionPreview } from '../listings.types';
 import type { SelectionDraft } from '../selection-draft';
 import { CardSaveFooter } from './CardSaveFooter';
 import { SelectionFilters } from './SelectionFilters';
@@ -54,6 +54,18 @@ function RemovedNote({ count, onRestore }: { count: number; onRestore: () => voi
   );
 }
 
+/** What saving the rule does now: the products it publishes and removes. */
+function describeImpact(preview: SelectionPreview | undefined): string | undefined {
+  if (!preview) return undefined;
+  const { toPublish, toRemove } = preview;
+  if (toPublish === 0 && toRemove === 0) return 'Saving changes no listing.';
+  const parts = [
+    toPublish > 0 ? `publishes ${pluralize(toPublish, 'product')}` : '',
+    toRemove > 0 ? `removes ${pluralize(toRemove, 'product')}` : '',
+  ].filter(Boolean);
+  return `Saving ${parts.join(' and ')} now.`;
+}
+
 /** The store's automatic rule: off, all products or filters, with a live preview of the store. */
 export function ProductSelectionCard({
   workspaceId,
@@ -72,7 +84,7 @@ export function ProductSelectionCard({
         </CardTitle>
         <CardDescription>
           Besides the products you add by hand, the store can get all products or those matching
-          filters. Products you remove by hand stay out. Sync now applies a change.
+          filters. Products you remove by hand stay out. Saving applies the rule at once.
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
@@ -91,7 +103,8 @@ export function ProductSelectionCard({
       </CardContent>
       {canManage && (
         <CardSaveFooter
-          label="Save selection"
+          label="Save and apply"
+          note={editor.isDirty ? describeImpact(editor.preview) : undefined}
           error={editor.save.error}
           isSaving={editor.save.isPending}
           disabled={!editor.isDirty}

@@ -24,7 +24,7 @@ export function ContentOverrideFields({ productTitle }: { productTitle: string }
   return (
     <>
       <Field>
-        <FieldLabel htmlFor="override-title">Title on this channel</FieldLabel>
+        <FieldLabel htmlFor="override-title">Title in this store</FieldLabel>
         <Input id="override-title" placeholder={productTitle} {...register('title')} />
         <FieldDescription>Leave empty to use the product’s title.</FieldDescription>
       </Field>
@@ -39,14 +39,14 @@ export function ContentOverrideFields({ productTitle }: { productTitle: string }
               onCheckedChange={(checked) => field.onChange(checked === true)}
             />
             <FieldLabel htmlFor="override-custom-description" className="font-normal">
-              Write a different description for this channel
+              Write a different description for this store
             </FieldLabel>
           </Field>
         )}
       />
       {custom && (
         <Field>
-          <FieldLabel id={DESCRIPTION_LABEL_ID}>Description on this channel</FieldLabel>
+          <FieldLabel id={DESCRIPTION_LABEL_ID}>Description in this store</FieldLabel>
           <Controller
             control={control}
             name="descriptionHtml"
@@ -106,7 +106,7 @@ export function StockOverrideFields() {
           placeholder="0"
           {...register('inventoryBuffer')}
         />
-        <FieldDescription>Units this channel never sees.</FieldDescription>
+        <FieldDescription>Units this store never sees.</FieldDescription>
         <FieldError errors={[formState.errors.inventoryBuffer]} />
       </Field>
       <Field data-invalid={Boolean(formState.errors.maxQuantity)}>
@@ -134,7 +134,7 @@ export function PriceOverrideFields({
   const { register, formState } = useFormContext<OverrideFormValues>();
   return (
     <fieldset className="flex flex-col gap-3">
-      <legend className="mb-1 text-sm font-medium">Price on this channel</legend>
+      <legend className="mb-1 text-sm font-medium">Price in this store</legend>
       {variants.map((variant, index) => (
         <Field
           key={variant.variantId}

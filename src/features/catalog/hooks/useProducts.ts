@@ -1,6 +1,12 @@
 import { ApiRequestError } from '@/api/api-error';
 import { fetchClient } from '@/api/client';
-import type { CatalogGap, ProductStatus } from '@/api/schema';
+import type {
+  CatalogGap,
+  ProductSort,
+  ProductStatus,
+  ProductStoreFilter,
+  SortDirection,
+} from '@/api/schema';
 import { useCursorPages } from '@/hooks/useCursorPages';
 import { PRODUCTS_ENDPOINT, PRODUCTS_PAGE_SIZE } from '../catalog.constants';
 import type { ProductSummary } from '../catalog.types';
@@ -10,17 +16,21 @@ interface ProductsFilter {
   search: string;
   status: ProductStatus | undefined;
   gap: CatalogGap | undefined;
+  storeFilter?: ProductStoreFilter;
+  storeId?: string;
+  sort: ProductSort;
+  direction: SortDirection;
 }
 
 async function fetchProductPage(
-  { workspaceId, search, status, gap }: ProductsFilter,
+  { workspaceId, search, ...filters }: ProductsFilter,
   cursor: string | undefined,
   signal: AbortSignal,
 ) {
   const { data, error } = await fetchClient.GET(PRODUCTS_ENDPOINT, {
     params: {
       path: { workspaceId: workspaceId ?? '' },
-      query: { search: search || undefined, status, gap, cursor, limit: PRODUCTS_PAGE_SIZE },
+      query: { ...filters, search: search || undefined, cursor, limit: PRODUCTS_PAGE_SIZE },
     },
     signal,
   });
@@ -28,7 +38,7 @@ async function fetchProductPage(
   return data;
 }
 
-/** Product pages in title order, a page at a time (the API pages by cursor). */
+/** Product pages in the chosen order, a page at a time (the API pages by cursor). */
 export function useProducts(filter: ProductsFilter) {
   const query = useCursorPages<ProductSummary>({
     endpoint: PRODUCTS_ENDPOINT,

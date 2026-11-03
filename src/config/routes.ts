@@ -45,6 +45,8 @@ export const ROUTE_QUERY = {
   stockLevel: 'stock',
   state: 'state',
   sort: 'sort',
+  storeFilter: 'stores',
+  storeId: 'store',
 } as const;
 
 /** Filters of the activity page, kept in the URL so a filtered log can be shared. */
@@ -53,9 +55,13 @@ export const ACTIVITY_ROUTE_QUERY = {
   outcome: 'outcome',
 } as const;
 
-export function toProductsRoute(filter: { gap?: string } = {}): string {
+export function toProductsRoute(
+  filter: { gap?: string; storeFilter?: string; storeId?: string } = {},
+): string {
   const query = new URLSearchParams();
   if (filter.gap) query.set(ROUTE_QUERY.gap, filter.gap);
+  if (filter.storeFilter) query.set(ROUTE_QUERY.storeFilter, filter.storeFilter);
+  if (filter.storeId) query.set(ROUTE_QUERY.storeId, filter.storeId);
   const search = query.toString();
   return search ? `${ROUTES.products}?${search}` : ROUTES.products;
 }

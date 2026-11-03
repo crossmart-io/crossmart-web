@@ -19,6 +19,7 @@ export function connectionFixture(overrides: Partial<ChannelConnection> = {}): C
       primaryLocation: null,
     },
     productSelection: null,
+    failedListings: 0,
     pricing: null,
     connectedAt: '2026-11-03T09:00:00Z',
     disconnectedAt: null,

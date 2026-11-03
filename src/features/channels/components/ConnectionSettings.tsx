@@ -17,6 +17,8 @@ interface ConnectionSettingsProps {
   onDisconnected: () => void;
   /** The store's automatic product rule, from the listings feature. */
   automaticRule?: ReactNode;
+  /** Sends the whole store again, from the listings feature; for recovery. */
+  resyncAction?: ReactNode;
 }
 
 function Detail({ label, children }: { label: string; children: ReactNode }) {
@@ -108,6 +110,7 @@ function ConnectionCard({
   workspaceId,
   connection,
   onDisconnected,
+  resyncAction,
 }: Omit<ConnectionSettingsProps, 'canManage' | 'canEditCatalog' | 'automaticRule'>) {
   const channel = channelInfoFor(connection.channel);
   if (!channel?.connect) return null;
@@ -119,10 +122,11 @@ function ConnectionCard({
         </CardTitle>
         <CardDescription>
           {connection.statusReason ??
-            'Reconnect when the store asks you to approve Crossmart again. Disconnecting keeps your products in both places.'}
+            'Changes reach the store at once. Resync sends everything again, after an outage or a change made in the store. Disconnecting keeps your products in both places.'}
         </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-wrap gap-2">
+        {resyncAction}
         <ConnectionActions
           workspaceId={workspaceId}
           channel={channel}
@@ -144,6 +148,7 @@ export function ConnectionSettings({
   canEditCatalog,
   onDisconnected,
   automaticRule,
+  resyncAction,
 }: ConnectionSettingsProps) {
   const isConnected = connection.status === ChannelConnectionStatus.CONNECTED;
   return (
@@ -158,6 +163,7 @@ export function ConnectionSettings({
           workspaceId={workspaceId}
           connection={connection}
           onDisconnected={onDisconnected}
+          resyncAction={resyncAction}
         />
       )}
     </div>

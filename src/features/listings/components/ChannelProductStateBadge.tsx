@@ -9,6 +9,7 @@ const BADGE_VARIANTS = {
   [ChannelProductState.pending]: 'secondary',
   [ChannelProductState.failed]: 'destructive',
   [ChannelProductState.removing]: 'warning',
+  [ChannelProductState.removed_by_hand]: 'outline',
   [ChannelProductState.excluded]: 'outline',
 } as const satisfies Record<ChannelProductState, StateBadgeVariant>;
 

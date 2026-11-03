@@ -7,7 +7,8 @@ import {
   headlineStatus,
 } from './connection-status';
 
-const withStatus = (status: ChannelConnectionStatus) => ({ status }) as ChannelConnection;
+const withStatus = (status: ChannelConnectionStatus, failedListings = 0) =>
+  ({ status, failedListings }) as ChannelConnection;
 
 describe('headlineStatus', () => {
   it('surfaces the connection that needs attention', () => {
@@ -49,6 +50,12 @@ describe('connectionsSummary', () => {
     [[CONNECTED, NEEDS_REAUTH], '2 stores connected · 1 needs re-auth'],
     [[NEEDS_REAUTH, NEEDS_REAUTH, ERROR], '3 stores connected · 2 need re-auth · 1 with errors'],
   ])('sums up %j in one line', (statuses, expected) => {
-    expect(connectionsSummary(statuses.map(withStatus))).toBe(expected);
+    expect(connectionsSummary(statuses.map((status) => withStatus(status)))).toBe(expected);
+  });
+
+  it('counts listing errors across the stores', () => {
+    expect(connectionsSummary([withStatus(CONNECTED, 2), withStatus(CONNECTED, 1)])).toBe(
+      '2 stores connected · 3 listing errors',
+    );
   });
 });

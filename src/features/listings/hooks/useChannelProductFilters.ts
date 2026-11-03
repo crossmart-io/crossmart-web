@@ -8,12 +8,14 @@ import {
   ALL_CHANNEL_PRODUCTS,
   CHANNEL_PRODUCT_SORTS,
   CHANNEL_PRODUCTS_SEARCH_DEBOUNCE_MS,
+  CHANNEL_PRODUCT_FILTERS,
   type ChannelProductFilter,
-  IN_STORE_STATES,
 } from '../listings.constants';
 
 function toFilter(value: string | null): ChannelProductFilter {
-  return IN_STORE_STATES.find((state) => state === value) ?? ALL_CHANNEL_PRODUCTS;
+  return (
+    CHANNEL_PRODUCT_FILTERS.find((filter) => filter.value === value)?.value ?? ALL_CHANNEL_PRODUCTS
+  );
 }
 
 /** The products tab's filter, search and sort, kept in the URL so a view can be shared. */

@@ -50,7 +50,8 @@ export function PricingRuleCard({
           <h2>Pricing</h2>
         </CardTitle>
         <CardDescription>
-          Prices on this channel follow the rule unless a product sets its own price here.
+          Prices in this store follow the rule unless a product sets its own price for it. Saving
+          sends the new prices to the store at once.
         </CardDescription>
       </CardHeader>
       <FormProvider {...form}>
@@ -70,7 +71,7 @@ export function PricingRuleCard({
           </CardContent>
           {canManage && (
             <CardSaveFooter
-              label="Save pricing"
+              label="Save and apply"
               error={save.error}
               isSaving={form.formState.isSubmitting}
               disabled={!form.formState.isDirty}

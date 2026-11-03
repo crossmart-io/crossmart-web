@@ -2,15 +2,16 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
-import { ChannelConnectionStatus, ChannelType, ListingStatus } from '@/api/schema';
+import { ChannelConnectionStatus, ChannelType, ListingSource, ListingStatus } from '@/api/schema';
 import type * as ProductChannelHooks from '../hooks/useProductChannels';
-import { useRemoveFromStore } from '../hooks/useProductChannels';
+import { useAddToStore, useRemoveFromStore } from '../hooks/useProductChannels';
 import type { ProductChannel } from '../listings.types';
 import { ProductChannelItem } from './ProductChannelItem';
 
 vi.mock('../hooks/useProductChannels', async (importOriginal) => ({
   ...(await importOriginal<typeof ProductChannelHooks>()),
   useRemoveFromStore: vi.fn<typeof useRemoveFromStore>(),
+  useAddToStore: vi.fn<typeof useAddToStore>(),
 }));
 
 const PRODUCT = { id: 'p-1', title: 'Linen shirt', descriptionHtml: '' };
@@ -37,6 +38,12 @@ function renderItem(productChannel: ProductChannel, canEdit = true) {
   vi.mocked(useRemoveFromStore).mockReturnValue({
     mutateAsync: removeFromStore,
   } as unknown as ReturnType<typeof useRemoveFromStore>);
+  const addToStore = vi.fn<() => void>();
+  vi.mocked(useAddToStore).mockReturnValue({
+    mutate: addToStore,
+    mutateAsync: vi.fn<() => Promise<ProductChannel>>().mockResolvedValue(productChannel),
+    isPending: false,
+  } as unknown as ReturnType<typeof useAddToStore>);
   render(
     <QueryClientProvider client={new QueryClient()}>
       <MemoryRouter>
@@ -51,15 +58,23 @@ function renderItem(productChannel: ProductChannel, canEdit = true) {
       </MemoryRouter>
     </QueryClientProvider>,
   );
-  return { removeFromStore };
+  return { removeFromStore, addToStore };
 }
 
 describe('ProductChannelItem', () => {
-  it('adds a product that is not in the store, with its overrides in one step', async () => {
-    renderItem(channel());
+  it('adds a product that is not in the store in one click', async () => {
+    const { addToStore } = renderItem(channel());
 
     expect(screen.getByText('Not in this store')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Add to store' }));
+
+    expect(addToStore).toHaveBeenCalled();
+  });
+
+  it('adds it with this store’s changes from the overrides panel', async () => {
+    renderItem(channel());
+
+    await userEvent.click(screen.getByRole('button', { name: 'Add with changes…' }));
 
     expect(screen.getByRole('dialog', { name: 'Add to crossmartstore' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Add to store' })).toHaveAttribute('type', 'submit');
@@ -72,6 +87,7 @@ describe('ProductChannelItem', () => {
         listing: {
           id: 'l-1',
           status: ListingStatus.ACTIVE,
+          source: ListingSource.MANUAL,
           externalId: 'gid://shopify/Product/1',
           externalUrl: 'https://demo.example.com/products/linen-shirt',
           lastError: null,

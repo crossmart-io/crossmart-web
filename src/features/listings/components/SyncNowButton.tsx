@@ -11,7 +11,10 @@ interface SyncNowButtonProps {
   disabled?: boolean;
 }
 
-/** Publishes the selected products and syncs the rest of the connection in the background. */
+/**
+ * Sends every product of the store again, and delists what it should no longer have. Changes
+ * apply at once, so this is for recovery: after an outage or a change made on the channel.
+ */
 export function SyncNowButton({
   workspaceId,
   connectionId,
@@ -20,13 +23,19 @@ export function SyncNowButton({
 }: SyncNowButtonProps) {
   const sync = useRequestSync({ workspaceId, connectionId });
   return (
-    <Button type="button" disabled={disabled || sync.isPending} onClick={() => sync.mutate()}>
+    <Button
+      type="button"
+      variant="outline"
+      size="sm"
+      disabled={disabled || sync.isPending}
+      onClick={() => sync.mutate()}
+    >
       {sync.isPending ? (
         <Spinner data-icon="inline-start" />
       ) : (
         <RefreshCw data-icon="inline-start" />
       )}
-      {hasListings ? 'Sync now' : 'Publish selected products'}
+      {hasListings ? 'Resync everything' : 'Publish the store’s products'}
     </Button>
   );
 }

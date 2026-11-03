@@ -3,11 +3,13 @@ import {
   ChannelProductSort,
   ChannelProductState,
   CompareAtMode,
-  SortDirection,
+  ListingSource,
   ListingStatus,
+  SortDirection,
   ListingVisibility,
   PriceRounding,
   PriceWarning,
+  ProductStoreFilter,
 } from '@/api/schema';
 
 const CONNECTION_ENDPOINT = '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}';
@@ -48,11 +50,12 @@ export const CHANNEL_CARD_VARIANT_LIMIT = 3;
 export const PRODUCT_STORE_ICONS_SHOWN = 4;
 
 export const LISTINGS_FEEDBACK = {
-  pricingSaved: 'Pricing rule saved',
-  selectionSaved: 'Product selection saved',
-  overrideSaved: 'Channel overrides saved',
-  overrideCleared: 'Channel overrides removed',
+  pricingSaved: 'Pricing saved; sending the new prices to the store',
+  selectionSaved: 'Automatic rule saved and applied',
+  overrideSaved: 'Store overrides saved',
+  overrideCleared: 'Store overrides removed',
   removedFromStore: 'Removed from the store',
+  addedToStore: 'Added to the store; publishing now',
 } as const;
 
 export const ROUNDING_OPTIONS: readonly { value: PriceRounding; label: string; example: string }[] =
@@ -90,8 +93,8 @@ export const FOLLOW_PRODUCT = 'follow';
 export type VisibilityChoice = ListingVisibility | typeof FOLLOW_PRODUCT;
 export const VISIBILITY_OPTIONS: readonly { value: VisibilityChoice; label: string }[] = [
   { value: FOLLOW_PRODUCT, label: 'Same as the product’s status' },
-  { value: ListingVisibility.VISIBLE, label: 'Show on this channel' },
-  { value: ListingVisibility.HIDDEN, label: 'Hide on this channel' },
+  { value: ListingVisibility.VISIBLE, label: 'Show in this store' },
+  { value: ListingVisibility.HIDDEN, label: 'Hide in this store' },
 ];
 
 /** What a store's automatic rule adds, besides the products added to it by hand. */
@@ -117,32 +120,44 @@ export const IN_STORE_STATES = [
   ChannelProductState.removing,
 ] as const;
 export type InStoreState = (typeof IN_STORE_STATES)[number];
-export type ChannelProductFilter = InStoreState | typeof ALL_CHANNEL_PRODUCTS;
+/** The tab's filters: the store's states, and products removed by hand, to add them back. */
+export type ChannelProductFilter =
+  InStoreState | ChannelProductState.removed_by_hand | typeof ALL_CHANNEL_PRODUCTS;
 
 export const CHANNEL_PRODUCT_STATE_LABELS: Record<ChannelProductState, string> = {
   [ChannelProductState.listed]: 'Live',
   [ChannelProductState.pending]: 'Waiting to publish',
   [ChannelProductState.failed]: 'Error',
   [ChannelProductState.removing]: 'Being removed',
+  [ChannelProductState.removed_by_hand]: 'Removed by hand',
   [ChannelProductState.excluded]: 'Not in this store',
 };
 
 /** What each state means, under its badge. */
 export const CHANNEL_PRODUCT_STATE_HINTS: Record<ChannelProductState, string> = {
-  [ChannelProductState.listed]: 'On the channel.',
-  [ChannelProductState.pending]: 'Sync now publishes it.',
+  [ChannelProductState.listed]: 'Live in the store.',
+  [ChannelProductState.pending]: 'Being published now.',
   [ChannelProductState.failed]: 'The last sync failed.',
-  [ChannelProductState.removing]: 'Sync now removes it from the channel.',
-  [ChannelProductState.excluded]: 'Not selected for this store.',
+  [ChannelProductState.removing]: 'Being taken off the store.',
+  [ChannelProductState.removed_by_hand]: 'The automatic rule leaves it out until you add it back.',
+  [ChannelProductState.excluded]: 'Not in this store.',
 };
 
 export const CHANNEL_PRODUCT_FILTERS: readonly { value: ChannelProductFilter; label: string }[] = [
   { value: ALL_CHANNEL_PRODUCTS, label: 'All' },
-  ...IN_STORE_STATES.map((state) => ({
-    value: state,
-    label: CHANNEL_PRODUCT_STATE_LABELS[state],
-  })),
+  ...IN_STORE_STATES.map((state) => ({ value: state, label: CHANNEL_PRODUCT_STATE_LABELS[state] })),
+  {
+    value: ChannelProductState.removed_by_hand,
+    label: CHANNEL_PRODUCT_STATE_LABELS[ChannelProductState.removed_by_hand],
+  },
 ];
+
+/** How a product joined a store, as its listing row says it. */
+export const LISTING_SOURCE_LABELS: Record<ListingSource, string> = {
+  [ListingSource.MANUAL]: 'Added by hand',
+  [ListingSource.IMPORT]: 'Imported',
+  [ListingSource.RULE]: 'By automatic rule',
+};
 
 export const CHANNEL_PRODUCT_SORTS: readonly [
   SortOption<ChannelProductSort>,
@@ -179,3 +194,12 @@ export enum OverrideSheetMode {
   Edit = 'edit',
   Add = 'add',
 }
+
+/** The products table's store filter when it filters nothing. */
+export const ANY_STORE = 'any';
+
+/** Labels of the store filters that are not about one store. */
+export const STORE_FILTER_LABELS: Partial<Record<ProductStoreFilter, string>> = {
+  [ProductStoreFilter.in_no_store]: 'In no store',
+  [ProductStoreFilter.with_errors]: 'With listing errors',
+};

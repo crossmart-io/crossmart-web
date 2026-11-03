@@ -18,6 +18,7 @@ const SKELETON_ROWS = 5;
 interface ChannelProductsTableProps {
   products: ReturnType<typeof useChannelProducts>;
   onRemove?: (productId: string) => Promise<unknown>;
+  onAddBack?: (productId: string) => void;
 }
 
 function NoProducts() {
@@ -37,7 +38,7 @@ function NoProducts() {
 }
 
 /** The store's products with their state there, a page at a time. */
-export function ChannelProductsTable({ products, onRemove }: ChannelProductsTableProps) {
+export function ChannelProductsTable({ products, onRemove, onAddBack }: ChannelProductsTableProps) {
   if (products.isError) {
     return (
       <ErrorState
@@ -58,14 +59,19 @@ export function ChannelProductsTable({ products, onRemove }: ChannelProductsTabl
               <TableHead>Product</TableHead>
               <TableHead className="w-48">In this store</TableHead>
               <TableHead className="hidden w-36 sm:table-cell">Last synced</TableHead>
-              <TableHead className="w-20">
+              <TableHead className="w-28">
                 <span className="sr-only">Actions</span>
               </TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {products.items.map((row) => (
-              <ChannelProductRow key={row.product.id} row={row} onRemove={onRemove} />
+              <ChannelProductRow
+                key={row.product.id}
+                row={row}
+                onRemove={onRemove}
+                onAddBack={onAddBack}
+              />
             ))}
           </TableBody>
         </Table>

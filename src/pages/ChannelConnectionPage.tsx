@@ -75,6 +75,12 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
           canManage={canManage}
           canEditCatalog={canEdit}
           onDisconnected={() => void navigate(ROUTES.channels)}
+          resyncAction={
+            <ChannelSyncButton
+              {...ref}
+              disabled={connection.status !== ChannelConnectionStatus.CONNECTED}
+            />
+          }
           automaticRule={
             <ProductSelectionCard
               {...ref}
@@ -120,8 +126,6 @@ function ChannelConnection({ workspace, connectionId, tab }: ChannelConnectionPr
 
   const name = connectionName(connection);
   const canManage = canManageWorkspace(workspace.role);
-  const isConnected = connection.status === ChannelConnectionStatus.CONNECTED;
-  const ref = { workspaceId: workspace.id, connectionId };
   return (
     <Page
       name={name}
@@ -138,7 +142,6 @@ function ChannelConnection({ workspace, connectionId, tab }: ChannelConnectionPr
         </>
       }
       description={connection.externalAccountId}
-      actions={canManage && <ChannelSyncButton {...ref} disabled={!isConnected} />}
     >
       <ReturnToProvider parents={PAGE_PARENTS.channels} label={name}>
         <ChannelConnectionTabs workspace={workspace} connection={connection} tab={tab} />

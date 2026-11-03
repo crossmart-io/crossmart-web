@@ -17,6 +17,13 @@ export interface NavItem {
   icon: LucideIcon;
   /** Match only this exact path (the overview), not its children. */
   end?: boolean;
+  /** A count shown on the item, such as listings that need attention. */
+  badge?: NavBadge;
+}
+
+/** Counts the sidebar can show on an item; `AppSidebar` maps each to its component. */
+export enum NavBadge {
+  ChannelErrors = 'channel_errors',
 }
 
 export interface NavGroup {
@@ -32,7 +39,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { label: 'Products', to: ROUTES.products, icon: Package },
       { label: 'Inventory', to: ROUTES.inventory, icon: Warehouse },
       { label: 'Imports', to: ROUTES.imports, icon: FileUp },
-      { label: 'Channels', to: ROUTES.channels, icon: Share2 },
+      { label: 'Channels', to: ROUTES.channels, icon: Share2, badge: NavBadge.ChannelErrors },
       { label: 'Activity', to: ROUTES.activity, icon: History },
     ],
   },

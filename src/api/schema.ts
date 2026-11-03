@@ -511,7 +511,7 @@ export interface paths {
     get?: never;
     /**
      * Set the connection’s pricing rule
-     * @description Listings get the new prices on their next sync. A null rule removes it.
+     * @description The store’s listings get the new prices at once. A null rule sends catalog prices.
      */
     put: operations['ChannelRulesController_updatePricing_v1'];
     post?: never;
@@ -550,10 +550,10 @@ export interface paths {
     };
     get?: never;
     /**
-     * Choose which products the connection lists
-     * @description “Sync now” publishes newly selected products and delists the rest.
+     * Set the store’s automatic rule
+     * @description Applies at once: products the rule now adds are published, and products it now drops are delisted. Products added by hand stay; those removed by hand stay out.
      */
-    put: operations['ChannelRulesController_updateSelection_v1'];
+    put: operations['ChannelSelectionController_updateSelection_v1'];
     post?: never;
     delete?: never;
     options?: never;
@@ -571,7 +571,7 @@ export interface paths {
     get?: never;
     put?: never;
     /** The products a selection lists, with counts, saved or not */
-    post: operations['ChannelRulesController_previewSelection_v1'];
+    post: operations['ChannelSelectionController_previewSelection_v1'];
     delete?: never;
     options?: never;
     head?: never;
@@ -794,6 +794,12 @@ export interface components {
     ProductStatus: ProductStatus;
     /** @enum {string} */
     CatalogGap: CatalogGap;
+    /** @enum {string} */
+    ProductStoreFilter: ProductStoreFilter;
+    /** @enum {string} */
+    ProductSort: ProductSort;
+    /** @enum {string} */
+    SortDirection: SortDirection;
     PriceRangeDto: {
       /**
        * @description Decimal string in the workspace currency
@@ -807,6 +813,8 @@ export interface components {
     ChannelType: ChannelType;
     /** @enum {string} */
     ListingStatus: ListingStatus;
+    /** @enum {string} */
+    ListingSource: ListingSource;
     ProductStoreBadgeDto: {
       /** Format: uuid */
       connectionId: string;
@@ -814,6 +822,7 @@ export interface components {
       /** @example Demo Store */
       storeName: string;
       status: components['schemas']['ListingStatus'];
+      source: components['schemas']['ListingSource'];
     };
     ProductSummaryDto: {
       /** Format: uuid */
@@ -1426,6 +1435,8 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
+      /** @description Listings in this store whose last sync failed */
+      failedListings: number;
     };
     StartAuthorizationDto: {
       channel: components['schemas']['ChannelType'];
@@ -1445,12 +1456,12 @@ export interface components {
     ChannelProductState: ChannelProductState;
     /** @enum {string} */
     ChannelProductSort: ChannelProductSort;
-    /** @enum {string} */
-    SortDirection: SortDirection;
     ListingSummaryDto: {
       /** Format: uuid */
       id: string;
       status: components['schemas']['ListingStatus'];
+      /** @description How the product joined the store: by hand, by an import, or by the automatic rule */
+      source: components['schemas']['ListingSource'];
       /** @description The product’s id on the channel */
       externalId: string | null;
       /** @description Where to see it on the channel */
@@ -1474,6 +1485,8 @@ export interface components {
       failed: number;
       /** @description On the channel but no longer selected; the next sync delists them */
       removing: number;
+      /** @description Removed by hand and off the channel; adding them back undoes it */
+      removed_by_hand: number;
       /** @description Neither selected nor on the channel */
       excluded: number;
     };
@@ -1557,6 +1570,10 @@ export interface components {
       removedManually: number;
       items: components['schemas']['ProductSummaryDto'][];
       nextCursor: string | null;
+      /** @description Products saving this rule publishes now */
+      toPublish: number;
+      /** @description Products saving this rule delists now */
+      toRemove: number;
     };
     SyncRequestResultDto: {
       /** @description Selected products queued to be published or updated */
@@ -1568,6 +1585,8 @@ export interface components {
       /** Format: uuid */
       id: string;
       status: components['schemas']['ListingStatus'];
+      /** @description How the product joined the store: by hand, by an import, or by the automatic rule */
+      source: components['schemas']['ListingSource'];
       /** @description The product’s id on the channel */
       externalId: string | null;
       /** @description Where to see it on the channel */
@@ -1952,6 +1971,12 @@ export interface operations {
         tags?: string[];
         /** @description Only products of this vendor, ignoring case */
         vendor?: string;
+        /** @description By the stores products are in; `in_store` and `not_in_store` need `storeId` */
+        storeFilter?: components['schemas']['ProductStoreFilter'];
+        /** @description The store `storeFilter` is about */
+        storeId?: string;
+        sort?: components['schemas']['ProductSort'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
         limit?: number;
@@ -2626,7 +2651,7 @@ export interface operations {
       };
     };
   };
-  ChannelRulesController_updateSelection_v1: {
+  ChannelSelectionController_updateSelection_v1: {
     parameters: {
       query?: never;
       header?: never;
@@ -2652,7 +2677,7 @@ export interface operations {
       };
     };
   };
-  ChannelRulesController_previewSelection_v1: {
+  ChannelSelectionController_previewSelection_v1: {
     parameters: {
       query?: {
         /** @description `nextCursor` from the previous page */
@@ -2958,6 +2983,21 @@ export enum CatalogGap {
   barcode = 'barcode',
   out_of_stock = 'out_of_stock',
 }
+export enum ProductStoreFilter {
+  in_store = 'in_store',
+  not_in_store = 'not_in_store',
+  in_no_store = 'in_no_store',
+  with_errors = 'with_errors',
+}
+export enum ProductSort {
+  title = 'title',
+  updatedAt = 'updatedAt',
+  createdAt = 'createdAt',
+}
+export enum SortDirection {
+  asc = 'asc',
+  desc = 'desc',
+}
 export enum ChannelType {
   shopify = 'shopify',
   ebay = 'ebay',
@@ -2972,6 +3012,11 @@ export enum ListingStatus {
   INACTIVE = 'INACTIVE',
   ERROR = 'ERROR',
   DELISTED = 'DELISTED',
+}
+export enum ListingSource {
+  MANUAL = 'MANUAL',
+  IMPORT = 'IMPORT',
+  RULE = 'RULE',
 }
 export enum OutOfStockPolicy {
   STOP_SELLING = 'STOP_SELLING',
@@ -3122,15 +3167,12 @@ export enum ChannelProductState {
   pending = 'pending',
   failed = 'failed',
   removing = 'removing',
+  removed_by_hand = 'removed_by_hand',
   excluded = 'excluded',
 }
 export enum ChannelProductSort {
   title = 'title',
   updatedAt = 'updatedAt',
-}
-export enum SortDirection {
-  asc = 'asc',
-  desc = 'desc',
 }
 export enum PriceSource {
   override = 'override',

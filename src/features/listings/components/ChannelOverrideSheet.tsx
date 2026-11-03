@@ -98,7 +98,7 @@ function OverrideSheetHeader({ isAdding, store }: { isAdding: boolean; store: st
       <SheetDescription>
         {isAdding
           ? 'It is published there once you add it. Change anything this store should show differently; empty fields follow the product.'
-          : 'Only this channel changes. Empty fields follow the product.'}
+          : 'Only this store changes. Empty fields follow the product.'}
       </SheetDescription>
     </SheetHeader>
   );
