@@ -1,4 +1,5 @@
 import { ChannelConnectionStatus } from '@/api/schema';
+import { pluralize } from '@/lib/format';
 import type { ChannelConnection } from './channels.types';
 
 /** Most urgent first: a card shows the status that most needs the merchant's attention. */
@@ -16,6 +17,25 @@ export function headlineStatus(
   return STATUS_URGENCY.find((status) =>
     connections.some((connection) => connection.status === status),
   );
+}
+
+const SUMMARY_SEPARATOR = ' · ';
+
+/** Problems the merchant should act on, as they read in a channel's summary. */
+const ATTENTION_LABELS: Partial<Record<ChannelConnectionStatus, (count: number) => string>> = {
+  [ChannelConnectionStatus.NEEDS_REAUTH]: (count) =>
+    `${count} need${count === 1 ? 's' : ''} re-auth`,
+  [ChannelConnectionStatus.ERROR]: (count) => `${count} with errors`,
+};
+
+/** One line for a channel's stores, however many: "3 stores connected · 1 needs re-auth". */
+export function connectionsSummary(connections: readonly ChannelConnection[]): string {
+  const parts = [`${pluralize(connections.length, 'store')} connected`];
+  for (const [status, label] of Object.entries(ATTENTION_LABELS)) {
+    const count = connections.filter((connection) => connection.status === status).length;
+    if (count > 0) parts.push(label(count));
+  }
+  return parts.join(SUMMARY_SEPARATOR);
 }
 
 /** How far the workspace is with channels, for onboarding. */

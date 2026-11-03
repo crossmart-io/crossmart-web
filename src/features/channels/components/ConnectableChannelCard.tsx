@@ -11,9 +11,8 @@ import {
   type ConnectableChannel,
 } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
-import { headlineStatus } from '../connection-status';
+import { connectionsSummary, headlineStatus } from '../connection-status';
 import { ChannelCardHeader } from './ChannelCardHeader';
-import { ChannelConnectionItem } from './ChannelConnectionItem';
 import { ConnectChannelDialog } from './ConnectChannelDialog';
 import { ConnectionStatusBadge } from './ConnectionStatusBadge';
 
@@ -71,8 +70,8 @@ function CardActions({
 }
 
 /**
- * A channel whose connector has shipped, at a glance: its connected stores and their status.
- * Stores are managed, and more are connected, on a store's own page.
+ * A channel whose connector has shipped, at a glance: how many stores are connected and which
+ * need attention. Stores are listed, managed and added on a store's own page.
  */
 export function ConnectableChannelCard(props: ConnectableChannelCardProps) {
   const { channel, connections } = props;
@@ -92,15 +91,7 @@ export function ConnectableChannelCard(props: ConnectableChannelCardProps) {
           }
         />
         {connections.length > 0 && (
-          <ul className="flex flex-col gap-2" aria-label={`Connected ${channel.name} accounts`}>
-            {connections.map((connection) => (
-              <ChannelConnectionItem
-                key={connection.id}
-                channel={channel}
-                connection={connection}
-              />
-            ))}
-          </ul>
+          <p className="text-sm text-muted-foreground">{connectionsSummary(connections)}</p>
         )}
       </CardContent>
       <CardFooter className="mt-auto">

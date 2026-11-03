@@ -49,7 +49,8 @@ describe('ConnectableChannelCard', () => {
   it('shows a connected store at a glance, managed on its own page', () => {
     renderCard([connection()]);
 
-    expect(screen.getByText('demo-store.myshopify.com')).toBeInTheDocument();
+    expect(screen.getByText('1 store connected')).toBeInTheDocument();
+    expect(screen.queryByText('demo-store.myshopify.com')).not.toBeInTheDocument();
     expect(screen.getAllByText('Connected')).not.toHaveLength(0);
     expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-1');
     expect(screen.queryByRole('button', { name: 'Disconnect' })).not.toBeInTheDocument();
@@ -57,7 +58,7 @@ describe('ConnectableChannelCard', () => {
     expect(screen.queryByRole('button', { name: /Connect/ })).not.toBeInTheDocument();
   });
 
-  it('opens the store that needs attention first, and says why', () => {
+  it('opens the store that needs attention first, and counts it', () => {
     renderCard([
       connection(),
       connection({
@@ -67,7 +68,7 @@ describe('ConnectableChannelCard', () => {
       }),
     ]);
 
-    expect(screen.getByText('Connect the store again.')).toBeInTheDocument();
+    expect(screen.getByText('2 stores connected · 1 needs re-auth')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-2');
   });
 
