@@ -785,6 +785,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/analytics/inventory': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Stock value, stock levels and each store’s listings, as of now
+     * @description Values are in the workspace currency; variants without a cost are counted apart.
+     */
+    get: operations['InventoryReportController_get_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1940,6 +1960,56 @@ export interface components {
       topProducts: components['schemas']['TopProductDto'][];
       /** @description Orders in other currencies, which the report leaves out */
       otherCurrencyOrders: number;
+    };
+    InventoryValueDto: {
+      /**
+       * @description Units on hand times cost; no-cost variants left out
+       * @example 4120.50
+       */
+      atCost: string;
+      /**
+       * @description Units on hand times price
+       * @example 9800.00
+       */
+      atPrice: string;
+      /** @description Available plus held for orders */
+      unitsOnHand: number;
+      /** @description Variants with stock on hand but no cost */
+      variantsWithoutCost: number;
+    };
+    StockLevelCountsDto: {
+      inStock: number;
+      lowStock: number;
+      outOfStock: number;
+      /** @description Variants that do not track stock */
+      untracked: number;
+    };
+    ListingStatusCountDto: {
+      status: components['schemas']['ListingStatus'];
+      count: number;
+    };
+    StoreHealthDto: {
+      /** Format: uuid */
+      connectionId: string;
+      /** @example shopify */
+      channel: string;
+      /** @example Demo Store */
+      displayName: string;
+      status: components['schemas']['ChannelConnectionStatus'];
+      /** Format: date-time */
+      lastSyncedAt: string | null;
+      /** @description Every listing status, in order */
+      listings: components['schemas']['ListingStatusCountDto'][];
+    };
+    InventoryReportDto: {
+      /** @example USD */
+      currencyCode: string;
+      value: components['schemas']['InventoryValueDto'];
+      stockLevels: components['schemas']['StockLevelCountsDto'];
+      /** @description Available units at or below which stock counts as low */
+      lowStockThreshold: number;
+      /** @description Every store, oldest first */
+      stores: components['schemas']['StoreHealthDto'][];
     };
   };
   responses: never;
@@ -3333,6 +3403,27 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['SalesReportDto'];
+        };
+      };
+    };
+  };
+  InventoryReportController_get_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InventoryReportDto'];
         };
       };
     };

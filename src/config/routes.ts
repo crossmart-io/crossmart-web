@@ -77,6 +77,13 @@ export function toProductsRoute(
   return search ? `${ROUTES.products}?${search}` : ROUTES.products;
 }
 
+/** The inventory list, optionally at one stock level (`StockLevel`). */
+export function toInventoryRoute(stockLevel?: string): string {
+  return stockLevel
+    ? `${ROUTES.inventory}?${new URLSearchParams({ [ROUTE_QUERY.stockLevel]: stockLevel })}`
+    : ROUTES.inventory;
+}
+
 export function toOrderRoute(orderId: string): string {
   return ROUTES.order.replace(`:${ROUTE_PARAMS.orderId}`, orderId);
 }

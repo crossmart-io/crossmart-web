@@ -9,4 +9,4 @@ export {
   useInventoryListFilters,
 } from './hooks/useInventoryListFilters';
 export type { InventoryItem } from './inventory.types';
-export { toStockLevelQuery } from './stock-level';
+export { STOCK_LEVEL_COPY, toStockLevelQuery } from './stock-level';

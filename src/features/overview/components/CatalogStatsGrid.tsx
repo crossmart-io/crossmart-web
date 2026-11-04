@@ -1,9 +1,8 @@
-import { Boxes, PackageX, Package, Share2 } from 'lucide-react';
-import { CatalogGap, ChannelConnectionStatus } from '@/api/schema';
-import { ROUTES, toProductsRoute } from '@/config/routes';
+import { Boxes, Package, Share2 } from 'lucide-react';
+import { ChannelConnectionStatus } from '@/api/schema';
+import { ROUTES } from '@/config/routes';
 import { useCatalogStats } from '@/features/catalog';
 import { connectionsSummary, useChannelConnections } from '@/features/channels';
-import { pluralize } from '@/lib/format';
 import { StatTile } from './StatTile';
 
 /** Stores that are linked, whatever their state; disconnected ones are gone. */
@@ -29,7 +28,7 @@ export function CatalogStatsGrid({ workspaceId }: { workspaceId: string }) {
   const { data: stats } = useCatalogStats(workspaceId);
 
   return (
-    <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+    <div className="grid gap-4 sm:grid-cols-3">
       <StatTile
         label="Products"
         value={stats?.products}
@@ -45,17 +44,6 @@ export function CatalogStatsGrid({ workspaceId }: { workspaceId: string }) {
         detail="Every size, color and material you sell"
         icon={Boxes}
         to={ROUTES.products}
-      />
-      <StatTile
-        label="Out of stock"
-        value={stats?.outOfStockVariants}
-        detail={
-          stats?.outOfStockVariants
-            ? `${pluralize(stats.outOfStockVariants, 'variant')} need restocking`
-            : 'Everything tracked is in stock'
-        }
-        icon={PackageX}
-        to={toProductsRoute({ gap: CatalogGap.out_of_stock })}
       />
       <ChannelsTile workspaceId={workspaceId} />
     </div>

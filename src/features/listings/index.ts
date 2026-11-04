@@ -1,3 +1,4 @@
+export { LISTING_STATUS_LABELS } from './listings.constants';
 export { ChannelProductsCard } from './components/ChannelProductsCard';
 export { PricingRuleCard } from './components/PricingRuleCard';
 export { ProductChannelsCard } from './components/ProductChannelsCard';
