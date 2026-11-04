@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
-import { ChannelConnectionStatus } from '@/api/schema';
-import { connectionFixture } from '../testing/channel-connection.fixture';
+import { ChannelConnectionStatus, EbayMarketplaceId } from '@/api/schema';
+import { connectionFixture, ebayConnectionFixture } from '../testing/channel-connection.fixture';
 import type { ChannelConnection } from '../channels.types';
 import { ConnectionSettings } from './ConnectionSettings';
 
@@ -75,5 +75,41 @@ describe('ConnectionSettings', () => {
     expect(screen.getByText('The store removed Crossmart’s access.')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Reconnect' })).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Import products/ })).not.toBeInTheDocument();
+  });
+
+  it('shows an eBay account’s marketplace and says when business policies are off', () => {
+    renderSettings(ebayConnectionFixture());
+
+    expect(screen.getByText('demo_seller')).toBeInTheDocument();
+    expect(screen.getByText('eBay UK (GBP)')).toBeInTheDocument();
+    expect(screen.getByText('GBP')).toBeInTheDocument();
+    expect(screen.getByText('Business policies are off on this eBay account')).toBeInTheDocument();
+    expect(screen.queryByText('Domain')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Import products/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Disconnect' })).toBeInTheDocument();
+  });
+
+  it('counts an eBay account’s business policies', () => {
+    renderSettings(
+      ebayConnectionFixture({
+        ebay: {
+          marketplaceId: EbayMarketplaceId.EBAY_US,
+          currencyCode: 'USD',
+          username: 'demo_seller',
+          userId: 'user-1',
+          businessPoliciesEnabled: true,
+          policies: {
+            fulfillment: [
+              { id: '1', name: 'Free shipping' },
+              { id: '2', name: 'Express' },
+            ],
+            payment: [{ id: '3', name: 'Managed payments' }],
+            return: [],
+          },
+        },
+      }),
+    );
+
+    expect(screen.getByText('2 shipping · 1 payment · 0 return')).toBeInTheDocument();
   });
 });

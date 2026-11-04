@@ -14,6 +14,7 @@ import {
   ConnectionSettings,
   ConnectionStatusBadge,
   ConnectionSwitcher,
+  connectionCurrency,
   connectionName,
   MissingFeaturesAlert,
 } from '@/features/channels';
@@ -42,7 +43,7 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
   const navigate = useNavigate();
   const canManage = hasPermission(workspace, WorkspacePermission.channels_manage);
   const canEditListings = hasPermission(workspace, WorkspacePermission.listings_edit);
-  const currency = connection.shopify?.currencyCode ?? workspace.currency;
+  const currency = connectionCurrency(connection) ?? workspace.currency;
   const ref = { workspaceId: workspace.id, connectionId: connection.id };
   return (
     <Tabs

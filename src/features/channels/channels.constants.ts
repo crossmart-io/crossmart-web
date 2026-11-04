@@ -1,4 +1,10 @@
-import { ChannelConnectionStatus, ChannelFeature, ChannelType, ConnectFailure } from '@/api/schema';
+import {
+  ChannelConnectionStatus,
+  ChannelFeature,
+  ChannelType,
+  ConnectFailure,
+  EbayMarketplaceId,
+} from '@/api/schema';
 import amazonLogo from './assets/logos/amazon.svg';
 import ebayLogo from './assets/logos/ebay.svg';
 import etsyLogo from './assets/logos/etsy.svg';
@@ -84,19 +90,75 @@ export interface ChannelLogo {
   tint?: string;
 }
 
-/** How the merchant names the account to connect, for channels connected through OAuth. */
-export interface AccountPrompt {
+/** How the merchant names the account to connect: typed in, or picked from a list. */
+export enum AccountPromptKind {
+  Text = 'text',
+  Select = 'select',
+}
+
+interface AccountPromptBase {
   label: string;
   placeholder: string;
-  /** Shown after the input, such as `.myshopify.com`. */
-  suffix?: string;
   description: string;
 }
+
+/** A typed account, such as a Shopify store domain. */
+export interface TextAccountPrompt extends AccountPromptBase {
+  kind: AccountPromptKind.Text;
+  /** Shown after the input, such as `.myshopify.com`. */
+  suffix?: string;
+}
+
+export interface AccountOption {
+  /** The account handle sent to the API, such as `EBAY_US`. */
+  value: string;
+  label: string;
+}
+
+/** An account picked from a fixed list, such as an eBay marketplace. */
+export interface SelectAccountPrompt extends AccountPromptBase {
+  kind: AccountPromptKind.Select;
+  options: readonly AccountOption[];
+}
+
+export type AccountPrompt = TextAccountPrompt | SelectAccountPrompt;
 
 export interface ConnectableChannel {
   type: ChannelType;
   account: AccountPrompt;
+  /** Whether Crossmart can import the channel's catalog into the workspace. */
+  importsCatalog: boolean;
 }
+
+/** The eBay marketplaces Crossmart can connect, as the merchant picks them. */
+export const EBAY_MARKETPLACE_LABELS: Record<EbayMarketplaceId, string> = {
+  [EbayMarketplaceId.EBAY_US]: 'eBay US (USD)',
+  [EbayMarketplaceId.EBAY_GB]: 'eBay UK (GBP)',
+  [EbayMarketplaceId.EBAY_DE]: 'eBay Germany (EUR)',
+  [EbayMarketplaceId.EBAY_AU]: 'eBay Australia (AUD)',
+  [EbayMarketplaceId.EBAY_CA]: 'eBay Canada (CAD)',
+  [EbayMarketplaceId.EBAY_FR]: 'eBay France (EUR)',
+  [EbayMarketplaceId.EBAY_IT]: 'eBay Italy (EUR)',
+  [EbayMarketplaceId.EBAY_ES]: 'eBay Spain (EUR)',
+};
+
+const EBAY_MARKETPLACE_OPTIONS: readonly AccountOption[] = Object.values(EbayMarketplaceId).map(
+  (marketplaceId) => ({ value: marketplaceId, label: EBAY_MARKETPLACE_LABELS[marketplaceId] }),
+);
+
+/** What the store page says about an eBay account's business policies. */
+export const EBAY_POLICIES_COPY = {
+  label: 'Business policies',
+  off: 'Business policies are off on this eBay account',
+  separator: ' · ',
+} as const;
+
+/** How each kind of eBay business policy is named in the policy counts. */
+export const EBAY_POLICY_KIND_LABELS = {
+  fulfillment: 'shipping',
+  payment: 'payment',
+  return: 'return',
+} as const;
 
 export interface ChannelInfo {
   name: string;
@@ -116,7 +178,9 @@ export const CHANNELS: readonly ChannelInfo[] = [
     logo: { src: shopifyLogo, tint: '#5e8e3e' },
     connect: {
       type: ChannelType.shopify,
+      importsCatalog: true,
       account: {
+        kind: AccountPromptKind.Text,
         label: 'Store domain',
         placeholder: 'your-store',
         suffix: '.myshopify.com',
@@ -130,6 +194,18 @@ export const CHANNELS: readonly ChannelInfo[] = [
     description: 'List with eBay categories, item specifics and business policies.',
     status: ChannelStatus.InDevelopment,
     logo: { src: ebayLogo, tint: '#e53238' },
+    connect: {
+      type: ChannelType.ebay,
+      importsCatalog: false,
+      account: {
+        kind: AccountPromptKind.Select,
+        label: 'Marketplace',
+        placeholder: 'Choose a marketplace',
+        options: EBAY_MARKETPLACE_OPTIONS,
+        description:
+          'The eBay site you sell on. Connect each site separately; you sign in with the same eBay account.',
+      },
+    },
   },
   {
     name: 'Google Merchant Center',

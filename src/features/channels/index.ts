@@ -11,3 +11,4 @@ export { connectionName } from './connection-name';
 export { useChannelConnections } from './hooks/useChannelConnections';
 export { ChannelErrorsBadge } from './components/ChannelErrorsBadge';
 export { MissingFeaturesAlert } from './components/MissingFeaturesAlert';
+export { connectionCurrency } from './connection-account';

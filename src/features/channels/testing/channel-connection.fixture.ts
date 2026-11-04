@@ -1,4 +1,4 @@
-import { ChannelConnectionStatus, ChannelType } from '@/api/schema';
+import { ChannelConnectionStatus, ChannelType, EbayMarketplaceId } from '@/api/schema';
 import type { ChannelConnection } from '../channels.types';
 
 /** A connected Shopify store, with `overrides` applied. */
@@ -19,6 +19,7 @@ export function connectionFixture(overrides: Partial<ChannelConnection> = {}): C
       primaryDomainUrl: null,
       primaryLocation: null,
     },
+    ebay: null,
     productSelection: null,
     failedListings: 0,
     pricing: null,
@@ -29,4 +30,26 @@ export function connectionFixture(overrides: Partial<ChannelConnection> = {}): C
     updatedAt: '2026-11-03T09:00:00Z',
     ...overrides,
   };
+}
+
+/** A connected eBay account on eBay UK, without business policies, with `overrides` applied. */
+export function ebayConnectionFixture(
+  overrides: Partial<ChannelConnection> = {},
+): ChannelConnection {
+  return connectionFixture({
+    id: 'c-ebay',
+    channel: ChannelType.ebay,
+    externalAccountId: 'nY4uWx2bQ1e:EBAY_GB',
+    displayName: 'demo_seller · eBay UK',
+    shopify: null,
+    ebay: {
+      marketplaceId: EbayMarketplaceId.EBAY_GB,
+      currencyCode: 'GBP',
+      username: 'demo_seller',
+      userId: 'nY4uWx2bQ1e',
+      businessPoliciesEnabled: false,
+      policies: { fulfillment: [], payment: [], return: [] },
+    },
+    ...overrides,
+  });
 }
