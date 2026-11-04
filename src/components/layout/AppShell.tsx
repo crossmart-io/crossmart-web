@@ -4,7 +4,7 @@ import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { MAIN_CONTENT_ID } from '@/config/app';
-import { UserMenu } from '@/features/auth';
+import { UserMenu, VerifyEmailBanner } from '@/features/auth';
 import { AppSidebar } from './AppSidebar';
 import { BreadcrumbsProvider } from './BreadcrumbsProvider';
 import { HeaderBreadcrumbs } from './HeaderBreadcrumbs';
@@ -40,6 +40,7 @@ export function AppShell() {
               tabIndex={-1}
               className="mx-auto w-full max-w-6xl px-4 py-6 outline-none sm:px-6 lg:py-8"
             >
+              <VerifyEmailBanner />
               <Outlet />
             </main>
           </SidebarInset>

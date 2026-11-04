@@ -8,6 +8,7 @@ export enum AuthErrorCode {
   InvalidEmail = 'INVALID_EMAIL',
   PasswordTooShort = 'PASSWORD_TOO_SHORT',
   PasswordTooLong = 'PASSWORD_TOO_LONG',
+  InvalidToken = 'INVALID_TOKEN',
 }
 
 const EMAIL_TAKEN_MESSAGE = 'An account with this email already exists. Sign in instead.';
@@ -19,6 +20,7 @@ export const AUTH_ERROR_MESSAGES: Record<AuthErrorCode, string> = {
   [AuthErrorCode.InvalidEmail]: 'Enter a valid email address.',
   [AuthErrorCode.PasswordTooShort]: `Use at least ${MIN_PASSWORD_LENGTH} characters.`,
   [AuthErrorCode.PasswordTooLong]: 'That password is too long.',
+  [AuthErrorCode.InvalidToken]: 'This link has expired or was already used. Ask for a new one.',
 };
 
 export const FALLBACK_AUTH_ERROR_MESSAGE = 'Something went wrong. Please try again.';
@@ -28,6 +30,17 @@ export enum AuthField {
   Name = 'name',
   Email = 'email',
   Password = 'password',
+}
+
+/** Query parameters Better Auth adds when it sends someone back to the web app. */
+export const AUTH_LINK_QUERY = {
+  token: 'token',
+  error: 'error',
+} as const;
+
+/** Where emailed links land, as absolute URLs for the API to redirect to. */
+export function toAppUrl(path: string): string {
+  return new URL(path, window.location.origin).toString();
 }
 
 /** The legal pages on crossmart.io that signing up accepts. */

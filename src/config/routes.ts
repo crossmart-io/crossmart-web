@@ -10,6 +10,8 @@ export const ROUTES = {
   home: '/',
   signIn: '/sign-in',
   signUp: '/sign-up',
+  forgotPassword: '/forgot-password',
+  resetPassword: '/reset-password',
   products: '/products',
   newProduct: '/products/new',
   product: `/products/:${ROUTE_PARAMS.productId}`,

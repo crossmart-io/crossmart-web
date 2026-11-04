@@ -1,6 +1,8 @@
 import type { FormEvent } from 'react';
+import { Link } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
+import { ROUTES } from '@/config/routes';
 import { AuthField } from '../auth.constants';
 import { useSignIn } from '../hooks/useSignIn';
 import { readAuthField, readPassword } from '../read-auth-form';
@@ -26,6 +28,12 @@ export function SignInForm() {
         <AuthFormError error={signIn.error} />
         <EmailField />
         <PasswordField autoComplete="current-password" />
+        <Link
+          to={ROUTES.forgotPassword}
+          className="-mt-3 self-end text-sm text-muted-foreground underline-offset-2 hover:underline"
+        >
+          Forgot your password?
+        </Link>
         <Button type="submit" disabled={signIn.isPending}>
           {signIn.isPending ? 'Signing in…' : 'Sign in'}
         </Button>
