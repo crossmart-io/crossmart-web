@@ -13,6 +13,7 @@ export type ChannelListing = Schemas['ChannelListingDto'];
 export type ProductChannel = Schemas['ProductChannelDto'];
 export type ChannelVariant = Schemas['ChannelVariantDto'];
 export type ListingOverride = Schemas['ListingOverrideDto'];
+export type ChannelCategory = Schemas['ChannelCategoryDto'];
 export type ListingOverrideView = Schemas['ListingOverrideViewDto'];
 export type ChannelProduct = components['schemas']['ChannelProductDto'];
 export type ChannelProductCounts = components['schemas']['ChannelProductCountsDto'];

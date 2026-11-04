@@ -30,6 +30,10 @@ export const ADD_STORE_PRODUCTS_ENDPOINT = `${CONNECTION_ENDPOINT}/products/add`
 export const REMOVE_STORE_PRODUCTS_ENDPOINT = `${CONNECTION_ENDPOINT}/products/remove` as const;
 export const LISTING_OVERRIDE_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/override';
+export const CATEGORY_SUGGESTIONS_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/category-suggestions';
+export const LISTING_CATEGORY_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/category';
 
 /** Previews wait for typing to pause, so each keystroke is not a request. */
 export const PREVIEW_DEBOUNCE_MS = 400;
@@ -55,6 +59,19 @@ export const LISTINGS_FEEDBACK = {
   overrideCleared: 'Store overrides removed',
   removedFromStore: 'Removed from the store',
   addedToStore: 'Added to the store; publishing now',
+  categorySaved: 'Category saved',
+} as const;
+
+/** What the eBay category field in the override sheet says. */
+export const CATEGORY_COPY = {
+  label: 'eBay category',
+  automatic: 'Picked from eBay’s suggestions for the title when it is first published.',
+  searchLabel: 'Search eBay categories',
+  searchPlaceholder: 'Keywords, or leave empty to use the title',
+  search: 'Search',
+  noResults: 'eBay suggested no category. Try other keywords.',
+  useSuggested: 'Let eBay suggest',
+  savedNote: 'Changing it updates the listing on eBay.',
 } as const;
 
 export const ROUNDING_OPTIONS: readonly { value: PriceRounding; label: string; example: string }[] =

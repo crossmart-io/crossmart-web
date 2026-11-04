@@ -1,7 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { ChannelConnectionStatus, EbayMarketplaceId } from '@/api/schema';
-import { connectionFixture, ebayConnectionFixture } from '../testing/channel-connection.fixture';
+import {
+  connectionFixture,
+  ebayConnectionFixture,
+  NO_EBAY_DEFAULTS,
+} from '../testing/channel-connection.fixture';
 import type { ChannelConnection } from '../channels.types';
 import { ConnectionSettings } from './ConnectionSettings';
 
@@ -84,6 +88,8 @@ describe('ConnectionSettings', () => {
     expect(screen.getByText('eBay UK (GBP)')).toBeInTheDocument();
     expect(screen.getByText('GBP')).toBeInTheDocument();
     expect(screen.getByText('Business policies are off on this eBay account')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Listing defaults' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Opt in to business policies' })).toBeInTheDocument();
     expect(screen.queryByText('Domain')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Import products/ })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Disconnect' })).toBeInTheDocument();
@@ -106,6 +112,8 @@ describe('ConnectionSettings', () => {
             payment: [{ id: '3', name: 'Managed payments' }],
             return: [],
           },
+          listingDefaults: NO_EBAY_DEFAULTS,
+          readyToList: false,
         },
       }),
     );

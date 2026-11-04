@@ -92,6 +92,7 @@ describe('ProductChannelItem', () => {
           externalUrl: 'https://demo.example.com/products/linen-shirt',
           lastError: null,
           lastSyncedAt: null,
+          category: null,
         },
       }),
     );

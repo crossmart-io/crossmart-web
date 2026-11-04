@@ -34,6 +34,7 @@ function row(state: ChannelProductState, lastError: string | null = null): Chann
             externalUrl: 'https://demo.example.com/products/linen-shirt',
             lastError,
             lastSyncedAt: null,
+            category: null,
           },
   };
 }
