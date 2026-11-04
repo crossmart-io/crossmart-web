@@ -33,9 +33,9 @@ export function ImportProductsDialog({ workspaceId }: { workspaceId: string | un
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
-        <Button>
+        <Button variant="outline">
           <Upload />
-          Import products
+          Import
         </Button>
       </DialogTrigger>
       <DialogContent>

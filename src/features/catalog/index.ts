@@ -1,11 +1,10 @@
 export { ImportProductsDialog } from './components/ImportProductsDialog';
 export { ProductFilters } from './components/ProductFilters';
-export { ProductOverview } from './components/ProductOverview';
 export { ProductStatusBadge } from './components/ProductStatusBadge';
 export { ProductsEmptyState } from './components/ProductsEmptyState';
 export { ProductsTable } from './components/ProductsTable';
 export { ProductsTableSkeleton } from './components/ProductsTableSkeleton';
-export { VariantsTable } from './components/VariantsTable';
+export { useCatalogStats } from './hooks/useCatalogStats';
 export { useProduct } from './hooks/useProduct';
 export { useProducts } from './hooks/useProducts';
 export { ALL_STATUSES, type StatusFilter, toStatusQuery } from './product-status';

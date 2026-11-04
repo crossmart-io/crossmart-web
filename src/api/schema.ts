@@ -134,7 +134,11 @@ export interface paths {
     };
     /** A product with its variants, stock and media */
     get: operations['ProductsController_get_v1'];
-    put?: never;
+    /**
+     * Replace a product
+     * @description Variants sent with an id are edited, new ones are added and missing ones are removed. Stock changes are written to the inventory ledger as adjustments.
+     */
+    put: operations['ProductsController_update_v1'];
     post?: never;
     /** Delete a product, its variants and their stock */
     delete: operations['ProductsController_delete_v1'];
@@ -157,6 +161,43 @@ export interface paths {
      * @description Products whose handle is already in the catalog are skipped, never overwritten. Invalid products are reported; the rest are created.
      */
     post: operations['ProductImportsController_import_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/media/product-images': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Upload a product image
+     * @description Returns a URL to put in a product’s `media`. The format is read from the file.
+     */
+    post: operations['ProductImagesController_upload_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/catalog-stats': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Product and stock counts for the workspace overview */
+    get: operations['CatalogStatsController_get_v1'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -322,6 +363,11 @@ export interface components {
       /** Format: date-time */
       updatedAt: string;
     };
+    CreateMediaDto: {
+      /** @example https://cdn.example.com/mug.jpg */
+      url: string;
+      altText?: string;
+    };
     CreateVariantDto: {
       sku?: string;
       /** @description GTIN, UPC, EAN or ISBN */
@@ -350,15 +396,8 @@ export interface components {
        */
       quantity: number;
     };
-    CreateMediaDto: {
-      /** @example https://cdn.example.com/mug.jpg */
-      url: string;
-      altText?: string;
-    };
     CreateProductDto: {
       title: string;
-      /** @description Unique in the workspace. Defaults to the slugified title. */
-      handle?: string;
       descriptionHtml?: string;
       vendor?: string;
       productType?: string;
@@ -372,8 +411,62 @@ export interface components {
        *     ]
        */
       optionNames?: string[];
-      variants: components['schemas']['CreateVariantDto'][];
       media?: components['schemas']['CreateMediaDto'][];
+      /** @description Unique in the workspace. Defaults to the slugified title. */
+      handle?: string;
+      variants: components['schemas']['CreateVariantDto'][];
+    };
+    UpdateVariantDto: {
+      sku?: string;
+      /** @description GTIN, UPC, EAN or ISBN */
+      barcode?: string;
+      /** @description One value per product option, in order */
+      optionValues?: string[];
+      /** @example 19.90 */
+      price: string;
+      /** @example 24.90 */
+      compareAtPrice?: string;
+      weightGrams?: number;
+      /** @default true */
+      requiresShipping: boolean;
+      /** @default true */
+      taxable: boolean;
+      /** @default STOP_SELLING */
+      outOfStockPolicy: components['schemas']['OutOfStockPolicy'];
+      /**
+       * @description Track stock for this variant
+       * @default true
+       */
+      tracked: boolean;
+      /**
+       * @description Opening stock
+       * @default 0
+       */
+      quantity: number;
+      /**
+       * Format: uuid
+       * @description The variant to edit. Leave empty to add a new variant.
+       */
+      id?: string;
+    };
+    UpdateProductDto: {
+      title: string;
+      descriptionHtml?: string;
+      vendor?: string;
+      productType?: string;
+      tags?: string[];
+      /** @default DRAFT */
+      status: components['schemas']['ProductStatus'];
+      /**
+       * @example [
+       *       "Size",
+       *       "Color"
+       *     ]
+       */
+      optionNames?: string[];
+      media?: components['schemas']['CreateMediaDto'][];
+      handle: string;
+      variants: components['schemas']['UpdateVariantDto'][];
     };
     /** @enum {string} */
     CatalogImportFormat: CatalogImportFormat;
@@ -396,6 +489,23 @@ export interface components {
       skipped: components['schemas']['ImportIssueDto'][];
       /** @description Products that could not be imported */
       failed: components['schemas']['ImportIssueDto'][];
+    };
+    /** @enum {string} */
+    ImageContentType: ImageContentType;
+    UploadedImageDto: {
+      /** @description Use it as a product media `url` */
+      url: string;
+      contentType: components['schemas']['ImageContentType'];
+      byteSize: number;
+    };
+    CatalogStatsDto: {
+      products: number;
+      activeProducts: number;
+      draftProducts: number;
+      archivedProducts: number;
+      variants: number;
+      /** @description Tracked variants with nothing available */
+      outOfStockVariants: number;
     };
   };
   responses: never;
@@ -756,6 +866,32 @@ export interface operations {
       };
     };
   };
+  ProductsController_update_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateProductDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductDto'];
+        };
+      };
+    };
+  };
   ProductsController_delete_v1: {
     parameters: {
       query?: never;
@@ -803,6 +939,58 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['CatalogImportResultDto'];
+        };
+      };
+    };
+  };
+  ProductImagesController_upload_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': {
+          /**
+           * Format: binary
+           * @description JPEG, PNG, WebP or GIF
+           */
+          file: string;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['UploadedImageDto'];
+        };
+      };
+    };
+  };
+  CatalogStatsController_get_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CatalogStatsDto'];
         };
       };
     };
@@ -871,4 +1059,10 @@ export enum ImportIssueCode {
   invalid_value = 'invalid_value',
   missing_value = 'missing_value',
   invalid_options = 'invalid_options',
+}
+export enum ImageContentType {
+  image_jpeg = 'image/jpeg',
+  image_png = 'image/png',
+  image_webp = 'image/webp',
+  image_gif = 'image/gif',
 }

@@ -128,3 +128,22 @@
     @apply font-sans;
   }
 }
+
+/* Rich text inside the description editor (TipTap renders plain HTML). */
+@layer components {
+  .prose-editor h2 {
+    @apply mt-3 mb-1 text-base font-semibold;
+  }
+  .prose-editor h3 {
+    @apply mt-2 mb-1 font-semibold;
+  }
+  .prose-editor p {
+    @apply my-1;
+  }
+  .prose-editor ul {
+    @apply my-1 list-disc pl-5;
+  }
+  .prose-editor ol {
+    @apply my-1 list-decimal pl-5;
+  }
+}
