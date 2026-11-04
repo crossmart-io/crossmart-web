@@ -50,9 +50,9 @@ export const IMPORT_MODE_COPY: Record<CatalogImportMode, ImportModeCopy> = {
   },
   [CatalogImportMode.update]: {
     label: 'Update existing products',
-    summary: 'Replaces products with the same handle. Stock is not changed.',
+    summary: 'Changes only the columns in your file. Variants and stock are never removed.',
     instructions:
-      'Use a Shopify product CSV. Variants are matched by SKU; images stay unless the file lists some.',
+      'Use a Shopify product CSV with a Handle column. Leave out a column to keep it; an empty cell clears it. Variants are matched by SKU, then by option values; images stay unless the file lists some.',
     fileLabel: 'Shopify product CSV',
     format: CatalogImportFormat.shopify_csv,
     record: 'product',
