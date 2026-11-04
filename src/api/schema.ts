@@ -32,7 +32,11 @@ export interface paths {
     get: operations['MeController_getMe_v1'];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * Delete your account
+     * @description Deletes the workspaces only you use, with everything in them, and removes you from the others. Refused (409) while you own a workspace other people use.
+     */
+    delete: operations['MeController_deleteMe_v1'];
     options?: never;
     head?: never;
     patch?: never;
@@ -49,7 +53,11 @@ export interface paths {
     get: operations['WorkspacesController_getWorkspace_v1'];
     put?: never;
     post?: never;
-    delete?: never;
+    /**
+     * Delete a workspace and everything in it
+     * @description Disconnects every store (removing the app unless another workspace uses the store), then deletes products, stock, listings, orders, activity and API keys. It cannot be undone.
+     */
+    delete: operations['WorkspacesController_deleteWorkspace_v1'];
     options?: never;
     head?: never;
     patch?: never;
@@ -787,6 +795,10 @@ export interface components {
       name: string;
       email: string;
       workspaces: components['schemas']['WorkspaceDto'][];
+    };
+    DeleteWorkspaceDto: {
+      /** @description The workspace’s name, typed to confirm: deleting it cannot be undone */
+      confirmName: string;
     };
     WorkspaceMemberDto: {
       /** Format: uuid */
@@ -1998,6 +2010,23 @@ export interface operations {
       };
     };
   };
+  MeController_deleteMe_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   WorkspacesController_getWorkspace_v1: {
     parameters: {
       query?: never;
@@ -2016,6 +2045,29 @@ export interface operations {
         content: {
           'application/json': components['schemas']['WorkspaceDto'];
         };
+      };
+    };
+  };
+  WorkspacesController_deleteWorkspace_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['DeleteWorkspaceDto'];
+      };
+    };
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
       };
     };
   };

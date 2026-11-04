@@ -24,6 +24,7 @@ export const ROUTES = {
   importJob: `/imports/:${ROUTE_PARAMS.jobId}`,
   apiKeys: '/settings/api-keys',
   members: '/settings/members',
+  account: '/settings/account',
 } as const;
 
 export function toProductRoute(productId: string): string {
