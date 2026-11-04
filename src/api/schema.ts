@@ -387,6 +387,80 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/channel-connections': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Channel accounts connected to the workspace, in connection order */
+    get: operations['ChannelConnectionsController_list_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/authorizations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Start connecting a channel account
+     * @description Returns the URL to send the merchant to. After they approve the app, the channel redirects to the API, which stores the connection and sends them back to the web app’s Channels page with the parameters of `ChannelConnectRedirectDto`. Needs a signed-in user.
+     */
+    post: operations['ChannelConnectionsController_startAuthorization_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** One channel connection */
+    get: operations['ChannelConnectionsController_get_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/disconnect': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Disconnect a channel account
+     * @description Revokes Crossmart’s access on the channel (for Shopify, uninstalls the app unless another workspace uses the same store) and wipes the stored credentials. Listings stay.
+     */
+    post: operations['ChannelConnectionsController_disconnect_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -938,6 +1012,101 @@ export interface components {
       items: components['schemas']['InventoryMovementDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
+    };
+    /**
+     * @description Set when the account was connected
+     * @enum {string}
+     */
+    ChannelType: ChannelType;
+    /**
+     * @description Set when connecting failed
+     * @enum {string}
+     */
+    ConnectFailure: ConnectFailure;
+    ChannelConnectRedirectDto: {
+      /** @description Set when the account was connected */
+      connected?: components['schemas']['ChannelType'];
+      /** @description Set when connecting failed */
+      error?: components['schemas']['ConnectFailure'];
+      /** @description The channel an error is about */
+      channel?: components['schemas']['ChannelType'];
+    };
+    /** @enum {string} */
+    ChannelConnectionStatus: ChannelConnectionStatus;
+    ShopifyLocationDto: {
+      /** @example gid://shopify/Location/1001 */
+      id: string;
+      name: string;
+    };
+    ShopifySettingsDto: {
+      shopName: string;
+      /**
+       * @description ISO 4217 code of the store’s currency
+       * @example USD
+       */
+      currencyCode: string;
+      /** @example America/New_York */
+      ianaTimezone: string | null;
+      /** @description The storefront’s public URL */
+      primaryDomainUrl: string | null;
+      /** @description Where Crossmart reads and writes stock */
+      primaryLocation: components['schemas']['ShopifyLocationDto'] | null;
+    };
+    ProductSelectionFilterDto: {
+      search?: string;
+      status?: components['schemas']['ProductStatus'];
+      gap?: components['schemas']['CatalogGap'];
+      tags?: string[];
+      vendor?: string;
+    };
+    ProductSelectionRuleDto: {
+      filter: components['schemas']['ProductSelectionFilterDto'];
+      includeProductIds: string[];
+      excludeProductIds: string[];
+    };
+    ChannelConnectionDto: {
+      /** Format: uuid */
+      id: string;
+      channel: components['schemas']['ChannelType'];
+      /**
+       * @description The account on the channel
+       * @example demo-store.myshopify.com
+       */
+      externalAccountId: string;
+      /** @example Demo Store */
+      displayName: string;
+      status: components['schemas']['ChannelConnectionStatus'];
+      /** @description Why it needs re-auth or failed */
+      statusReason: string | null;
+      grantedScopes: string[];
+      /** @description The store’s details, for Shopify connections */
+      shopify: components['schemas']['ShopifySettingsDto'] | null;
+      /** @description Which products the connection lists; null lists every product */
+      productSelection: components['schemas']['ProductSelectionRuleDto'] | null;
+      /** Format: date-time */
+      connectedAt: string;
+      /** Format: date-time */
+      disconnectedAt: string | null;
+      /** Format: date-time */
+      lastSyncedAt: string | null;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    StartAuthorizationDto: {
+      channel: components['schemas']['ChannelType'];
+      /**
+       * @description The account to connect. For Shopify, the store’s myshopify.com domain or handle.
+       * @example demo-store.myshopify.com
+       */
+      accountHandle: string;
+    };
+    StartedAuthorizationDto: {
+      /** @description Send the merchant here to approve the app on the channel */
+      authorizationUrl: string;
+      /** @example demo-store.myshopify.com */
+      externalAccountId: string;
     };
   };
   responses: never;
@@ -1711,6 +1880,96 @@ export interface operations {
       };
     };
   };
+  ChannelConnectionsController_list_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'][];
+        };
+      };
+    };
+  };
+  ChannelConnectionsController_startAuthorization_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['StartAuthorizationDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StartedAuthorizationDto'];
+        };
+      };
+    };
+  };
+  ChannelConnectionsController_get_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
+  ChannelConnectionsController_disconnect_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -1830,6 +2089,9 @@ export enum ActivityAction {
   api_key_created = 'api_key_created',
   api_key_revoked = 'api_key_revoked',
   inventory_adjusted = 'inventory_adjusted',
+  channel_connected = 'channel_connected',
+  channel_disconnected = 'channel_disconnected',
+  channel_connect_failed = 'channel_connect_failed',
 }
 export enum ActivityOutcome {
   SUCCEEDED = 'SUCCEEDED',
@@ -1840,6 +2102,7 @@ export enum ActivitySubjectType {
   product_view = 'product_view',
   import_job = 'import_job',
   api_key = 'api_key',
+  channel_connection = 'channel_connection',
 }
 export enum ActivityActorType {
   USER = 'USER',
@@ -1866,4 +2129,29 @@ export enum InventoryMovementReason {
   LOST = 'LOST',
   SOLD = 'SOLD',
   IMPORTED = 'IMPORTED',
+}
+export enum ChannelType {
+  shopify = 'shopify',
+  ebay = 'ebay',
+  google_merchant = 'google_merchant',
+  etsy = 'etsy',
+  amazon = 'amazon',
+  walmart = 'walmart',
+}
+export enum ConnectFailure {
+  invalid_state = 'invalid_state',
+  expired_state = 'expired_state',
+  invalid_signature = 'invalid_signature',
+  invalid_account = 'invalid_account',
+  access_denied = 'access_denied',
+  missing_scopes = 'missing_scopes',
+  not_permitted = 'not_permitted',
+  channel_unavailable = 'channel_unavailable',
+  unexpected = 'unexpected',
+}
+export enum ChannelConnectionStatus {
+  CONNECTED = 'CONNECTED',
+  NEEDS_REAUTH = 'NEEDS_REAUTH',
+  DISCONNECTED = 'DISCONNECTED',
+  ERROR = 'ERROR',
 }

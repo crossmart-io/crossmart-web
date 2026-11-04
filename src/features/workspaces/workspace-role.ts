@@ -15,3 +15,13 @@ export const WORKSPACE_ROLE_DESCRIPTIONS: Record<WorkspaceRole, string> = {
   [WorkspaceRole.APPROVER]: 'Approve AI suggestions',
   [WorkspaceRole.VIEWER]: 'Read only',
 };
+
+/** Roles that may manage the workspace: connect channels, change settings. */
+const MANAGING_ROLES: ReadonlySet<WorkspaceRole> = new Set([
+  WorkspaceRole.OWNER,
+  WorkspaceRole.ADMIN,
+]);
+
+export function canManageWorkspace(role: WorkspaceRole): boolean {
+  return MANAGING_ROLES.has(role);
+}

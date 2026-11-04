@@ -20,6 +20,8 @@ export function toSubjectRoute(event: ActivityEvent): string | undefined {
       return ROUTES.apiKeys;
     case ActivitySubjectType.import_job:
       return toImportJobRoute(subject.id);
+    case ActivitySubjectType.channel_connection:
+      return ROUTES.channels;
     case ActivitySubjectType.product_view:
       return undefined;
   }

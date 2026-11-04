@@ -4,24 +4,23 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { EXTERNAL_LINKS } from '@/config/links';
 import { CHANNEL_STATUS_LABELS, ChannelStatus, type ChannelInfo } from '../channels.constants';
-import { ChannelLogo } from './ChannelLogo';
+import { ChannelCardHeader } from './ChannelCardHeader';
 
+/** A channel on the roadmap, not connectable yet. */
 export function ChannelCard({ channel }: { channel: ChannelInfo }) {
   const inDevelopment = channel.status === ChannelStatus.InDevelopment;
 
   return (
     <Card>
       <CardContent className="flex flex-col gap-3">
-        <div className="flex items-start justify-between">
-          <ChannelLogo logo={channel.logo} />
-          <Badge variant={inDevelopment ? 'default' : 'outline'}>
-            {CHANNEL_STATUS_LABELS[channel.status]}
-          </Badge>
-        </div>
-        <div className="flex flex-col gap-1">
-          <h2 className="font-medium">{channel.name}</h2>
-          <p className="text-sm text-muted-foreground">{channel.description}</p>
-        </div>
+        <ChannelCardHeader
+          channel={channel}
+          badge={
+            <Badge variant={inDevelopment ? 'default' : 'outline'}>
+              {CHANNEL_STATUS_LABELS[channel.status]}
+            </Badge>
+          }
+        />
       </CardContent>
       <CardFooter className="mt-auto">
         <Button variant="ghost" size="sm" className="-ml-2" asChild>

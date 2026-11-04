@@ -1,2 +1,3 @@
-export { ChannelCard } from './components/ChannelCard';
+export { ChannelGrid } from './components/ChannelGrid';
 export { CHANNELS } from './channels.constants';
+export { useConnectRedirectToast } from './hooks/useConnectRedirectToast';

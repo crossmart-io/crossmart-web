@@ -1,3 +1,4 @@
+import { ChannelConnectionStatus, ChannelType, ConnectFailure } from '@/api/schema';
 import amazonLogo from './assets/logos/amazon.svg';
 import ebayLogo from './assets/logos/ebay.svg';
 import etsyLogo from './assets/logos/etsy.svg';
@@ -6,17 +7,53 @@ import shopifyLogo from './assets/logos/shopify.svg';
 import tiktokLogo from './assets/logos/tiktok.svg';
 import walmartLogo from './assets/logos/walmart.svg';
 
+export const CHANNEL_CONNECTIONS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/channel-connections';
+export const CHANNEL_AUTHORIZATIONS_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/channel-connections/authorizations';
+export const CHANNEL_DISCONNECT_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/disconnect';
+
 export enum ChannelStatus {
+  /** Its connector has shipped: it can be connected. */
+  Available = 'available',
   InDevelopment = 'in_development',
   Planned = 'planned',
 }
 
 export const CHANNEL_STATUS_LABELS: Record<ChannelStatus, string> = {
+  [ChannelStatus.Available]: 'Available',
   [ChannelStatus.InDevelopment]: 'In development',
   [ChannelStatus.Planned]: 'Planned',
 };
 
-/** Paints a single-colour mark in the text colour, so it stays visible in dark mode. */
+export const CONNECTION_STATUS_LABELS: Record<ChannelConnectionStatus, string> = {
+  [ChannelConnectionStatus.CONNECTED]: 'Connected',
+  [ChannelConnectionStatus.NEEDS_REAUTH]: 'Needs re-auth',
+  [ChannelConnectionStatus.DISCONNECTED]: 'Disconnected',
+  [ChannelConnectionStatus.ERROR]: 'Error',
+};
+
+/** What the merchant reads after a failed connection, by the reason the API sent back. */
+export const CONNECT_FAILURE_MESSAGES: Record<ConnectFailure, string> = {
+  [ConnectFailure.invalid_state]: 'That connection link is not valid. Start again from here.',
+  [ConnectFailure.expired_state]: 'The connection took too long and expired. Please try again.',
+  [ConnectFailure.invalid_signature]: 'The reply could not be verified, so nothing was connected.',
+  [ConnectFailure.invalid_account]:
+    'The reply was for a different account than the one you entered.',
+  [ConnectFailure.access_denied]: 'The app was not approved, so nothing was connected.',
+  [ConnectFailure.missing_scopes]:
+    'Some permissions Crossmart needs were not granted. Please try again.',
+  [ConnectFailure.not_permitted]: 'You can no longer manage this workspace.',
+  [ConnectFailure.channel_unavailable]: 'The channel is not responding. Try again in a moment.',
+  [ConnectFailure.unexpected]: 'Something went wrong while connecting. Please try again.',
+};
+
+export const CHANNEL_FEEDBACK = {
+  disconnected: 'Channel disconnected',
+  connectFailedTitle: 'Could not connect',
+} as const;
+
+/** Single-colour marks are painted in the text colour, so they stay visible in dark mode. */
 export const FOREGROUND_TINT = 'currentColor';
 
 export interface ChannelLogo {
@@ -25,11 +62,27 @@ export interface ChannelLogo {
   tint?: string;
 }
 
+/** How the merchant names the account to connect, for channels connected through OAuth. */
+export interface AccountPrompt {
+  label: string;
+  placeholder: string;
+  /** Shown after the input, such as `.myshopify.com`. */
+  suffix?: string;
+  description: string;
+}
+
+export interface ConnectableChannel {
+  type: ChannelType;
+  account: AccountPrompt;
+}
+
 export interface ChannelInfo {
   name: string;
   description: string;
   status: ChannelStatus;
   logo: ChannelLogo;
+  /** Set once the channel's connector has shipped. */
+  connect?: ConnectableChannel;
 }
 
 /** The roadmap as it really stands. Update a channel's status when its connector ships. */
@@ -37,8 +90,18 @@ export const CHANNELS: readonly ChannelInfo[] = [
   {
     name: 'Shopify',
     description: 'Sync products, stock and orders with your Shopify store.',
-    status: ChannelStatus.InDevelopment,
+    status: ChannelStatus.Available,
     logo: { src: shopifyLogo, tint: '#5e8e3e' },
+    connect: {
+      type: ChannelType.shopify,
+      account: {
+        label: 'Store domain',
+        placeholder: 'your-store',
+        suffix: '.myshopify.com',
+        description:
+          'Find it in your Shopify admin under Settings, Domains. Your own domain will not work here.',
+      },
+    },
   },
   {
     name: 'eBay',
