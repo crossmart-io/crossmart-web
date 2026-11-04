@@ -1,12 +1,9 @@
-import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { ApiRequestError } from '@/api/api-error';
 import { fetchClient } from '@/api/client';
 import type { ActivityAction, ActivityOutcome } from '@/api/schema';
+import { useCursorPages } from '@/hooks/useCursorPages';
 import { ACTIVITY_ENDPOINT, ACTIVITY_PAGE_SIZE } from '../activity.constants';
 import type { ActivityEvent } from '../activity.types';
-
-/** Same key prefix as the generated query hooks, so one invalidation refreshes both. */
-const HTTP_METHOD_GET = 'get';
 
 interface ActivityFilter {
   workspaceId: string;
@@ -32,14 +29,12 @@ async function fetchActivityPage(
 
 /** The workspace log, newest first, a page at a time. Always refetched when the page opens. */
 export function useActivity(filter: ActivityFilter) {
-  const query = useInfiniteQuery({
-    queryKey: [HTTP_METHOD_GET, ACTIVITY_ENDPOINT, filter],
-    queryFn: ({ pageParam, signal }) => fetchActivityPage(filter, pageParam, signal),
-    initialPageParam: undefined as string | undefined,
-    getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
+  const query = useCursorPages<ActivityEvent>({
+    endpoint: ACTIVITY_ENDPOINT,
+    params: filter,
+    fetchPage: (cursor, signal) => fetchActivityPage(filter, cursor, signal),
     staleTime: 0,
-    placeholderData: keepPreviousData,
+    keepPreviousPages: true,
   });
-  const events: ActivityEvent[] = query.data?.pages.flatMap((page) => page.items) ?? [];
-  return { ...query, events };
+  return { ...query, events: query.items };
 }

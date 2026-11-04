@@ -1,10 +1,9 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApiRequestError } from '@/api/api-error';
 import { api, fetchClient } from '@/api/client';
+import { endpointQueryKey } from '@/api/query-keys';
 import type { components } from '@/api/schema';
 import { API_KEY_ENDPOINT, API_KEY_FEEDBACK, API_KEYS_ENDPOINT } from '../api-keys.constants';
-
-const HTTP_METHOD_GET = 'get';
 
 export type ApiKey = components['schemas']['ApiKeyDto'];
 export type IssuedApiKey = components['schemas']['IssuedApiKeyDto'];
@@ -16,7 +15,7 @@ export function useApiKeys(workspaceId: string) {
 
 function useRefreshApiKeys() {
   const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: [HTTP_METHOD_GET, API_KEYS_ENDPOINT] });
+  return () => queryClient.invalidateQueries({ queryKey: endpointQueryKey(API_KEYS_ENDPOINT) });
 }
 
 export function useCreateApiKey(workspaceId: string) {

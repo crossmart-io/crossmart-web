@@ -299,6 +299,60 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/inventory-items': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Stock of every variant, by product title */
+    get: operations['InventoryItemsController_list_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/inventory-items/{inventoryItemId}/adjustments': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Adjust the stock on hand of a variant
+     * @description Adds or removes units, or sets the counted stock, and records the change in the ledger with its reason and author. Reserved units are not changed.
+     */
+    post: operations['InventoryItemsController_adjust_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/inventory-items/{inventoryItemId}/movements': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Stock history of a variant, newest first */
+    get: operations['InventoryItemsController_history_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -689,6 +743,74 @@ export interface components {
     };
     ActivityPageDto: {
       items: components['schemas']['ActivityEventDto'][];
+      /** @description Null on the last page */
+      nextCursor: string | null;
+    };
+    /** @enum {string} */
+    StockLevel: StockLevel;
+    InventoryItemDto: {
+      /** Format: uuid */
+      inventoryItemId: string;
+      /** Format: uuid */
+      variantId: string;
+      /** Format: uuid */
+      productId: string;
+      productTitle: string;
+      /** @description One value per product option, in order */
+      optionValues: string[];
+      sku: string | null;
+      /** @description The product’s first image */
+      imageUrl: string | null;
+      /** @description Whether Crossmart tracks stock for this variant */
+      tracked: boolean;
+      /** @description Units in stock: available plus reserved */
+      onHand: number;
+      /** @description Units held for open orders */
+      reserved: number;
+      /** @description Units that can still be sold, and what channels receive */
+      available: number;
+      stockLevel: components['schemas']['StockLevel'];
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    InventoryPageDto: {
+      items: components['schemas']['InventoryItemDto'][];
+      /** @description Null on the last page */
+      nextCursor: string | null;
+    };
+    /** @enum {string} */
+    StockAdjustmentMode: StockAdjustmentMode;
+    /**
+     * @description One of RECEIVED, CORRECTION, RETURNED, DAMAGED, LOST, SOLD. The other reasons are recorded by Crossmart.
+     * @enum {string}
+     */
+    InventoryMovementReason: InventoryMovementReason;
+    AdjustStockDto: {
+      mode: components['schemas']['StockAdjustmentMode'];
+      /** @description With `delta`, units to add (or remove, when negative). With `set`, the new stock on hand. */
+      quantity: number;
+      /** @description One of RECEIVED, CORRECTION, RETURNED, DAMAGED, LOST, SOLD. The other reasons are recorded by Crossmart. */
+      reason: components['schemas']['InventoryMovementReason'];
+      note?: string;
+    };
+    InventoryMovementDto: {
+      /** Format: uuid */
+      id: string;
+      /** @description Units added (positive) or removed (negative) */
+      delta: number;
+      reason: components['schemas']['InventoryMovementReason'];
+      /** @description Stock on hand right after this movement */
+      quantityAfter: number;
+      note: string | null;
+      /** @description The user who made the change; null for API keys and changes made by Crossmart */
+      userName: string | null;
+      /** @description The API key that made the change, if any */
+      apiKeyName: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    InventoryMovementPageDto: {
+      items: components['schemas']['InventoryMovementDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
     };
@@ -1337,6 +1459,86 @@ export interface operations {
       };
     };
   };
+  InventoryItemsController_list_v1: {
+    parameters: {
+      query?: {
+        /** @description Matches the SKU or the product title */
+        search?: string;
+        stockLevel?: components['schemas']['StockLevel'];
+        /** @description `nextCursor` from the previous page */
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InventoryPageDto'];
+        };
+      };
+    };
+  };
+  InventoryItemsController_adjust_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        inventoryItemId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['AdjustStockDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InventoryItemDto'];
+        };
+      };
+    };
+  };
+  InventoryItemsController_history_v1: {
+    parameters: {
+      query?: {
+        /** @description `nextCursor` from the previous page */
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+        inventoryItemId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InventoryMovementPageDto'];
+        };
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -1433,6 +1635,7 @@ export enum ActivityAction {
   product_view_deleted = 'product_view_deleted',
   api_key_created = 'api_key_created',
   api_key_revoked = 'api_key_revoked',
+  inventory_adjusted = 'inventory_adjusted',
 }
 export enum ActivityOutcome {
   SUCCEEDED = 'SUCCEEDED',
@@ -1448,4 +1651,24 @@ export enum ActivityActorType {
   USER = 'USER',
   API_KEY = 'API_KEY',
   SYSTEM = 'SYSTEM',
+}
+export enum StockLevel {
+  in_stock = 'in_stock',
+  low_stock = 'low_stock',
+  out_of_stock = 'out_of_stock',
+  untracked = 'untracked',
+}
+export enum StockAdjustmentMode {
+  delta = 'delta',
+  set = 'set',
+}
+export enum InventoryMovementReason {
+  OPENING_BALANCE = 'OPENING_BALANCE',
+  ADJUSTMENT = 'ADJUSTMENT',
+  CORRECTION = 'CORRECTION',
+  RECEIVED = 'RECEIVED',
+  RETURNED = 'RETURNED',
+  DAMAGED = 'DAMAGED',
+  LOST = 'LOST',
+  SOLD = 'SOLD',
 }

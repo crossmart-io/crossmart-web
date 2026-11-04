@@ -15,3 +15,5 @@ export { type ProductListFilters, useProductListFilters } from './hooks/useProdu
 export { BulkActionBar } from './components/bulk/BulkActionBar';
 export { ProductViewsBar } from './components/views/ProductViewsBar';
 export { useListSelection } from './hooks/useListSelection';
+export { useInvalidateCatalog } from './hooks/useInvalidateCatalog';
+export { ProductThumbnail } from './components/ProductThumbnail';

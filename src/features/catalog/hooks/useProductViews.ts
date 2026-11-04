@@ -1,11 +1,10 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApiRequestError } from '@/api/api-error';
 import { api, fetchClient } from '@/api/client';
+import { endpointQueryKey } from '@/api/query-keys';
 import type { components } from '@/api/schema';
 import { PRODUCT_VIEW_ENDPOINT, PRODUCT_VIEWS_ENDPOINT, VIEW_FEEDBACK } from '../catalog.constants';
 import type { ProductView } from '../catalog.types';
-
-const HTTP_METHOD_GET = 'get';
 
 type NewProductView = components['schemas']['CreateProductViewDto'];
 
@@ -21,7 +20,7 @@ export function useProductViews(workspaceId: string | undefined) {
 function useRefreshViews() {
   const queryClient = useQueryClient();
   return () =>
-    queryClient.invalidateQueries({ queryKey: [HTTP_METHOD_GET, PRODUCT_VIEWS_ENDPOINT] });
+    queryClient.invalidateQueries({ queryKey: endpointQueryKey(PRODUCT_VIEWS_ENDPOINT) });
 }
 
 export function useCreateProductView(workspaceId: string) {
