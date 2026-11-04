@@ -147,6 +147,61 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/product-bulk-actions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Change many products at once
+     * @description Set a status, add or remove tags, move every variant price by a percentage, or delete. Each action runs as one statement, scoped to the workspace.
+     */
+    post: operations['ProductBulkActionsController_apply_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/product-views': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Saved filters of the product list, oldest first */
+    get: operations['ProductViewsController_list_v1'];
+    put?: never;
+    /** Save the current filters of the product list as a view */
+    post: operations['ProductViewsController_create_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/product-views/{viewId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Delete a saved view */
+    delete: operations['ProductViewsController_delete_v1'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/workspaces/{workspaceId}/product-imports': {
     parameters: {
       query?: never;
@@ -469,6 +524,40 @@ export interface components {
       media?: components['schemas']['CreateMediaDto'][];
       handle: string;
       variants: components['schemas']['UpdateVariantDto'][];
+    };
+    /** @enum {string} */
+    BulkProductAction: BulkProductAction;
+    BulkProductActionDto: {
+      productIds: string[];
+      action: components['schemas']['BulkProductAction'];
+      /** @description Required for `set_status` */
+      status?: components['schemas']['ProductStatus'];
+      /** @description Required for `add_tags` and `remove_tags` */
+      tags?: string[];
+      /** @description Required for `adjust_prices`. 10 raises every price by 10%, -15 lowers it by 15%. */
+      percent?: number;
+    };
+    BulkProductResultDto: {
+      /** @description Products changed. Ids from other workspaces are not counted. */
+      affected: number;
+    };
+    ProductViewDto: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      search?: string | null;
+      status?: components['schemas']['ProductStatus'] | null;
+      gap?: components['schemas']['CatalogGap'] | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    CreateProductViewDto: {
+      /** @description Unique in the workspace */
+      name: string;
+      /** @description Matches title, handle or SKU */
+      search?: string;
+      status?: components['schemas']['ProductStatus'];
+      gap?: components['schemas']['CatalogGap'];
     };
     /** @enum {string} */
     CatalogImportFormat: CatalogImportFormat;
@@ -923,6 +1012,97 @@ export interface operations {
       };
     };
   };
+  ProductBulkActionsController_apply_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['BulkProductActionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BulkProductResultDto'];
+        };
+      };
+    };
+  };
+  ProductViewsController_list_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductViewDto'][];
+        };
+      };
+    };
+  };
+  ProductViewsController_create_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateProductViewDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductViewDto'];
+        };
+      };
+    };
+  };
+  ProductViewsController_delete_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        viewId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   ProductImportsController_import_v1: {
     parameters: {
       query?: never;
@@ -1067,6 +1247,13 @@ export enum CatalogGap {
 export enum OutOfStockPolicy {
   STOP_SELLING = 'STOP_SELLING',
   CONTINUE_SELLING = 'CONTINUE_SELLING',
+}
+export enum BulkProductAction {
+  set_status = 'set_status',
+  add_tags = 'add_tags',
+  remove_tags = 'remove_tags',
+  adjust_prices = 'adjust_prices',
+  delete = 'delete',
 }
 export enum CatalogImportFormat {
   shopify_csv = 'shopify_csv',

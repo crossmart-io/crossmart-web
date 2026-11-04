@@ -12,6 +12,10 @@ export const IMPORT_FORM_FIELDS = { format: 'format', file: 'file' } as const;
 export const UPLOAD_FILE_FIELD = 'file';
 export const PRODUCT_IMAGES_ENDPOINT = '/api/v1/workspaces/{workspaceId}/media/product-images';
 export const CATALOG_STATS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/catalog-stats';
+export const PRODUCT_BULK_ACTIONS_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/product-bulk-actions';
+export const PRODUCT_VIEWS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/product-views';
+export const PRODUCT_VIEW_ENDPOINT = '/api/v1/workspaces/{workspaceId}/product-views/{viewId}';
 
 /** The image types the API accepts. It checks the file content again, not just the name. */
 export const IMAGE_CONTENT_TYPES = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'] as const;
@@ -36,4 +40,13 @@ export const EDITOR_FEEDBACK = {
   unsaved: 'Unsaved changes',
   optionRemoved: 'Option removed. Its variants were merged.',
   undo: 'Undo',
+} as const;
+
+/** Mirrors the API's limits, so the form can say so before a round trip. */
+export const MIN_PRICE_ADJUSTMENT_PERCENT = -90;
+export const MAX_PRICE_ADJUSTMENT_PERCENT = 500;
+
+export const VIEW_FEEDBACK = {
+  saved: 'View saved',
+  deleted: 'View deleted',
 } as const;

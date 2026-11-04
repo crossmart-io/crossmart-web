@@ -1,5 +1,6 @@
 import { Link } from 'react-router';
 import { cn } from 'cn';
+import { Checkbox } from '@/components/ui/checkbox';
 import {
   Table,
   TableBody,
@@ -9,6 +10,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { toProductRoute } from '@/config/routes';
+import type { Selection } from '@/hooks/useSelection';
 import { formatPriceRange } from '@/lib/format';
 import type { ProductSummary } from '../catalog.types';
 import { ProductStatusBadge } from './ProductStatusBadge';
@@ -22,9 +24,16 @@ interface ProductsTableProps {
   currency: string;
   /** A new filter is loading; the current rows stay, dimmed. */
   isRefreshing?: boolean;
+  /** Checked rows, for bulk actions. Without it the table has no checkboxes. */
+  selection?: Selection;
 }
 
-export function ProductsTable({ products, currency, isRefreshing = false }: ProductsTableProps) {
+export function ProductsTable({
+  products,
+  currency,
+  isRefreshing = false,
+  selection,
+}: ProductsTableProps) {
   return (
     <div
       className={cn('rounded-lg border transition-opacity', isRefreshing && 'opacity-60')}
@@ -33,6 +42,15 @@ export function ProductsTable({ products, currency, isRefreshing = false }: Prod
       <Table>
         <TableHeader>
           <TableRow>
+            {selection && (
+              <TableHead className="w-10">
+                <SelectAllCheckbox
+                  productIds={products.map((product) => product.id)}
+                  selection={selection}
+                  disabled={isRefreshing}
+                />
+              </TableHead>
+            )}
             <TableHead>Product</TableHead>
             <TableHead className="hidden sm:table-cell">Status</TableHead>
             <TableHead className="hidden md:table-cell">Inventory</TableHead>
@@ -42,7 +60,13 @@ export function ProductsTable({ products, currency, isRefreshing = false }: Prod
         </TableHeader>
         <TableBody>
           {products.map((product) => (
-            <ProductRow key={product.id} product={product} currency={currency} />
+            <ProductRow
+              key={product.id}
+              product={product}
+              currency={currency}
+              selection={selection}
+              isRefreshing={isRefreshing}
+            />
           ))}
         </TableBody>
       </Table>
@@ -50,11 +74,50 @@ export function ProductsTable({ products, currency, isRefreshing = false }: Prod
   );
 }
 
-function ProductRow({ product, currency }: { product: ProductSummary; currency: string }) {
-  const price = product.priceRange ? formatPriceRange(product.priceRange, currency) : NO_VALUE;
+interface SelectAllCheckboxProps {
+  productIds: string[];
+  selection: Selection;
+  /** The rows on screen are about to be replaced, so they cannot be selected. */
+  disabled: boolean;
+}
+
+function SelectAllCheckbox({ productIds, selection, disabled }: SelectAllCheckboxProps) {
+  const selectedCount = productIds.filter((id) => selection.isSelected(id)).length;
+  const allSelected = productIds.length > 0 && selectedCount === productIds.length;
 
   return (
-    <TableRow className="group/row">
+    <Checkbox
+      checked={allSelected ? true : selectedCount > 0 ? 'indeterminate' : false}
+      onCheckedChange={() => selection.toggleAll(productIds)}
+      disabled={disabled}
+      aria-label={allSelected ? 'Clear selection' : 'Select all products shown'}
+    />
+  );
+}
+
+interface ProductRowProps {
+  product: ProductSummary;
+  currency: string;
+  selection?: Selection;
+  isRefreshing: boolean;
+}
+
+function ProductRow({ product, currency, selection, isRefreshing }: ProductRowProps) {
+  const price = product.priceRange ? formatPriceRange(product.priceRange, currency) : NO_VALUE;
+  const isSelected = selection?.isSelected(product.id) ?? false;
+
+  return (
+    <TableRow className="group/row" data-state={isSelected ? 'selected' : undefined}>
+      {selection && (
+        <TableCell>
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={() => selection.toggle(product.id)}
+            disabled={isRefreshing}
+            aria-label={`Select ${product.title}`}
+          />
+        </TableCell>
+      )}
       <TableCell className="max-w-0 md:max-w-none">
         <Link
           to={toProductRoute(product.id)}

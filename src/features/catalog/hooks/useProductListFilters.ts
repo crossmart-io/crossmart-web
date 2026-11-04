@@ -1,11 +1,18 @@
 import { useCallback, useEffect, useState } from 'react';
 import { useSearchParams } from 'react-router';
-import type { CatalogGap } from '@/api/schema';
+import type { CatalogGap, ProductStatus } from '@/api/schema';
 import { ROUTE_QUERY } from '@/config/routes';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
 import { SEARCH_DEBOUNCE_MS } from '../catalog.constants';
 import { toCatalogGap } from '../catalog-gap';
-import { ALL_STATUSES, type StatusFilter, toStatusFilter } from '../product-status';
+import { ALL_STATUSES, type StatusFilter, toStatusFilter, toStatusQuery } from '../product-status';
+
+/** The filters a saved view stores: absent ones mean "any". */
+export interface ListFilterValues {
+  search?: string | null;
+  status?: ProductStatus | null;
+  gap?: CatalogGap | null;
+}
 
 export interface ProductListFilters {
   /** What is in the search box right now. */
@@ -19,6 +26,8 @@ export interface ProductListFilters {
   clearGap: () => void;
   isFiltered: boolean;
   clearAll: () => void;
+  /** Replaces every filter at once, as opening a saved view does. */
+  applyFilters: (values: ListFilterValues) => void;
 }
 
 type ParamsUpdate = (params: URLSearchParams) => void;
@@ -70,7 +79,24 @@ export function useProductListFilters(): ProductListFilters {
       setSearch('');
       updateParams((params) => Object.values(ROUTE_QUERY).forEach((key) => params.delete(key)));
     },
+    applyFilters: (values) => {
+      setSearch(values.search ?? '');
+      updateParams((params) => {
+        setOrDelete(params, ROUTE_QUERY.search, values.search ?? '');
+        setOrDelete(params, ROUTE_QUERY.status, values.status ?? '');
+        setOrDelete(params, ROUTE_QUERY.gap, values.gap ?? '');
+      });
+    },
   };
+}
+
+/** True when the list shows exactly what the view saved. */
+export function matchesFilters(filters: ProductListFilters, values: ListFilterValues): boolean {
+  return (
+    filters.debouncedSearch === (values.search ?? '') &&
+    toStatusQuery(filters.status) === (values.status ?? undefined) &&
+    filters.gap === (values.gap ?? undefined)
+  );
 }
 
 function setOrDelete(params: URLSearchParams, key: string, value: string): void {
