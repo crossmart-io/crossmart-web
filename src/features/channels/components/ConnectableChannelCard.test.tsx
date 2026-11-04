@@ -2,9 +2,11 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
+import { MemoryRouter } from 'react-router';
 import { ChannelConnectionStatus, ChannelType } from '@/api/schema';
 import { CHANNELS, type ChannelInfo, type ConnectableChannel } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
+import { connectionFixture as connection } from '../testing/channel-connection.fixture';
 import { ConnectableChannelCard } from './ConnectableChannelCard';
 
 function shopifyChannel(): { channel: ChannelInfo; connect: ConnectableChannel } {
@@ -15,43 +17,18 @@ function shopifyChannel(): { channel: ChannelInfo; connect: ConnectableChannel }
 
 const { channel: SHOPIFY, connect: CONNECT } = shopifyChannel();
 
-function connection(overrides: Partial<ChannelConnection> = {}): ChannelConnection {
-  return {
-    id: 'c-1',
-    channel: ChannelType.shopify,
-    externalAccountId: 'demo-store.myshopify.com',
-    displayName: 'Demo Store',
-    status: ChannelConnectionStatus.CONNECTED,
-    statusReason: null,
-    grantedScopes: [],
-    shopify: {
-      shopName: 'Demo Store',
-      currencyCode: 'USD',
-      ianaTimezone: null,
-      primaryDomainUrl: null,
-      primaryLocation: null,
-    },
-    productSelection: null,
-    connectedAt: '2026-11-03T09:00:00Z',
-    disconnectedAt: null,
-    lastSyncedAt: null,
-    createdAt: '2026-11-03T09:00:00Z',
-    updatedAt: '2026-11-03T09:00:00Z',
-    ...overrides,
-  };
-}
-
-function renderCard(connections: ChannelConnection[], canManage = true, canEditCatalog = false) {
+function renderCard(connections: ChannelConnection[], canManage = true) {
   const element: ReactElement = (
     <QueryClientProvider client={new QueryClient()}>
-      <ConnectableChannelCard
-        workspaceId="ws-1"
-        channel={SHOPIFY}
-        connect={CONNECT}
-        connections={connections}
-        canManage={canManage}
-        canEditCatalog={canEditCatalog}
-      />
+      <MemoryRouter>
+        <ConnectableChannelCard
+          workspaceId="ws-1"
+          channel={SHOPIFY}
+          connect={CONNECT}
+          connections={connections}
+          canManage={canManage}
+        />
+      </MemoryRouter>
     </QueryClientProvider>
   );
   return render(element);
@@ -69,45 +46,42 @@ describe('ConnectableChannelCard', () => {
     expect(screen.getByRole('button', { name: 'Continue to Shopify' })).toBeDisabled();
   });
 
-  it('shows a connected store with its status and a disconnect action', () => {
+  it('shows a connected store at a glance, managed on its own page', () => {
     renderCard([connection()]);
 
-    expect(screen.getByText('demo-store.myshopify.com')).toBeInTheDocument();
+    expect(screen.getByText('1 store connected')).toBeInTheDocument();
+    expect(screen.queryByText('demo-store.myshopify.com')).not.toBeInTheDocument();
     expect(screen.getAllByText('Connected')).not.toHaveLength(0);
-    expect(screen.getByRole('button', { name: 'Disconnect' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Connect another store' })).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-1');
+    expect(screen.queryByRole('button', { name: 'Disconnect' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Import products/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /Connect/ })).not.toBeInTheDocument();
   });
 
-  it('asks to reconnect a store that needs re-auth', () => {
+  it('opens the store that needs attention first, and counts it', () => {
     renderCard([
+      connection(),
       connection({
+        id: 'c-2',
         status: ChannelConnectionStatus.NEEDS_REAUTH,
         statusReason: 'Connect the store again.',
       }),
     ]);
 
-    expect(screen.getAllByText('Needs re-auth')).not.toHaveLength(0);
-    expect(screen.getByText('Connect the store again.')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Reconnect' })).toBeInTheDocument();
+    expect(screen.getByText('2 stores connected · 1 needs re-auth')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-2');
   });
 
-  it('hides management actions from members who cannot manage the workspace', () => {
-    renderCard([connection()], false);
+  it('asks members who cannot manage the workspace to have an admin connect a store', () => {
+    renderCard([], false);
 
-    expect(screen.queryByRole('button', { name: 'Disconnect' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Connect' })).not.toBeInTheDocument();
     expect(screen.getByText('Ask a workspace admin to connect it.')).toBeInTheDocument();
   });
 
-  it('offers catalog editors an import of a connected store, but not of one needing re-auth', () => {
-    renderCard(
-      [
-        connection(),
-        connection({ id: 'c-2', status: ChannelConnectionStatus.NEEDS_REAUTH, shopify: null }),
-      ],
-      false,
-      true,
-    );
+  it('lets anyone open a connected store, whoever views it', () => {
+    renderCard([connection()], false);
 
-    expect(screen.getAllByRole('button', { name: 'Import products from Shopify' })).toHaveLength(1);
+    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-1');
   });
 });

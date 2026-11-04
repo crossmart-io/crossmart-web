@@ -51,6 +51,13 @@ const appRoutes: RouteObject[] = [
     lazy: () =>
       import('@/pages/ChannelsPage').then(({ ChannelsPage }) => ({ Component: ChannelsPage })),
   },
+  ...[ROUTES.channelConnection, ROUTES.channelConnectionTab].map((path) => ({
+    path,
+    lazy: () =>
+      import('@/pages/ChannelConnectionPage').then(({ ChannelConnectionPage }) => ({
+        Component: ChannelConnectionPage,
+      })),
+  })),
   {
     path: ROUTES.activity,
     lazy: () =>

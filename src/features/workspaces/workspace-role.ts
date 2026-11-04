@@ -26,7 +26,7 @@ export function canManageWorkspace(role: WorkspaceRole): boolean {
   return MANAGING_ROLES.has(role);
 }
 
-/** Roles that may change the catalog: edit products, import them. */
+/** Roles that may change the catalog: edit products, import them, and set what each channel shows. */
 const EDITING_ROLES: ReadonlySet<WorkspaceRole> = new Set([
   WorkspaceRole.OWNER,
   WorkspaceRole.ADMIN,

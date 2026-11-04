@@ -1,6 +1,8 @@
 export const ROUTE_PARAMS = {
   productId: 'productId',
   jobId: 'jobId',
+  connectionId: 'connectionId',
+  tab: 'tab',
 } as const;
 
 export const ROUTES = {
@@ -12,6 +14,8 @@ export const ROUTES = {
   product: `/products/:${ROUTE_PARAMS.productId}`,
   inventory: '/inventory',
   channels: '/channels',
+  channelConnection: `/channels/:${ROUTE_PARAMS.connectionId}`,
+  channelConnectionTab: `/channels/:${ROUTE_PARAMS.connectionId}/:${ROUTE_PARAMS.tab}`,
   activity: '/activity',
   imports: '/imports',
   importJob: `/imports/:${ROUTE_PARAMS.jobId}`,
@@ -21,6 +25,12 @@ export const ROUTES = {
 
 export function toProductRoute(productId: string): string {
   return ROUTES.product.replace(`:${ROUTE_PARAMS.productId}`, productId);
+}
+
+/** A channel connection's page, opened on `tab` when one is given. */
+export function toChannelConnectionRoute(connectionId: string, tab?: string): string {
+  const route = ROUTES.channelConnection.replace(`:${ROUTE_PARAMS.connectionId}`, connectionId);
+  return tab ? `${route}/${tab}` : route;
 }
 
 export function toImportJobRoute(jobId: string): string {
@@ -33,17 +43,32 @@ export const ROUTE_QUERY = {
   search: 'q',
   status: 'status',
   stockLevel: 'stock',
+  state: 'state',
+  sort: 'sort',
+  storeFilter: 'stores',
+  storeId: 'store',
+} as const;
+
+/** A table's page and rows per page, kept in the URL with its filters. */
+export const PAGINATION_QUERY = {
+  page: 'page',
+  pageSize: 'per',
 } as const;
 
 /** Filters of the activity page, kept in the URL so a filtered log can be shared. */
 export const ACTIVITY_ROUTE_QUERY = {
   action: 'action',
   outcome: 'outcome',
+  sort: 'sort',
 } as const;
 
-export function toProductsRoute(filter: { gap?: string } = {}): string {
+export function toProductsRoute(
+  filter: { gap?: string; storeFilter?: string; storeId?: string } = {},
+): string {
   const query = new URLSearchParams();
   if (filter.gap) query.set(ROUTE_QUERY.gap, filter.gap);
+  if (filter.storeFilter) query.set(ROUTE_QUERY.storeFilter, filter.storeFilter);
+  if (filter.storeId) query.set(ROUTE_QUERY.storeId, filter.storeId);
   const search = query.toString();
   return search ? `${ROUTES.products}?${search}` : ROUTES.products;
 }

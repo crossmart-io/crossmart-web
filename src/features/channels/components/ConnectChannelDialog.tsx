@@ -22,8 +22,11 @@ interface ConnectChannelDialogProps {
   workspaceId: string;
   channel: ChannelInfo;
   connect: ConnectableChannel;
-  /** The button that opens the dialog. */
-  trigger: ReactNode;
+  /** The button that opens the dialog. Omit it to open the dialog with `open` instead. */
+  trigger?: ReactNode;
+  /** Controls the dialog from outside, such as from a menu item. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   /** Prefills the account, to connect it again. */
   initialAccount?: string;
 }
@@ -44,8 +47,11 @@ export function ConnectChannelDialog({
   connect,
   trigger,
   initialAccount = '',
+  open: controlledOpen,
+  onOpenChange,
 }: ConnectChannelDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [uncontrolledOpen, setUncontrolledOpen] = useState(false);
+  const open = controlledOpen ?? uncontrolledOpen;
   const [account, setAccount] = useState(initialAccount);
   const start = useStartChannelAuthorization(workspaceId);
   // After success the browser is leaving for the channel, so the form stays busy.
@@ -53,7 +59,8 @@ export function ConnectChannelDialog({
 
   function handleOpenChange(nextOpen: boolean) {
     if (isBusy) return;
-    setOpen(nextOpen);
+    setUncontrolledOpen(nextOpen);
+    onOpenChange?.(nextOpen);
     if (!nextOpen) {
       setAccount(initialAccount);
       start.reset();
@@ -67,7 +74,7 @@ export function ConnectChannelDialog({
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogTrigger asChild>{trigger}</DialogTrigger>
+      {trigger && <DialogTrigger asChild>{trigger}</DialogTrigger>}
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Connect {channel.name}</DialogTitle>

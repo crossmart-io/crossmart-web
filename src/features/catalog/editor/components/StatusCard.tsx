@@ -16,9 +16,9 @@ import { EditorCard } from './EditorCard';
 const STATUS_FIELD_ID = 'status';
 
 const STATUS_HINTS: Record<ProductStatus, string> = {
-  [ProductStatus.ACTIVE]: 'Ready to list on your channels.',
-  [ProductStatus.DRAFT]: 'Hidden from channels while you work on it.',
-  [ProductStatus.ARCHIVED]: 'Kept for your records and removed from channels.',
+  [ProductStatus.ACTIVE]: 'Ready to list in your stores.',
+  [ProductStatus.DRAFT]: 'Hidden from your stores while you work on it.',
+  [ProductStatus.ARCHIVED]: 'Kept for your records and removed from your stores.',
 };
 
 function isProductStatus(value: string): value is ProductStatus {

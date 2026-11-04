@@ -7,6 +7,28 @@ import { setOrDeleteParam } from '@/lib/search-params';
 import { SEARCH_DEBOUNCE_MS } from '../catalog.constants';
 import { toCatalogGap } from '../catalog-gap';
 import { ALL_STATUSES, type StatusFilter, toStatusFilter, toStatusQuery } from '../product-status';
+import { type ProductSort, ProductStoreFilter } from '@/api/schema';
+import { type SortOption, toSortOption } from '@/components/lists/sort-options';
+import { PRODUCT_SORTS } from '../catalog.constants';
+
+/** The products table's store filter, as the URL holds it. */
+export interface StoreFilterValue {
+  filter?: ProductStoreFilter;
+  storeId?: string;
+}
+
+/** Store filters about one store need its id; without one they are dropped. */
+const STORE_FILTERS_WITH_STORE: ReadonlySet<ProductStoreFilter> = new Set([
+  ProductStoreFilter.in_store,
+  ProductStoreFilter.not_in_store,
+]);
+
+function toStoreFilter(filter: string | null, storeId: string | null): StoreFilterValue {
+  const known = Object.values(ProductStoreFilter).find((value) => value === filter);
+  if (!known) return {};
+  if (STORE_FILTERS_WITH_STORE.has(known)) return storeId ? { filter: known, storeId } : {};
+  return { filter: known };
+}
 
 /** The filters a saved view stores: absent ones mean "any". */
 export interface ListFilterValues {
@@ -25,6 +47,11 @@ export interface ProductListFilters {
   setStatus: (status: StatusFilter) => void;
   gap: CatalogGap | undefined;
   clearGap: () => void;
+  /** Which stores the products are in, with the store it is about when there is one. */
+  store: StoreFilterValue;
+  setStore: (store: StoreFilterValue) => void;
+  sort: SortOption<ProductSort>;
+  setSort: (value: string) => void;
   isFiltered: boolean;
   clearAll: () => void;
   /** Replaces every filter at once, as opening a saved view does. */
@@ -40,6 +67,11 @@ export function useProductListFilters(): ProductListFilters {
   const updateParams = useSearchParamsUpdater();
   const status = toStatusFilter(searchParams.get(ROUTE_QUERY.status));
   const gap = toCatalogGap(searchParams.get(ROUTE_QUERY.gap));
+  const store = toStoreFilter(
+    searchParams.get(ROUTE_QUERY.storeFilter),
+    searchParams.get(ROUTE_QUERY.storeId),
+  );
+  const sort = toSortOption(PRODUCT_SORTS, searchParams.get(ROUTE_QUERY.sort));
   const {
     value: search,
     setValue: setSearch,
@@ -57,7 +89,19 @@ export function useProductListFilters(): ProductListFilters {
       ),
     gap,
     clearGap: () => updateParams((params) => params.delete(ROUTE_QUERY.gap)),
-    isFiltered: Boolean(debouncedSearch) || status !== ALL_STATUSES || Boolean(gap),
+    store,
+    setStore: (next) =>
+      updateParams((params) => {
+        setOrDeleteParam(params, ROUTE_QUERY.storeFilter, next.filter ?? '');
+        setOrDeleteParam(params, ROUTE_QUERY.storeId, next.storeId ?? '');
+      }),
+    sort,
+    setSort: (value) =>
+      updateParams((params) =>
+        setOrDeleteParam(params, ROUTE_QUERY.sort, value === PRODUCT_SORTS[0].value ? '' : value),
+      ),
+    isFiltered:
+      Boolean(debouncedSearch) || status !== ALL_STATUSES || Boolean(gap) || Boolean(store.filter),
     clearAll: () => {
       setSearch('');
       updateParams((params) => Object.values(ROUTE_QUERY).forEach((key) => params.delete(key)));

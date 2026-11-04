@@ -19,10 +19,12 @@ interface ProductEditorProps {
   product?: Product;
   /** Extra cards for the side column. */
   aside?: ReactNode;
+  /** Where the product is listed, in place of the placeholder card. */
+  channels?: ReactNode;
 }
 
 /** Create and edit a product, laid out like the store admins sellers already know. */
-export function ProductEditor({ workspace, product, aside }: ProductEditorProps) {
+export function ProductEditor({ workspace, product, aside, channels }: ProductEditorProps) {
   const editor = useProductEditorForm(workspace.id, product);
   const { isDirty, isSubmitting } = editor.form.formState;
 
@@ -52,6 +54,7 @@ export function ProductEditor({ workspace, product, aside }: ProductEditorProps)
             hasOptions={editor.hasOptions}
             onPendingUploadsChange={editor.setPendingUploads}
             aside={aside}
+            channels={channels}
           />
         </form>
         {product && (

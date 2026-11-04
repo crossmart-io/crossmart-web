@@ -16,6 +16,8 @@ import type { ProductSummary } from '../catalog.types';
 import { ProductStatusBadge } from './ProductStatusBadge';
 import { ProductThumbnail } from './ProductThumbnail';
 import { StockLabel } from './StockLabel';
+// Imported from its file, not the feature's index, which itself uses the catalog.
+import { ProductStoreIcons } from '@/features/listings/components/ProductStoreIcons';
 
 const NO_VALUE = '—';
 
@@ -39,7 +41,7 @@ export function ProductsTable({
       className={cn('rounded-lg border transition-opacity', isRefreshing && 'opacity-60')}
       aria-busy={isRefreshing}
     >
-      <Table>
+      <Table stickyHeader>
         <TableHeader>
           <TableRow>
             {selection && (
@@ -53,6 +55,7 @@ export function ProductsTable({
             )}
             <TableHead>Product</TableHead>
             <TableHead className="hidden sm:table-cell">Status</TableHead>
+            <TableHead className="hidden sm:table-cell">Channels</TableHead>
             <TableHead className="hidden md:table-cell">Inventory</TableHead>
             <TableHead className="hidden text-right md:table-cell">Price</TableHead>
             <TableHead className="hidden lg:table-cell">Vendor</TableHead>
@@ -147,6 +150,9 @@ function ProductRow({ product, currency, selection, isRefreshing }: ProductRowPr
       </TableCell>
       <TableCell className="hidden sm:table-cell">
         <ProductStatusBadge status={product.status} />
+      </TableCell>
+      <TableCell className="hidden sm:table-cell">
+        <ProductStoreIcons stores={product.stores} />
       </TableCell>
       <TableCell className="hidden md:table-cell">
         <StockLabel totalAvailable={product.totalAvailable} variantCount={product.variantCount} />

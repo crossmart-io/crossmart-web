@@ -481,6 +481,245 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/products': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The store’s products with their state on the channel
+     * @description Products the store should have or still has: listed, pending (being published), failed or removing (being delisted). Pass `state=excluded` for the catalog products it does not have. Counts per state follow `search`, so they can label filter tabs.
+     */
+    get: operations['ChannelProductsController_listProducts_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/pricing': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Set the connection’s pricing rule
+     * @description The store’s listings get the new prices at once. A null rule sends catalog prices.
+     */
+    put: operations['ChannelRulesController_updatePricing_v1'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/pricing/preview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Price a real product with a rule, saved or not
+     * @description Without `productId`, the first product of the selection is priced.
+     */
+    post: operations['ChannelRulesController_previewPricing_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/product-selection': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Set the store’s automatic rule
+     * @description Applies at once: products the rule now adds are published, and products it now drops are delisted. Products added by hand stay; those removed by hand stay out.
+     */
+    put: operations['ChannelSelectionController_updateSelection_v1'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/product-selection/preview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /** The products a selection lists, with counts, saved or not */
+    post: operations['ChannelSelectionController_previewSelection_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/sync': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Publish the selected products and sync the connection
+     * @description Queues every selected product to be published (or updated when the channel has it) and every listing that is no longer selected to be delisted. Jobs run in the background; follow them in the listings.
+     */
+    post: operations['ChannelSyncController_requestSync_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/listings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** The connection’s listings, most recently changed first */
+    get: operations['ChannelSyncController_listListings_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/products/add': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add products to the store
+     * @description They stay until removed and are published at once.
+     */
+    post: operations['StoreProductsController_add_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/products/remove': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Remove products from the store
+     * @description They are delisted at once, and the automatic rule leaves them out.
+     */
+    post: operations['StoreProductsController_remove_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The product on each connected channel
+     * @description Listing status, channel prices with their explanation, shown stock and overrides.
+     */
+    get: operations['ProductChannelsController_list_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Add the product to a store
+     * @description The product stays in the store until it is removed, whatever the automatic rule says, and is published there at once.
+     */
+    post: operations['ProductChannelsController_add_v1'];
+    /**
+     * Remove the product from a store
+     * @description The product is delisted there at once, and the automatic rule leaves it out.
+     */
+    delete: operations['ProductChannelsController_remove_v1'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/override': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Override the product on one channel
+     * @description Replaces the overrides: absent or null fields follow the product. When the channel already lists the product, an update is queued.
+     */
+    put: operations['ProductChannelsController_saveOverride_v1'];
+    post?: never;
+    /** Remove the product’s overrides on one channel */
+    delete: operations['ProductChannelsController_clearOverride_v1'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -555,6 +794,12 @@ export interface components {
     ProductStatus: ProductStatus;
     /** @enum {string} */
     CatalogGap: CatalogGap;
+    /** @enum {string} */
+    ProductStoreFilter: ProductStoreFilter;
+    /** @enum {string} */
+    ProductSort: ProductSort;
+    /** @enum {string} */
+    SortDirection: SortDirection;
     PriceRangeDto: {
       /**
        * @description Decimal string in the workspace currency
@@ -563,6 +808,21 @@ export interface components {
       min: string;
       /** @example 89.00 */
       max: string;
+    };
+    /** @enum {string} */
+    ChannelType: ChannelType;
+    /** @enum {string} */
+    ListingStatus: ListingStatus;
+    /** @enum {string} */
+    ListingSource: ListingSource;
+    ProductStoreBadgeDto: {
+      /** Format: uuid */
+      connectionId: string;
+      channel: components['schemas']['ChannelType'];
+      /** @example Demo Store */
+      storeName: string;
+      status: components['schemas']['ListingStatus'];
+      source: components['schemas']['ListingSource'];
     };
     ProductSummaryDto: {
       /** Format: uuid */
@@ -577,6 +837,8 @@ export interface components {
       totalAvailable: number | null;
       priceRange: components['schemas']['PriceRangeDto'] | null;
       imageUrl: string | null;
+      /** @description The stores it is in, in the order it joined them */
+      stores: components['schemas']['ProductStoreBadgeDto'][];
       /** Format: date-time */
       updatedAt: string;
     };
@@ -584,6 +846,8 @@ export interface components {
       items: components['schemas']['ProductSummaryDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
     /** @enum {string} */
     OutOfStockPolicy: OutOfStockPolicy;
@@ -603,6 +867,11 @@ export interface components {
       price: string;
       /** @example 99.00 */
       compareAtPrice: string | null;
+      /**
+       * @description What you pay per unit; never shown to buyers
+       * @example 40.00
+       */
+      cost: string | null;
       weightGrams: number | null;
       requiresShipping: boolean;
       taxable: boolean;
@@ -657,6 +926,11 @@ export interface components {
       price: string;
       /** @example 24.90 */
       compareAtPrice?: string;
+      /**
+       * @description What you pay per unit. Used for pricing floors; never shown to buyers.
+       * @example 40.00
+       */
+      cost?: string;
       weightGrams?: number;
       /** @default true */
       requiresShipping: boolean;
@@ -705,6 +979,11 @@ export interface components {
       price: string;
       /** @example 24.90 */
       compareAtPrice?: string;
+      /**
+       * @description What you pay per unit. Used for pricing floors; never shown to buyers.
+       * @example 40.00
+       */
+      cost?: string;
       weightGrams?: number;
       /** @default true */
       requiresShipping: boolean;
@@ -874,6 +1153,8 @@ export interface components {
       items: components['schemas']['ImportJobDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
     /** @enum {string} */
     ImportIssueOutcome: ImportIssueOutcome;
@@ -983,9 +1264,13 @@ export interface components {
       items: components['schemas']['ActivityEventDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
     /** @enum {string} */
     StockLevel: StockLevel;
+    /** @enum {string} */
+    InventorySort: InventorySort;
     InventoryItemDto: {
       /** Format: uuid */
       inventoryItemId: string;
@@ -1015,6 +1300,8 @@ export interface components {
       items: components['schemas']['InventoryItemDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
     /** @enum {string} */
     StockAdjustmentMode: StockAdjustmentMode;
@@ -1051,12 +1338,9 @@ export interface components {
       items: components['schemas']['InventoryMovementDto'][];
       /** @description Null on the last page */
       nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
     };
-    /**
-     * @description Set when the account was connected
-     * @enum {string}
-     */
-    ChannelType: ChannelType;
     /**
      * @description Set when connecting failed
      * @enum {string}
@@ -1072,6 +1356,11 @@ export interface components {
     };
     /** @enum {string} */
     ChannelConnectionStatus: ChannelConnectionStatus;
+    /**
+     * @description What the connection cannot do until the merchant approves the app again
+     * @enum {string}
+     */
+    ChannelFeature: ChannelFeature;
     ShopifyLocationDto: {
       /** @example gid://shopify/Location/1001 */
       id: string;
@@ -1092,16 +1381,45 @@ export interface components {
       primaryLocation: components['schemas']['ShopifyLocationDto'] | null;
     };
     ProductSelectionFilterDto: {
+      /** @description Matches title, handle or SKU */
       search?: string;
       status?: components['schemas']['ProductStatus'];
       gap?: components['schemas']['CatalogGap'];
+      /** @description Products with any of these tags */
       tags?: string[];
+      /** @description Products of this vendor, ignoring case */
       vendor?: string;
     };
     ProductSelectionRuleDto: {
-      filter: components['schemas']['ProductSelectionFilterDto'];
+      filter: components['schemas']['ProductSelectionFilterDto'] | null;
       includeProductIds: string[];
       excludeProductIds: string[];
+    };
+    /** @enum {string} */
+    PriceRounding: PriceRounding;
+    PricingFloorDto: {
+      /**
+       * @description Never price below cost plus this percentage (0 to 1000)
+       * @example 30
+       */
+      minMarginPercent: string;
+    };
+    /** @enum {string} */
+    CompareAtMode: CompareAtMode;
+    PricingRuleDto: {
+      /**
+       * @description Markup (positive) or discount (negative), -90 to 500
+       * @example 15
+       */
+      adjustmentPercent: string;
+      /**
+       * @description Added after the percentage; may be negative
+       * @example 0
+       */
+      fixedAmount: string;
+      rounding: components['schemas']['PriceRounding'];
+      floor: components['schemas']['PricingFloorDto'] | null;
+      compareAt: components['schemas']['CompareAtMode'];
     };
     ChannelConnectionDto: {
       /** Format: uuid */
@@ -1118,10 +1436,14 @@ export interface components {
       /** @description Why it needs re-auth or failed */
       statusReason: string | null;
       grantedScopes: string[];
+      /** @description What the connection cannot do until the merchant approves the app again */
+      missingFeatures: components['schemas']['ChannelFeature'][];
       /** @description The store’s details, for Shopify connections */
       shopify: components['schemas']['ShopifySettingsDto'] | null;
       /** @description Which products the connection lists; null lists every product */
       productSelection: components['schemas']['ProductSelectionRuleDto'] | null;
+      /** @description How the connection prices variants; null sends catalog prices */
+      pricing: components['schemas']['PricingRuleDto'] | null;
       /** Format: date-time */
       connectedAt: string;
       /** Format: date-time */
@@ -1132,6 +1454,8 @@ export interface components {
       createdAt: string;
       /** Format: date-time */
       updatedAt: string;
+      /** @description Listings in this store whose last sync failed */
+      failedListings: number;
     };
     StartAuthorizationDto: {
       channel: components['schemas']['ChannelType'];
@@ -1146,6 +1470,233 @@ export interface components {
       authorizationUrl: string;
       /** @example demo-store.myshopify.com */
       externalAccountId: string;
+    };
+    /** @enum {string} */
+    ChannelProductState: ChannelProductState;
+    /** @enum {string} */
+    ChannelProductSort: ChannelProductSort;
+    ListingSummaryDto: {
+      /** Format: uuid */
+      id: string;
+      status: components['schemas']['ListingStatus'];
+      /** @description How the product joined the store: by hand, by an import, or by the automatic rule */
+      source: components['schemas']['ListingSource'];
+      /** @description The product’s id on the channel */
+      externalId: string | null;
+      /** @description Where to see it on the channel */
+      externalUrl: string | null;
+      /** @description Why the last sync failed */
+      lastError: string | null;
+      /** Format: date-time */
+      lastSyncedAt: string | null;
+    };
+    ChannelProductDto: {
+      product: components['schemas']['ProductSummaryDto'];
+      state: components['schemas']['ChannelProductState'];
+      listing: components['schemas']['ListingSummaryDto'] | null;
+    };
+    ChannelProductCountsDto: {
+      /** @description Selected and on the channel */
+      listed: number;
+      /** @description Selected, waiting for the next sync to publish them */
+      pending: number;
+      /** @description Their last sync failed */
+      failed: number;
+      /** @description On the channel but no longer selected; the next sync delists them */
+      removing: number;
+      /** @description Removed by hand and off the channel; adding them back undoes it */
+      removed_by_hand: number;
+      /** @description Neither selected nor on the channel */
+      excluded: number;
+    };
+    ChannelProductPageDto: {
+      items: components['schemas']['ChannelProductDto'][];
+      counts: components['schemas']['ChannelProductCountsDto'];
+      nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
+    };
+    UpdatePricingDto: {
+      /** @description The rule; null removes it, so catalog prices are sent as they are */
+      rule: components['schemas']['PricingRuleDto'] | null;
+    };
+    PricingPreviewRequestDto: {
+      /** @description The rule to try, saved or not; null shows catalog prices */
+      rule: components['schemas']['PricingRuleDto'] | null;
+      /**
+       * Format: uuid
+       * @description The product to price; defaults to the first selected product
+       */
+      productId?: string;
+    };
+    PricingPreviewProductDto: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+    };
+    /** @enum {string} */
+    PriceSource: PriceSource;
+    /** @enum {string} */
+    PriceStepKind: PriceStepKind;
+    PriceStepDto: {
+      kind: components['schemas']['PriceStepKind'];
+      /** @example +15% */
+      label: string;
+      /**
+       * @description The price after this step
+       * @example 102.35
+       */
+      amount: string;
+    };
+    /** @enum {string} */
+    PriceWarning: PriceWarning;
+    ResolvedPriceDto: {
+      /** @example 102.99 */
+      price: string;
+      compareAtPrice: string | null;
+      source: components['schemas']['PriceSource'];
+      steps: components['schemas']['PriceStepDto'][];
+      /** @example $89.00 → +15% → .99 = $102.99 */
+      explanation: string;
+      warnings: components['schemas']['PriceWarning'][];
+    };
+    PricingPreviewVariantDto: {
+      /** Format: uuid */
+      variantId: string;
+      /** @example Blue / Large */
+      title: string;
+      /** @example 89.00 */
+      basePrice: string;
+      cost: string | null;
+      resolved: components['schemas']['ResolvedPriceDto'];
+    };
+    PricingPreviewDto: {
+      /** @example USD */
+      currencyCode: string;
+      product: components['schemas']['PricingPreviewProductDto'] | null;
+      variants: components['schemas']['PricingPreviewVariantDto'][];
+    };
+    UpdateProductSelectionDto: {
+      /** @description The selection; null lists every product */
+      rule: components['schemas']['ProductSelectionRuleDto'] | null;
+    };
+    SelectionPreviewDto: {
+      /** @description Products the selection lists */
+      total: number;
+      /** @description Products the filter matches, before the manual lists */
+      matchingFilter: number;
+      /** @description Products added by hand that the filter does not match */
+      addedManually: number;
+      /** @description Products the filter matches that were removed by hand */
+      removedManually: number;
+      items: components['schemas']['ProductSummaryDto'][];
+      nextCursor: string | null;
+      /** @description Products saving this rule publishes now */
+      toPublish: number;
+      /** @description Products saving this rule delists now */
+      toRemove: number;
+    };
+    SyncRequestResultDto: {
+      /** @description Selected products queued to be published or updated */
+      queued: number;
+      /** @description Listings queued to be delisted, as they are no longer selected */
+      delisting: number;
+    };
+    ChannelListingDto: {
+      /** Format: uuid */
+      id: string;
+      status: components['schemas']['ListingStatus'];
+      /** @description How the product joined the store: by hand, by an import, or by the automatic rule */
+      source: components['schemas']['ListingSource'];
+      /** @description The product’s id on the channel */
+      externalId: string | null;
+      /** @description Where to see it on the channel */
+      externalUrl: string | null;
+      /** @description Why the last sync failed */
+      lastError: string | null;
+      /** Format: date-time */
+      lastSyncedAt: string | null;
+      /** Format: uuid */
+      productId: string;
+      productTitle: string;
+      imageUrl: string | null;
+      variantCount: number;
+    };
+    ChannelListingPageDto: {
+      items: components['schemas']['ChannelListingDto'][];
+      nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
+    };
+    StoreProductsDto: {
+      productIds: string[];
+    };
+    StoreProductsResultDto: {
+      /** @description Products added or removed */
+      count: number;
+    };
+    ConnectionSummaryDto: {
+      /** Format: uuid */
+      id: string;
+      channel: components['schemas']['ChannelType'];
+      displayName: string;
+      status: components['schemas']['ChannelConnectionStatus'];
+      /** @example USD */
+      currencyCode: string;
+    };
+    /** @enum {string} */
+    ListingVisibility: ListingVisibility;
+    VariantPriceOverrideDto: {
+      /** Format: uuid */
+      variantId: string;
+      /** @example 79.00 */
+      price: string | null;
+      /** @example 99.00 */
+      compareAtPrice: string | null;
+    };
+    ListingOverrideViewDto: {
+      title: string | null;
+      descriptionHtml: string | null;
+      tags: string[] | null;
+      mediaUrls: string[] | null;
+      visibility: components['schemas']['ListingVisibility'] | null;
+      inventoryBuffer: number | null;
+      maxQuantity: number | null;
+      variantPrices: components['schemas']['VariantPriceOverrideDto'][];
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    ChannelVariantDto: {
+      /** Format: uuid */
+      variantId: string;
+      /** @example Blue / Large */
+      title: string;
+      price: components['schemas']['ResolvedPriceDto'];
+      /** @description The stock the channel shows; null when the variant does not track stock */
+      quantity: number | null;
+    };
+    ProductChannelDto: {
+      connection: components['schemas']['ConnectionSummaryDto'];
+      /** @description Whether the connection’s product selection includes it */
+      selected: boolean;
+      listing: components['schemas']['ListingSummaryDto'] | null;
+      override: components['schemas']['ListingOverrideViewDto'] | null;
+      variants: components['schemas']['ChannelVariantDto'][];
+    };
+    ListingOverrideDto: {
+      title?: string | null;
+      descriptionHtml?: string | null;
+      /** @description Replaces the product’s tags */
+      tags?: string[] | null;
+      /** @description The product’s image URLs to show, in order */
+      mediaUrls?: string[] | null;
+      /** @description Show or hide on this channel, whatever the product’s status */
+      visibility?: components['schemas']['ListingVisibility'] | null;
+      /** @description Units held back */
+      inventoryBuffer?: number | null;
+      /** @description Most units shown */
+      maxQuantity?: number | null;
+      variantPrices?: components['schemas']['VariantPriceOverrideDto'][];
     };
   };
   responses: never;
@@ -1439,8 +1990,20 @@ export interface operations {
         status?: components['schemas']['ProductStatus'];
         /** @description Only products that lack this value */
         gap?: components['schemas']['CatalogGap'];
+        /** @description Only products with any of these tags. Repeat the parameter for several. */
+        tags?: string[];
+        /** @description Only products of this vendor, ignoring case */
+        vendor?: string;
+        /** @description By the stores products are in; `in_store` and `not_in_store` need `storeId` */
+        storeFilter?: components['schemas']['ProductStoreFilter'];
+        /** @description The store `storeFilter` is about */
+        storeId?: string;
+        sort?: components['schemas']['ProductSort'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;
@@ -1679,8 +2242,14 @@ export interface operations {
   ImportJobsController_list_v1: {
     parameters: {
       query?: {
+        status?: components['schemas']['ImportJobStatus'];
+        /** @description Where the records came from: a file of this format, or a channel */
+        format?: components['schemas']['CatalogImportFormat'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;
@@ -1781,8 +2350,11 @@ export interface operations {
         action?: components['schemas']['ActivityAction'];
         /** @description `FAILED` lists only what went wrong */
         outcome?: components['schemas']['ActivityOutcome'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
         subjectType?: components['schemas']['ActivitySubjectType'];
         /** @description Events about this record, including bulk actions that touched it */
@@ -1816,8 +2388,11 @@ export interface operations {
         action?: components['schemas']['ActivityAction'];
         /** @description `FAILED` lists only what went wrong */
         outcome?: components['schemas']['ActivityOutcome'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;
@@ -1845,8 +2420,12 @@ export interface operations {
         /** @description Matches the SKU or the product title */
         search?: string;
         stockLevel?: components['schemas']['StockLevel'];
+        sort?: components['schemas']['InventorySort'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;
@@ -1896,8 +2475,12 @@ export interface operations {
   InventoryItemsController_history_v1: {
     parameters: {
       query?: {
+        reason?: components['schemas']['InventoryMovementReason'];
+        direction?: components['schemas']['SortDirection'];
         /** @description `nextCursor` from the previous page */
         cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
         limit?: number;
       };
       header?: never;
@@ -2031,6 +2614,366 @@ export interface operations {
       };
     };
   };
+  ChannelProductsController_listProducts_v1: {
+    parameters: {
+      query?: {
+        state?: components['schemas']['ChannelProductState'];
+        /** @description Matches title, handle or SKU */
+        search?: string;
+        sort?: components['schemas']['ChannelProductSort'];
+        direction?: components['schemas']['SortDirection'];
+        cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelProductPageDto'];
+        };
+      };
+    };
+  };
+  ChannelRulesController_updatePricing_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdatePricingDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
+  ChannelRulesController_previewPricing_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['PricingPreviewRequestDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PricingPreviewDto'];
+        };
+      };
+    };
+  };
+  ChannelSelectionController_updateSelection_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateProductSelectionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
+  ChannelSelectionController_previewSelection_v1: {
+    parameters: {
+      query?: {
+        /** @description `nextCursor` from the previous page */
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateProductSelectionDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SelectionPreviewDto'];
+        };
+      };
+    };
+  };
+  ChannelSyncController_requestSync_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SyncRequestResultDto'];
+        };
+      };
+    };
+  };
+  ChannelSyncController_listListings_v1: {
+    parameters: {
+      query?: {
+        status?: components['schemas']['ListingStatus'];
+        cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelListingPageDto'];
+        };
+      };
+    };
+  };
+  StoreProductsController_add_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['StoreProductsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoreProductsResultDto'];
+        };
+      };
+    };
+  };
+  StoreProductsController_remove_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['StoreProductsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['StoreProductsResultDto'];
+        };
+      };
+    };
+  };
+  ProductChannelsController_list_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductChannelDto'][];
+        };
+      };
+    };
+  };
+  ProductChannelsController_add_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductChannelDto'];
+        };
+      };
+    };
+  };
+  ProductChannelsController_remove_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductChannelDto'];
+        };
+      };
+    };
+  };
+  ProductChannelsController_saveOverride_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ListingOverrideDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductChannelDto'];
+        };
+      };
+    };
+  };
+  ProductChannelsController_clearOverride_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductChannelDto'];
+        };
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -2088,6 +3031,41 @@ export enum CatalogGap {
   sku = 'sku',
   barcode = 'barcode',
   out_of_stock = 'out_of_stock',
+}
+export enum ProductStoreFilter {
+  in_store = 'in_store',
+  not_in_store = 'not_in_store',
+  in_no_store = 'in_no_store',
+  with_errors = 'with_errors',
+}
+export enum ProductSort {
+  title = 'title',
+  updatedAt = 'updatedAt',
+  createdAt = 'createdAt',
+}
+export enum SortDirection {
+  asc = 'asc',
+  desc = 'desc',
+}
+export enum ChannelType {
+  shopify = 'shopify',
+  ebay = 'ebay',
+  google_merchant = 'google_merchant',
+  etsy = 'etsy',
+  amazon = 'amazon',
+  walmart = 'walmart',
+}
+export enum ListingStatus {
+  PENDING = 'PENDING',
+  ACTIVE = 'ACTIVE',
+  INACTIVE = 'INACTIVE',
+  ERROR = 'ERROR',
+  DELISTED = 'DELISTED',
+}
+export enum ListingSource {
+  MANUAL = 'MANUAL',
+  IMPORT = 'IMPORT',
+  RULE = 'RULE',
 }
 export enum OutOfStockPolicy {
   STOP_SELLING = 'STOP_SELLING',
@@ -2157,6 +3135,16 @@ export enum ActivityAction {
   channel_connected = 'channel_connected',
   channel_disconnected = 'channel_disconnected',
   channel_connect_failed = 'channel_connect_failed',
+  listing_published = 'listing_published',
+  listing_updated = 'listing_updated',
+  listing_sync_failed = 'listing_sync_failed',
+  listing_delisted = 'listing_delisted',
+  listing_added = 'listing_added',
+  listing_removed = 'listing_removed',
+  listing_override_updated = 'listing_override_updated',
+  channel_pricing_updated = 'channel_pricing_updated',
+  channel_selection_updated = 'channel_selection_updated',
+  channel_sync_requested = 'channel_sync_requested',
 }
 export enum ActivityOutcome {
   SUCCEEDED = 'SUCCEEDED',
@@ -2180,6 +3168,11 @@ export enum StockLevel {
   out_of_stock = 'out_of_stock',
   untracked = 'untracked',
 }
+export enum InventorySort {
+  title = 'title',
+  available = 'available',
+  updated_at = 'updated_at',
+}
 export enum StockAdjustmentMode {
   delta = 'delta',
   set = 'set',
@@ -2194,14 +3187,6 @@ export enum InventoryMovementReason {
   LOST = 'LOST',
   SOLD = 'SOLD',
   IMPORTED = 'IMPORTED',
-}
-export enum ChannelType {
-  shopify = 'shopify',
-  ebay = 'ebay',
-  google_merchant = 'google_merchant',
-  etsy = 'etsy',
-  amazon = 'amazon',
-  walmart = 'walmart',
 }
 export enum ConnectFailure {
   invalid_state = 'invalid_state',
@@ -2219,4 +3204,53 @@ export enum ChannelConnectionStatus {
   NEEDS_REAUTH = 'NEEDS_REAUTH',
   DISCONNECTED = 'DISCONNECTED',
   ERROR = 'ERROR',
+}
+export enum ChannelFeature {
+  storefront_visibility = 'storefront_visibility',
+}
+export enum PriceRounding {
+  none = 'none',
+  ending_99 = 'ending_99',
+  ending_95 = 'ending_95',
+  whole = 'whole',
+}
+export enum CompareAtMode {
+  adjust = 'adjust',
+  keep = 'keep',
+  omit = 'omit',
+}
+export enum ChannelProductState {
+  listed = 'listed',
+  pending = 'pending',
+  failed = 'failed',
+  removing = 'removing',
+  removed_by_hand = 'removed_by_hand',
+  excluded = 'excluded',
+}
+export enum ChannelProductSort {
+  title = 'title',
+  updatedAt = 'updatedAt',
+}
+export enum PriceSource {
+  override = 'override',
+  rule = 'rule',
+  base = 'base',
+}
+export enum PriceStepKind {
+  base = 'base',
+  percent = 'percent',
+  fixed_amount = 'fixed_amount',
+  rounding = 'rounding',
+  floor = 'floor',
+  override = 'override',
+}
+export enum PriceWarning {
+  missing_cost = 'missing_cost',
+  below_floor = 'below_floor',
+  compare_at_dropped = 'compare_at_dropped',
+  clamped_to_zero = 'clamped_to_zero',
+}
+export enum ListingVisibility {
+  VISIBLE = 'VISIBLE',
+  HIDDEN = 'HIDDEN',
 }

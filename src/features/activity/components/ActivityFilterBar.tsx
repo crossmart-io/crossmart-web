@@ -1,5 +1,7 @@
 import { useId } from 'react';
 import { ActivityAction } from '@/api/schema';
+import { SortSelect } from '@/components/lists/SortSelect';
+import { TIME_SORTS } from '@/components/lists/sort-options';
 import { Label } from '@/components/ui/label';
 import {
   Select,
@@ -35,13 +37,16 @@ export function ActivityFilterBar({ filters }: { filters: ActivityFilters }) {
           ))}
         </SelectContent>
       </Select>
-      <div className="flex items-center gap-2">
-        <Switch
-          id={failuresId}
-          checked={filters.failuresOnly}
-          onCheckedChange={filters.setFailuresOnly}
-        />
-        <Label htmlFor={failuresId}>Failures only</Label>
+      <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Switch
+            id={failuresId}
+            checked={filters.failuresOnly}
+            onCheckedChange={filters.setFailuresOnly}
+          />
+          <Label htmlFor={failuresId}>Failures only</Label>
+        </div>
+        <SortSelect options={TIME_SORTS} value={filters.sort.value} onChange={filters.setSort} />
       </div>
     </div>
   );

@@ -1,7 +1,8 @@
+import type { SortOption } from '@/components/lists/sort-options';
+import { ProductSort, SortDirection } from '@/api/schema';
 export const PRODUCTS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/products';
 export const PRODUCT_ENDPOINT = '/api/v1/workspaces/{workspaceId}/products/{productId}';
 
-export const PRODUCTS_PAGE_SIZE = 25;
 export const SEARCH_DEBOUNCE_MS = 300;
 
 export const UPLOAD_FILE_FIELD = 'file';
@@ -45,3 +46,29 @@ export const VIEW_FEEDBACK = {
   saved: 'View saved',
   deleted: 'View deleted',
 } as const;
+
+/** Explains the variant cost field wherever it is edited. */
+export const COST_HELP = 'What you pay per unit. Used for pricing floors; never shown to buyers.';
+
+/** The products table's orders, by their URL value; the first is the default. */
+export const PRODUCT_SORTS: readonly [SortOption<ProductSort>, ...SortOption<ProductSort>[]] = [
+  { value: 'title-asc', label: 'Title A–Z', sort: ProductSort.title, direction: SortDirection.asc },
+  {
+    value: 'title-desc',
+    label: 'Title Z–A',
+    sort: ProductSort.title,
+    direction: SortDirection.desc,
+  },
+  {
+    value: 'updated-desc',
+    label: 'Recently updated',
+    sort: ProductSort.updatedAt,
+    direction: SortDirection.desc,
+  },
+  {
+    value: 'created-desc',
+    label: 'Newest first',
+    sort: ProductSort.createdAt,
+    direction: SortDirection.desc,
+  },
+];

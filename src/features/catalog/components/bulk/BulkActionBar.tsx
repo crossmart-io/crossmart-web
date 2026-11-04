@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Trash2, X } from 'lucide-react';
 import { BulkProductAction } from '@/api/schema';
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
@@ -13,10 +14,12 @@ import { BulkTagsPopover } from './BulkTagsPopover';
 interface BulkActionBarProps {
   workspaceId: string;
   selection: Selection;
+  /** More actions from other features, such as adding the products to a store. */
+  renderActions?: (productIds: string[]) => ReactNode;
 }
 
 /** Floats over the list while products are selected, like the editor's save bar. */
-export function BulkActionBar({ workspaceId, selection }: BulkActionBarProps) {
+export function BulkActionBar({ workspaceId, selection, renderActions }: BulkActionBarProps) {
   const bulkAction = useBulkProductAction(workspaceId);
   const productIds = [...selection.ids];
   const busy = bulkAction.isPending;
@@ -48,6 +51,7 @@ export function BulkActionBar({ workspaceId, selection }: BulkActionBarProps) {
         disabled={busy}
         onApply={(percent) => void run({ action: BulkProductAction.adjust_prices, percent })}
       />
+      {renderActions?.(productIds)}
       <ConfirmDialog
         trigger={
           <Button variant="destructive" size="sm" disabled={busy}>
@@ -56,7 +60,7 @@ export function BulkActionBar({ workspaceId, selection }: BulkActionBarProps) {
           </Button>
         }
         title={`Delete ${count}?`}
-        description="Their variants, images and stock history are deleted too. This cannot be undone."
+        description="Their variants, images and stock history are deleted too, and they are archived in every store that lists them. This cannot be undone."
         confirmLabel={`Delete ${count}`}
         onConfirm={async () => {
           await run({ action: BulkProductAction.delete });

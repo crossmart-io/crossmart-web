@@ -16,8 +16,14 @@ import type {
 
 const CONNECTION_ENDPOINTS = [CHANNEL_CONNECTIONS_ENDPOINT] as const;
 
-export function useChannelConnections(workspaceId: string) {
-  return api.useQuery('get', CHANNEL_CONNECTIONS_ENDPOINT, { params: { path: { workspaceId } } });
+/** The workspace's connections; waits until there is a workspace. */
+export function useChannelConnections(workspaceId: string | undefined) {
+  return api.useQuery(
+    'get',
+    CHANNEL_CONNECTIONS_ENDPOINT,
+    { params: { path: { workspaceId: workspaceId ?? '' } } },
+    { enabled: Boolean(workspaceId) },
+  );
 }
 
 /** Asks the API for the channel's authorize URL, then leaves the app for it. */

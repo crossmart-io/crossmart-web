@@ -16,3 +16,4 @@ export { ProductViewsBar } from './components/views/ProductViewsBar';
 export { useListSelection } from './hooks/useListSelection';
 export { useInvalidateCatalog } from './hooks/useInvalidateCatalog';
 export { ProductThumbnail } from './components/ProductThumbnail';
+export { PRODUCT_SORTS } from './catalog.constants';

@@ -2,13 +2,14 @@ import { Plus } from 'lucide-react';
 import { Link } from 'react-router';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Page } from '@/components/layout/Page';
-import { LoadMoreButton } from '@/components/lists/LoadMoreButton';
+import { TablePagination } from '@/components/lists/TablePagination';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/config/routes';
 import {
   ActiveFilterChip,
   BulkActionBar,
   CATALOG_GAP_COPY,
+  PRODUCT_SORTS,
   ProductFilters,
   type ProductListFilters,
   ProductsEmptyState,
@@ -22,10 +23,12 @@ import {
   useProductListFilters,
   useProducts,
 } from '@/features/catalog';
+import { useUrlPagination } from '@/hooks/usePagination';
 import type { Selection } from '@/hooks/useSelection';
-import { pluralize } from '@/lib/format';
 import { ImportProductsDialog } from '@/features/imports';
 import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
+import { ProductStoreFilterSelect, StoreMembershipMenu } from '@/features/listings';
+import { SortSelect } from '@/components/lists/SortSelect';
 
 function AddProductButton() {
   return (
@@ -67,9 +70,24 @@ export function ProductsPage() {
         onStatusChange={filters.setStatus}
         counts={counts}
       />
-      {filters.gap && (
-        <ActiveFilterChip label={CATALOG_GAP_COPY[filters.gap].label} onClear={filters.clearGap} />
-      )}
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-wrap items-center gap-2">
+          {workspace && (
+            <ProductStoreFilterSelect
+              workspaceId={workspace.id}
+              value={filters.store}
+              onChange={filters.setStore}
+            />
+          )}
+          {filters.gap && (
+            <ActiveFilterChip
+              label={CATALOG_GAP_COPY[filters.gap].label}
+              onClear={filters.clearGap}
+            />
+          )}
+        </div>
+        <SortSelect options={PRODUCT_SORTS} value={filters.sort.value} onChange={filters.setSort} />
+      </div>
       <ProductResults workspace={workspace} filters={filters} />
     </Page>
   );
@@ -82,12 +100,20 @@ interface ProductResultsProps {
 
 function ProductResults({ workspace, filters }: ProductResultsProps) {
   const selection = useListSelection(filters);
-  const products = useProducts({
-    workspaceId: workspace?.id,
-    search: filters.debouncedSearch,
-    status: toStatusQuery(filters.status),
-    gap: filters.gap,
-  });
+  const pagination = useUrlPagination();
+  const products = useProducts(
+    {
+      workspaceId: workspace?.id,
+      search: filters.debouncedSearch,
+      status: toStatusQuery(filters.status),
+      gap: filters.gap,
+      storeFilter: filters.store.filter,
+      storeId: filters.store.storeId,
+      sort: filters.sort.sort,
+      direction: filters.sort.direction,
+    },
+    pagination,
+  );
 
   if (products.isError) {
     return (
@@ -110,31 +136,21 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
   }
   return (
     <>
-      <ResultCount count={products.products.length} hasMore={products.hasNextPage} />
       <ProductsTable
         products={products.products}
         currency={workspace?.currency ?? ''}
         isRefreshing={products.isPlaceholderData}
         selection={selection}
       />
-      {products.hasNextPage && (
-        <LoadMoreButton
-          isLoading={products.isFetchingNextPage}
-          onLoadMore={() => void products.fetchNextPage()}
-        />
-      )}
+      <TablePagination
+        pagination={pagination}
+        total={products.total}
+        pageCount={products.pageCount}
+        noun="product"
+        isFetching={products.isPlaceholderData}
+      />
       {workspace && <SelectionActions workspaceId={workspace.id} selection={selection} />}
     </>
-  );
-}
-
-/** Tells screen readers how many products the filters left. */
-function ResultCount({ count, hasMore }: { count: number; hasMore: boolean }) {
-  return (
-    <p className="sr-only" aria-live="polite">
-      {hasMore ? 'Showing the first ' : 'Showing '}
-      {pluralize(count, 'product')}
-    </p>
   );
 }
 
@@ -150,7 +166,13 @@ function SelectionActions({
     <>
       {/* Room under the last row, so the floating bar never covers it. */}
       <div className="h-16" aria-hidden="true" />
-      <BulkActionBar workspaceId={workspaceId} selection={selection} />
+      <BulkActionBar
+        workspaceId={workspaceId}
+        selection={selection}
+        renderActions={(productIds) => (
+          <StoreMembershipMenu workspaceId={workspaceId} productIds={productIds} />
+        )}
+      />
     </>
   );
 }

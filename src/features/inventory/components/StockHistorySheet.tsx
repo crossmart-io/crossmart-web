@@ -1,7 +1,15 @@
 import { History } from 'lucide-react';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { ListSkeleton } from '@/components/lists/ListSkeleton';
-import { LoadMoreButton } from '@/components/lists/LoadMoreButton';
+import { TablePagination } from '@/components/lists/TablePagination';
+import { useState } from 'react';
+import type { InventoryMovementReason } from '@/api/schema';
+import { FilterSelect } from '@/components/lists/FilterSelect';
+import { toFilterOptions } from '@/components/lists/filter-options';
+import { SortSelect } from '@/components/lists/SortSelect';
+import { TIME_SORTS, toSortOption } from '@/components/lists/sort-options';
+import { useLocalPagination } from '@/hooks/usePagination';
+import { MOVEMENT_REASON_LABELS } from '../movement-reason';
 import {
   Empty,
   EmptyDescription,
@@ -24,6 +32,7 @@ import { MovementList } from './MovementList';
 import { StockSummary } from './StockSummary';
 
 const HISTORY_SKELETON_ROWS = 4;
+const REASON_OPTIONS = toFilterOptions<InventoryMovementReason>(MOVEMENT_REASON_LABELS);
 
 interface StockHistorySheetProps {
   workspaceId: string;
@@ -32,7 +41,7 @@ interface StockHistorySheetProps {
   onClose: () => void;
 }
 
-/** Every change to one variant's stock, newest first. */
+/** Every change to one variant’s stock, filtered by reason, newest or oldest first. */
 export function StockHistorySheet({ workspaceId, item, onClose }: StockHistorySheetProps) {
   const details = item && [variantLabel(item), item.sku].filter(Boolean).join(' · ');
 
@@ -51,7 +60,11 @@ export function StockHistorySheet({ workspaceId, item, onClose }: StockHistorySh
                 <AdjustStockPopover workspaceId={workspaceId} item={item} />
               </div>
             )}
-            <HistoryBody workspaceId={workspaceId} inventoryItemId={item.inventoryItemId} />
+            <HistoryBody
+              key={item.inventoryItemId}
+              workspaceId={workspaceId}
+              inventoryItemId={item.inventoryItemId}
+            />
           </div>
         )}
       </SheetContent>
@@ -66,7 +79,26 @@ function HistoryBody({
   workspaceId: string;
   inventoryItemId: string;
 }) {
-  const history = useStockMovements({ workspaceId, inventoryItemId });
+  const [reason, setReason] = useState<InventoryMovementReason>();
+  const [sortValue, setSort] = useState<string>(TIME_SORTS[0].value);
+  const sort = toSortOption(TIME_SORTS, sortValue);
+  const pagination = useLocalPagination(`${reason ?? ''}|${sort.value}`);
+  const history = useStockMovements(
+    { workspaceId, inventoryItemId, reason, direction: sort.direction },
+    pagination,
+  );
+  const filterBar = (
+    <div className="flex flex-col gap-2 sm:flex-row">
+      <FilterSelect
+        options={REASON_OPTIONS}
+        value={reason}
+        onChange={setReason}
+        anyLabel="All reasons"
+        label="Filter by reason"
+      />
+      <SortSelect options={TIME_SORTS} value={sort.value} onChange={setSort} />
+    </div>
+  );
 
   if (history.isError) {
     return (
@@ -80,16 +112,22 @@ function HistoryBody({
   if (history.isPending) {
     return <ListSkeleton label="Loading stock history" rows={HISTORY_SKELETON_ROWS} />;
   }
-  if (history.movements.length === 0) return <EmptyHistory />;
+  if (history.movements.length === 0 && !reason) return <EmptyHistory />;
   return (
     <>
-      <MovementList movements={history.movements} />
-      {history.hasNextPage && (
-        <LoadMoreButton
-          isLoading={history.isFetchingNextPage}
-          onLoadMore={() => void history.fetchNextPage()}
-        />
+      {filterBar}
+      {history.movements.length === 0 ? (
+        <p className="text-sm text-muted-foreground">No changes for this reason.</p>
+      ) : (
+        <MovementList movements={history.movements} />
       )}
+      <TablePagination
+        pagination={pagination}
+        total={history.total}
+        pageCount={history.pageCount}
+        noun="change"
+        isFetching={history.isPlaceholderData}
+      />
     </>
   );
 }

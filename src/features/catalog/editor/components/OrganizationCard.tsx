@@ -26,7 +26,7 @@ export function OrganizationCard() {
               onChange={field.onChange}
               placeholder="Type a tag and press Enter"
             />
-            <FieldDescription>Help you find products and build channel rules.</FieldDescription>
+            <FieldDescription>Help you find products and build store rules.</FieldDescription>
           </Field>
         )}
       />

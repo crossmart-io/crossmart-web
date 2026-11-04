@@ -1,5 +1,10 @@
 import { ActivityAction, ActivitySubjectType } from '@/api/schema';
-import { ROUTES, toImportJobRoute, toProductRoute } from '@/config/routes';
+import {
+  ROUTES,
+  toChannelConnectionRoute,
+  toImportJobRoute,
+  toProductRoute,
+} from '@/config/routes';
 import type { ActivityEvent } from './activity.types';
 
 /** Actions whose subject no longer exists, so there is nothing to open. */
@@ -21,7 +26,7 @@ export function toSubjectRoute(event: ActivityEvent): string | undefined {
     case ActivitySubjectType.import_job:
       return toImportJobRoute(subject.id);
     case ActivitySubjectType.channel_connection:
-      return ROUTES.channels;
+      return toChannelConnectionRoute(subject.id);
     case ActivitySubjectType.product_view:
       return undefined;
   }

@@ -1,4 +1,4 @@
-import { ChannelConnectionStatus, ChannelType, ConnectFailure } from '@/api/schema';
+import { ChannelConnectionStatus, ChannelFeature, ChannelType, ConnectFailure } from '@/api/schema';
 import amazonLogo from './assets/logos/amazon.svg';
 import ebayLogo from './assets/logos/ebay.svg';
 import etsyLogo from './assets/logos/etsy.svg';
@@ -48,6 +48,21 @@ export const CONNECT_FAILURE_MESSAGES: Record<ConnectFailure, string> = {
   [ConnectFailure.not_permitted]: 'You can no longer manage this workspace.',
   [ConnectFailure.channel_unavailable]: 'The channel is not responding. Try again in a moment.',
   [ConnectFailure.unexpected]: 'Something went wrong while connecting. Please try again.',
+};
+
+/** What the store page says about a feature the store was connected without. */
+export const MISSING_FEATURE_COPY: Record<
+  ChannelFeature,
+  { title: string; description: string; askAdmin: string; action: string }
+> = {
+  [ChannelFeature.storefront_visibility]: {
+    title: 'Products are not shown in your Online Store yet',
+    description:
+      'They are created in Shopify, but shoppers cannot see them until you approve one more permission. Approving takes you to Shopify and back; nothing else changes.',
+    askAdmin:
+      'They are created in Shopify, but shoppers cannot see them until a workspace admin approves one more permission.',
+    action: 'Approve in Shopify',
+  },
 };
 
 export const CHANNEL_FEEDBACK = {
@@ -142,3 +157,14 @@ export const CHANNELS: readonly ChannelInfo[] = [
     logo: { src: tiktokLogo, tint: FOREGROUND_TINT },
   },
 ];
+
+/** The channel a connection belongs to, for its name, logo and how to reconnect it. */
+export function channelInfoFor(type: ChannelType): ChannelInfo | undefined {
+  return CHANNELS.find((channel) => channel.connect?.type === type);
+}
+
+/** A channel card's logo tile, or the small one a table row shows per store. */
+export enum ChannelLogoSize {
+  Default = 'default',
+  Small = 'small',
+}

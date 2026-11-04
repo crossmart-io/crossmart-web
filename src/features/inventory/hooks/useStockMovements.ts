@@ -1,24 +1,28 @@
 import { ApiRequestError } from '@/api/api-error';
 import { fetchClient } from '@/api/client';
-import { useCursorPages } from '@/hooks/useCursorPages';
-import { INVENTORY_MOVEMENTS_ENDPOINT, MOVEMENTS_PAGE_SIZE } from '../inventory.constants';
+import { usePagedList } from '@/hooks/usePagedList';
+import type { Pagination } from '@/hooks/usePagination';
+import type { InventoryMovementReason, SortDirection } from '@/api/schema';
+import { INVENTORY_MOVEMENTS_ENDPOINT } from '../inventory.constants';
 import type { InventoryMovement } from '../inventory.types';
 
 interface MovementsTarget {
   workspaceId: string;
   /** Null while no history is open. */
   inventoryItemId: string | null;
+  reason?: InventoryMovementReason;
+  direction: SortDirection;
 }
 
 async function fetchMovementPage(
-  { workspaceId, inventoryItemId }: MovementsTarget,
-  cursor: string | undefined,
+  { workspaceId, inventoryItemId, ...filters }: MovementsTarget,
+  page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
   const { data, error } = await fetchClient.GET(INVENTORY_MOVEMENTS_ENDPOINT, {
     params: {
       path: { workspaceId, inventoryItemId: inventoryItemId ?? '' },
-      query: { cursor, limit: MOVEMENTS_PAGE_SIZE },
+      query: { ...filters, ...page },
     },
     signal,
   });
@@ -27,11 +31,12 @@ async function fetchMovementPage(
 }
 
 /** The stock history of one variant, newest first. */
-export function useStockMovements(target: MovementsTarget) {
-  const query = useCursorPages<InventoryMovement>({
+export function useStockMovements(target: MovementsTarget, pagination: Pagination) {
+  const query = usePagedList<InventoryMovement>({
     endpoint: INVENTORY_MOVEMENTS_ENDPOINT,
     params: target,
-    fetchPage: (cursor, signal) => fetchMovementPage(target, cursor, signal),
+    pagination,
+    fetchPage: (page, signal) => fetchMovementPage(target, page, signal),
     enabled: Boolean(target.inventoryItemId),
   });
   return { ...query, movements: query.items };

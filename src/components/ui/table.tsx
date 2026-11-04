@@ -1,12 +1,28 @@
 import * as React from 'react';
 import { cn } from 'cn';
 
-function Table({ className, ...props }: React.ComponentProps<'table'>) {
+/** Column headers that stay under the app header while the page scrolls, on wide screens. */
+const STICKY_HEADER_CLASSES =
+  'lg:[&_thead_th]:sticky lg:[&_thead_th]:top-(--app-header-height) lg:[&_thead_th]:z-10 lg:[&_thead_th]:bg-background';
+
+function Table({
+  className,
+  stickyHeader = false,
+  ...props
+}: React.ComponentProps<'table'> & { stickyHeader?: boolean }) {
   return (
-    <div data-slot="table-container" className="relative w-full overflow-x-auto">
+    <div
+      data-slot="table-container"
+      // A scrolling container would pin the headers to itself instead of the page.
+      className={cn('relative w-full overflow-x-auto', stickyHeader && 'lg:overflow-x-visible')}
+    >
       <table
         data-slot="table"
-        className={cn('w-full caption-bottom text-sm', className)}
+        className={cn(
+          'w-full caption-bottom text-sm',
+          stickyHeader && STICKY_HEADER_CLASSES,
+          className,
+        )}
         {...props}
       />
     </div>
