@@ -1,9 +1,29 @@
 import { Boxes, PackageX, Package, Share2 } from 'lucide-react';
-import { CatalogGap } from '@/api/schema';
+import { CatalogGap, ChannelConnectionStatus } from '@/api/schema';
 import { ROUTES, toProductsRoute } from '@/config/routes';
 import { useCatalogStats } from '@/features/catalog';
+import { connectionsSummary, useChannelConnections } from '@/features/channels';
 import { pluralize } from '@/lib/format';
 import { StatTile } from './StatTile';
+
+/** Stores that are linked, whatever their state; disconnected ones are gone. */
+function ChannelsTile({ workspaceId }: { workspaceId: string }) {
+  const { data: connections } = useChannelConnections(workspaceId);
+  const stores = connections?.filter(
+    (connection) => connection.status !== ChannelConnectionStatus.DISCONNECTED,
+  );
+  return (
+    <StatTile
+      label="Channels"
+      value={stores?.length}
+      detail={
+        stores?.length ? connectionsSummary(stores) : 'Connect Shopify to sync products and stock'
+      }
+      icon={Share2}
+      to={ROUTES.channels}
+    />
+  );
+}
 
 export function CatalogStatsGrid({ workspaceId }: { workspaceId: string }) {
   const { data: stats } = useCatalogStats(workspaceId);
@@ -37,13 +57,7 @@ export function CatalogStatsGrid({ workspaceId }: { workspaceId: string }) {
         icon={PackageX}
         to={toProductsRoute({ gap: CatalogGap.out_of_stock })}
       />
-      <StatTile
-        label="Channels"
-        value={0}
-        detail="Shopify and eBay are coming next"
-        icon={Share2}
-        to={ROUTES.channels}
-      />
+      <ChannelsTile workspaceId={workspaceId} />
     </div>
   );
 }

@@ -765,6 +765,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/analytics/sales': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Sales over time, by store, compared with the period before
+     * @description Order totals in the workspace currency, bucketed in the given time zone. Cancelled orders and orders in other currencies are left out.
+     */
+    get: operations['SalesReportController_get_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1833,6 +1853,93 @@ export interface components {
       /** @description The order’s id on its channel */
       externalId: string;
       lines: components['schemas']['OrderLineDto'][];
+    };
+    /** @enum {string} */
+    SalesRange: SalesRange;
+    /** @enum {string} */
+    SalesInterval: SalesInterval;
+    SalesTotalsDto: {
+      /**
+       * @description Order totals, cancelled orders left out
+       * @example 1290.00
+       */
+      sales: string;
+      orders: number;
+      /** @description Units ordered */
+      units: number;
+      /**
+       * @description Sales per order
+       * @example 43.00
+       */
+      averageOrderValue: string | null;
+    };
+    ConnectionSalesDto: {
+      /** Format: uuid */
+      connectionId: string;
+      /** @example 120.00 */
+      sales: string;
+      orders: number;
+    };
+    SalesBucketDto: {
+      /**
+       * @description First day of the bucket, in the time zone
+       * @example 2026-11-04
+       */
+      startsOn: string;
+      /** @example 120.00 */
+      sales: string;
+      orders: number;
+      /**
+       * @description First day of the matching earlier bucket
+       * @example 2026-10-05
+       */
+      previousStartsOn: string;
+      /** @example 80.00 */
+      previousSales: string;
+      /** @description Stores with orders in the bucket */
+      byConnection: components['schemas']['ConnectionSalesDto'][];
+    };
+    SalesStoreDto: {
+      /** Format: uuid */
+      connectionId: string;
+      /** @example 120.00 */
+      sales: string;
+      orders: number;
+      /** @example shopify */
+      channel: string;
+      /** @example Demo Store */
+      displayName: string;
+    };
+    TopProductDto: {
+      /** Format: uuid */
+      productId: string;
+      title: string;
+      units: number;
+      /**
+       * @description Line prices times units
+       * @example 240.00
+       */
+      sales: string;
+    };
+    SalesReportDto: {
+      range: components['schemas']['SalesRange'];
+      interval: components['schemas']['SalesInterval'];
+      /** @example America/New_York */
+      timeZone: string;
+      /**
+       * @description The workspace currency; amounts are in it
+       * @example USD
+       */
+      currencyCode: string;
+      current: components['schemas']['SalesTotalsDto'];
+      /** @description The period of the same length before */
+      previous: components['schemas']['SalesTotalsDto'];
+      buckets: components['schemas']['SalesBucketDto'][];
+      /** @description Every store, oldest first */
+      stores: components['schemas']['SalesStoreDto'][];
+      topProducts: components['schemas']['TopProductDto'][];
+      /** @description Orders in other currencies, which the report leaves out */
+      otherCurrencyOrders: number;
     };
   };
   responses: never;
@@ -3205,6 +3312,31 @@ export interface operations {
       };
     };
   };
+  SalesReportController_get_v1: {
+    parameters: {
+      query?: {
+        range?: components['schemas']['SalesRange'];
+        /** @description IANA time zone that days, weeks and months follow */
+        timeZone?: string;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SalesReportDto'];
+        };
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -3493,4 +3625,15 @@ export enum OrderStatus {
   PARTIALLY_FULFILLED = 'PARTIALLY_FULFILLED',
   FULFILLED = 'FULFILLED',
   CANCELLED = 'CANCELLED',
+}
+export enum SalesRange {
+  last_7_days = 'last_7_days',
+  last_30_days = 'last_30_days',
+  last_90_days = 'last_90_days',
+  last_12_months = 'last_12_months',
+}
+export enum SalesInterval {
+  day = 'day',
+  week = 'week',
+  month = 'month',
 }
