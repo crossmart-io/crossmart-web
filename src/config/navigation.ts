@@ -4,6 +4,7 @@ import {
   KeyRound,
   LayoutDashboard,
   Package,
+  ShoppingBag,
   Share2,
   Users,
   Warehouse,
@@ -37,6 +38,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { label: 'Overview', to: ROUTES.home, icon: LayoutDashboard, end: true },
       { label: 'Products', to: ROUTES.products, icon: Package },
+      { label: 'Orders', to: ROUTES.orders, icon: ShoppingBag },
       { label: 'Inventory', to: ROUTES.inventory, icon: Warehouse },
       { label: 'Imports', to: ROUTES.imports, icon: FileUp },
       { label: 'Channels', to: ROUTES.channels, icon: Share2, badge: NavBadge.ChannelErrors },
@@ -65,4 +67,5 @@ export const PAGE_PARENTS = {
   settings: [{ label: 'Settings' }],
   imports: [{ label: 'Imports', to: ROUTES.imports }],
   channels: [{ label: 'Channels', to: ROUTES.channels }],
+  orders: [{ label: 'Orders', to: ROUTES.orders }],
 } as const satisfies Record<string, readonly Crumb[]>;

@@ -2,7 +2,7 @@ import { ShieldCheck } from 'lucide-react';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { MISSING_FEATURE_COPY } from '../channels.constants';
+import { MISSING_FEATURE_COPY, MISSING_FEATURES_COPY } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
 import { useStartChannelAuthorization } from '../hooks/useChannelConnections';
 
@@ -14,8 +14,8 @@ interface MissingFeaturesAlertProps {
 }
 
 /**
- * Says what a store cannot do until the merchant grants a permission it was connected without,
- * and sends admins to approve the app again on the channel. Nothing else changes for the store.
+ * Says what a store cannot do until the merchant grants permissions it was connected without,
+ * and sends admins to approve them all at once on the channel.
  */
 export function MissingFeaturesAlert({
   workspaceId,
@@ -23,15 +23,28 @@ export function MissingFeaturesAlert({
   canManage,
 }: MissingFeaturesAlertProps) {
   const authorize = useStartChannelAuthorization(workspaceId);
-  const [feature] = connection.missingFeatures;
-  if (!feature) return null;
-  const copy = MISSING_FEATURE_COPY[feature];
+  const missing = connection.missingFeatures.map((feature) => MISSING_FEATURE_COPY[feature]);
+  const [first] = missing;
+  if (!first) return null;
   return (
     <Alert>
       <ShieldCheck />
-      <AlertTitle>{copy.title}</AlertTitle>
+      <AlertTitle>
+        {missing.length === 1 ? first.title : MISSING_FEATURES_COPY.severalTitle}
+      </AlertTitle>
       <AlertDescription className="flex flex-col items-start gap-3">
-        <p>{canManage ? copy.description : copy.askAdmin}</p>
+        {missing.length === 1 ? (
+          <p>{first.effect}</p>
+        ) : (
+          <ul className="list-disc pl-4">
+            {missing.map((copy) => (
+              <li key={copy.title}>
+                {copy.title}. {copy.effect}
+              </li>
+            ))}
+          </ul>
+        )}
+        <p>{canManage ? MISSING_FEATURES_COPY.approve : MISSING_FEATURES_COPY.askAdmin}</p>
         {canManage && (
           <Button
             type="button"
@@ -45,7 +58,7 @@ export function MissingFeaturesAlert({
             }
           >
             {authorize.isPending && <Spinner data-icon="inline-start" />}
-            {copy.action}
+            {MISSING_FEATURES_COPY.action}
           </Button>
         )}
       </AlertDescription>

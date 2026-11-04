@@ -29,6 +29,7 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.channel_pricing_updated]: 'Pricing rule changed',
   [ActivityAction.channel_selection_updated]: 'Product selection changed',
   [ActivityAction.channel_sync_requested]: 'Channel sync started',
+  [ActivityAction.stock_oversold]: 'Oversold',
 };
 
 export function toActivityAction(value: string | null): ActivityAction | undefined {
