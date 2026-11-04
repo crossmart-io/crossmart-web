@@ -12,6 +12,8 @@ export const CHANNEL_AUTHORIZATIONS_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/authorizations';
 export const CHANNEL_DISCONNECT_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/disconnect';
+export const CHANNEL_IMPORTS_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/imports';
 
 export enum ChannelStatus {
   /** Its connector has shipped: it can be connected. */

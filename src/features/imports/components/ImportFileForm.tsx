@@ -7,7 +7,8 @@ import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
   CSV_FILE_ACCEPT,
-  IMPORT_MODE_COPY,
+  FILE_IMPORT_MODE_COPY,
+  type FileImportMode,
   INVENTORY_TEMPLATE_FILE_NAME,
   INVENTORY_TEMPLATE_HREF,
 } from '../imports.constants';
@@ -18,8 +19,8 @@ const FILE_INPUT_ID = 'catalog-import-file';
 interface ImportFileFormProps {
   /** Lets a submit button outside the form (in the dialog footer) submit it. */
   formId: string;
-  mode: CatalogImportMode;
-  onModeChange: (mode: CatalogImportMode) => void;
+  mode: FileImportMode;
+  onModeChange: (mode: FileImportMode) => void;
   error: Error | null;
   onFileChange: (file: File | null) => void;
   onSubmit: () => void;
@@ -33,7 +34,7 @@ export function ImportFileForm({
   onFileChange,
   onSubmit,
 }: ImportFileFormProps) {
-  const copy = IMPORT_MODE_COPY[mode];
+  const copy = FILE_IMPORT_MODE_COPY[mode];
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();

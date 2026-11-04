@@ -4,6 +4,7 @@ import {
   ImportIssueOutcome,
   ImportJobStatus,
 } from '@/api/schema';
+import type { ImportJobCounts } from './imports.types';
 
 export const PRODUCT_IMPORTS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/product-imports';
 export const IMPORT_JOBS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/import-jobs';
@@ -23,11 +24,19 @@ export const INVENTORY_TEMPLATE_HREF = `data:text/csv;charset=utf-8,${encodeURIC
   `${INVENTORY_CSV_COLUMNS.join(',')}\n`,
 )}`;
 
-export const DEFAULT_IMPORT_MODE = CatalogImportMode.create;
+/** The modes a file upload can use. Channel imports are started from the Channels page. */
+export type FileImportMode = Exclude<CatalogImportMode, CatalogImportMode.create_or_link>;
+
+export const DEFAULT_IMPORT_MODE: FileImportMode = CatalogImportMode.create;
 
 export interface ImportModeCopy {
   /** Short name, for the mode picker and the history. */
   label: string;
+  /** What the history counts for this mode: products, or the rows of a stock sheet. */
+  record: string;
+}
+
+export interface FileImportModeCopy extends ImportModeCopy {
   /** One line under the label in the mode picker. */
   summary: string;
   /** How to get the file, shown above the file input. */
@@ -35,11 +44,9 @@ export interface ImportModeCopy {
   fileLabel: string;
   /** The file format this mode reads. */
   format: CatalogImportFormat;
-  /** What the history counts for this mode: products, or the rows of a stock sheet. */
-  record: string;
 }
 
-export const IMPORT_MODE_COPY: Record<CatalogImportMode, ImportModeCopy> = {
+export const FILE_IMPORT_MODE_COPY: Record<FileImportMode, FileImportModeCopy> = {
   [CatalogImportMode.create]: {
     label: 'Add new products',
     summary: 'Products already in your catalog are left unchanged.',
@@ -68,7 +75,31 @@ export const IMPORT_MODE_COPY: Record<CatalogImportMode, ImportModeCopy> = {
   },
 };
 
-export const IMPORT_MODE_OPTIONS = Object.values(CatalogImportMode);
+export const IMPORT_MODE_COPY: Record<CatalogImportMode, ImportModeCopy> = {
+  ...FILE_IMPORT_MODE_COPY,
+  [CatalogImportMode.create_or_link]: { label: 'Create or link products', record: 'product' },
+};
+
+export const FILE_IMPORT_MODES: readonly FileImportMode[] = [
+  CatalogImportMode.create,
+  CatalogImportMode.update,
+  CatalogImportMode.inventory,
+];
+
+/** Where an import read its records from, for the history. */
+export const IMPORT_FORMAT_LABELS: Record<CatalogImportFormat, string> = {
+  [CatalogImportFormat.shopify_csv]: 'Shopify CSV',
+  [CatalogImportFormat.inventory_csv]: 'Inventory CSV',
+  [CatalogImportFormat.shopify_api]: 'Shopify store',
+};
+
+/** Formats read from a connected channel rather than an uploaded file. */
+export const CHANNEL_IMPORT_FORMATS: ReadonlySet<CatalogImportFormat> = new Set([
+  CatalogImportFormat.shopify_api,
+]);
+
+/** How often a running import is checked for progress. */
+export const IMPORT_JOB_POLL_INTERVAL_MS = 1500;
 
 export const IMPORT_JOB_STATUS_LABELS: Record<ImportJobStatus, string> = {
   [ImportJobStatus.PROCESSING]: 'Processing',
@@ -79,4 +110,30 @@ export const IMPORT_JOB_STATUS_LABELS: Record<ImportJobStatus, string> = {
 export const IMPORT_ISSUE_OUTCOME_LABELS: Record<ImportIssueOutcome, string> = {
   [ImportIssueOutcome.SKIPPED]: 'Skipped',
   [ImportIssueOutcome.FAILED]: 'Failed',
+};
+
+export interface ImportCountLabel {
+  key: keyof ImportJobCounts;
+  label: string;
+}
+
+const FILE_IMPORT_COUNTS: readonly ImportCountLabel[] = [
+  { key: 'created', label: 'Created' },
+  { key: 'updated', label: 'Updated' },
+  { key: 'skipped', label: 'Skipped' },
+  { key: 'failed', label: 'Failed' },
+];
+
+/** The counts each mode reports, in the order they are shown, in that mode's words. */
+export const IMPORT_COUNT_LABELS: Record<CatalogImportMode, readonly ImportCountLabel[]> = {
+  [CatalogImportMode.create]: FILE_IMPORT_COUNTS,
+  [CatalogImportMode.update]: FILE_IMPORT_COUNTS,
+  [CatalogImportMode.inventory]: FILE_IMPORT_COUNTS,
+  [CatalogImportMode.create_or_link]: [
+    { key: 'created', label: 'Created' },
+    { key: 'linked', label: 'Linked' },
+    { key: 'updated', label: 'Already linked' },
+    { key: 'skipped', label: 'Skipped' },
+    { key: 'failed', label: 'Failed' },
+  ],
 };

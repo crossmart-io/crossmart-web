@@ -1,4 +1,3 @@
-import type { CatalogImportMode } from '@/api/schema';
 import {
   Field,
   FieldContent,
@@ -9,21 +8,25 @@ import {
   FieldTitle,
 } from '@/components/ui/field';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { IMPORT_MODE_COPY, IMPORT_MODE_OPTIONS } from '../imports.constants';
+import {
+  FILE_IMPORT_MODE_COPY,
+  FILE_IMPORT_MODES,
+  type FileImportMode,
+} from '../imports.constants';
 
 interface ImportModePickerProps {
-  value: CatalogImportMode;
-  onChange: (mode: CatalogImportMode) => void;
+  value: FileImportMode;
+  onChange: (mode: FileImportMode) => void;
 }
 
 const MODE_INPUT_ID_PREFIX = 'import-mode-';
 
-function toInputId(mode: CatalogImportMode): string {
+function toInputId(mode: FileImportMode): string {
   return `${MODE_INPUT_ID_PREFIX}${mode}`;
 }
 
-function toMode(value: string): CatalogImportMode | undefined {
-  return IMPORT_MODE_OPTIONS.find((mode) => mode === value);
+function toMode(value: string): FileImportMode | undefined {
+  return FILE_IMPORT_MODES.find((mode) => mode === value);
 }
 
 /** What the file should do, as choice cards. */
@@ -38,12 +41,12 @@ export function ImportModePicker({ value, onChange }: ImportModePickerProps) {
           if (mode) onChange(mode);
         }}
       >
-        {IMPORT_MODE_OPTIONS.map((mode) => (
+        {FILE_IMPORT_MODES.map((mode) => (
           <FieldLabel key={mode} htmlFor={toInputId(mode)}>
             <Field orientation="horizontal">
               <FieldContent>
-                <FieldTitle>{IMPORT_MODE_COPY[mode].label}</FieldTitle>
-                <FieldDescription>{IMPORT_MODE_COPY[mode].summary}</FieldDescription>
+                <FieldTitle>{FILE_IMPORT_MODE_COPY[mode].label}</FieldTitle>
+                <FieldDescription>{FILE_IMPORT_MODE_COPY[mode].summary}</FieldDescription>
               </FieldContent>
               <RadioGroupItem value={mode} id={toInputId(mode)} />
             </Field>

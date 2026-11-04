@@ -34,17 +34,46 @@ const OUTCOME_BADGES = {
   [ImportIssueOutcome.SKIPPED]: 'outline',
 } as const satisfies Record<ImportIssueOutcome, 'destructive' | 'outline'>;
 
-/** The rows an import skipped or could not apply, with a filter by outcome. */
-export function ImportJobIssues({ issues }: { issues: ImportJobIssue[] }) {
-  const [filter, setFilter] = useState<OutcomeFilter>(ALL_OUTCOMES);
+interface IssuesCopy {
+  heading: string;
+  emptyTitle: string;
+  emptyDescription: string;
+  /** Files have spreadsheet rows; channel catalogs do not. */
+  showRows: boolean;
+}
 
-  if (issues.length === 0) return <NoIssues />;
+const FILE_ISSUES_COPY: IssuesCopy = {
+  heading: 'Rows to review',
+  emptyTitle: 'Every row went through',
+  emptyDescription: 'Nothing in this file was skipped or failed.',
+  showRows: true,
+};
+
+const CHANNEL_ISSUES_COPY: IssuesCopy = {
+  heading: 'Products to review',
+  emptyTitle: 'Every product went through',
+  emptyDescription: 'Nothing from this store was skipped or failed.',
+  showRows: false,
+};
+
+interface ImportJobIssuesProps {
+  issues: ImportJobIssue[];
+  /** The import read a connected channel rather than a file. */
+  fromChannel?: boolean;
+}
+
+/** The records an import skipped or could not apply, with a filter by outcome. */
+export function ImportJobIssues({ issues, fromChannel = false }: ImportJobIssuesProps) {
+  const [filter, setFilter] = useState<OutcomeFilter>(ALL_OUTCOMES);
+  const copy = fromChannel ? CHANNEL_ISSUES_COPY : FILE_ISSUES_COPY;
+
+  if (issues.length === 0) return <NoIssues copy={copy} />;
   const counts = countIssues(issues);
   return (
     <section className="flex flex-col gap-3" aria-labelledby="import-issues-heading">
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h2 id="import-issues-heading" className="font-heading text-lg font-semibold">
-          Rows to review
+          {copy.heading}
         </h2>
         <ToggleGroup
           type="single"
@@ -66,18 +95,18 @@ export function ImportJobIssues({ issues }: { issues: ImportJobIssue[] }) {
           ))}
         </ToggleGroup>
       </div>
-      <IssuesTable issues={filterIssues(issues, filter)} />
+      <IssuesTable issues={filterIssues(issues, filter)} showRows={copy.showRows} />
     </section>
   );
 }
 
-function IssuesTable({ issues }: { issues: ImportJobIssue[] }) {
+function IssuesTable({ issues, showRows }: { issues: ImportJobIssue[]; showRows: boolean }) {
   return (
     <div className="rounded-lg border">
       <Table className="table-fixed">
         <TableHeader>
           <TableRow>
-            <TableHead className="w-16">Row</TableHead>
+            {showRows && <TableHead className="w-16">Row</TableHead>}
             <TableHead className="hidden w-24 sm:table-cell">Outcome</TableHead>
             <TableHead className="hidden w-48 md:table-cell">Record</TableHead>
             <TableHead>Problem</TableHead>
@@ -85,7 +114,11 @@ function IssuesTable({ issues }: { issues: ImportJobIssue[] }) {
         </TableHeader>
         <TableBody>
           {issues.map((issue, index) => (
-            <IssueRow key={`${index}-${issue.row}-${issue.code}`} issue={issue} />
+            <IssueRow
+              key={`${index}-${issue.row}-${issue.code}`}
+              issue={issue}
+              showRow={showRows}
+            />
           ))}
         </TableBody>
       </Table>
@@ -93,11 +126,11 @@ function IssuesTable({ issues }: { issues: ImportJobIssue[] }) {
   );
 }
 
-function IssueRow({ issue }: { issue: ImportJobIssue }) {
+function IssueRow({ issue, showRow }: { issue: ImportJobIssue; showRow: boolean }) {
   const record = issue.handle ?? issue.sku;
   return (
     <TableRow>
-      <TableCell className="align-top tabular-nums">{issue.row ?? '—'}</TableCell>
+      {showRow && <TableCell className="align-top tabular-nums">{issue.row ?? '—'}</TableCell>}
       <TableCell className="hidden align-top sm:table-cell">
         <Badge variant={OUTCOME_BADGES[issue.outcome]}>
           {IMPORT_ISSUE_OUTCOME_LABELS[issue.outcome]}
@@ -121,15 +154,15 @@ function IssueRow({ issue }: { issue: ImportJobIssue }) {
   );
 }
 
-function NoIssues() {
+function NoIssues({ copy }: { copy: IssuesCopy }) {
   return (
     <Empty className="border">
       <EmptyHeader>
         <EmptyMedia variant="icon">
           <CircleCheck />
         </EmptyMedia>
-        <EmptyTitle>Every row went through</EmptyTitle>
-        <EmptyDescription>Nothing in this file was skipped or failed.</EmptyDescription>
+        <EmptyTitle>{copy.emptyTitle}</EmptyTitle>
+        <EmptyDescription>{copy.emptyDescription}</EmptyDescription>
       </EmptyHeader>
     </Empty>
   );

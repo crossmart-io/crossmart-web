@@ -25,3 +25,14 @@ const MANAGING_ROLES: ReadonlySet<WorkspaceRole> = new Set([
 export function canManageWorkspace(role: WorkspaceRole): boolean {
   return MANAGING_ROLES.has(role);
 }
+
+/** Roles that may change the catalog: edit products, import them. */
+const EDITING_ROLES: ReadonlySet<WorkspaceRole> = new Set([
+  WorkspaceRole.OWNER,
+  WorkspaceRole.ADMIN,
+  WorkspaceRole.EDITOR,
+]);
+
+export function canEditCatalog(role: WorkspaceRole): boolean {
+  return EDITING_ROLES.has(role);
+}

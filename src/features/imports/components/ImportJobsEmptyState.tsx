@@ -18,7 +18,8 @@ export function ImportJobsEmptyState({ action }: { action: ReactNode }) {
         </EmptyMedia>
         <EmptyTitle>No imports yet</EmptyTitle>
         <EmptyDescription>
-          Every CSV you import shows up here, with what it changed and any rows that need a fix.
+          Every file or store you import shows up here, with what it changed and anything that needs
+          a fix.
         </EmptyDescription>
       </EmptyHeader>
       <EmptyContent>{action}</EmptyContent>

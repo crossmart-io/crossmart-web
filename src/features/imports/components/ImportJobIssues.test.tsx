@@ -38,4 +38,13 @@ describe('ImportJobIssues', () => {
 
     expect(screen.getByText('Every row went through')).toBeInTheDocument();
   });
+
+  it('names products, not rows, for channel imports', () => {
+    render(
+      <ImportJobIssues issues={[{ ...ISSUES[0]!, row: undefined, handle: 'tote' }]} fromChannel />,
+    );
+
+    expect(screen.getByRole('heading', { name: 'Products to review' })).toBeInTheDocument();
+    expect(screen.queryByRole('columnheader', { name: 'Row' })).not.toBeInTheDocument();
+  });
 });

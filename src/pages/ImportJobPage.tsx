@@ -8,6 +8,7 @@ import { PAGE_PARENTS } from '@/config/navigation';
 import { ROUTE_PARAMS } from '@/config/routes';
 import {
   describeActor,
+  IMPORT_FORMAT_LABELS,
   IMPORT_MODE_COPY,
   ImportJobDetails,
   ImportJobStatusBadge,
@@ -46,7 +47,7 @@ function ImportJob({ workspaceId, jobId }: { workspaceId: string; jobId: string 
           <ImportJobStatusBadge status={job.status} />
         </>
       }
-      description={`${IMPORT_MODE_COPY[job.mode].label} · ${formatDateTime(job.createdAt)} · ${describeActor(job.actor)}`}
+      description={`${IMPORT_FORMAT_LABELS[job.format]} · ${IMPORT_MODE_COPY[job.mode].label} · ${formatDateTime(job.createdAt)} · ${describeActor(job.actor)}`}
     >
       <ImportJobDetails job={job} />
     </Page>

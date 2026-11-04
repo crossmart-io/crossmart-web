@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import type { ChannelInfo, ConnectableChannel } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
 import { useDisconnectChannel } from '../hooks/useChannelConnections';
+import { ChannelImportSection } from './ChannelImportSection';
 import { ConnectChannelDialog } from './ConnectChannelDialog';
 import { ConnectionStatusBadge } from './ConnectionStatusBadge';
 
@@ -14,6 +15,7 @@ interface ChannelConnectionItemProps {
   connect: ConnectableChannel;
   connection: ChannelConnection;
   canManage: boolean;
+  canEditCatalog: boolean;
 }
 
 /** One connected account: its name and domain, status, and what the merchant can do with it. */
@@ -23,10 +25,20 @@ export function ChannelConnectionItem({
   connect,
   connection,
   canManage,
+  canEditCatalog,
 }: ChannelConnectionItemProps) {
-  const disconnect = useDisconnectChannel(workspaceId);
   const needsReauth = connection.status === ChannelConnectionStatus.NEEDS_REAUTH;
+  const canImport = canEditCatalog && connection.status === ChannelConnectionStatus.CONNECTED;
   const name = connection.shopify?.shopName ?? connection.displayName;
+  const actions = canManage ? (
+    <ConnectionActions
+      workspaceId={workspaceId}
+      channel={channel}
+      connect={connect}
+      connection={connection}
+      name={name}
+    />
+  ) : null;
 
   return (
     <li className="flex flex-col gap-3 rounded-lg border bg-muted/30 p-3">
@@ -44,36 +56,68 @@ export function ChannelConnectionItem({
           {connection.statusReason ?? `${channel.name} needs you to approve Crossmart again.`}
         </p>
       )}
-      {canManage && (
-        <div className="flex flex-wrap gap-2">
-          {needsReauth && (
-            <ConnectChannelDialog
-              workspaceId={workspaceId}
-              channel={channel}
-              connect={connect}
-              initialAccount={connection.externalAccountId}
-              trigger={
-                <Button size="sm">
-                  <RefreshCw data-icon="inline-start" />
-                  Reconnect
-                </Button>
-              }
-            />
-          )}
-          <ConfirmDialog
-            trigger={
-              <Button variant="outline" size="sm">
-                <Unplug data-icon="inline-start" />
-                Disconnect
-              </Button>
-            }
-            title={`Disconnect ${name}?`}
-            description={`Crossmart stops syncing with this store and removes its access. Your products stay in Crossmart and on ${channel.name}.`}
-            confirmLabel="Disconnect"
-            onConfirm={() => disconnect.mutateAsync(connection.id)}
-          />
-        </div>
+      {canImport ? (
+        <ChannelImportSection
+          workspaceId={workspaceId}
+          connection={connection}
+          channelName={channel.name}
+        >
+          {actions}
+        </ChannelImportSection>
+      ) : (
+        actions && <div className="flex flex-wrap gap-2">{actions}</div>
       )}
     </li>
+  );
+}
+
+interface ConnectionActionsProps {
+  workspaceId: string;
+  channel: ChannelInfo;
+  connect: ConnectableChannel;
+  connection: ChannelConnection;
+  name: string;
+}
+
+/** What a workspace admin can do with a connection: reconnect it, or disconnect it. */
+function ConnectionActions({
+  workspaceId,
+  channel,
+  connect,
+  connection,
+  name,
+}: ConnectionActionsProps) {
+  const disconnect = useDisconnectChannel(workspaceId);
+  const needsReauth = connection.status === ChannelConnectionStatus.NEEDS_REAUTH;
+
+  return (
+    <>
+      {needsReauth && (
+        <ConnectChannelDialog
+          workspaceId={workspaceId}
+          channel={channel}
+          connect={connect}
+          initialAccount={connection.externalAccountId}
+          trigger={
+            <Button size="sm">
+              <RefreshCw data-icon="inline-start" />
+              Reconnect
+            </Button>
+          }
+        />
+      )}
+      <ConfirmDialog
+        trigger={
+          <Button variant="outline" size="sm">
+            <Unplug data-icon="inline-start" />
+            Disconnect
+          </Button>
+        }
+        title={`Disconnect ${name}?`}
+        description={`Crossmart stops syncing with this store and removes its access. Your products stay in Crossmart and on ${channel.name}.`}
+        confirmLabel="Disconnect"
+        onConfirm={() => disconnect.mutateAsync(connection.id)}
+      />
+    </>
   );
 }

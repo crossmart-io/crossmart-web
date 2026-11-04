@@ -1,6 +1,5 @@
 import { Upload } from 'lucide-react';
 import { useState } from 'react';
-import type { CatalogImportMode } from '@/api/schema';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -12,7 +11,7 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { useImportProducts } from '../hooks/useImportProducts';
-import { DEFAULT_IMPORT_MODE } from '../imports.constants';
+import { DEFAULT_IMPORT_MODE, type FileImportMode } from '../imports.constants';
 import { ImportFileForm } from './ImportFileForm';
 import { ImportResultSummary } from './ImportResultSummary';
 
@@ -20,7 +19,7 @@ const IMPORT_FORM_ID = 'catalog-import-form';
 
 export function ImportProductsDialog({ workspaceId }: { workspaceId: string | undefined }) {
   const [open, setOpen] = useState(false);
-  const [mode, setMode] = useState<CatalogImportMode>(DEFAULT_IMPORT_MODE);
+  const [mode, setMode] = useState<FileImportMode>(DEFAULT_IMPORT_MODE);
   const [file, setFile] = useState<File | null>(null);
   const importProducts = useImportProducts(workspaceId);
   const result = importProducts.data;
