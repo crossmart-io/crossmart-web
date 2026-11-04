@@ -4,6 +4,7 @@ import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
   SelectTrigger,
   SelectValue,
@@ -45,11 +46,13 @@ export function StatusCard() {
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
-                {Object.values(ProductStatus).map((status) => (
-                  <SelectItem key={status} value={status}>
-                    {PRODUCT_STATUS_LABELS[status]}
-                  </SelectItem>
-                ))}
+                <SelectGroup>
+                  {Object.values(ProductStatus).map((status) => (
+                    <SelectItem key={status} value={status}>
+                      {PRODUCT_STATUS_LABELS[status]}
+                    </SelectItem>
+                  ))}
+                </SelectGroup>
               </SelectContent>
             </Select>
             <FieldDescription>{STATUS_HINTS[field.value]}</FieldDescription>

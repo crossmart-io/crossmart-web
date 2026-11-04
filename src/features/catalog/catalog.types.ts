@@ -5,3 +5,4 @@ export type Product = components['schemas']['ProductDto'];
 export type Variant = components['schemas']['VariantDto'];
 export type CatalogImportResult = components['schemas']['CatalogImportResultDto'];
 export type ImportIssue = components['schemas']['ImportIssueDto'];
+export type CatalogStats = components['schemas']['CatalogStatsDto'];

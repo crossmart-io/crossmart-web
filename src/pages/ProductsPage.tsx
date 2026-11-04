@@ -3,6 +3,7 @@ import { Link } from 'react-router';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Page } from '@/components/layout/Page';
 import { Button } from '@/components/ui/button';
+import { Spinner } from '@/components/ui/spinner';
 import { ROUTES } from '@/config/routes';
 import {
   ActiveFilterChip,
@@ -13,10 +14,13 @@ import {
   ProductsEmptyState,
   ProductsTable,
   ProductsTableSkeleton,
+  toStatusCounts,
   toStatusQuery,
+  useCatalogStats,
   useProductListFilters,
   useProducts,
 } from '@/features/catalog';
+import { pluralize } from '@/lib/format';
 import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
 
 function AddProductButton() {
@@ -42,6 +46,8 @@ function AddProductActions({ workspaceId }: { workspaceId: string | undefined })
 export function ProductsPage() {
   const { workspace } = useCurrentWorkspace();
   const filters = useProductListFilters();
+  const { data: stats } = useCatalogStats(workspace?.id);
+  const counts = stats && toStatusCounts(stats);
 
   return (
     <Page
@@ -54,6 +60,7 @@ export function ProductsPage() {
         onSearchChange={filters.setSearch}
         status={filters.status}
         onStatusChange={filters.setStatus}
+        counts={counts}
       />
       {filters.gap && (
         <ActiveFilterChip label={CATALOG_GAP_COPY[filters.gap].label} onClear={filters.clearGap} />
@@ -97,17 +104,37 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
   }
   return (
     <>
-      <ProductsTable products={products.products} currency={workspace?.currency ?? ''} />
+      <ResultCount count={products.products.length} hasMore={products.hasNextPage} />
+      <ProductsTable
+        products={products.products}
+        currency={workspace?.currency ?? ''}
+        isRefreshing={products.isPlaceholderData}
+      />
       {products.hasNextPage && (
-        <Button
-          variant="outline"
-          className="self-center"
-          disabled={products.isFetchingNextPage}
-          onClick={() => void products.fetchNextPage()}
-        >
-          {products.isFetchingNextPage ? 'Loading…' : 'Load more'}
-        </Button>
+        <LoadMoreButton
+          isLoading={products.isFetchingNextPage}
+          onLoadMore={() => void products.fetchNextPage()}
+        />
       )}
     </>
+  );
+}
+
+/** Tells screen readers how many products the filters left. */
+function ResultCount({ count, hasMore }: { count: number; hasMore: boolean }) {
+  return (
+    <p className="sr-only" aria-live="polite">
+      {hasMore ? 'Showing the first ' : 'Showing '}
+      {pluralize(count, 'product')}
+    </p>
+  );
+}
+
+function LoadMoreButton({ isLoading, onLoadMore }: { isLoading: boolean; onLoadMore: () => void }) {
+  return (
+    <Button variant="outline" className="self-center" disabled={isLoading} onClick={onLoadMore}>
+      {isLoading && <Spinner data-icon="inline-start" />}
+      {isLoading ? 'Loading…' : 'Load more'}
+    </Button>
   );
 }

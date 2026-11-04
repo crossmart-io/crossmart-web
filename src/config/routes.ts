@@ -21,6 +21,8 @@ export function toProductRoute(productId: string): string {
 /** Query parameters that pages read from the URL, so filtered views can be linked to. */
 export const ROUTE_QUERY = {
   gap: 'gap',
+  search: 'q',
+  status: 'status',
 } as const;
 
 export function toProductsRoute(filter: { gap?: string } = {}): string {

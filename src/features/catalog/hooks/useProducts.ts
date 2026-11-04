@@ -1,4 +1,4 @@
-import { useInfiniteQuery } from '@tanstack/react-query';
+import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { ApiRequestError } from '@/api/api-error';
 import { fetchClient } from '@/api/client';
 import type { CatalogGap, ProductStatus } from '@/api/schema';
@@ -42,6 +42,8 @@ export function useProducts(filter: ProductsFilter) {
     initialPageParam: undefined as string | undefined,
     getNextPageParam: (lastPage) => lastPage.nextCursor ?? undefined,
     enabled: Boolean(filter.workspaceId),
+    // Keep the current rows while a new filter loads, instead of flashing a skeleton.
+    placeholderData: keepPreviousData,
   });
   const products: ProductSummary[] = query.data?.pages.flatMap((page) => page.items) ?? [];
   return { ...query, products };

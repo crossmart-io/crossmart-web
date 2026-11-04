@@ -28,4 +28,14 @@ describe('TagInput', () => {
     expect(screen.queryByText('b2')).not.toBeInTheDocument();
     expect(screen.getByText('a1')).toBeInTheDocument();
   });
+
+  it('announces what was added and removed', async () => {
+    render(<Harness initial={['wool']} />);
+
+    await userEvent.type(screen.getByRole('textbox'), 'linen{Enter}');
+    expect(screen.getByText('Added linen')).toBeInTheDocument();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Remove wool' }));
+    expect(screen.getByText('Removed wool')).toBeInTheDocument();
+  });
 });
