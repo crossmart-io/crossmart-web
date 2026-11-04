@@ -10,6 +10,7 @@ import { AccountDetail } from './AccountDetail';
 import { ChannelImportSection } from './ChannelImportSection';
 import { ConnectionActions } from './ConnectionActions';
 import { EbayAccountDetails } from './EbayAccountDetails';
+import { EbayListingDefaultsCard } from './EbayListingDefaultsCard';
 import { ShopifyAccountDetails } from './ShopifyAccountDetails';
 
 interface ConnectionSettingsProps {
@@ -136,6 +137,14 @@ export function ConnectionSettings({
   return (
     <div className="flex flex-col gap-6">
       <StoreDetailsCard connection={connection} />
+      {connection.ebay && (
+        <EbayListingDefaultsCard
+          workspaceId={workspaceId}
+          connectionId={connection.id}
+          ebay={connection.ebay}
+          canManage={canManage && isConnected}
+        />
+      )}
       {automaticRule}
       {canImportProducts && isConnected && importsCatalog && (
         <ImportCard workspaceId={workspaceId} connection={connection} />

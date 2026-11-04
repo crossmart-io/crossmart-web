@@ -13,6 +13,7 @@ import {
   SheetTitle,
 } from '@/components/ui/sheet';
 import { Spinner } from '@/components/ui/spinner';
+import { ChannelType } from '@/api/schema';
 import {
   useAddToStore,
   useClearListingOverride,
@@ -34,6 +35,8 @@ import {
   VisibilityField,
 } from './OverrideFields';
 import { MediaOverrideField, TagsOverrideField } from './OverrideTagsAndMediaFields';
+import { ChannelCategoryField } from './ChannelCategoryField';
+import type { ProductChannelRef } from '../hooks/useProductChannels';
 
 export interface OverrideProduct extends ProductDefaults {
   id: string;
@@ -107,16 +110,27 @@ function OverrideSheetHeader({ isAdding, store }: { isAdding: boolean; store: st
 
 /** Every field the store can show differently, in the order a merchant reads the listing. */
 function OverrideFieldList({
+  channelRef,
   product,
   channel,
   error,
 }: {
+  channelRef: ProductChannelRef;
   product: OverrideProduct;
   channel: ProductChannel;
   error: Error | null;
 }) {
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pb-4">
+      {channel.connection.channel === ChannelType.ebay && (
+        <>
+          <ChannelCategoryField
+            channelRef={channelRef}
+            category={channel.listing?.category ?? null}
+          />
+          <Separator />
+        </>
+      )}
       <ContentOverrideFields productTitle={product.title} />
       <TagsOverrideField />
       <MediaOverrideField imageUrls={product.media.map(({ url }) => url)} />
@@ -168,6 +182,7 @@ export function ChannelOverrideSheet({
             className="flex min-h-0 flex-1 flex-col"
           >
             <OverrideFieldList
+              channelRef={ref}
               product={product}
               channel={channel}
               error={save.error ?? add.error}

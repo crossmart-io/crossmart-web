@@ -3,6 +3,7 @@ import {
   ChannelFeature,
   ChannelType,
   ConnectFailure,
+  EbayCondition,
   EbayMarketplaceId,
 } from '@/api/schema';
 import amazonLogo from './assets/logos/amazon.svg';
@@ -14,12 +15,20 @@ import tiktokLogo from './assets/logos/tiktok.svg';
 import walmartLogo from './assets/logos/walmart.svg';
 
 export const CHANNEL_CONNECTIONS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/channel-connections';
+export const CHANNEL_CONNECTION_DETAIL_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}';
 export const CHANNEL_AUTHORIZATIONS_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/authorizations';
 export const CHANNEL_DISCONNECT_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/disconnect';
 export const CHANNEL_IMPORTS_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/imports';
+export const EBAY_LISTING_DEFAULTS_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/listing-defaults';
+export const EBAY_POLICIES_OPT_IN_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/business-policies/opt-in';
+export const EBAY_POLICIES_REFRESH_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/business-policies/refresh';
 
 export enum ChannelStatus {
   /** Its connector has shipped: it can be connected. */
@@ -152,6 +161,56 @@ export const EBAY_POLICIES_COPY = {
   off: 'Business policies are off on this eBay account',
   separator: ' · ',
 } as const;
+
+/** An item's condition, as the merchant picks it for every listing. */
+export const EBAY_CONDITION_LABELS: Record<EbayCondition, string> = {
+  [EbayCondition.NEW]: 'New',
+  [EbayCondition.LIKE_NEW]: 'Like new',
+  [EbayCondition.NEW_OTHER]: 'New (other)',
+  [EbayCondition.NEW_WITH_DEFECTS]: 'New with defects',
+  [EbayCondition.CERTIFIED_REFURBISHED]: 'Certified refurbished',
+  [EbayCondition.EXCELLENT_REFURBISHED]: 'Excellent, refurbished',
+  [EbayCondition.VERY_GOOD_REFURBISHED]: 'Very good, refurbished',
+  [EbayCondition.GOOD_REFURBISHED]: 'Good, refurbished',
+  [EbayCondition.SELLER_REFURBISHED]: 'Seller refurbished',
+  [EbayCondition.USED_EXCELLENT]: 'Used, excellent',
+  [EbayCondition.USED_VERY_GOOD]: 'Used, very good',
+  [EbayCondition.USED_GOOD]: 'Used, good',
+  [EbayCondition.USED_ACCEPTABLE]: 'Used, acceptable',
+  [EbayCondition.FOR_PARTS_OR_NOT_WORKING]: 'For parts or not working',
+};
+
+/**
+ * Where merchants create and edit business policies. The web app does not know the API's eBay
+ * environment, so this is eBay's production page; sandbox sellers use their sandbox site.
+ */
+export const EBAY_BUSINESS_POLICIES_URL = 'https://www.ebay.com/bp/manage';
+
+/** What the listing defaults card says. */
+export const EBAY_DEFAULTS_COPY = {
+  title: 'Listing defaults',
+  description:
+    'Every listing in this eBay store is sold under these policies and condition, and ships from this address.',
+  ready: 'Ready to list.',
+  notReady: 'Choose a policy of each type and where items ship from before publishing.',
+  choosePolicy: 'Choose a policy',
+  noPolicies: 'No policies yet',
+  save: 'Save defaults',
+  saved: 'Listing defaults saved',
+  optIn: 'Opt in to business policies',
+  optedIn: 'Opted in. eBay may take a few minutes; create your policies on eBay, then refresh.',
+  refresh: 'Refresh policies',
+  refreshed: 'Policies read again from eBay',
+  manage: 'Manage policies on eBay',
+  manageNote: 'Opens eBay’s site; sandbox accounts manage policies on the sandbox site.',
+  policiesOff:
+    'eBay lists items only under business policies. Opt this account in, then create shipping, payment and return policies on eBay.',
+} as const;
+
+/** The country of a ship-from address: two capital letters (ISO 3166). */
+export const COUNTRY_CODE_PATTERN = /^[A-Z]{2}$/;
+export const POSTAL_CODE_MAX_LENGTH = 32;
+export const CITY_MAX_LENGTH = 128;
 
 /** How each kind of eBay business policy is named in the policy counts. */
 export const EBAY_POLICY_KIND_LABELS = {

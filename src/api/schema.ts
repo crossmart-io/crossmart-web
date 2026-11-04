@@ -694,6 +694,66 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/listing-defaults': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Set an eBay connection’s listing defaults
+     * @description Business policies, condition and ship-from address for every listing. The address is saved on eBay as the account’s Crossmart inventory location.
+     */
+    put: operations['EbayAccountController_saveListingDefaults_v1'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/business-policies/opt-in': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Opt an eBay account in to business policies
+     * @description eBay may take a few minutes to enable them; refresh the policies once they are created.
+     */
+    post: operations['EbayAccountController_optInToBusinessPolicies_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/business-policies/refresh': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Read an eBay account’s business policies again
+     * @description After the merchant creates or edits policies on eBay. Defaults are kept.
+     */
+    post: operations['EbayAccountController_refreshPolicies_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/products': {
     parameters: {
       query?: never;
@@ -928,6 +988,46 @@ export interface paths {
     post?: never;
     /** Remove the product’s overrides on one channel */
     delete: operations['ProductChannelsController_clearOverride_v1'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/category-suggestions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Suggest channel categories for the product
+     * @description Searches the channel’s categories for `search`, or for the product’s title.
+     */
+    get: operations['ProductChannelCategoryController_suggest_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/category': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Choose the product’s channel category
+     * @description Null lets the next publish pick the channel’s best match. When the channel already lists the product, an update is queued.
+     */
+    put: operations['ProductChannelCategoryController_choose_v1'];
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -1841,6 +1941,28 @@ export interface components {
       payment: components['schemas']['EbayPolicyDto'][];
       return: components['schemas']['EbayPolicyDto'][];
     };
+    /** @enum {string} */
+    EbayCondition: EbayCondition;
+    EbayShipFromDto: {
+      /** @example 95125 */
+      postalCode: string;
+      /**
+       * @description ISO 3166 alpha-2 country code
+       * @example US
+       */
+      country: string;
+      /** @example San Jose */
+      city: string | null;
+    };
+    EbayListingDefaultsDto: {
+      fulfillmentPolicyId: string | null;
+      paymentPolicyId: string | null;
+      returnPolicyId: string | null;
+      condition: components['schemas']['EbayCondition'];
+      location: components['schemas']['EbayShipFromDto'] | null;
+      /** @description The inventory location Crossmart created on eBay for `location` */
+      merchantLocationKey: string | null;
+    };
     EbaySettingsDto: {
       marketplaceId: components['schemas']['EbayMarketplaceId'];
       /**
@@ -1855,6 +1977,10 @@ export interface components {
       /** @description False when the account has not opted in to business policies on eBay */
       businessPoliciesEnabled: boolean;
       policies: components['schemas']['EbayBusinessPoliciesDto'];
+      /** @description What listings are published with; policies resolve to the only one of a type */
+      listingDefaults: components['schemas']['EbayListingDefaultsDto'];
+      /** @description Whether listings can be published: policies of each type and a ship-from set */
+      readyToList: boolean;
     };
     ProductSelectionFilterDto: {
       /** @description Matches title, handle or SKU */
@@ -1963,10 +2089,28 @@ export interface components {
        */
       externalAccountId: string;
     };
+    UpdateEbayListingDefaultsDto: {
+      /** @description Shipping policy; null uses the account’s only one, when it has exactly one */
+      fulfillmentPolicyId: string | null;
+      paymentPolicyId: string | null;
+      returnPolicyId: string | null;
+      condition: components['schemas']['EbayCondition'];
+      /** @description Saved on eBay as the account’s Crossmart inventory location */
+      location: components['schemas']['EbayShipFromDto'] | null;
+    };
     /** @enum {string} */
     ChannelProductState: ChannelProductState;
     /** @enum {string} */
     ChannelProductSort: ChannelProductSort;
+    ChannelCategoryDto: {
+      /** @example 20625 */
+      id: string;
+      /**
+       * @description The category with its ancestors, as the channel shows it
+       * @example Home & Garden > Kitchen, Dining & Bar > Dinnerware & Serving Dishes > Mugs
+       */
+      name: string;
+    };
     ListingSummaryDto: {
       /** Format: uuid */
       id: string;
@@ -1981,6 +2125,8 @@ export interface components {
       lastError: string | null;
       /** Format: date-time */
       lastSyncedAt: string | null;
+      /** @description The channel category it is listed in, on channels with categories (eBay) */
+      category: components['schemas']['ChannelCategoryDto'] | null;
     };
     ChannelProductDto: {
       product: components['schemas']['ProductSummaryDto'];
@@ -2110,6 +2256,8 @@ export interface components {
       lastError: string | null;
       /** Format: date-time */
       lastSyncedAt: string | null;
+      /** @description The channel category it is listed in, on channels with categories (eBay) */
+      category: components['schemas']['ChannelCategoryDto'] | null;
       /** Format: uuid */
       productId: string;
       productTitle: string;
@@ -2191,6 +2339,9 @@ export interface components {
       /** @description Most units shown */
       maxQuantity?: number | null;
       variantPrices?: components['schemas']['VariantPriceOverrideDto'][];
+    };
+    ChooseChannelCategoryDto: {
+      category: components['schemas']['ChannelCategoryDto'] | null;
     };
     /** @enum {string} */
     OrderStatus: OrderStatus;
@@ -3710,6 +3861,76 @@ export interface operations {
       };
     };
   };
+  EbayAccountController_saveListingDefaults_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateEbayListingDefaultsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
+  EbayAccountController_optInToBusinessPolicies_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
+  EbayAccountController_refreshPolicies_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
   ChannelProductsController_listProducts_v1: {
     parameters: {
       query?: {
@@ -4070,6 +4291,59 @@ export interface operations {
       };
     };
   };
+  ProductChannelCategoryController_suggest_v1: {
+    parameters: {
+      query?: {
+        /** @description Keywords; the product’s title when absent */
+        search?: string;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelCategoryDto'][];
+        };
+      };
+    };
+  };
+  ProductChannelCategoryController_choose_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ChooseChannelCategoryDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductChannelDto'];
+        };
+      };
+    };
+  };
   OrdersController_list_v1: {
     parameters: {
       query?: {
@@ -4373,6 +4647,9 @@ export enum ActivityAction {
   listing_override_updated = 'listing_override_updated',
   channel_pricing_updated = 'channel_pricing_updated',
   channel_selection_updated = 'channel_selection_updated',
+  channel_listing_defaults_updated = 'channel_listing_defaults_updated',
+  channel_policies_opted_in = 'channel_policies_opted_in',
+  listing_category_changed = 'listing_category_changed',
   channel_sync_requested = 'channel_sync_requested',
   stock_oversold = 'stock_oversold',
 }
@@ -4453,6 +4730,22 @@ export enum EbayMarketplaceId {
   EBAY_FR = 'EBAY_FR',
   EBAY_IT = 'EBAY_IT',
   EBAY_ES = 'EBAY_ES',
+}
+export enum EbayCondition {
+  NEW = 'NEW',
+  LIKE_NEW = 'LIKE_NEW',
+  NEW_OTHER = 'NEW_OTHER',
+  NEW_WITH_DEFECTS = 'NEW_WITH_DEFECTS',
+  CERTIFIED_REFURBISHED = 'CERTIFIED_REFURBISHED',
+  EXCELLENT_REFURBISHED = 'EXCELLENT_REFURBISHED',
+  VERY_GOOD_REFURBISHED = 'VERY_GOOD_REFURBISHED',
+  GOOD_REFURBISHED = 'GOOD_REFURBISHED',
+  SELLER_REFURBISHED = 'SELLER_REFURBISHED',
+  USED_EXCELLENT = 'USED_EXCELLENT',
+  USED_VERY_GOOD = 'USED_VERY_GOOD',
+  USED_GOOD = 'USED_GOOD',
+  USED_ACCEPTABLE = 'USED_ACCEPTABLE',
+  FOR_PARTS_OR_NOT_WORKING = 'FOR_PARTS_OR_NOT_WORKING',
 }
 export enum PriceRounding {
   none = 'none',

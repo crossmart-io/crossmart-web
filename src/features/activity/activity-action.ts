@@ -41,6 +41,9 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.channel_pricing_updated]: 'Pricing rule changed',
   [ActivityAction.channel_selection_updated]: 'Product selection changed',
   [ActivityAction.channel_sync_requested]: 'Channel sync started',
+  [ActivityAction.channel_listing_defaults_updated]: 'Listing defaults changed',
+  [ActivityAction.channel_policies_opted_in]: 'Business policies opted in',
+  [ActivityAction.listing_category_changed]: 'Channel category changed',
   [ActivityAction.stock_oversold]: 'Oversold',
 };
 

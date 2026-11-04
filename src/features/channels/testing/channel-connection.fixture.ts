@@ -1,4 +1,9 @@
-import { ChannelConnectionStatus, ChannelType, EbayMarketplaceId } from '@/api/schema';
+import {
+  ChannelConnectionStatus,
+  ChannelType,
+  EbayCondition,
+  EbayMarketplaceId,
+} from '@/api/schema';
 import type { ChannelConnection } from '../channels.types';
 
 /** A connected Shopify store, with `overrides` applied. */
@@ -32,6 +37,16 @@ export function connectionFixture(overrides: Partial<ChannelConnection> = {}): C
   };
 }
 
+/** eBay listing defaults before the merchant chose any. */
+export const NO_EBAY_DEFAULTS = {
+  fulfillmentPolicyId: null,
+  paymentPolicyId: null,
+  returnPolicyId: null,
+  condition: EbayCondition.NEW,
+  location: null,
+  merchantLocationKey: null,
+};
+
 /** A connected eBay account on eBay UK, without business policies, with `overrides` applied. */
 export function ebayConnectionFixture(
   overrides: Partial<ChannelConnection> = {},
@@ -49,6 +64,8 @@ export function ebayConnectionFixture(
       userId: 'nY4uWx2bQ1e',
       businessPoliciesEnabled: false,
       policies: { fulfillment: [], payment: [], return: [] },
+      listingDefaults: NO_EBAY_DEFAULTS,
+      readyToList: false,
     },
     ...overrides,
   });
