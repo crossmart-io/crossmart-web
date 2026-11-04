@@ -202,6 +202,48 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/roles': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Every role: the built-in ones with their permissions, and custom ones */
+    get: operations['CustomRolesController_list_v1'];
+    put?: never;
+    /** Create a role from permissions you have */
+    post: operations['CustomRolesController_create_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/roles/{roleId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Change a role
+     * @description Applies to everyone holding it at once. API keys created by its members that now allow more than the role are revoked.
+     */
+    put: operations['CustomRolesController_update_v1'];
+    post?: never;
+    /**
+     * Delete a role
+     * @description Refused (409) while members, pending invitations or API keys hold it.
+     */
+    delete: operations['CustomRolesController_delete_v1'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/workspaces/{workspaceId}/api-keys': {
     parameters: {
       query?: never;
@@ -956,6 +998,11 @@ export interface components {
      * @enum {string}
      */
     WorkspaceRole: WorkspaceRole;
+    CustomRoleRefDto: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+    };
     /**
      * @description What your role lets you do here. Check these, not the role, to adapt a UI.
      * @enum {string}
@@ -977,6 +1024,8 @@ export interface components {
       currency: string;
       /** @description Your role here */
       role: components['schemas']['WorkspaceRole'];
+      /** @description The workspace’s own role, when `role` is CUSTOM */
+      customRole: components['schemas']['CustomRoleRefDto'] | null;
       /** @description What your role lets you do here. Check these, not the role, to adapt a UI. */
       permissions: components['schemas']['WorkspacePermission'][];
     };
@@ -997,18 +1046,27 @@ export interface components {
       name: string;
       email: string;
       role: components['schemas']['WorkspaceRole'];
+      /** @description The workspace’s own role, when `role` is CUSTOM */
+      customRole: components['schemas']['CustomRoleRefDto'] | null;
       /** Format: date-time */
       joinedAt: string;
     };
     UpdateMemberRoleDto: {
-      /** @description At most your own role. A workspace always keeps an owner. */
+      /** @description At most your own access. CUSTOM needs `customRoleId`. */
       role: components['schemas']['WorkspaceRole'];
+      /**
+       * Format: uuid
+       * @description One of the workspace’s roles, with CUSTOM
+       */
+      customRoleId?: string;
     };
     InvitationDto: {
       /** Format: uuid */
       id: string;
       email: string;
       role: components['schemas']['WorkspaceRole'];
+      /** @description The workspace’s own role, when `role` is CUSTOM */
+      customRole: components['schemas']['CustomRoleRefDto'] | null;
       invitedByName: string;
       /** Format: date-time */
       expiresAt: string;
@@ -1016,10 +1074,15 @@ export interface components {
       createdAt: string;
     };
     InviteMemberDto: {
+      /** @description At most your own access. CUSTOM needs `customRoleId`. */
+      role: components['schemas']['WorkspaceRole'];
+      /**
+       * Format: uuid
+       * @description One of the workspace’s roles, with CUSTOM
+       */
+      customRoleId?: string;
       /** @example dana@example.com */
       email: string;
-      /** @description At most your own role. */
-      role: components['schemas']['WorkspaceRole'];
     };
     InvitationTokenDto: {
       token: string;
@@ -1031,6 +1094,11 @@ export interface components {
       /** @description The address invited; accepting needs an account with it */
       email: string;
       role: components['schemas']['WorkspaceRole'];
+      /**
+       * @description The role as people read it
+       * @example Editor
+       */
+      roleName: string;
       /** Format: date-time */
       expiresAt: string;
     };
@@ -1039,11 +1107,43 @@ export interface components {
       workspaceId: string;
       role: components['schemas']['WorkspaceRole'];
     };
+    BuiltInRoleDto: {
+      role: components['schemas']['WorkspaceRole'];
+      permissions: components['schemas']['WorkspacePermission'][];
+    };
+    CustomRoleDto: {
+      /** Format: uuid */
+      id: string;
+      name: string;
+      description: string | null;
+      permissions: components['schemas']['WorkspacePermission'][];
+      /** @description Members holding the role now */
+      memberCount: number;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    RoleCatalogDto: {
+      /** @description Most access first */
+      builtIn: components['schemas']['BuiltInRoleDto'][];
+      /** @description By name */
+      custom: components['schemas']['CustomRoleDto'][];
+    };
+    CustomRoleInputDto: {
+      /** @example Stock clerk */
+      name: string;
+      description?: string | null;
+      /** @description At most your own permissions. workspace:view is always added; workspace:delete is for owners only. */
+      permissions: components['schemas']['WorkspacePermission'][];
+    };
     ApiKeyDto: {
       /** Format: uuid */
       id: string;
       name: string;
       role: components['schemas']['WorkspaceRole'];
+      /** @description The workspace’s own role, when `role` is CUSTOM */
+      customRole: components['schemas']['CustomRoleRefDto'] | null;
       /** @description The first characters of the key, to tell keys apart */
       prefix: string;
       /** Format: date-time */
@@ -1054,10 +1154,15 @@ export interface components {
       createdAt: string;
     };
     CreateApiKeyDto: {
+      /** @description At most your own access. CUSTOM needs `customRoleId`. */
+      role: components['schemas']['WorkspaceRole'];
+      /**
+       * Format: uuid
+       * @description One of the workspace’s roles, with CUSTOM
+       */
+      customRoleId?: string;
       /** @example Claude Desktop */
       name: string;
-      /** @description At most your own role. OWNER is not allowed. */
-      role: components['schemas']['WorkspaceRole'];
       /**
        * Format: date-time
        * @description Leave empty for a key that does not expire
@@ -1078,6 +1183,10 @@ export interface components {
        */
       workspaceId: string;
       role: components['schemas']['WorkspaceRole'];
+      /** @description The workspace’s own role, when `role` is CUSTOM */
+      customRole: components['schemas']['CustomRoleRefDto'] | null;
+      /** @description What the key may do */
+      permissions: components['schemas']['WorkspacePermission'][];
     };
     /** @enum {string} */
     ProductStatus: ProductStatus;
@@ -2646,6 +2755,98 @@ export interface operations {
       };
     };
   };
+  CustomRolesController_list_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['RoleCatalogDto'];
+        };
+      };
+    };
+  };
+  CustomRolesController_create_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CustomRoleInputDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CustomRoleDto'];
+        };
+      };
+    };
+  };
+  CustomRolesController_update_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        roleId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CustomRoleInputDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CustomRoleDto'];
+        };
+      };
+    };
+  };
+  CustomRolesController_delete_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        roleId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   ApiKeysController_list_v1: {
     parameters: {
       query?: never;
@@ -3869,6 +4070,7 @@ export enum WorkspaceRole {
   EDITOR = 'EDITOR',
   APPROVER = 'APPROVER',
   VIEWER = 'VIEWER',
+  CUSTOM = 'CUSTOM',
 }
 export enum WorkspacePermission {
   workspace_view = 'workspace:view',
@@ -4006,6 +4208,9 @@ export enum ActivityAction {
   member_role_changed = 'member_role_changed',
   member_removed = 'member_removed',
   member_left = 'member_left',
+  custom_role_created = 'custom_role_created',
+  custom_role_updated = 'custom_role_updated',
+  custom_role_deleted = 'custom_role_deleted',
   inventory_adjusted = 'inventory_adjusted',
   channel_connected = 'channel_connected',
   channel_disconnected = 'channel_disconnected',
@@ -4033,6 +4238,7 @@ export enum ActivitySubjectType {
   api_key = 'api_key',
   member = 'member',
   invitation = 'invitation',
+  custom_role = 'custom_role',
   channel_connection = 'channel_connection',
 }
 export enum ActivityActorType {

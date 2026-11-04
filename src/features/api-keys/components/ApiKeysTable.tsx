@@ -19,7 +19,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
-import { WORKSPACE_ROLE_LABELS } from '@/features/workspaces';
+import { roleLabel } from '@/features/workspaces';
 import { formatDate } from '@/lib/format';
 import { type ApiKey, useApiKeys, useRevokeApiKey } from '../hooks/useApiKeys';
 
@@ -66,7 +66,7 @@ export function ApiKeysTable({ workspaceId }: { workspaceId: string }) {
                 {apiKey.prefix}…
               </TableCell>
               <TableCell>
-                <Badge variant="secondary">{WORKSPACE_ROLE_LABELS[apiKey.role]}</Badge>
+                <Badge variant="secondary">{roleLabel(apiKey)}</Badge>
               </TableCell>
               <TableCell className="hidden text-muted-foreground md:table-cell">
                 {formatDate(apiKey.lastUsedAt, 'Never')}

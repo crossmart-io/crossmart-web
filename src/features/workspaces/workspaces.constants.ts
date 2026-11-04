@@ -5,6 +5,8 @@ export const MEMBER_ENDPOINT = '/api/v1/workspaces/{workspaceId}/members/{userId
 export const MEMBERSHIP_ENDPOINT = '/api/v1/workspaces/{workspaceId}/membership';
 export const INVITATIONS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/invitations';
 export const INVITATION_ENDPOINT = '/api/v1/workspaces/{workspaceId}/invitations/{invitationId}';
+export const ROLES_ENDPOINT = '/api/v1/workspaces/{workspaceId}/roles';
+export const ROLE_ENDPOINT = '/api/v1/workspaces/{workspaceId}/roles/{roleId}';
 export const INVITATION_PREVIEW_ENDPOINT = '/api/v1/invitations/preview';
 export const INVITATION_ACCEPT_ENDPOINT = '/api/v1/invitations/accept';
 

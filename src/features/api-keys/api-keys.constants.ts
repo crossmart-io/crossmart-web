@@ -3,15 +3,10 @@ import { WorkspaceRole } from '@/api/schema';
 export const API_KEYS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/api-keys';
 export const API_KEY_ENDPOINT = '/api/v1/workspaces/{workspaceId}/api-keys/{apiKeyId}';
 
-/** Keys can never be owners. The API also refuses roles above the creator's own. */
-export const ASSIGNABLE_KEY_ROLES = [
-  WorkspaceRole.EDITOR,
-  WorkspaceRole.APPROVER,
-  WorkspaceRole.VIEWER,
-  WorkspaceRole.ADMIN,
-] as const;
+/** Keys can never be owners. The API also refuses roles beyond the creator's own. */
+export const KEY_EXCLUDED_ROLES: readonly WorkspaceRole[] = [WorkspaceRole.OWNER];
 
-export const DEFAULT_KEY_ROLE = WorkspaceRole.EDITOR;
+export const DEFAULT_KEY_ROLE: string = WorkspaceRole.EDITOR;
 
 /** Toasts after key changes. */
 export const API_KEY_FEEDBACK = {

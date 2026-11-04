@@ -13,7 +13,7 @@ import {
 } from '@/components/ui/table';
 import { formatDate } from '@/lib/format';
 import { type Invitation, useInvitations, useRevokeInvitation } from '../hooks/useInvitations';
-import { WORKSPACE_ROLE_LABELS } from '../workspace-role';
+import { roleLabel } from '../role-options';
 
 /** Invitations not yet accepted. Shown only to members who manage the workspace. */
 export function PendingInvitations({ workspaceId }: { workspaceId: string }) {
@@ -44,7 +44,7 @@ export function PendingInvitations({ workspaceId }: { workspaceId: string }) {
               <TableRow key={invitation.id}>
                 <TableCell className="font-medium">{invitation.email}</TableCell>
                 <TableCell>
-                  <Badge variant="outline">{WORKSPACE_ROLE_LABELS[invitation.role]}</Badge>
+                  <Badge variant="outline">{roleLabel(invitation)}</Badge>
                 </TableCell>
                 <TableCell className="hidden text-muted-foreground md:table-cell">
                   {invitation.invitedByName}

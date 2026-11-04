@@ -22,6 +22,7 @@ const SUBJECT_ROUTES: Record<ActivitySubjectType, (subjectId: string) => string 
   [ActivitySubjectType.channel_connection]: (subjectId) => toChannelConnectionRoute(subjectId),
   [ActivitySubjectType.member]: () => ROUTES.members,
   [ActivitySubjectType.invitation]: () => ROUTES.members,
+  [ActivitySubjectType.custom_role]: () => ROUTES.roles,
   [ActivitySubjectType.product_view]: () => undefined,
 };
 

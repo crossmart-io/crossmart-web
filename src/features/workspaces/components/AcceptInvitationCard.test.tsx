@@ -22,6 +22,7 @@ const PREVIEW = {
   inviterName: 'Ana',
   email: 'bo@example.com',
   role: WorkspaceRole.EDITOR,
+  roleName: 'Editor',
   expiresAt: '2026-11-11T00:00:00Z',
 };
 

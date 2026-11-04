@@ -11,7 +11,6 @@ import {
   useAcceptInvitation,
   useInvitationPreview,
 } from '../hooks/useInvitations';
-import { WORKSPACE_ROLE_LABELS } from '../workspace-role';
 
 const HOME_LINK = (
   <Link to={ROUTES.home} className="font-medium text-foreground underline">
@@ -38,8 +37,7 @@ export function AcceptInvitationCard({ token }: { token: string }) {
   const invitation = preview.data;
   const title = `Join ${invitation.workspaceName}`;
   const description =
-    `${invitation.inviterName} invited ${invitation.email} as ` +
-    `${WORKSPACE_ROLE_LABELS[invitation.role]}.`;
+    `${invitation.inviterName} invited ${invitation.email} as ` + `${invitation.roleName}.`;
 
   return (
     <AuthCard title={title} description={description} footer={HOME_LINK}>

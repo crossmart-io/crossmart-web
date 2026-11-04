@@ -1,32 +1,29 @@
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
-import type { Workspace } from '../hooks/useCurrentWorkspace';
 import { useChangeMemberRole, type WorkspaceMember } from '../hooks/useMembers';
-import {
-  grantableRoles,
-  WORKSPACE_ROLE_DESCRIPTIONS,
-  WORKSPACE_ROLE_LABELS,
-} from '../workspace-role';
+import { type RoleOption, roleLabel, roleValue } from '../role-options';
+import { WORKSPACE_ROLE_DESCRIPTIONS } from '../workspace-role';
 import { RoleSelect } from './RoleSelect';
 
 interface MemberRoleProps {
-  workspace: Workspace;
+  workspaceId: string;
   member: WorkspaceMember;
-  isYou: boolean;
+  /** The roles the user may give. */
+  options: readonly RoleOption[];
+  editable: boolean;
 }
 
 /** A role picker for members the user may manage; a badge explaining the role otherwise. */
-export function MemberRole({ workspace, member, isYou }: MemberRoleProps) {
-  const changeRole = useChangeMemberRole(workspace.id);
-  const roles = grantableRoles(workspace.role);
+export function MemberRole({ workspaceId, member, options, editable }: MemberRoleProps) {
+  const changeRole = useChangeMemberRole(workspaceId);
 
-  if (isYou || !roles.includes(member.role)) {
+  if (!editable) {
     return (
       <Tooltip>
         <TooltipTrigger asChild>
           {/* Focusable, so keyboard users can read what the role allows. */}
           <Badge variant="secondary" tabIndex={0}>
-            {WORKSPACE_ROLE_LABELS[member.role]}
+            {roleLabel(member)}
           </Badge>
         </TooltipTrigger>
         <TooltipContent>{WORKSPACE_ROLE_DESCRIPTIONS[member.role]}</TooltipContent>
@@ -35,12 +32,12 @@ export function MemberRole({ workspace, member, isYou }: MemberRoleProps) {
   }
   return (
     <RoleSelect
-      value={member.role}
-      roles={roles}
+      value={roleValue(member)}
+      options={options}
       ariaLabel={`Role of ${member.name}`}
       disabled={changeRole.isPending}
-      onChange={(role) => changeRole.mutate({ userId: member.userId, role })}
-      className="w-32"
+      onChange={(option) => changeRole.mutate({ userId: member.userId, ...option.assignment })}
+      className="w-36"
     />
   );
 }

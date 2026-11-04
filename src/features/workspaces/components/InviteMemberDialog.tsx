@@ -1,7 +1,7 @@
-import { CircleAlert, UserPlus } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { WorkspaceRole } from '@/api/schema';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -15,34 +15,39 @@ import {
 import { Field, FieldDescription, FieldGroup, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
-import { useInviteMember } from '../hooks/useInvitations';
 import type { Workspace } from '../hooks/useCurrentWorkspace';
-import { grantableRoles, WORKSPACE_ROLE_DESCRIPTIONS } from '../workspace-role';
+import { useInviteMember } from '../hooks/useInvitations';
+import { useRolePicker } from '../hooks/useRolePicker';
 import { RoleSelect } from './RoleSelect';
 
 const FORM_ID = 'invite-member-form';
 const EMAIL_FIELD_ID = 'invite-email';
 const ROLE_FIELD_ID = 'invite-role';
-const DEFAULT_INVITE_ROLE = WorkspaceRole.EDITOR;
+const DEFAULT_INVITE_ROLE: string = WorkspaceRole.EDITOR;
 
 export function InviteMemberDialog({ workspace }: { workspace: Workspace }) {
   const [open, setOpen] = useState(false);
   const [email, setEmail] = useState('');
-  const [role, setRole] = useState<WorkspaceRole>(DEFAULT_INVITE_ROLE);
+  const picker = useRolePicker(workspace, DEFAULT_INVITE_ROLE);
+  const { role } = picker;
   const invite = useInviteMember(workspace.id);
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);
     if (!nextOpen) {
       setEmail('');
-      setRole(DEFAULT_INVITE_ROLE);
+      picker.reset();
       invite.reset();
     }
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    invite.mutate({ email: email.trim(), role }, { onSuccess: () => handleOpenChange(false) });
+    if (!role) return;
+    invite.mutate(
+      { email: email.trim(), ...role.assignment },
+      { onSuccess: () => handleOpenChange(false) },
+    );
   }
 
   return (
@@ -60,41 +65,35 @@ export function InviteMemberDialog({ workspace }: { workspace: Workspace }) {
             We email them a link to join {workspace.displayName}. It works for 7 days.
           </DialogDescription>
         </DialogHeader>
-        {invite.error && (
-          <Alert variant="destructive">
-            <CircleAlert />
-            <AlertDescription>{invite.error.message}</AlertDescription>
-          </Alert>
-        )}
+        <FormError error={invite.error} />
         <form id={FORM_ID} onSubmit={handleSubmit}>
-          <InviteFields
-            email={email}
-            onEmailChange={setEmail}
-            role={role}
-            onRoleChange={setRole}
-            roles={grantableRoles(workspace.role)}
-          />
+          <InviteFields email={email} onEmailChange={setEmail} picker={picker} />
         </form>
         <DialogFooter>
-          <Button type="submit" form={FORM_ID} disabled={!email.trim() || invite.isPending}>
-            {invite.isPending && <Spinner data-icon="inline-start" />}
-            {invite.isPending ? 'Sending…' : 'Send invitation'}
-          </Button>
+          <SendButton disabled={!email.trim() || !role} isPending={invite.isPending} />
         </DialogFooter>
       </DialogContent>
     </Dialog>
   );
 }
 
+function SendButton({ disabled, isPending }: { disabled: boolean; isPending: boolean }) {
+  return (
+    <Button type="submit" form={FORM_ID} disabled={disabled || isPending}>
+      {isPending && <Spinner data-icon="inline-start" />}
+      {isPending ? 'Sending…' : 'Send invitation'}
+    </Button>
+  );
+}
+
 interface InviteFieldsProps {
   email: string;
   onEmailChange: (email: string) => void;
-  role: WorkspaceRole;
-  onRoleChange: (role: WorkspaceRole) => void;
-  roles: readonly WorkspaceRole[];
+  picker: ReturnType<typeof useRolePicker>;
 }
 
-function InviteFields({ email, onEmailChange, role, onRoleChange, roles }: InviteFieldsProps) {
+function InviteFields({ email, onEmailChange, picker }: InviteFieldsProps) {
+  const { role } = picker;
   return (
     <FieldGroup>
       <Field>
@@ -112,12 +111,12 @@ function InviteFields({ email, onEmailChange, role, onRoleChange, roles }: Invit
         <FieldLabel htmlFor={ROLE_FIELD_ID}>Role</FieldLabel>
         <RoleSelect
           id={ROLE_FIELD_ID}
-          value={role}
-          roles={roles}
-          onChange={onRoleChange}
+          value={role?.value ?? ''}
+          options={picker.options}
+          onChange={picker.pick}
           className="w-full"
         />
-        <FieldDescription>{WORKSPACE_ROLE_DESCRIPTIONS[role]}</FieldDescription>
+        {role && <FieldDescription>{role.description}</FieldDescription>}
       </Field>
     </FieldGroup>
   );
