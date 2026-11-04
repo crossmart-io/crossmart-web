@@ -14,10 +14,39 @@ interface TextFieldProps {
   description?: ReactNode;
   placeholder?: string;
   inputMode?: 'text' | 'numeric';
+  /** Codes like SKUs and barcodes: no spell check, autocorrect or translation. */
+  isCode?: boolean;
 }
 
+/** Ids that tie a field's description and error to its control for screen readers. */
+function describedByIds(
+  name: string,
+  hasDescription: boolean,
+  hasError: boolean,
+): string | undefined {
+  const ids = [hasDescription && `${name}-description`, hasError && `${name}-error`].filter(
+    Boolean,
+  );
+  return ids.length > 0 ? ids.join(' ') : undefined;
+}
+
+const CODE_INPUT_PROPS = {
+  spellCheck: false,
+  autoComplete: 'off',
+  autoCorrect: 'off',
+  autoCapitalize: 'off',
+  translate: 'no',
+} as const;
+
 /** A labelled text input bound to the product form, with its validation message. */
-export function TextField({ name, label, description, placeholder, inputMode }: TextFieldProps) {
+export function TextField({
+  name,
+  label,
+  description,
+  placeholder,
+  inputMode,
+  isCode = false,
+}: TextFieldProps) {
   const { register, getFieldState, formState } = useFormContext<ProductFormValues>();
   const { error } = getFieldState(name, formState);
 
@@ -29,10 +58,12 @@ export function TextField({ name, label, description, placeholder, inputMode }: 
         placeholder={placeholder}
         inputMode={inputMode}
         aria-invalid={Boolean(error)}
+        aria-describedby={describedByIds(name, Boolean(description), Boolean(error))}
+        {...(isCode ? CODE_INPUT_PROPS : {})}
         {...register(name)}
       />
-      {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldError errors={[error]} />
+      {description && <FieldDescription id={`${name}-description`}>{description}</FieldDescription>}
+      <FieldError id={`${name}-error`} errors={[error]} />
     </Field>
   );
 }
@@ -56,10 +87,11 @@ export function MoneyField({ name, label, currency, description }: MoneyFieldPro
         currency={currency}
         placeholder="0.00"
         aria-invalid={Boolean(error)}
+        aria-describedby={describedByIds(name, Boolean(description), Boolean(error))}
         {...register(name)}
       />
-      {description && <FieldDescription>{description}</FieldDescription>}
-      <FieldError errors={[error]} />
+      {description && <FieldDescription id={`${name}-description`}>{description}</FieldDescription>}
+      <FieldError id={`${name}-error`} errors={[error]} />
     </Field>
   );
 }

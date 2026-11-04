@@ -1,5 +1,5 @@
 import { Trash2 } from 'lucide-react';
-import { Controller, useFormContext } from 'react-hook-form';
+import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { TagInput } from '@/components/forms/TagInput';
 import { Button } from '@/components/ui/button';
 import { Field, FieldError, FieldLabel } from '@/components/ui/field';
@@ -16,6 +16,7 @@ interface OptionRowProps {
 export function OptionRow({ index, onValuesChange, onRemove }: OptionRowProps) {
   const { control, register, formState } = useFormContext<ProductFormValues>();
   const errors = formState.errors.options?.[index];
+  const name = useWatch({ control, name: `options.${index}.name` });
 
   return (
     <div className="grid gap-3 rounded-md border p-3 sm:grid-cols-[10rem_1fr_auto]">
@@ -50,7 +51,7 @@ export function OptionRow({ index, onValuesChange, onRemove }: OptionRowProps) {
         size="icon"
         className="self-end"
         onClick={onRemove}
-        aria-label={`Remove option ${index + 1}`}
+        aria-label={`Remove option ${name || index + 1}`}
       >
         <Trash2 />
       </Button>

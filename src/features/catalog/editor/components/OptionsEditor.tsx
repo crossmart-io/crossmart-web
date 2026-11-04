@@ -1,6 +1,8 @@
 import { Plus } from 'lucide-react';
 import { useFieldArray, useFormContext } from 'react-hook-form';
+import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
+import { EDITOR_FEEDBACK } from '../../catalog.constants';
 import { MAX_OPTIONS, type ProductFormValues } from '../product-form.schema';
 import { syncVariants } from '../variant-sync';
 import { OptionRow } from './OptionRow';
@@ -18,6 +20,22 @@ export function OptionsEditor() {
     setValue('variants', syncVariants(current, variants), { shouldDirty: true });
   }
 
+  /** Removing an option merges variants and drops their prices and stock, so it can be undone. */
+  function removeOption(index: number) {
+    const before = getValues(['options', 'variants']);
+    options.remove(index);
+    regenerateVariants();
+    toast(EDITOR_FEEDBACK.optionRemoved, {
+      action: {
+        label: EDITOR_FEEDBACK.undo,
+        onClick: () => {
+          options.replace(before[0]);
+          setValue('variants', before[1], { shouldDirty: true });
+        },
+      },
+    });
+  }
+
   function addOption() {
     const used = new Set(getValues('options').map((option) => option.name.toLowerCase()));
     const name = SUGGESTED_OPTION_NAMES.find((suggestion) => !used.has(suggestion.toLowerCase()));
@@ -31,15 +49,12 @@ export function OptionsEditor() {
           key={option.id}
           index={index}
           onValuesChange={regenerateVariants}
-          onRemove={() => {
-            options.remove(index);
-            regenerateVariants();
-          }}
+          onRemove={() => removeOption(index)}
         />
       ))}
       {options.fields.length < MAX_OPTIONS && (
         <Button type="button" variant="outline" className="w-fit" onClick={addOption}>
-          <Plus />
+          <Plus data-icon="inline-start" />
           {options.fields.length === 0 ? 'Add options like size or color' : 'Add another option'}
         </Button>
       )}

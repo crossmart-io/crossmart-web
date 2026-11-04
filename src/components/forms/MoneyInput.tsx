@@ -1,6 +1,10 @@
-import type { ComponentProps } from 'react';
-import { cn } from 'cn';
-import { Input } from '@/components/ui/input';
+import { type ComponentProps, useId } from 'react';
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  InputGroupText,
+} from '@/components/ui/input-group';
 
 /** The symbol shown before an amount, e.g. "$" for USD. */
 function currencySymbol(currency: string): string {
@@ -8,18 +12,36 @@ function currencySymbol(currency: string): string {
   return parts.find((part) => part.type === 'currency')?.value ?? currency;
 }
 
-interface MoneyInputProps extends Omit<ComponentProps<typeof Input>, 'type'> {
+interface MoneyInputProps extends Omit<ComponentProps<typeof InputGroupInput>, 'type'> {
   currency: string;
 }
 
-/** A decimal amount kept as text, so "19.90" stays exact. */
-export function MoneyInput({ currency, className, ...props }: MoneyInputProps) {
+/**
+ * A decimal amount kept as text, so "19.90" stays exact. The currency sits in an addon that
+ * fits any symbol ("$", "CHF", "zł") and is read out with the field.
+ */
+export function MoneyInput({
+  currency,
+  'aria-describedby': describedBy,
+  ...props
+}: MoneyInputProps) {
+  const currencyId = useId();
+
   return (
-    <div className="relative">
-      <span className="pointer-events-none absolute top-1/2 left-3 -translate-y-1/2 text-sm text-muted-foreground">
-        {currencySymbol(currency)}
-      </span>
-      <Input inputMode="decimal" autoComplete="off" className={cn('pl-8', className)} {...props} />
-    </div>
+    <InputGroup>
+      <InputGroupAddon>
+        <InputGroupText id={currencyId}>
+          <span aria-hidden="true">{currencySymbol(currency)}</span>
+          <span className="sr-only">Amount in {currency}</span>
+        </InputGroupText>
+      </InputGroupAddon>
+      <InputGroupInput
+        inputMode="decimal"
+        autoComplete="off"
+        aria-describedby={[describedBy, currencyId].filter(Boolean).join(' ')}
+        className="tabular-nums"
+        {...props}
+      />
+    </InputGroup>
   );
 }

@@ -1,31 +1,50 @@
 import { Button } from '@/components/ui/button';
+import { Kbd } from '@/components/ui/kbd';
+import { Spinner } from '@/components/ui/spinner';
+import { shortcutAria, shortcutLabel } from '@/lib/platform';
+
+const SAVE_KEY = 'S';
 
 interface SaveBarProps {
   label: string;
   isSaving: boolean;
+  /** Uploads still running; saving now would drop them. */
+  isBusy: boolean;
   onDiscard: () => void;
 }
 
-/** Sticky under the app header while there is something to save. */
-export function SaveBar({ label, isSaving, onDiscard }: SaveBarProps) {
+/**
+ * Floats over the bottom of the page while there is something to save. It overlays the
+ * content instead of pushing it, so the field being typed in never moves.
+ */
+export function SaveBar({ label, isSaving, isBusy, onDiscard }: SaveBarProps) {
   return (
-    <div className="sticky top-14 z-10 -mx-4 mb-6 flex items-center justify-between gap-3 border-b bg-foreground px-4 py-2.5 text-background sm:-mx-6 sm:px-6">
-      <span className="text-sm font-medium">{label}</span>
-      <div className="flex gap-2">
-        <Button
-          type="button"
-          size="sm"
-          variant="ghost"
-          className="text-background hover:bg-background/10 hover:text-background"
-          onClick={onDiscard}
-          disabled={isSaving}
-        >
+    <section
+      aria-label="Save changes"
+      className="fixed inset-x-4 bottom-4 z-30 mx-auto flex max-w-xl animate-in items-center justify-between gap-3 rounded-xl border bg-popover px-4 py-2.5 text-popover-foreground shadow-lg fade-in slide-in-from-bottom-4 sm:inset-x-6"
+    >
+      <span className="text-sm font-medium" aria-live="polite">
+        {isBusy ? 'Uploading images…' : label}
+      </span>
+      <div className="flex items-center gap-2">
+        <Button type="button" variant="ghost" size="sm" onClick={onDiscard} disabled={isSaving}>
           Discard
         </Button>
-        <Button type="submit" size="sm" variant="secondary" disabled={isSaving}>
+        <Button
+          type="submit"
+          size="sm"
+          disabled={isSaving || isBusy}
+          aria-keyshortcuts={shortcutAria(SAVE_KEY)}
+        >
+          {isSaving && <Spinner data-icon="inline-start" />}
           {isSaving ? 'Saving…' : 'Save'}
+          {!isSaving && (
+            <Kbd className="hidden bg-primary-foreground/15 text-primary-foreground sm:inline-flex">
+              {shortcutLabel(SAVE_KEY)}
+            </Kbd>
+          )}
         </Button>
       </div>
-    </div>
+    </section>
   );
 }
