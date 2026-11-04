@@ -7,6 +7,7 @@ export const WORKSPACE_ROLE_LABELS: Record<WorkspaceRole, string> = {
   [WorkspaceRole.EDITOR]: 'Editor',
   [WorkspaceRole.APPROVER]: 'Approver',
   [WorkspaceRole.VIEWER]: 'Viewer',
+  [WorkspaceRole.CUSTOM]: 'Custom',
 };
 
 export const WORKSPACE_ROLE_DESCRIPTIONS: Record<WorkspaceRole, string> = {
@@ -15,6 +16,7 @@ export const WORKSPACE_ROLE_DESCRIPTIONS: Record<WorkspaceRole, string> = {
   [WorkspaceRole.EDITOR]: 'Edit the catalog',
   [WorkspaceRole.APPROVER]: 'Approve AI suggestions',
   [WorkspaceRole.VIEWER]: 'Read only',
+  [WorkspaceRole.CUSTOM]: 'A role this workspace defined',
 };
 
 /**
@@ -26,26 +28,6 @@ export function hasPermission(
   permission: WorkspacePermission,
 ): boolean {
   return workspace.permissions.includes(permission);
-}
-
-/** Every role, most access first. */
-const ALL_ROLES: readonly WorkspaceRole[] = [
-  WorkspaceRole.OWNER,
-  WorkspaceRole.ADMIN,
-  WorkspaceRole.EDITOR,
-  WorkspaceRole.APPROVER,
-  WorkspaceRole.VIEWER,
-];
-
-/**
- * The roles a member with `role` may give or take away: an Owner any, an Admin any but Owner,
- * everyone else none. The API enforces the same rule.
- */
-export function grantableRoles(role: WorkspaceRole): readonly WorkspaceRole[] {
-  if (role === WorkspaceRole.OWNER) return ALL_ROLES;
-  if (role === WorkspaceRole.ADMIN)
-    return ALL_ROLES.filter((other) => other !== WorkspaceRole.OWNER);
-  return [];
 }
 
 export function isWorkspaceRole(value: string): value is WorkspaceRole {

@@ -1,3 +1,4 @@
+import { WorkspacePermission } from '@/api/schema';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -12,6 +13,9 @@ import {
 import { formatDate } from '@/lib/format';
 import type { Workspace } from '../hooks/useCurrentWorkspace';
 import { useMembers, type WorkspaceMember } from '../hooks/useMembers';
+import { useRoleCatalog } from '../hooks/useRoleCatalog';
+import { covers, grantableOptions, type RoleOption, roleOptions, roleValue } from '../role-options';
+import { hasPermission } from '../workspace-role';
 import { MemberActions } from './MemberActions';
 import { MemberRole } from './MemberRole';
 
@@ -21,13 +25,31 @@ interface MembersTableProps {
   currentUserId: string;
 }
 
-export function MembersTable({ workspace, currentUserId }: MembersTableProps) {
-  const { data: members, isPending, error, refetch } = useMembers(workspace.id);
+/** What the user may do to one member: change or remove them only if they cover that role. */
+export interface MemberAccess {
+  manageable: boolean;
+  /** The roles the user may give. */
+  grantable: readonly RoleOption[];
+}
 
+export function MembersTable({ workspace, currentUserId }: MembersTableProps) {
+  const members = useMembers(workspace.id);
+  const catalog = useRoleCatalog(workspace.id);
+
+  const error = members.error ?? catalog.error;
   if (error) {
+    const refetch = () => Promise.all([members.refetch(), catalog.refetch()]);
     return <ErrorState title="Members could not be loaded" error={error} onRetry={refetch} />;
   }
-  if (isPending) return <Skeleton className="h-32 w-full" />;
+  if (!members.data || !catalog.data) return <Skeleton className="h-32 w-full" />;
+
+  const options = roleOptions(catalog.data);
+  const grantable = grantableOptions(options, workspace.permissions);
+  const canManage = hasPermission(workspace, WorkspacePermission.members_manage);
+  const accessTo = (member: WorkspaceMember): MemberAccess => {
+    const held = options.find((option) => option.value === roleValue(member));
+    return { manageable: canManage && !!held && covers(workspace.permissions, held), grantable };
+  };
 
   return (
     <div className="rounded-lg border">
@@ -41,12 +63,13 @@ export function MembersTable({ workspace, currentUserId }: MembersTableProps) {
           </TableRow>
         </TableHeader>
         <TableBody>
-          {members.map((member) => (
+          {members.data.map((member) => (
             <MemberRow
               key={member.userId}
               workspace={workspace}
               member={member}
               isYou={member.userId === currentUserId}
+              access={accessTo(member)}
             />
           ))}
         </TableBody>
@@ -59,9 +82,10 @@ interface MemberRowProps {
   workspace: Workspace;
   member: WorkspaceMember;
   isYou: boolean;
+  access: MemberAccess;
 }
 
-function MemberRow({ workspace, member, isYou }: MemberRowProps) {
+function MemberRow({ workspace, member, isYou, access }: MemberRowProps) {
   return (
     <TableRow>
       <TableCell>
@@ -79,13 +103,23 @@ function MemberRow({ workspace, member, isYou }: MemberRowProps) {
         </div>
       </TableCell>
       <TableCell>
-        <MemberRole workspace={workspace} member={member} isYou={isYou} />
+        <MemberRole
+          workspaceId={workspace.id}
+          member={member}
+          options={access.grantable}
+          editable={access.manageable && !isYou}
+        />
       </TableCell>
       <TableCell className="hidden text-muted-foreground sm:table-cell">
         {formatDate(member.joinedAt)}
       </TableCell>
       <TableCell className="text-right">
-        <MemberActions workspace={workspace} member={member} isYou={isYou} />
+        <MemberActions
+          workspace={workspace}
+          member={member}
+          isYou={isYou}
+          manageable={access.manageable}
+        />
       </TableCell>
     </TableRow>
   );

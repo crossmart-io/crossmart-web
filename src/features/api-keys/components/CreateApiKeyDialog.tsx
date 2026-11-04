@@ -1,7 +1,6 @@
-import { CircleAlert, Plus } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
-import type { WorkspaceRole } from '@/api/schema';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import {
@@ -13,8 +12,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '@/components/ui/dialog';
-import { WORKSPACE_ROLE_LABELS } from '@/features/workspaces';
-import { DEFAULT_KEY_ROLE } from '../api-keys.constants';
+import { roleLabel, useRolePicker, type Workspace } from '@/features/workspaces';
+import { DEFAULT_KEY_ROLE, KEY_EXCLUDED_ROLES } from '../api-keys.constants';
 import { type IssuedApiKey, useCreateApiKey } from '../hooks/useApiKeys';
 import { ApiKeyFields } from './ApiKeyFields';
 import { SecretReveal } from './SecretReveal';
@@ -23,30 +22,30 @@ const FORM_ID = 'create-api-key-form';
 const INTRO = 'For Claude, ChatGPT, your own agent or scripts. Send it in the x-api-key header.';
 
 function describe(issued: IssuedApiKey | undefined): string {
-  return issued
-    ? `${issued.apiKey.name} can now act as ${WORKSPACE_ROLE_LABELS[issued.apiKey.role]}.`
-    : INTRO;
+  return issued ? `${issued.apiKey.name} can now act as ${roleLabel(issued.apiKey)}.` : INTRO;
 }
 
-export function CreateApiKeyDialog({ workspaceId }: { workspaceId: string }) {
+export function CreateApiKeyDialog({ workspace }: { workspace: Workspace }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState('');
-  const [role, setRole] = useState<WorkspaceRole>(DEFAULT_KEY_ROLE);
-  const createKey = useCreateApiKey(workspaceId);
+  // A key never gets Owner, nor more than its creator has.
+  const picker = useRolePicker(workspace, DEFAULT_KEY_ROLE, KEY_EXCLUDED_ROLES);
+  const { role } = picker;
+  const createKey = useCreateApiKey(workspace.id);
   const issued = createKey.data;
 
   function handleOpenChange(nextOpen: boolean) {
     setOpen(nextOpen);
     if (!nextOpen) {
       setName('');
-      setRole(DEFAULT_KEY_ROLE);
+      picker.reset();
       createKey.reset();
     }
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    createKey.mutate({ name: name.trim(), role });
+    if (role) createKey.mutate({ name: name.trim(), ...role.assignment });
   }
 
   return (
@@ -67,24 +66,19 @@ export function CreateApiKeyDialog({ workspaceId }: { workspaceId: string }) {
           <DialogTitle>{issued ? 'Your new API key' : 'Create an API key'}</DialogTitle>
           <DialogDescription>{describe(issued)}</DialogDescription>
         </DialogHeader>
-        {createKey.error && (
-          <Alert variant="destructive">
-            <CircleAlert />
-            <AlertDescription>{createKey.error.message}</AlertDescription>
-          </Alert>
-        )}
+        <FormError error={createKey.error} />
         {issued ? (
           <SecretReveal secret={issued.secret} />
         ) : (
           <form id={FORM_ID} onSubmit={handleSubmit}>
-            <ApiKeyFields name={name} onNameChange={setName} role={role} onRoleChange={setRole} />
+            <ApiKeyFields name={name} onNameChange={setName} picker={picker} />
           </form>
         )}
         <DialogFooter>
           {issued ? (
             <Button onClick={() => handleOpenChange(false)}>Done</Button>
           ) : (
-            <SubmitKeyButton disabled={!name.trim()} isPending={createKey.isPending} />
+            <SubmitKeyButton disabled={!name.trim() || !role} isPending={createKey.isPending} />
           )}
         </DialogFooter>
       </DialogContent>

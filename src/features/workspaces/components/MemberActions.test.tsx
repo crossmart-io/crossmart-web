@@ -19,6 +19,7 @@ function workspaceAs(role: WorkspaceRole): Workspace {
     slug: 'default',
     currency: 'USD',
     role,
+    customRole: null,
     permissions: [],
   };
 }
@@ -28,30 +29,36 @@ const OWNER_MEMBER: WorkspaceMember = {
   name: 'Bo',
   email: 'bo@example.com',
   role: WorkspaceRole.OWNER,
+  customRole: null,
   joinedAt: '2026-11-01T00:00:00Z',
 };
 
-function renderActions(role: WorkspaceRole, isYou = false) {
+function renderActions(role: WorkspaceRole, { isYou = false, manageable = false } = {}) {
   render(
     <MemoryRouter>
-      <MemberActions workspace={workspaceAs(role)} member={OWNER_MEMBER} isYou={isYou} />
+      <MemberActions
+        workspace={workspaceAs(role)}
+        member={OWNER_MEMBER}
+        isYou={isYou}
+        manageable={manageable}
+      />
     </MemoryRouter>,
   );
 }
 
 describe('MemberActions', () => {
-  it('lets an owner remove another owner', () => {
-    renderActions(WorkspaceRole.OWNER);
+  it('offers to remove a member the user may manage', () => {
+    renderActions(WorkspaceRole.OWNER, { manageable: true });
     expect(screen.getByRole('button', { name: 'Remove Bo' })).toBeInTheDocument();
   });
 
-  it('gives an admin no action on an owner', () => {
+  it('gives no action on a member the user may not manage', () => {
     renderActions(WorkspaceRole.ADMIN);
     expect(screen.queryByRole('button')).not.toBeInTheDocument();
   });
 
   it('offers to leave on your own row', () => {
-    renderActions(WorkspaceRole.VIEWER, true);
+    renderActions(WorkspaceRole.VIEWER, { isYou: true });
     expect(screen.getByRole('button', { name: 'Leave' })).toBeInTheDocument();
   });
 });

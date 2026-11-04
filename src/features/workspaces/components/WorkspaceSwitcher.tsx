@@ -16,7 +16,7 @@ import {
 import { ROUTES } from '@/config/routes';
 import { type Workspace, useCurrentWorkspace } from '../hooks/useCurrentWorkspace';
 import { selectWorkspace } from '../selected-workspace';
-import { WORKSPACE_ROLE_LABELS } from '../workspace-role';
+import { roleLabel } from '../role-options';
 
 function WorkspaceLabel({ workspace }: { workspace: Workspace }) {
   return (
@@ -27,7 +27,7 @@ function WorkspaceLabel({ workspace }: { workspace: Workspace }) {
       <span className="flex min-w-0 flex-1 flex-col text-left leading-tight">
         <span className="truncate font-medium">{workspace.displayName}</span>
         <span className="truncate text-xs text-muted-foreground">
-          {WORKSPACE_ROLE_LABELS[workspace.role]} · {workspace.currency}
+          {roleLabel(workspace)} · {workspace.currency}
         </span>
       </span>
     </>
@@ -80,9 +80,7 @@ function SwitcherMenu({ current, workspaces }: { current: Workspace; workspaces:
           <DropdownMenuItem key={workspace.id} onSelect={() => open(workspace.id)}>
             <span className="flex min-w-0 flex-1 flex-col">
               <span className="truncate">{workspace.displayName}</span>
-              <span className="text-xs text-muted-foreground">
-                {WORKSPACE_ROLE_LABELS[workspace.role]}
-              </span>
+              <span className="text-xs text-muted-foreground">{roleLabel(workspace)}</span>
             </span>
             {workspace.id === current.id && <Check className="size-4" />}
           </DropdownMenuItem>

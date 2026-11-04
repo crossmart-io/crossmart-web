@@ -12,7 +12,7 @@ export function ApiKeysPage() {
       name="API keys"
       parents={PAGE_PARENTS.settings}
       description="Let Claude, ChatGPT, your own agent or scripts work with this workspace through the API and MCP server."
-      actions={workspace && <CreateApiKeyDialog workspaceId={workspace.id} />}
+      actions={workspace && <CreateApiKeyDialog workspace={workspace} />}
     >
       <WorkspaceGate>{(current) => <ApiKeysTable workspaceId={current.id} />}</WorkspaceGate>
     </Page>

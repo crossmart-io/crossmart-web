@@ -4,18 +4,19 @@ import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/config/routes';
 import type { Workspace } from '../hooks/useCurrentWorkspace';
 import { useLeaveWorkspace, useRemoveMember, type WorkspaceMember } from '../hooks/useMembers';
-import { grantableRoles } from '../workspace-role';
 
 interface MemberActionsProps {
   workspace: Workspace;
   member: WorkspaceMember;
   isYou: boolean;
+  /** Whether the user may remove this member: their role covers the member's. */
+  manageable: boolean;
 }
 
 /** Leave for the user's own row, remove for members they may manage, nothing otherwise. */
-export function MemberActions({ workspace, member, isYou }: MemberActionsProps) {
+export function MemberActions({ workspace, member, isYou, manageable }: MemberActionsProps) {
   if (isYou) return <LeaveButton workspace={workspace} />;
-  if (!grantableRoles(workspace.role).includes(member.role)) return null;
+  if (!manageable) return null;
   return <RemoveButton workspaceId={workspace.id} member={member} />;
 }
 

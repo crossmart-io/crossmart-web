@@ -2,7 +2,8 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { ApiRequestError } from '@/api/api-error';
 import { api, fetchClient } from '@/api/client';
 import { endpointQueryKey } from '@/api/query-keys';
-import type { components, WorkspaceRole } from '@/api/schema';
+import type { components } from '@/api/schema';
+import type { RoleAssignment } from '../role-options';
 import {
   MEMBER_ENDPOINT,
   MEMBERS_ENDPOINT,
@@ -12,9 +13,8 @@ import {
 
 export type WorkspaceMember = components['schemas']['WorkspaceMemberDto'];
 
-interface RoleChange {
+interface RoleChange extends RoleAssignment {
   userId: string;
-  role: WorkspaceRole;
 }
 
 export function useMembers(workspaceId: string) {
@@ -30,10 +30,10 @@ export function useChangeMemberRole(workspaceId: string) {
   const refresh = useRefreshMembers();
   return useMutation<void, Error, RoleChange>({
     meta: { successMessage: MEMBERS_FEEDBACK.roleChanged },
-    mutationFn: async ({ userId, role }) => {
+    mutationFn: async ({ userId, ...assignment }) => {
       const { error } = await fetchClient.PATCH(MEMBER_ENDPOINT, {
         params: { path: { workspaceId, userId } },
-        body: { role },
+        body: assignment,
       });
       if (error) throw ApiRequestError.from(error);
     },
