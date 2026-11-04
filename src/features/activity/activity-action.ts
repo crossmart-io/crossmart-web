@@ -21,6 +21,8 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.member_role_changed]: 'Role changed',
   [ActivityAction.member_removed]: 'Member removed',
   [ActivityAction.member_left]: 'Member left',
+  [ActivityAction.workspace_created]: 'Workspace created',
+  [ActivityAction.workspace_renamed]: 'Workspace renamed',
   [ActivityAction.custom_role_created]: 'Role created',
   [ActivityAction.custom_role_updated]: 'Role changed',
   [ActivityAction.custom_role_deleted]: 'Role deleted',

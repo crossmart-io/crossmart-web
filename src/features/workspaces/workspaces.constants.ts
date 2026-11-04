@@ -1,5 +1,6 @@
 export const ME_ENDPOINT = '/api/v1/me';
 export const WORKSPACE_ENDPOINT = '/api/v1/workspaces/{workspaceId}';
+export const ORGANIZATION_WORKSPACES_ENDPOINT = '/api/v1/organizations/{organizationId}/workspaces';
 export const MEMBERS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/members';
 export const MEMBER_ENDPOINT = '/api/v1/workspaces/{workspaceId}/members/{userId}';
 export const MEMBERSHIP_ENDPOINT = '/api/v1/workspaces/{workspaceId}/membership';
@@ -17,8 +18,19 @@ export const SELECTED_WORKSPACE_STORAGE_KEY = 'crossmart:workspace';
 export const INVITATION_TOKEN_QUERY = 'token';
 
 export const DELETION_FEEDBACK = {
-  workspaceDeleted: 'Workspace deleted. You are in a new, empty workspace.',
+  workspaceDeleted: 'Workspace deleted.',
 } as const;
+
+/** Toasts after workspace changes. */
+export const WORKSPACE_FEEDBACK = {
+  created: 'Workspace created. You are in it now.',
+  renamed: 'Workspace renamed',
+} as const;
+
+/** Currencies offered for a new workspace's catalog; the API takes any ISO 4217 code. */
+export const CURRENCY_CHOICES = ['USD', 'EUR', 'GBP', 'ILS', 'CAD', 'AUD', 'JPY'] as const;
+export const DEFAULT_CURRENCY = 'USD';
+export const WORKSPACE_NAME_MAX_LENGTH = 200;
 
 /** Toasts after membership changes. */
 export const MEMBERS_FEEDBACK = {

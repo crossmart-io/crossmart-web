@@ -84,6 +84,13 @@ const appRoutes: RouteObject[] = [
       import('@/pages/MembersPage').then(({ MembersPage }) => ({ Component: MembersPage })),
   },
   {
+    path: ROUTES.workspaceSettings,
+    lazy: () =>
+      import('@/pages/WorkspaceSettingsPage').then(({ WorkspaceSettingsPage }) => ({
+        Component: WorkspaceSettingsPage,
+      })),
+  },
+  {
     path: ROUTES.roles,
     lazy: () => import('@/pages/RolesPage').then(({ RolesPage }) => ({ Component: RolesPage })),
   },

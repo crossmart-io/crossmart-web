@@ -1,10 +1,13 @@
-import { Check, ChevronsUpDown, Store } from 'lucide-react';
+import { Check, ChevronsUpDown, Plus, Store } from 'lucide-react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router';
+import { WorkspaceRole } from '@/api/schema';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
@@ -15,8 +18,9 @@ import {
 } from '@/components/ui/sidebar';
 import { ROUTES } from '@/config/routes';
 import { type Workspace, useCurrentWorkspace } from '../hooks/useCurrentWorkspace';
-import { selectWorkspace } from '../selected-workspace';
 import { roleLabel } from '../role-options';
+import { selectWorkspace } from '../selected-workspace';
+import { CreateWorkspaceDialog } from './CreateWorkspaceDialog';
 
 function WorkspaceLabel({ workspace }: { workspace: Workspace }) {
   return (
@@ -34,29 +38,38 @@ function WorkspaceLabel({ workspace }: { workspace: Workspace }) {
   );
 }
 
-/** The workspace the app acts on and the user's role in it; a menu to switch when there are more. */
+/** The workspace the app acts on, and a menu to switch to another or create one. */
 export function WorkspaceSwitcher() {
   const { workspace, workspaces } = useCurrentWorkspace();
+  const [creating, setCreating] = useState(false);
   if (!workspace) return null;
 
   return (
     <SidebarMenu>
       <SidebarMenuItem>
-        {workspaces.length > 1 ? (
-          <SwitcherMenu current={workspace} workspaces={workspaces} />
-        ) : (
-          <SidebarMenuButton size="lg" asChild className="cursor-default hover:bg-transparent">
-            <div>
-              <WorkspaceLabel workspace={workspace} />
-            </div>
-          </SidebarMenuButton>
-        )}
+        <SwitcherMenu
+          current={workspace}
+          workspaces={workspaces}
+          onCreate={workspace.role === WorkspaceRole.OWNER ? () => setCreating(true) : undefined}
+        />
+        <CreateWorkspaceDialog
+          organizationId={workspace.organizationId}
+          open={creating}
+          onOpenChange={setCreating}
+        />
       </SidebarMenuItem>
     </SidebarMenu>
   );
 }
 
-function SwitcherMenu({ current, workspaces }: { current: Workspace; workspaces: Workspace[] }) {
+interface SwitcherMenuProps {
+  current: Workspace;
+  workspaces: Workspace[];
+  /** Only owners create workspaces in the organization. */
+  onCreate?: () => void;
+}
+
+function SwitcherMenu({ current, workspaces, onCreate }: SwitcherMenuProps) {
   const navigate = useNavigate();
   const { isMobile } = useSidebar();
 
@@ -85,6 +98,15 @@ function SwitcherMenu({ current, workspaces }: { current: Workspace; workspaces:
             {workspace.id === current.id && <Check className="size-4" />}
           </DropdownMenuItem>
         ))}
+        {onCreate && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onSelect={onCreate}>
+              <Plus className="size-4" />
+              Create workspace
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );

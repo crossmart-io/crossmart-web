@@ -34,3 +34,4 @@ export {
 export { MembersTable } from './components/MembersTable';
 export { DeleteAccountCard } from './components/DeleteAccountCard';
 export { DeleteWorkspaceCard } from './components/DeleteWorkspaceCard';
+export { RenameWorkspaceCard } from './components/RenameWorkspaceCard';

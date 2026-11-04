@@ -38,7 +38,9 @@ export function DeleteWorkspaceCard({ workspaceId, workspaceName }: DeleteWorksp
             onChange={(event) => setTyped(event.target.value)}
             autoComplete="off"
           />
-          <FieldDescription>You will continue in a new, empty workspace.</FieldDescription>
+          <FieldDescription>
+            You continue in your other workspace, or in a new, empty one if this is your only one.
+          </FieldDescription>
         </Field>
         {remove.error && (
           <Alert variant="destructive">
