@@ -1,7 +1,11 @@
 export { AuthCard } from './components/AuthCard';
 export { AuthLayout } from './components/AuthLayout';
 export { RequireSession } from './components/RequireSession';
+export { ForgotPasswordForm } from './components/ForgotPasswordForm';
+export { ResetPasswordForm } from './components/ResetPasswordForm';
 export { SignInForm } from './components/SignInForm';
+export { VerifyEmailBanner } from './components/VerifyEmailBanner';
+export { AUTH_LINK_QUERY } from './auth.constants';
 export { SignUpForm } from './components/SignUpForm';
 export { UserMenu } from './components/UserMenu';
 export { useSession } from './hooks/useSession';

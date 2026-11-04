@@ -2,6 +2,8 @@ import { createBrowserRouter, type RouteObject } from 'react-router';
 import { AppShell } from '@/components/layout/AppShell';
 import { ROUTES } from '@/config/routes';
 import { AuthLayout, RequireSession } from '@/features/auth';
+import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
+import { ResetPasswordPage } from '@/pages/ResetPasswordPage';
 import { SignInPage } from '@/pages/SignInPage';
 import { SignUpPage } from '@/pages/SignUpPage';
 
@@ -94,6 +96,8 @@ export const router = createBrowserRouter([
     children: [
       { path: ROUTES.signIn, element: <SignInPage /> },
       { path: ROUTES.signUp, element: <SignUpPage /> },
+      { path: ROUTES.forgotPassword, element: <ForgotPasswordPage /> },
+      { path: ROUTES.resetPassword, element: <ResetPasswordPage /> },
     ],
   },
   {

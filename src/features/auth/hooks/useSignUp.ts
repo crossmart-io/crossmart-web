@@ -1,6 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { authClient } from '@/api/auth-client';
+import { ROUTES } from '@/config/routes';
 import { AuthRequestError } from '../auth-error';
+import { toAppUrl } from '../auth.constants';
 
 export interface SignUpDetails {
   name: string;
@@ -12,7 +14,10 @@ export function useSignUp() {
   return useMutation<void, AuthRequestError, SignUpDetails>({
     meta: { inlineError: true },
     mutationFn: async (details) => {
-      const { error } = await authClient.signUp.email(details);
+      const { error } = await authClient.signUp.email({
+        ...details,
+        callbackURL: toAppUrl(ROUTES.home),
+      });
       if (error) throw AuthRequestError.from(error);
     },
   });
