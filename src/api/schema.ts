@@ -60,8 +60,8 @@ export interface paths {
     delete: operations['WorkspacesController_deleteWorkspace_v1'];
     options?: never;
     head?: never;
-    /** Rename a workspace */
-    patch: operations['WorkspacesController_rename_v1'];
+    /** Rename a workspace or set its time zone */
+    patch: operations['WorkspacesController_update_v1'];
     trace?: never;
   };
   '/api/v1/organizations/{organizationId}/workspaces': {
@@ -1043,6 +1043,11 @@ export interface components {
        * @example USD
        */
       currency: string;
+      /**
+       * @description IANA time zone that reports follow; null until set
+       * @example Asia/Jerusalem
+       */
+      timeZone: string | null;
       /** @description Your role here */
       role: components['schemas']['WorkspaceRole'];
       /** @description The workspace’s own role, when `role` is CUSTOM */
@@ -1057,9 +1062,14 @@ export interface components {
       email: string;
       workspaces: components['schemas']['WorkspaceDto'][];
     };
-    RenameWorkspaceDto: {
+    UpdateWorkspaceDto: {
       /** @example EU store */
-      name: string;
+      name?: string;
+      /**
+       * @description IANA time zone where the workspace’s day starts, for reports, such as Asia/Jerusalem
+       * @example Asia/Jerusalem
+       */
+      timeZone?: string;
     };
     DeleteWorkspaceDto: {
       /** @description The workspace’s name, typed to confirm: deleting it cannot be undone */
@@ -1074,6 +1084,11 @@ export interface components {
        * @example EUR
        */
       currency: string;
+      /**
+       * @description IANA time zone where the workspace’s day starts, for reports, such as Asia/Jerusalem
+       * @example Europe/Berlin
+       */
+      timeZone?: string;
     };
     WorkspaceMemberDto: {
       /** Format: uuid */
@@ -1853,6 +1868,11 @@ export interface components {
       rounding: components['schemas']['PriceRounding'];
       floor: components['schemas']['PricingFloorDto'] | null;
       compareAt: components['schemas']['CompareAtMode'];
+      /**
+       * @description Store-currency units per catalog-currency unit, used instead of the ECB daily rate. Only applies when the store sells in another currency than the workspace.
+       * @example 0.92
+       */
+      fixedExchangeRate?: string | null;
     };
     ChannelConnectionDto: {
       /** Format: uuid */
@@ -1992,6 +2012,8 @@ export interface components {
       /** @example $89.00 → +15% → .99 = $102.99 */
       explanation: string;
       warnings: components['schemas']['PriceWarning'][];
+      /** @description The variant cost in the channel currency, converted like the price */
+      unitCost: string | null;
     };
     PricingPreviewVariantDto: {
       /** Format: uuid */
@@ -2592,7 +2614,7 @@ export interface operations {
       };
     };
   };
-  WorkspacesController_rename_v1: {
+  WorkspacesController_update_v1: {
     parameters: {
       query?: never;
       header?: never;
@@ -2603,7 +2625,7 @@ export interface operations {
     };
     requestBody: {
       content: {
-        'application/json': components['schemas']['RenameWorkspaceDto'];
+        'application/json': components['schemas']['UpdateWorkspaceDto'];
       };
     };
     responses: {
@@ -4068,7 +4090,7 @@ export interface operations {
     parameters: {
       query?: {
         range?: components['schemas']['SalesRange'];
-        /** @description IANA time zone that days, weeks and months follow */
+        /** @description IANA time zone that days, weeks and months follow. Defaults to the workspace's time zone, else UTC. */
         timeZone?: string;
       };
       header?: never;
@@ -4295,6 +4317,7 @@ export enum ActivityAction {
   member_left = 'member_left',
   workspace_created = 'workspace_created',
   workspace_renamed = 'workspace_renamed',
+  workspace_time_zone_changed = 'workspace_time_zone_changed',
   custom_role_created = 'custom_role_created',
   custom_role_updated = 'custom_role_updated',
   custom_role_deleted = 'custom_role_deleted',
@@ -4412,6 +4435,7 @@ export enum PriceSource {
 }
 export enum PriceStepKind {
   base = 'base',
+  conversion = 'conversion',
   percent = 'percent',
   fixed_amount = 'fixed_amount',
   rounding = 'rounding',
@@ -4423,6 +4447,7 @@ export enum PriceWarning {
   below_floor = 'below_floor',
   compare_at_dropped = 'compare_at_dropped',
   clamped_to_zero = 'clamped_to_zero',
+  no_exchange_rate = 'no_exchange_rate',
 }
 export enum ListingVisibility {
   VISIBLE = 'VISIBLE',

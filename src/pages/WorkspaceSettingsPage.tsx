@@ -2,14 +2,19 @@ import { WorkspacePermission } from '@/api/schema';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { Page } from '@/components/layout/Page';
 import { PAGE_PARENTS } from '@/config/navigation';
-import { DeleteWorkspaceCard, hasPermission, RenameWorkspaceCard } from '@/features/workspaces';
+import {
+  DeleteWorkspaceCard,
+  hasPermission,
+  RenameWorkspaceCard,
+  TimeZoneCard,
+} from '@/features/workspaces';
 
 export function WorkspaceSettingsPage() {
   return (
     <Page
       name="Workspace"
       parents={PAGE_PARENTS.settings}
-      description="This workspace's name, and deleting it with all its data."
+      description="This workspace's name and time zone, and deleting it with all its data."
     >
       <WorkspaceGate>
         {(workspace) => (
@@ -20,6 +25,9 @@ export function WorkspaceSettingsPage() {
                 key={`${workspace.id}:${workspace.name}`}
                 workspace={workspace}
               />
+            )}
+            {hasPermission(workspace, WorkspacePermission.workspace_manage) && (
+              <TimeZoneCard key={`${workspace.id}:${workspace.timeZone}`} workspace={workspace} />
             )}
             {hasPermission(workspace, WorkspacePermission.workspace_delete) && (
               <DeleteWorkspaceCard workspaceId={workspace.id} workspaceName={workspace.name} />

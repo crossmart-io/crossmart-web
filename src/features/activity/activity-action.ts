@@ -23,6 +23,7 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.member_left]: 'Member left',
   [ActivityAction.workspace_created]: 'Workspace created',
   [ActivityAction.workspace_renamed]: 'Workspace renamed',
+  [ActivityAction.workspace_time_zone_changed]: 'Time zone changed',
   [ActivityAction.custom_role_created]: 'Role created',
   [ActivityAction.custom_role_updated]: 'Role changed',
   [ActivityAction.custom_role_deleted]: 'Role deleted',

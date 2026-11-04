@@ -17,7 +17,12 @@ import {
 } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
-import { COMPARE_AT_OPTIONS, ROUNDING_OPTIONS } from '../listings.constants';
+import {
+  COMPARE_AT_OPTIONS,
+  RATE_MODE_OPTIONS,
+  RateMode,
+  ROUNDING_OPTIONS,
+} from '../listings.constants';
 import type { PricingRuleFormValues } from '../pricing-rule-form';
 
 function PercentInput({
@@ -158,6 +163,72 @@ export function CompareAtField() {
           </Select>
         )}
       />
+    </Field>
+  );
+}
+
+interface ConversionFieldProps {
+  /** The workspace's currency, which catalog prices are in. */
+  from: string;
+  /** The store's currency. */
+  to: string;
+}
+
+/** How catalog prices reach the store's currency: the ECB's daily rate, or a fixed one. */
+export function ConversionField({ from, to }: ConversionFieldProps) {
+  const { control, register, getFieldState, formState } = useFormContext<PricingRuleFormValues>();
+  const rateMode = useWatch({ control, name: 'rateMode' });
+  const { error } = getFieldState('fixedExchangeRate', formState);
+  return (
+    <Field>
+      <FieldLabel id="rate-mode-label">Currency</FieldLabel>
+      <FieldDescription>
+        Your catalog is in {from} and this store sells in {to}, so prices are converted first.
+      </FieldDescription>
+      <Controller
+        control={control}
+        name="rateMode"
+        render={({ field }) => (
+          <ToggleGroup
+            type="single"
+            variant="outline"
+            aria-labelledby="rate-mode-label"
+            value={field.value}
+            onValueChange={(value) => value && field.onChange(value)}
+          >
+            {RATE_MODE_OPTIONS.map((option) => (
+              <ToggleGroupItem key={option.value} value={option.value}>
+                {option.label}
+              </ToggleGroupItem>
+            ))}
+          </ToggleGroup>
+        )}
+      />
+      {rateMode === RateMode.Fixed ? (
+        <div data-invalid={Boolean(error)} className="flex flex-col gap-1">
+          <InputGroup>
+            <InputGroupAddon>
+              <InputGroupText>1 {from} =</InputGroupText>
+            </InputGroupAddon>
+            <InputGroupInput
+              id="fixedExchangeRate"
+              inputMode="decimal"
+              aria-label={`${to} for one ${from}`}
+              aria-invalid={Boolean(error)}
+              className="tabular-nums"
+              {...register('fixedExchangeRate')}
+            />
+            <InputGroupAddon align="inline-end">
+              <InputGroupText>{to}</InputGroupText>
+            </InputGroupAddon>
+          </InputGroup>
+          <FieldError errors={[error]} />
+        </div>
+      ) : (
+        <FieldDescription>
+          The European Central Bank’s reference rate, updated every working day.
+        </FieldDescription>
+      )}
     </Field>
   );
 }

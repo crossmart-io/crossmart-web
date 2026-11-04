@@ -27,6 +27,7 @@ function channel(overrides: Partial<ProductChannel> = {}): ProductChannel {
           steps: [],
           explanation: 'base price = $10.00',
           warnings: [],
+          unitCost: null,
         },
       },
     ],

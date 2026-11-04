@@ -5,6 +5,7 @@ import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/s
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { MAIN_CONTENT_ID } from '@/config/app';
 import { UserMenu, VerifyEmailBanner } from '@/features/auth';
+import { useCurrentWorkspace, useDefaultTimeZone } from '@/features/workspaces';
 import { AppSidebar } from './AppSidebar';
 import { BreadcrumbsProvider } from './BreadcrumbsProvider';
 import { HeaderBreadcrumbs } from './HeaderBreadcrumbs';
@@ -13,6 +14,7 @@ import { useFocusOnNavigation } from './useFocusOnNavigation';
 export function AppShell() {
   const mainRef = useRef<HTMLElement>(null);
   useFocusOnNavigation(mainRef);
+  useDefaultTimeZone(useCurrentWorkspace().workspace);
 
   return (
     <TooltipProvider>

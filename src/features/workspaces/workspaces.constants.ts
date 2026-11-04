@@ -25,6 +25,7 @@ export const DELETION_FEEDBACK = {
 export const WORKSPACE_FEEDBACK = {
   created: 'Workspace created. You are in it now.',
   renamed: 'Workspace renamed',
+  timeZoneSaved: 'Time zone saved. Reports follow it now.',
 } as const;
 
 /** Currencies offered for a new workspace's catalog; the API takes any ISO 4217 code. */
