@@ -8,6 +8,7 @@ import { useApiKeys } from '@/features/api-keys';
 import { useSession } from '@/features/auth';
 import { useCatalogStats } from '@/features/catalog';
 import { useChannelSetup } from '@/features/channels';
+import { InventoryOverview } from '@/features/inventory-report';
 import { CatalogHealth, CatalogStatsGrid, GettingStarted } from '@/features/overview';
 import { SalesOverview } from '@/features/sales';
 import type { Workspace } from '@/features/workspaces';
@@ -20,6 +21,7 @@ function OverviewContent({ workspace }: { workspace: Workspace }) {
   return (
     <>
       <SalesOverview workspaceId={workspace.id} />
+      <InventoryOverview workspaceId={workspace.id} />
       <h2 className="font-heading text-lg font-semibold">Catalog</h2>
       <CatalogStatsGrid workspaceId={workspace.id} />
       <div className="grid gap-6 lg:grid-cols-2">
@@ -42,7 +44,7 @@ export function OverviewPage() {
     <Page
       name="Overview"
       title={firstName ? `Welcome, ${firstName}` : 'Overview'}
-      description="Your sales and catalog at a glance, and what to do next."
+      description="Your sales, stock and catalog at a glance, and what to do next."
       actions={
         <Button asChild>
           <Link to={ROUTES.newProduct}>
