@@ -32,6 +32,14 @@ const appRoutes: RouteObject[] = [
       })),
   },
   {
+    path: ROUTES.orders,
+    lazy: () => import('@/pages/OrdersPage').then(({ OrdersPage }) => ({ Component: OrdersPage })),
+  },
+  {
+    path: ROUTES.order,
+    lazy: () => import('@/pages/OrderPage').then(({ OrderPage }) => ({ Component: OrderPage })),
+  },
+  {
     path: ROUTES.inventory,
     lazy: () =>
       import('@/pages/InventoryPage').then(({ InventoryPage }) => ({ Component: InventoryPage })),

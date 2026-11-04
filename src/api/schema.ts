@@ -720,6 +720,43 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/orders': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Orders from every connected store, newest first
+     * @description Orders hold no buyer details. Each line shows the stock it holds.
+     */
+    get: operations['OrdersController_list_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/orders/{orderId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** One order with its lines and the stock each holds */
+    get: operations['OrdersController_get_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -1697,6 +1734,93 @@ export interface components {
       /** @description Most units shown */
       maxQuantity?: number | null;
       variantPrices?: components['schemas']['VariantPriceOverrideDto'][];
+    };
+    /** @enum {string} */
+    OrderStatus: OrderStatus;
+    OrderSummaryDto: {
+      /** Format: uuid */
+      id: string;
+      /**
+       * @description The number the merchant and buyer see
+       * @example #1001
+       */
+      name: string;
+      status: components['schemas']['OrderStatus'];
+      /** @example USD */
+      currencyCode: string;
+      /**
+       * @description What the buyer pays now
+       * @example 130.00
+       */
+      total: string;
+      /** Format: date-time */
+      placedAt: string;
+      /** Format: uuid */
+      connectionId: string;
+      /** @example Demo Store */
+      storeName: string;
+      /** @example shopify */
+      channel: string;
+      /** @description Units ordered, over every line */
+      itemCount: number;
+      /** @description Lines that match no catalog variant, so their stock is not tracked */
+      unmatchedLines: number;
+    };
+    OrderPageDto: {
+      items: components['schemas']['OrderSummaryDto'][];
+      /** @description Null on the last page */
+      nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
+    };
+    OrderLineDto: {
+      /** Format: uuid */
+      id: string;
+      title: string;
+      sku: string | null;
+      quantity: number;
+      /** @example 45.00 */
+      unitPrice: string;
+      /** @description Units held for the order until they ship */
+      reservedQuantity: number;
+      /** @description Units shipped */
+      fulfilledQuantity: number;
+      /** Format: uuid */
+      variantId: string | null;
+      /** Format: uuid */
+      productId: string | null;
+    };
+    OrderDetailDto: {
+      /** Format: uuid */
+      id: string;
+      /**
+       * @description The number the merchant and buyer see
+       * @example #1001
+       */
+      name: string;
+      status: components['schemas']['OrderStatus'];
+      /** @example USD */
+      currencyCode: string;
+      /**
+       * @description What the buyer pays now
+       * @example 130.00
+       */
+      total: string;
+      /** Format: date-time */
+      placedAt: string;
+      /** Format: uuid */
+      connectionId: string;
+      /** @example Demo Store */
+      storeName: string;
+      /** @example shopify */
+      channel: string;
+      /** @description Units ordered, over every line */
+      itemCount: number;
+      /** @description Lines that match no catalog variant, so their stock is not tracked */
+      unmatchedLines: number;
+      /** @description The order’s id on its channel */
+      externalId: string;
+      lines: components['schemas']['OrderLineDto'][];
     };
   };
   responses: never;
@@ -2974,6 +3098,61 @@ export interface operations {
       };
     };
   };
+  OrdersController_list_v1: {
+    parameters: {
+      query?: {
+        status?: components['schemas']['OrderStatus'];
+        /** @description Orders of one store */
+        connectionId?: string;
+        /** @description Matches the order number */
+        search?: string;
+        direction?: components['schemas']['SortDirection'];
+        /** @description `nextCursor` from the previous page */
+        cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OrderPageDto'];
+        };
+      };
+    };
+  };
+  OrdersController_get_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        orderId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['OrderDetailDto'];
+        };
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -3145,6 +3324,7 @@ export enum ActivityAction {
   channel_pricing_updated = 'channel_pricing_updated',
   channel_selection_updated = 'channel_selection_updated',
   channel_sync_requested = 'channel_sync_requested',
+  stock_oversold = 'stock_oversold',
 }
 export enum ActivityOutcome {
   SUCCEEDED = 'SUCCEEDED',
@@ -3187,6 +3367,7 @@ export enum InventoryMovementReason {
   LOST = 'LOST',
   SOLD = 'SOLD',
   IMPORTED = 'IMPORTED',
+  ORDER_SHIPPED = 'ORDER_SHIPPED',
 }
 export enum ConnectFailure {
   invalid_state = 'invalid_state',
@@ -3207,6 +3388,7 @@ export enum ChannelConnectionStatus {
 }
 export enum ChannelFeature {
   storefront_visibility = 'storefront_visibility',
+  order_sync = 'order_sync',
 }
 export enum PriceRounding {
   none = 'none',
@@ -3253,4 +3435,10 @@ export enum PriceWarning {
 export enum ListingVisibility {
   VISIBLE = 'VISIBLE',
   HIDDEN = 'HIDDEN',
+}
+export enum OrderStatus {
+  OPEN = 'OPEN',
+  PARTIALLY_FULFILLED = 'PARTIALLY_FULFILLED',
+  FULFILLED = 'FULFILLED',
+  CANCELLED = 'CANCELLED',
 }

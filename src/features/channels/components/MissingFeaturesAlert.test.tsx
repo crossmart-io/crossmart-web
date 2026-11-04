@@ -43,10 +43,18 @@ describe('MissingFeaturesAlert', () => {
     });
   });
 
-  it('asks other members to get an admin, and says nothing when nothing is missing', () => {
+  it('asks other members to get an admin', () => {
     renderAlert([ChannelFeature.storefront_visibility], false);
     expect(screen.queryByRole('button', { name: 'Approve in Shopify' })).not.toBeInTheDocument();
-    expect(screen.getByText(/until a workspace admin approves/)).toBeInTheDocument();
+    expect(screen.getByText('A workspace admin can approve them in Shopify.')).toBeInTheDocument();
+  });
+
+  it('lists every missing permission under one approval', () => {
+    renderAlert([ChannelFeature.storefront_visibility, ChannelFeature.order_sync]);
+
+    expect(screen.getByText('This store needs new permissions')).toBeInTheDocument();
+    expect(screen.getByText(/Orders are not read from this store yet/)).toBeInTheDocument();
+    expect(screen.getAllByRole('button', { name: 'Approve in Shopify' })).toHaveLength(1);
   });
 
   it('renders nothing for a store with every permission', () => {

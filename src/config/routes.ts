@@ -2,6 +2,7 @@ export const ROUTE_PARAMS = {
   productId: 'productId',
   jobId: 'jobId',
   connectionId: 'connectionId',
+  orderId: 'orderId',
   tab: 'tab',
 } as const;
 
@@ -17,6 +18,8 @@ export const ROUTES = {
   channelConnection: `/channels/:${ROUTE_PARAMS.connectionId}`,
   channelConnectionTab: `/channels/:${ROUTE_PARAMS.connectionId}/:${ROUTE_PARAMS.tab}`,
   activity: '/activity',
+  orders: '/orders',
+  order: `/orders/:${ROUTE_PARAMS.orderId}`,
   imports: '/imports',
   importJob: `/imports/:${ROUTE_PARAMS.jobId}`,
   apiKeys: '/settings/api-keys',
@@ -71,4 +74,8 @@ export function toProductsRoute(
   if (filter.storeId) query.set(ROUTE_QUERY.storeId, filter.storeId);
   const search = query.toString();
   return search ? `${ROUTES.products}?${search}` : ROUTES.products;
+}
+
+export function toOrderRoute(orderId: string): string {
+  return ROUTES.order.replace(`:${ROUTE_PARAMS.orderId}`, orderId);
 }

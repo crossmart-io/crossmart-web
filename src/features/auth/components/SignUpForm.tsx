@@ -1,7 +1,7 @@
 import type { FormEvent } from 'react';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
-import { AuthField } from '../auth.constants';
+import { AuthField, LEGAL_LINKS } from '../auth.constants';
 import { useSignUp } from '../hooks/useSignUp';
 import { readAuthField, readPassword } from '../read-auth-form';
 import { EmailField, NameField, PasswordField } from './AuthFields';
@@ -31,6 +31,17 @@ export function SignUpForm() {
         <Button type="submit" disabled={signUp.isPending}>
           {signUp.isPending ? 'Creating your account…' : 'Create account'}
         </Button>
+        <p className="text-center text-xs text-muted-foreground">
+          By creating an account you agree to the{' '}
+          <a href={LEGAL_LINKS.terms} target="_blank" rel="noreferrer" className="underline">
+            Terms of Service
+          </a>{' '}
+          and{' '}
+          <a href={LEGAL_LINKS.privacy} target="_blank" rel="noreferrer" className="underline">
+            Privacy Policy
+          </a>
+          , including how Crossmart processes your customers’ data.
+        </p>
       </FieldGroup>
     </form>
   );

@@ -50,20 +50,25 @@ export const CONNECT_FAILURE_MESSAGES: Record<ConnectFailure, string> = {
   [ConnectFailure.unexpected]: 'Something went wrong while connecting. Please try again.',
 };
 
-/** What the store page says about a feature the store was connected without. */
-export const MISSING_FEATURE_COPY: Record<
-  ChannelFeature,
-  { title: string; description: string; askAdmin: string; action: string }
-> = {
+/** What the store page says about each feature the store was connected without. */
+export const MISSING_FEATURE_COPY: Record<ChannelFeature, { title: string; effect: string }> = {
   [ChannelFeature.storefront_visibility]: {
     title: 'Products are not shown in your Online Store yet',
-    description:
-      'They are created in Shopify, but shoppers cannot see them until you approve one more permission. Approving takes you to Shopify and back; nothing else changes.',
-    askAdmin:
-      'They are created in Shopify, but shoppers cannot see them until a workspace admin approves one more permission.',
-    action: 'Approve in Shopify',
+    effect: 'Products are created in Shopify, but shoppers cannot see them.',
+  },
+  [ChannelFeature.order_sync]: {
+    title: 'Orders are not read from this store yet',
+    effect: 'Its sales do not reserve stock in your other stores.',
   },
 };
+
+/** Said once, under the missing features, however many there are. */
+export const MISSING_FEATURES_COPY = {
+  severalTitle: 'This store needs new permissions',
+  approve: 'Approve them once in Shopify and come back; nothing else changes for the store.',
+  askAdmin: 'A workspace admin can approve them in Shopify.',
+  action: 'Approve in Shopify',
+} as const;
 
 export const CHANNEL_FEEDBACK = {
   disconnected: 'Channel disconnected',
