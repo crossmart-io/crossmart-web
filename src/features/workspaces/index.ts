@@ -8,3 +8,5 @@ export {
   WORKSPACE_ROLE_LABELS,
 } from './workspace-role';
 export { MembersTable } from './components/MembersTable';
+export { DeleteAccountCard } from './components/DeleteAccountCard';
+export { DeleteWorkspaceCard } from './components/DeleteWorkspaceCard';

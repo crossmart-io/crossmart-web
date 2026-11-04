@@ -2,6 +2,7 @@ import {
   FileUp,
   History,
   KeyRound,
+  CircleUser,
   LayoutDashboard,
   Package,
   ShoppingBag,
@@ -50,6 +51,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     items: [
       { label: 'Members', to: ROUTES.members, icon: Users },
       { label: 'API keys', to: ROUTES.apiKeys, icon: KeyRound },
+      { label: 'Account', to: ROUTES.account, icon: CircleUser },
     ],
   },
 ];
