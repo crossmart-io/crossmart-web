@@ -1,9 +1,15 @@
-export { WorkspaceBadge } from './components/WorkspaceBadge';
+export { WorkspaceSwitcher } from './components/WorkspaceSwitcher';
+export { InviteMemberDialog } from './components/InviteMemberDialog';
+export { PendingInvitations } from './components/PendingInvitations';
+export { AcceptInvitationCard } from './components/AcceptInvitationCard';
 export { useCurrentWorkspace, type Workspace } from './hooks/useCurrentWorkspace';
 export { useMe } from './hooks/useMe';
+export { INVITATION_TOKEN_QUERY } from './workspaces.constants';
+export { selectWorkspace } from './selected-workspace';
 export {
   canEditCatalog,
   canManageWorkspace,
+  grantableRoles,
   WORKSPACE_ROLE_DESCRIPTIONS,
   WORKSPACE_ROLE_LABELS,
 } from './workspace-role';

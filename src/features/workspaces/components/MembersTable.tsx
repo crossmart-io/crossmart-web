@@ -1,8 +1,6 @@
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
-import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   Table,
   TableBody,
@@ -12,11 +10,19 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate } from '@/lib/format';
-import { useMembers } from '../hooks/useMembers';
-import { WORKSPACE_ROLE_DESCRIPTIONS, WORKSPACE_ROLE_LABELS } from '../workspace-role';
+import type { Workspace } from '../hooks/useCurrentWorkspace';
+import { useMembers, type WorkspaceMember } from '../hooks/useMembers';
+import { MemberActions } from './MemberActions';
+import { MemberRole } from './MemberRole';
 
-export function MembersTable({ workspaceId }: { workspaceId: string }) {
-  const { data: members, isPending, error, refetch } = useMembers(workspaceId);
+interface MembersTableProps {
+  workspace: Workspace;
+  /** The signed-in user, who may leave but not edit their own row. */
+  currentUserId: string;
+}
+
+export function MembersTable({ workspace, currentUserId }: MembersTableProps) {
+  const { data: members, isPending, error, refetch } = useMembers(workspace.id);
 
   if (error) {
     return <ErrorState title="Members could not be loaded" error={error} onRetry={refetch} />;
@@ -31,40 +37,56 @@ export function MembersTable({ workspaceId }: { workspaceId: string }) {
             <TableHead>Member</TableHead>
             <TableHead>Role</TableHead>
             <TableHead className="hidden sm:table-cell">Joined</TableHead>
+            <TableHead className="w-24" />
           </TableRow>
         </TableHeader>
         <TableBody>
           {members.map((member) => (
-            <TableRow key={member.userId}>
-              <TableCell>
-                <div className="flex items-center gap-3">
-                  <Avatar className="size-8">
-                    <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
-                  </Avatar>
-                  <span className="flex flex-col">
-                    <span className="font-medium">{member.name}</span>
-                    <span className="text-xs text-muted-foreground">{member.email}</span>
-                  </span>
-                </div>
-              </TableCell>
-              <TableCell>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    {/* Focusable, so keyboard users can read what the role allows. */}
-                    <Badge variant="secondary" tabIndex={0}>
-                      {WORKSPACE_ROLE_LABELS[member.role]}
-                    </Badge>
-                  </TooltipTrigger>
-                  <TooltipContent>{WORKSPACE_ROLE_DESCRIPTIONS[member.role]}</TooltipContent>
-                </Tooltip>
-              </TableCell>
-              <TableCell className="hidden text-muted-foreground sm:table-cell">
-                {formatDate(member.joinedAt)}
-              </TableCell>
-            </TableRow>
+            <MemberRow
+              key={member.userId}
+              workspace={workspace}
+              member={member}
+              isYou={member.userId === currentUserId}
+            />
           ))}
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+interface MemberRowProps {
+  workspace: Workspace;
+  member: WorkspaceMember;
+  isYou: boolean;
+}
+
+function MemberRow({ workspace, member, isYou }: MemberRowProps) {
+  return (
+    <TableRow>
+      <TableCell>
+        <div className="flex items-center gap-3">
+          <Avatar className="size-8">
+            <AvatarFallback>{member.name.charAt(0).toUpperCase()}</AvatarFallback>
+          </Avatar>
+          <span className="flex min-w-0 flex-col">
+            <span className="truncate font-medium">
+              {member.name}
+              {isYou && <span className="font-normal text-muted-foreground"> (you)</span>}
+            </span>
+            <span className="truncate text-xs text-muted-foreground">{member.email}</span>
+          </span>
+        </div>
+      </TableCell>
+      <TableCell>
+        <MemberRole workspace={workspace} member={member} isYou={isYou} />
+      </TableCell>
+      <TableCell className="hidden text-muted-foreground sm:table-cell">
+        {formatDate(member.joinedAt)}
+      </TableCell>
+      <TableCell className="text-right">
+        <MemberActions workspace={workspace} member={member} isYou={isYou} />
+      </TableCell>
+    </TableRow>
   );
 }

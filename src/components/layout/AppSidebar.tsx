@@ -17,7 +17,7 @@ import { NAV_GROUPS, NavBadge, type NavItem } from '@/config/navigation';
 import { ChannelErrorsBadge } from '@/features/channels';
 import type { ComponentType } from 'react';
 import { ROUTES } from '@/config/routes';
-import { WorkspaceBadge } from '@/features/workspaces';
+import { WorkspaceSwitcher } from '@/features/workspaces';
 
 const NAV_BADGES: Record<NavBadge, ComponentType> = {
   [NavBadge.ChannelErrors]: ChannelErrorsBadge,
@@ -80,7 +80,7 @@ export function AppSidebar() {
         ))}
       </SidebarContent>
       <SidebarFooter>
-        <WorkspaceBadge />
+        <WorkspaceSwitcher />
       </SidebarFooter>
     </Sidebar>
   );

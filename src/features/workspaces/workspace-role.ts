@@ -16,7 +16,7 @@ export const WORKSPACE_ROLE_DESCRIPTIONS: Record<WorkspaceRole, string> = {
   [WorkspaceRole.VIEWER]: 'Read only',
 };
 
-/** Roles that may manage the workspace: connect channels, change settings. */
+/** Roles that may manage the workspace: connect channels, change settings, manage members. */
 const MANAGING_ROLES: ReadonlySet<WorkspaceRole> = new Set([
   WorkspaceRole.OWNER,
   WorkspaceRole.ADMIN,
@@ -35,4 +35,28 @@ const EDITING_ROLES: ReadonlySet<WorkspaceRole> = new Set([
 
 export function canEditCatalog(role: WorkspaceRole): boolean {
   return EDITING_ROLES.has(role);
+}
+
+/** Every role, most access first. */
+const ALL_ROLES: readonly WorkspaceRole[] = [
+  WorkspaceRole.OWNER,
+  WorkspaceRole.ADMIN,
+  WorkspaceRole.EDITOR,
+  WorkspaceRole.APPROVER,
+  WorkspaceRole.VIEWER,
+];
+
+/**
+ * The roles a member with `role` may give or take away: an Owner any, an Admin any but Owner,
+ * everyone else none. The API enforces the same rule.
+ */
+export function grantableRoles(role: WorkspaceRole): readonly WorkspaceRole[] {
+  if (role === WorkspaceRole.OWNER) return ALL_ROLES;
+  if (role === WorkspaceRole.ADMIN)
+    return ALL_ROLES.filter((other) => other !== WorkspaceRole.OWNER);
+  return [];
+}
+
+export function isWorkspaceRole(value: string): value is WorkspaceRole {
+  return Object.values<string>(WorkspaceRole).includes(value);
 }

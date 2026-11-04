@@ -1,6 +1,7 @@
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { AuthField, MIN_PASSWORD_LENGTH } from '../auth.constants';
+import { useAuthNavigationState } from '../hooks/useReturnPath';
 
 export function NameField() {
   return (
@@ -11,7 +12,9 @@ export function NameField() {
   );
 }
 
+/** Filled in when the page that sent the user here knows the address. */
 export function EmailField() {
+  const navigationState = useAuthNavigationState();
   return (
     <Field>
       <FieldLabel htmlFor={AuthField.Email}>Email</FieldLabel>
@@ -20,6 +23,7 @@ export function EmailField() {
         name={AuthField.Email}
         type="email"
         autoComplete="email"
+        defaultValue={navigationState?.email}
         required
       />
     </Field>

@@ -9,5 +9,7 @@ export { AUTH_LINK_QUERY } from './auth.constants';
 export { SignUpForm } from './components/SignUpForm';
 export { UserMenu } from './components/UserMenu';
 export { useSession } from './hooks/useSession';
+export { useSignOut } from './hooks/useSignOut';
+export { type ReturnPathState, useAuthNavigationState } from './hooks/useReturnPath';
 export { refreshSession } from './session-signal';
 export { toInitials } from './initials';
