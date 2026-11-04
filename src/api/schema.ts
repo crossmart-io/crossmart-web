@@ -107,6 +107,62 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/products': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Products of a workspace, in title order */
+    get: operations['ProductsController_list_v1'];
+    put?: never;
+    /** Create a product with its variants */
+    post: operations['ProductsController_create_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/products/{productId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** A product with its variants, stock and media */
+    get: operations['ProductsController_get_v1'];
+    put?: never;
+    post?: never;
+    /** Delete a product, its variants and their stock */
+    delete: operations['ProductsController_delete_v1'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/product-imports': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Import products from a file
+     * @description Products whose handle is already in the catalog are skipped, never overwritten. Invalid products are reported; the rest are created.
+     */
+    post: operations['ProductImportsController_import_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -123,6 +179,11 @@ export interface components {
       organizationId: string;
       name: string;
       slug: string;
+      /**
+       * @description ISO 4217 code of the catalog prices
+       * @example USD
+       */
+      currency: string;
       /** @description Your role here */
       role: components['schemas']['WorkspaceRole'];
     };
@@ -171,6 +232,170 @@ export interface components {
       apiKey: components['schemas']['ApiKeyDto'];
       /** @description The full key. Shown once; store it now. */
       secret: string;
+    };
+    /** @enum {string} */
+    ProductStatus: ProductStatus;
+    PriceRangeDto: {
+      /**
+       * @description Decimal string in the workspace currency
+       * @example 22.00
+       */
+      min: string;
+      /** @example 89.00 */
+      max: string;
+    };
+    ProductSummaryDto: {
+      /** Format: uuid */
+      id: string;
+      handle: string;
+      title: string;
+      status: components['schemas']['ProductStatus'];
+      vendor: string | null;
+      productType: string | null;
+      variantCount: number;
+      /** @description Stock across variants that track it; null when none do */
+      totalAvailable: number | null;
+      priceRange: components['schemas']['PriceRangeDto'] | null;
+      imageUrl: string | null;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    ProductPageDto: {
+      items: components['schemas']['ProductSummaryDto'][];
+      /** @description Null on the last page */
+      nextCursor: string | null;
+    };
+    /** @enum {string} */
+    OutOfStockPolicy: OutOfStockPolicy;
+    VariantDto: {
+      /** Format: uuid */
+      id: string;
+      position: number;
+      sku: string | null;
+      /** @description GTIN, UPC, EAN or ISBN */
+      barcode: string | null;
+      /** @description One value per product option, in order */
+      optionValues: string[];
+      /**
+       * @description Decimal string in the workspace currency
+       * @example 89.00
+       */
+      price: string;
+      /** @example 99.00 */
+      compareAtPrice: string | null;
+      weightGrams: number | null;
+      requiresShipping: boolean;
+      taxable: boolean;
+      outOfStockPolicy: components['schemas']['OutOfStockPolicy'];
+      /** @description Whether Crossmart tracks stock for this variant */
+      tracked: boolean;
+      available: number;
+    };
+    MediaDto: {
+      /** Format: uuid */
+      id: string;
+      url: string;
+      altText: string | null;
+      position: number;
+    };
+    ProductDto: {
+      /** Format: uuid */
+      id: string;
+      handle: string;
+      title: string;
+      descriptionHtml: string;
+      vendor: string | null;
+      productType: string | null;
+      tags: string[];
+      status: components['schemas']['ProductStatus'];
+      /**
+       * @example [
+       *       "Size",
+       *       "Color"
+       *     ]
+       */
+      optionNames: string[];
+      variants: components['schemas']['VariantDto'][];
+      media: components['schemas']['MediaDto'][];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    CreateVariantDto: {
+      sku?: string;
+      /** @description GTIN, UPC, EAN or ISBN */
+      barcode?: string;
+      /** @description One value per product option, in order */
+      optionValues?: string[];
+      /** @example 19.90 */
+      price: string;
+      /** @example 24.90 */
+      compareAtPrice?: string;
+      weightGrams?: number;
+      /** @default true */
+      requiresShipping: boolean;
+      /** @default true */
+      taxable: boolean;
+      /** @default STOP_SELLING */
+      outOfStockPolicy: components['schemas']['OutOfStockPolicy'];
+      /**
+       * @description Track stock for this variant
+       * @default true
+       */
+      tracked: boolean;
+      /**
+       * @description Opening stock
+       * @default 0
+       */
+      quantity: number;
+    };
+    CreateMediaDto: {
+      /** @example https://cdn.example.com/mug.jpg */
+      url: string;
+      altText?: string;
+    };
+    CreateProductDto: {
+      title: string;
+      /** @description Unique in the workspace. Defaults to the slugified title. */
+      handle?: string;
+      descriptionHtml?: string;
+      vendor?: string;
+      productType?: string;
+      tags?: string[];
+      /** @default DRAFT */
+      status: components['schemas']['ProductStatus'];
+      /**
+       * @example [
+       *       "Size",
+       *       "Color"
+       *     ]
+       */
+      optionNames?: string[];
+      variants: components['schemas']['CreateVariantDto'][];
+      media?: components['schemas']['CreateMediaDto'][];
+    };
+    /** @enum {string} */
+    CatalogImportFormat: CatalogImportFormat;
+    ImportProductsDto: {
+      format: components['schemas']['CatalogImportFormat'];
+    };
+    /** @enum {string} */
+    ImportIssueCode: ImportIssueCode;
+    ImportIssueDto: {
+      code: components['schemas']['ImportIssueCode'];
+      message: string;
+      handle?: string;
+      /** @description Spreadsheet row number; the header is row 1 */
+      row?: number;
+    };
+    CatalogImportResultDto: {
+      createdProducts: number;
+      createdVariants: number;
+      /** @description Products already in the catalog, left untouched */
+      skipped: components['schemas']['ImportIssueDto'][];
+      /** @description Products that could not be imported */
+      failed: components['schemas']['ImportIssueDto'][];
     };
   };
   responses: never;
@@ -456,6 +681,132 @@ export interface operations {
       };
     };
   };
+  ProductsController_list_v1: {
+    parameters: {
+      query?: {
+        /** @description Matches title, handle or SKU */
+        search?: string;
+        status?: components['schemas']['ProductStatus'];
+        /** @description `nextCursor` from the previous page */
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductPageDto'];
+        };
+      };
+    };
+  };
+  ProductsController_create_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateProductDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductDto'];
+        };
+      };
+    };
+  };
+  ProductsController_get_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ProductDto'];
+        };
+      };
+    };
+  };
+  ProductsController_delete_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  ProductImportsController_import_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'multipart/form-data': components['schemas']['ImportProductsDto'] & {
+          /**
+           * Format: binary
+           * @description The catalog file
+           */
+          file: string;
+        };
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CatalogImportResultDto'];
+        };
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -501,4 +852,23 @@ export enum WorkspaceRole {
   EDITOR = 'EDITOR',
   APPROVER = 'APPROVER',
   VIEWER = 'VIEWER',
+}
+export enum ProductStatus {
+  DRAFT = 'DRAFT',
+  ACTIVE = 'ACTIVE',
+  ARCHIVED = 'ARCHIVED',
+}
+export enum OutOfStockPolicy {
+  STOP_SELLING = 'STOP_SELLING',
+  CONTINUE_SELLING = 'CONTINUE_SELLING',
+}
+export enum CatalogImportFormat {
+  shopify_csv = 'shopify_csv',
+}
+export enum ImportIssueCode {
+  already_exists = 'already_exists',
+  duplicate_sku = 'duplicate_sku',
+  invalid_value = 'invalid_value',
+  missing_value = 'missing_value',
+  invalid_options = 'invalid_options',
 }
