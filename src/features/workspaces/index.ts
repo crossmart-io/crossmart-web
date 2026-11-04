@@ -7,9 +7,8 @@ export { useMe } from './hooks/useMe';
 export { INVITATION_TOKEN_QUERY } from './workspaces.constants';
 export { selectWorkspace } from './selected-workspace';
 export {
-  canEditCatalog,
-  canManageWorkspace,
   grantableRoles,
+  hasPermission,
   WORKSPACE_ROLE_DESCRIPTIONS,
   WORKSPACE_ROLE_LABELS,
 } from './workspace-role';

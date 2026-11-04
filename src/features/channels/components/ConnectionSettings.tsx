@@ -13,7 +13,7 @@ interface ConnectionSettingsProps {
   workspaceId: string;
   connection: ChannelConnection;
   canManage: boolean;
-  canEditCatalog: boolean;
+  canImportProducts: boolean;
   onDisconnected: () => void;
   /** The store's automatic product rule, from the listings feature. */
   automaticRule?: ReactNode;
@@ -111,7 +111,7 @@ function ConnectionCard({
   connection,
   onDisconnected,
   resyncAction,
-}: Omit<ConnectionSettingsProps, 'canManage' | 'canEditCatalog' | 'automaticRule'>) {
+}: Omit<ConnectionSettingsProps, 'canManage' | 'canImportProducts' | 'automaticRule'>) {
   const channel = channelInfoFor(connection.channel);
   if (!channel?.connect) return null;
   return (
@@ -145,7 +145,7 @@ export function ConnectionSettings({
   workspaceId,
   connection,
   canManage,
-  canEditCatalog,
+  canImportProducts,
   onDisconnected,
   automaticRule,
   resyncAction,
@@ -155,7 +155,7 @@ export function ConnectionSettings({
     <div className="flex flex-col gap-6">
       <StoreDetailsCard connection={connection} />
       {automaticRule}
-      {canEditCatalog && isConnected && (
+      {canImportProducts && isConnected && (
         <ImportCard workspaceId={workspaceId} connection={connection} />
       )}
       {canManage && (

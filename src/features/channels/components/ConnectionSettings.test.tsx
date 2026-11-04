@@ -7,7 +7,7 @@ import { ConnectionSettings } from './ConnectionSettings';
 
 interface Access {
   canManage?: boolean;
-  canEditCatalog?: boolean;
+  canImportProducts?: boolean;
 }
 
 function renderSettings(connection: ChannelConnection, access: Access = {}) {
@@ -17,7 +17,7 @@ function renderSettings(connection: ChannelConnection, access: Access = {}) {
         workspaceId="ws-1"
         connection={connection}
         canManage={access.canManage ?? true}
-        canEditCatalog={access.canEditCatalog ?? true}
+        canImportProducts={access.canImportProducts ?? true}
         onDisconnected={() => undefined}
       />
     </QueryClientProvider>,
@@ -58,7 +58,7 @@ describe('ConnectionSettings', () => {
   });
 
   it('hides the import and the connection actions from those who may not use them', () => {
-    renderSettings(connectionFixture(), { canManage: false, canEditCatalog: false });
+    renderSettings(connectionFixture(), { canManage: false, canImportProducts: false });
 
     expect(screen.queryByRole('button', { name: /Import products/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Disconnect' })).not.toBeInTheDocument();

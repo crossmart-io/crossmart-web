@@ -11,7 +11,8 @@ import { RecentActivityCard } from '@/features/activity';
 import { ProductStatusBadge, useProduct } from '@/features/catalog';
 import { ProductEditor } from '@/features/catalog/editor';
 import { ProductChannelsCard } from '@/features/listings';
-import { canEditCatalog, type Workspace } from '@/features/workspaces';
+import { WorkspacePermission } from '@/api/schema';
+import { hasPermission, type Workspace } from '@/features/workspaces';
 
 const PRODUCT_PAGE_NAME = 'Product';
 
@@ -56,7 +57,7 @@ function EditProduct({ workspace, productId }: { workspace: Workspace; productId
           <ProductChannelsCard
             workspaceId={workspace.id}
             product={product}
-            canEdit={canEditCatalog(workspace.role)}
+            canEdit={hasPermission(workspace, WorkspacePermission.products_edit)}
           />
         }
       />

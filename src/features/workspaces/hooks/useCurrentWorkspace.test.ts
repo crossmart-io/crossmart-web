@@ -15,6 +15,7 @@ function workspace(id: string): Workspace {
     slug: 'default',
     currency: 'USD',
     role: WorkspaceRole.OWNER,
+    permissions: [],
   };
 }
 
