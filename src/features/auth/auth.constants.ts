@@ -29,3 +29,9 @@ export enum AuthField {
   Email = 'email',
   Password = 'password',
 }
+
+/** The legal pages on crossmart.io that signing up accepts. */
+export const LEGAL_LINKS = {
+  terms: 'https://crossmart.io/terms',
+  privacy: 'https://crossmart.io/privacy',
+} as const;
