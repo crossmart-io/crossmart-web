@@ -79,12 +79,26 @@ export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
   [ListingStatus.DELISTED]: 'Delisted',
 };
 
+/** Where a store's conversion rate comes from: the ECB's daily rate, or one the merchant fixes. */
+export const RateMode = {
+  Daily: 'daily',
+  Fixed: 'fixed',
+} as const;
+export type RateMode = (typeof RateMode)[keyof typeof RateMode];
+
+export const RATE_MODE_OPTIONS: readonly { value: RateMode; label: string }[] = [
+  { value: RateMode.Daily, label: 'Daily rate' },
+  { value: RateMode.Fixed, label: 'Fixed rate' },
+];
+
 export const PRICE_WARNING_MESSAGES: Record<PriceWarning, string> = {
   [PriceWarning.missing_cost]: 'No cost set, so the price floor does not apply.',
   [PriceWarning.below_floor]: 'This manual price is below your price floor.',
   [PriceWarning.compare_at_dropped]:
     'The compare-at price is not above the price, so none is sent.',
   [PriceWarning.clamped_to_zero]: 'The rule would make the price negative; it is sent as zero.',
+  [PriceWarning.no_exchange_rate]:
+    'No exchange rate is known for this store’s currency, so this price is not converted and is not sent. Set a fixed rate in the store’s pricing.',
 };
 
 /** How the override sheet offers visibility: follow the product, or decide for this channel. */

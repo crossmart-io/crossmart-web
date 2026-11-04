@@ -6,19 +6,19 @@ import { Field, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { Spinner } from '@/components/ui/spinner';
 import type { Workspace } from '../hooks/useCurrentWorkspace';
-import { useRenameWorkspace } from '../hooks/useWorkspaceMutations';
-import { WORKSPACE_NAME_MAX_LENGTH } from '../workspaces.constants';
+import { useUpdateWorkspace } from '../hooks/useWorkspaceMutations';
+import { WORKSPACE_FEEDBACK, WORKSPACE_NAME_MAX_LENGTH } from '../workspaces.constants';
 
 const NAME_FIELD_ID = 'rename-workspace';
 
 export function RenameWorkspaceCard({ workspace }: { workspace: Workspace }) {
   const [name, setName] = useState(workspace.displayName);
-  const rename = useRenameWorkspace(workspace.id);
+  const rename = useUpdateWorkspace(workspace.id, WORKSPACE_FEEDBACK.renamed);
   const unchanged = name.trim() === workspace.displayName;
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    rename.mutate(name.trim());
+    rename.mutate({ name: name.trim() });
   }
 
   return (

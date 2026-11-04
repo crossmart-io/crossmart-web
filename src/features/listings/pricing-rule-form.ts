@@ -2,6 +2,7 @@ import { z } from 'zod';
 import { CompareAtMode, PriceRounding } from '@/api/schema';
 import {
   PRICING_MAX_MARGIN_PERCENT,
+  RateMode,
   PRICING_MAX_PERCENT,
   PRICING_MIN_PERCENT,
 } from './listings.constants';
@@ -9,6 +10,8 @@ import type { PricingRule } from './listings.types';
 
 const SIGNED_DECIMAL = /^-?\d{1,10}(\.\d{1,2})?$/;
 const DECIMAL_MESSAGE = 'Enter a number with at most two decimals';
+const EXCHANGE_RATE = /^\d{1,9}(\.\d{1,6})?$/;
+const EXCHANGE_RATE_MESSAGE = 'Enter a rate above zero with at most six decimals';
 
 function decimalBetween(min: number, max: number) {
   return z
@@ -18,15 +21,31 @@ function decimalBetween(min: number, max: number) {
     .refine((value) => Number(value) >= min && Number(value) <= max, `Between ${min} and ${max}`);
 }
 
-/** The pricing rule as the form edits it: text fields, and the floor as an on/off switch. */
-export const pricingRuleFormSchema = z.object({
-  adjustmentPercent: decimalBetween(PRICING_MIN_PERCENT, PRICING_MAX_PERCENT),
-  fixedAmount: z.string().trim().regex(SIGNED_DECIMAL, DECIMAL_MESSAGE),
-  rounding: z.enum(PriceRounding),
-  floorEnabled: z.boolean(),
-  minMarginPercent: decimalBetween(0, PRICING_MAX_MARGIN_PERCENT),
-  compareAt: z.enum(CompareAtMode),
-});
+/**
+ * The pricing rule as the form edits it: text fields, the floor as an on/off switch, and the
+ * conversion rate as a choice between the daily rate and a fixed one.
+ */
+export const pricingRuleFormSchema = z
+  .object({
+    adjustmentPercent: decimalBetween(PRICING_MIN_PERCENT, PRICING_MAX_PERCENT),
+    fixedAmount: z.string().trim().regex(SIGNED_DECIMAL, DECIMAL_MESSAGE),
+    rounding: z.enum(PriceRounding),
+    floorEnabled: z.boolean(),
+    minMarginPercent: decimalBetween(0, PRICING_MAX_MARGIN_PERCENT),
+    compareAt: z.enum(CompareAtMode),
+    rateMode: z.enum(RateMode),
+    fixedExchangeRate: z.string().trim(),
+  })
+  .superRefine((values, context) => {
+    const rate = values.fixedExchangeRate;
+    if (values.rateMode === RateMode.Fixed && (!EXCHANGE_RATE.test(rate) || Number(rate) <= 0)) {
+      context.addIssue({
+        code: 'custom',
+        path: ['fixedExchangeRate'],
+        message: EXCHANGE_RATE_MESSAGE,
+      });
+    }
+  });
 
 export type PricingRuleFormValues = z.infer<typeof pricingRuleFormSchema>;
 
@@ -50,6 +69,8 @@ export function toPricingRuleForm(rule: PricingRule | null | undefined): Pricing
     floorEnabled: source.floor !== null,
     minMarginPercent: source.floor?.minMarginPercent ?? DEFAULT_MARGIN_PERCENT,
     compareAt: source.compareAt,
+    rateMode: source.fixedExchangeRate ? RateMode.Fixed : RateMode.Daily,
+    fixedExchangeRate: source.fixedExchangeRate ?? '',
   };
 }
 
@@ -60,6 +81,7 @@ export function toPricingRule(values: PricingRuleFormValues): PricingRule {
     rounding: values.rounding,
     floor: values.floorEnabled ? { minMarginPercent: values.minMarginPercent.trim() } : null,
     compareAt: values.compareAt,
+    fixedExchangeRate: values.rateMode === RateMode.Fixed ? values.fixedExchangeRate.trim() : null,
   };
 }
 

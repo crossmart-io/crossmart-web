@@ -1,4 +1,5 @@
 import { CompareAtMode, PriceRounding } from '@/api/schema';
+import { RateMode } from './listings.constants';
 import { toPreviewRule, toPricingRule, toPricingRuleForm } from './pricing-rule-form';
 
 const RULE = {
@@ -7,6 +8,7 @@ const RULE = {
   rounding: PriceRounding.ending_99,
   floor: { minMarginPercent: '30' },
   compareAt: CompareAtMode.keep,
+  fixedExchangeRate: null,
 };
 
 describe('pricing rule form', () => {
@@ -27,5 +29,14 @@ describe('pricing rule form', () => {
     expect(toPreviewRule({ ...form, adjustmentPercent: '-95' })).toBeNull();
     expect(toPreviewRule({ ...form, fixedAmount: '1.005' })).toBeNull();
     expect(toPreviewRule(form)).toEqual(RULE);
+  });
+
+  it('keeps a fixed exchange rate only when that mode is chosen, and checks it', () => {
+    const fixed = toPricingRuleForm({ ...RULE, fixedExchangeRate: '0.92' });
+    expect(fixed.rateMode).toBe(RateMode.Fixed);
+    expect(toPricingRule(fixed).fixedExchangeRate).toBe('0.92');
+    expect(toPricingRule({ ...fixed, rateMode: RateMode.Daily }).fixedExchangeRate).toBeNull();
+    expect(toPreviewRule({ ...fixed, fixedExchangeRate: '0' })).toBeNull();
+    expect(toPreviewRule({ ...fixed, fixedExchangeRate: 'abc' })).toBeNull();
   });
 });

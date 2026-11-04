@@ -12,12 +12,25 @@ import {
 } from '../pricing-rule-form';
 import { CardSaveFooter } from './CardSaveFooter';
 import { PricingExample } from './PricingExample';
-import { AdjustmentFields, CompareAtField, FloorField, RoundingField } from './PricingRuleFields';
+import {
+  AdjustmentFields,
+  CompareAtField,
+  ConversionField,
+  FloorField,
+  RoundingField,
+} from './PricingRuleFields';
+
+const PRICING_DESCRIPTION =
+  'Prices in this store follow the rule unless a product sets its own price for it. Saving ' +
+  'sends the new prices to the store at once.';
 
 interface PricingRuleCardProps {
   workspaceId: string;
   connectionId: string;
+  /** The store's currency. */
   currency: string;
+  /** The workspace's currency, which catalog prices are in. */
+  catalogCurrency: string;
   rule: PricingRule | null;
   canManage: boolean;
 }
@@ -27,6 +40,7 @@ export function PricingRuleCard({
   workspaceId,
   connectionId,
   currency,
+  catalogCurrency,
   rule,
   canManage,
 }: PricingRuleCardProps) {
@@ -49,15 +63,15 @@ export function PricingRuleCard({
         <CardTitle>
           <h2>Pricing</h2>
         </CardTitle>
-        <CardDescription>
-          Prices in this store follow the rule unless a product sets its own price for it. Saving
-          sends the new prices to the store at once.
-        </CardDescription>
+        <CardDescription>{PRICING_DESCRIPTION}</CardDescription>
       </CardHeader>
       <FormProvider {...form}>
         <form onSubmit={(event) => void submit(event)} noValidate>
           <CardContent className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
             <fieldset disabled={!canManage} className="flex min-w-0 flex-col gap-5">
+              {catalogCurrency !== currency && (
+                <ConversionField from={catalogCurrency} to={currency} />
+              )}
               <AdjustmentFields currency={currency} />
               <RoundingField />
               <FloorField />

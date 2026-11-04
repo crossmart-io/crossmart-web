@@ -31,14 +31,17 @@ export function useCreateWorkspace(organizationId: string) {
   });
 }
 
-export function useRenameWorkspace(workspaceId: string) {
+type WorkspaceChanges = components['schemas']['UpdateWorkspaceDto'];
+
+/** Renames the workspace or sets its time zone; `successMessage` is the toast, if any. */
+export function useUpdateWorkspace(workspaceId: string, successMessage?: string) {
   const queryClient = useQueryClient();
-  return useMutation<void, Error, string>({
-    meta: { inlineError: true, successMessage: WORKSPACE_FEEDBACK.renamed },
-    mutationFn: async (name) => {
+  return useMutation<void, Error, WorkspaceChanges>({
+    meta: { inlineError: true, ...(successMessage ? { successMessage } : {}) },
+    mutationFn: async (body) => {
       const { error } = await fetchClient.PATCH(WORKSPACE_ENDPOINT, {
         params: { path: { workspaceId } },
-        body: { name },
+        body,
       });
       if (error) throw ApiRequestError.from(error);
     },

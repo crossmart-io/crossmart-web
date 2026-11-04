@@ -65,6 +65,7 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
         <PricingRuleCard
           {...ref}
           currency={currency}
+          catalogCurrency={workspace.currency}
           rule={connection.pricing}
           canManage={canManage}
         />
