@@ -23,6 +23,7 @@ const SUBJECT_ROUTES: Record<ActivitySubjectType, (subjectId: string) => string 
   [ActivitySubjectType.member]: () => ROUTES.members,
   [ActivitySubjectType.invitation]: () => ROUTES.members,
   [ActivitySubjectType.custom_role]: () => ROUTES.roles,
+  [ActivitySubjectType.workspace]: () => ROUTES.workspaceSettings,
   [ActivitySubjectType.product_view]: () => undefined,
 };
 

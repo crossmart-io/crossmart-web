@@ -8,6 +8,7 @@ import {
   ShoppingBag,
   Share2,
   ShieldCheck,
+  Store,
   Users,
   Warehouse,
   type LucideIcon,
@@ -50,6 +51,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
   {
     label: 'Settings',
     items: [
+      { label: 'Workspace', to: ROUTES.workspaceSettings, icon: Store },
       { label: 'Members', to: ROUTES.members, icon: Users },
       { label: 'Roles', to: ROUTES.roles, icon: ShieldCheck },
       { label: 'API keys', to: ROUTES.apiKeys, icon: KeyRound },

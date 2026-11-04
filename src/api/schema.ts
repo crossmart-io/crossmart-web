@@ -60,6 +60,27 @@ export interface paths {
     delete: operations['WorkspacesController_deleteWorkspace_v1'];
     options?: never;
     head?: never;
+    /** Rename a workspace */
+    patch: operations['WorkspacesController_rename_v1'];
+    trace?: never;
+  };
+  '/api/v1/organizations/{organizationId}/workspaces': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create a workspace
+     * @description For owners of a workspace in the organization, such as one per client or brand. You own the new workspace. Refused (409) past 25 workspaces per organization.
+     */
+    post: operations['OrganizationWorkspacesController_create_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
     patch?: never;
     trace?: never;
   };
@@ -1036,9 +1057,23 @@ export interface components {
       email: string;
       workspaces: components['schemas']['WorkspaceDto'][];
     };
+    RenameWorkspaceDto: {
+      /** @example EU store */
+      name: string;
+    };
     DeleteWorkspaceDto: {
       /** @description The workspace’s name, typed to confirm: deleting it cannot be undone */
       confirmName: string;
+    };
+    CreateWorkspaceDto: {
+      /** @example EU store */
+      name: string;
+      /**
+       * @description ISO 4217 code of the catalog prices. It cannot change later.
+       * @default USD
+       * @example EUR
+       */
+      currency: string;
     };
     WorkspaceMemberDto: {
       /** Format: uuid */
@@ -2554,6 +2589,56 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  WorkspacesController_rename_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['RenameWorkspaceDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WorkspaceDto'];
+        };
+      };
+    };
+  };
+  OrganizationWorkspacesController_create_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        organizationId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateWorkspaceDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WorkspaceDto'];
+        };
       };
     };
   };
@@ -4208,6 +4293,8 @@ export enum ActivityAction {
   member_role_changed = 'member_role_changed',
   member_removed = 'member_removed',
   member_left = 'member_left',
+  workspace_created = 'workspace_created',
+  workspace_renamed = 'workspace_renamed',
   custom_role_created = 'custom_role_created',
   custom_role_updated = 'custom_role_updated',
   custom_role_deleted = 'custom_role_deleted',
@@ -4238,6 +4325,7 @@ export enum ActivitySubjectType {
   api_key = 'api_key',
   member = 'member',
   invitation = 'invitation',
+  workspace = 'workspace',
   custom_role = 'custom_role',
   channel_connection = 'channel_connection',
 }
