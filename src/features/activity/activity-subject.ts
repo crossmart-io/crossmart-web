@@ -14,20 +14,20 @@ const GONE_SUBJECT_ACTIONS: ReadonlySet<ActivityAction> = new Set([
   ActivityAction.product_view_deleted,
 ]);
 
+/** Where each kind of subject opens, given its id. */
+const SUBJECT_ROUTES: Record<ActivitySubjectType, (subjectId: string) => string | undefined> = {
+  [ActivitySubjectType.product]: toProductRoute,
+  [ActivitySubjectType.api_key]: () => ROUTES.apiKeys,
+  [ActivitySubjectType.import_job]: toImportJobRoute,
+  [ActivitySubjectType.channel_connection]: (subjectId) => toChannelConnectionRoute(subjectId),
+  [ActivitySubjectType.member]: () => ROUTES.members,
+  [ActivitySubjectType.invitation]: () => ROUTES.members,
+  [ActivitySubjectType.product_view]: () => undefined,
+};
+
 /** Where the event's subject can be opened, if anywhere. */
 export function toSubjectRoute(event: ActivityEvent): string | undefined {
   const { subject } = event;
   if (!subject?.id || GONE_SUBJECT_ACTIONS.has(event.action)) return undefined;
-  switch (subject.type) {
-    case ActivitySubjectType.product:
-      return toProductRoute(subject.id);
-    case ActivitySubjectType.api_key:
-      return ROUTES.apiKeys;
-    case ActivitySubjectType.import_job:
-      return toImportJobRoute(subject.id);
-    case ActivitySubjectType.channel_connection:
-      return toChannelConnectionRoute(subject.id);
-    case ActivitySubjectType.product_view:
-      return undefined;
-  }
+  return SUBJECT_ROUTES[subject.type](subject.id);
 }

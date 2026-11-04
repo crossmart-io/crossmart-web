@@ -1,8 +1,10 @@
 import { Link } from 'react-router';
 import { ROUTES } from '@/config/routes';
-import { AuthCard, SignInForm } from '@/features/auth';
+import { AuthCard, useAuthNavigationState, SignInForm } from '@/features/auth';
 
 export function SignInPage() {
+  // Keeps where to go next, such as an invitation, when switching between the two forms.
+  const navigationState = useAuthNavigationState();
   return (
     <AuthCard
       title="Sign in"
@@ -10,7 +12,11 @@ export function SignInPage() {
       footer={
         <p>
           New to Crossmart?{' '}
-          <Link to={ROUTES.signUp} className="font-medium text-foreground underline">
+          <Link
+            to={ROUTES.signUp}
+            state={navigationState}
+            className="font-medium text-foreground underline"
+          >
             Create an account
           </Link>
         </p>

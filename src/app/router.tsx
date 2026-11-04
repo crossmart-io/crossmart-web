@@ -101,6 +101,13 @@ export const router = createBrowserRouter([
     ],
   },
   {
+    path: ROUTES.acceptInvitation,
+    lazy: () =>
+      import('@/pages/AcceptInvitationPage').then(({ AcceptInvitationPage }) => ({
+        Component: AcceptInvitationPage,
+      })),
+  },
+  {
     element: (
       <RequireSession>
         <AppShell />

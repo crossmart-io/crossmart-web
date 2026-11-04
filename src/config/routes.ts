@@ -12,6 +12,8 @@ export const ROUTES = {
   signUp: '/sign-up',
   forgotPassword: '/forgot-password',
   resetPassword: '/reset-password',
+  /** Where invitation emails link to, with the token in the query. */
+  acceptInvitation: '/invitations/accept',
   products: '/products',
   newProduct: '/products/new',
   product: `/products/:${ROUTE_PARAMS.productId}`,

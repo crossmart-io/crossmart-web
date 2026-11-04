@@ -71,9 +71,131 @@ export interface paths {
       cookie?: never;
     };
     /** The members of a workspace */
-    get: operations['WorkspacesController_listMembers_v1'];
+    get: operations['MembersController_list_v1'];
     put?: never;
     post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/members/{userId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Remove a member
+     * @description Only members whose role yours covers. Their API keys here are revoked.
+     */
+    delete: operations['MembersController_remove_v1'];
+    options?: never;
+    head?: never;
+    /**
+     * Change a member's role
+     * @description Only for members whose role yours covers, to a role yours covers. Their API keys that the new role could not have created are revoked.
+     */
+    patch: operations['MembersController_changeRole_v1'];
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/membership': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /**
+     * Leave a workspace
+     * @description Your API keys here are revoked. Refused (409) for its last owner and for your only workspace.
+     */
+    delete: operations['MembershipController_leave_v1'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/invitations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Pending invitations of a workspace */
+    get: operations['InvitationsController_list_v1'];
+    put?: never;
+    /**
+     * Invite someone by email
+     * @description Emails a link that works for 7 days. A new invitation to the same address replaces the pending one. Refused (409) for members and past 50 pending invitations.
+     */
+    post: operations['InvitationsController_invite_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/invitations/{invitationId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    post?: never;
+    /** Revoke a pending invitation; its link stops working */
+    delete: operations['InvitationsController_revoke_v1'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/invitations/preview': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * What an invitation link is for
+     * @description Open to anyone with the link, so it can be shown before signing in. 404 when the link is unknown, used, revoked or expired.
+     */
+    post: operations['InvitationLinksController_preview_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/invitations/accept': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Accept an invitation and join its workspace
+     * @description Needs a signed-in user whose email is the invited address (403 otherwise).
+     */
+    post: operations['InvitationLinksController_accept_v1'];
     delete?: never;
     options?: never;
     head?: never;
@@ -110,6 +232,26 @@ export interface paths {
     post?: never;
     /** Revoke an API key */
     delete: operations['ApiKeysController_revoke_v1'];
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/api-key': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The API key making this request
+     * @description Lets a program, such as the MCP server, find the workspace its key works in.
+     */
+    get: operations['CurrentApiKeyController_get_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
     options?: never;
     head?: never;
     patch?: never;
@@ -820,6 +962,8 @@ export interface components {
       /** Format: uuid */
       organizationId: string;
       name: string;
+      /** @description The name to show: the organization name while the workspace is named Default */
+      displayName: string;
       slug: string;
       /**
        * @description ISO 4217 code of the catalog prices
@@ -848,6 +992,45 @@ export interface components {
       role: components['schemas']['WorkspaceRole'];
       /** Format: date-time */
       joinedAt: string;
+    };
+    UpdateMemberRoleDto: {
+      /** @description At most your own role. A workspace always keeps an owner. */
+      role: components['schemas']['WorkspaceRole'];
+    };
+    InvitationDto: {
+      /** Format: uuid */
+      id: string;
+      email: string;
+      role: components['schemas']['WorkspaceRole'];
+      invitedByName: string;
+      /** Format: date-time */
+      expiresAt: string;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    InviteMemberDto: {
+      /** @example dana@example.com */
+      email: string;
+      /** @description At most your own role. */
+      role: components['schemas']['WorkspaceRole'];
+    };
+    InvitationTokenDto: {
+      token: string;
+    };
+    InvitationPreviewDto: {
+      /** @description The workspace's display name */
+      workspaceName: string;
+      inviterName: string;
+      /** @description The address invited; accepting needs an account with it */
+      email: string;
+      role: components['schemas']['WorkspaceRole'];
+      /** Format: date-time */
+      expiresAt: string;
+    };
+    AcceptedInvitationDto: {
+      /** Format: uuid */
+      workspaceId: string;
+      role: components['schemas']['WorkspaceRole'];
     };
     ApiKeyDto: {
       /** Format: uuid */
@@ -878,6 +1061,16 @@ export interface components {
       apiKey: components['schemas']['ApiKeyDto'];
       /** @description The full key. Shown once; store it now. */
       secret: string;
+    };
+    CurrentApiKeyDto: {
+      /** Format: uuid */
+      apiKeyId: string;
+      /**
+       * Format: uuid
+       * @description The one workspace the key works in
+       */
+      workspaceId: string;
+      role: components['schemas']['WorkspaceRole'];
     };
     /** @enum {string} */
     ProductStatus: ProductStatus;
@@ -2248,7 +2441,7 @@ export interface operations {
       };
     };
   };
-  WorkspacesController_listMembers_v1: {
+  MembersController_list_v1: {
     parameters: {
       query?: never;
       header?: never;
@@ -2265,6 +2458,183 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['WorkspaceMemberDto'][];
+        };
+      };
+    };
+  };
+  MembersController_remove_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        userId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  MembersController_changeRole_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        userId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateMemberRoleDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['WorkspaceMemberDto'];
+        };
+      };
+    };
+  };
+  MembershipController_leave_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  InvitationsController_list_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InvitationDto'][];
+        };
+      };
+    };
+  };
+  InvitationsController_invite_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['InviteMemberDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InvitationDto'];
+        };
+      };
+    };
+  };
+  InvitationsController_revoke_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        invitationId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      204: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
+  InvitationLinksController_preview_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['InvitationTokenDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['InvitationPreviewDto'];
+        };
+      };
+    };
+  };
+  InvitationLinksController_accept_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['InvitationTokenDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AcceptedInvitationDto'];
         };
       };
     };
@@ -2332,6 +2702,25 @@ export interface operations {
           [name: string]: unknown;
         };
         content?: never;
+      };
+    };
+  };
+  CurrentApiKeyController_get_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CurrentApiKeyDto'];
+        };
       };
     };
   };
@@ -3585,6 +3974,12 @@ export enum ActivityAction {
   product_view_deleted = 'product_view_deleted',
   api_key_created = 'api_key_created',
   api_key_revoked = 'api_key_revoked',
+  member_invited = 'member_invited',
+  invitation_revoked = 'invitation_revoked',
+  member_joined = 'member_joined',
+  member_role_changed = 'member_role_changed',
+  member_removed = 'member_removed',
+  member_left = 'member_left',
   inventory_adjusted = 'inventory_adjusted',
   channel_connected = 'channel_connected',
   channel_disconnected = 'channel_disconnected',
@@ -3610,6 +4005,8 @@ export enum ActivitySubjectType {
   product_view = 'product_view',
   import_job = 'import_job',
   api_key = 'api_key',
+  member = 'member',
+  invitation = 'invitation',
   channel_connection = 'channel_connection',
 }
 export enum ActivityActorType {
