@@ -9,4 +9,5 @@ export const MOVEMENT_REASON_LABELS: Record<InventoryMovementReason, string> = {
   [InventoryMovementReason.DAMAGED]: 'Damaged',
   [InventoryMovementReason.LOST]: 'Lost',
   [InventoryMovementReason.SOLD]: 'Sold elsewhere',
+  [InventoryMovementReason.IMPORTED]: 'Imported',
 };

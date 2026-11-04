@@ -34,7 +34,7 @@ export function formatDate(value: string | null | undefined, fallback = '—'): 
   return value ? DATE_FORMAT.format(new Date(value)) : fallback;
 }
 
-/** A date and time of day in the user's locale, for history entries. */
-export function formatDateTime(value: string): string {
-  return DATE_TIME_FORMAT.format(new Date(value));
+/** A date and time of day in the user's locale, or `fallback` when there is none. */
+export function formatDateTime(value: string | null | undefined, fallback = '—'): string {
+  return value ? DATE_TIME_FORMAT.format(new Date(value)) : fallback;
 }

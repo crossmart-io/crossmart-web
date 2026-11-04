@@ -212,10 +212,44 @@ export interface paths {
     get?: never;
     put?: never;
     /**
-     * Import products from a file
-     * @description Products whose handle is already in the catalog are skipped, never overwritten. Invalid products are reported; the rest are created.
+     * Import products or stock from a file
+     * @description In `create` mode, products whose handle is already in the catalog are skipped, never overwritten. In `update` mode, products are replaced by handle and their variants matched by SKU; stock is left as it is. In `inventory` mode, a `sku,available` CSV sets the stock of tracked variants. Invalid records are reported; the rest are applied. Every import is recorded in the import history.
      */
     post: operations['ProductImportsController_import_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/import-jobs': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Import history of a workspace, newest first */
+    get: operations['ImportJobsController_list_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/import-jobs/{jobId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** An import with its skipped and failed records */
+    get: operations['ImportJobsController_get_v1'];
+    put?: never;
+    post?: never;
     delete?: never;
     options?: never;
     head?: never;
@@ -655,8 +689,18 @@ export interface components {
     };
     /** @enum {string} */
     CatalogImportFormat: CatalogImportFormat;
+    /**
+     * @description `create` adds new products (Shopify CSV), `update` replaces products matched by handle (Shopify CSV) and `inventory` sets stock by SKU (inventory CSV)
+     * @enum {string}
+     */
+    CatalogImportMode: CatalogImportMode;
     ImportProductsDto: {
       format: components['schemas']['CatalogImportFormat'];
+      /**
+       * @description `create` adds new products (Shopify CSV), `update` replaces products matched by handle (Shopify CSV) and `inventory` sets stock by SKU (inventory CSV)
+       * @default create
+       */
+      mode: components['schemas']['CatalogImportMode'];
     };
     /** @enum {string} */
     ImportIssueCode: ImportIssueCode;
@@ -664,16 +708,97 @@ export interface components {
       code: components['schemas']['ImportIssueCode'];
       message: string;
       handle?: string;
+      sku?: string;
       /** @description Spreadsheet row number; the header is row 1 */
       row?: number;
     };
     CatalogImportResultDto: {
+      /**
+       * Format: uuid
+       * @description The import history entry of this import
+       */
+      jobId: string;
+      mode: components['schemas']['CatalogImportMode'];
       createdProducts: number;
       createdVariants: number;
-      /** @description Products already in the catalog, left untouched */
+      /** @description Products replaced by an update import */
+      updatedProducts: number;
+      /** @description Variants whose stock an inventory import set */
+      updatedVariants: number;
+      /** @description Records left as they were: already in the catalog, not found, stock not tracked */
       skipped: components['schemas']['ImportIssueDto'][];
-      /** @description Products that could not be imported */
+      /** @description Records that could not be imported */
       failed: components['schemas']['ImportIssueDto'][];
+    };
+    /** @enum {string} */
+    ImportJobStatus: ImportJobStatus;
+    ImportJobCountsDto: {
+      created: number;
+      updated: number;
+      skipped: number;
+      failed: number;
+    };
+    ImportJobActorDto: {
+      /** Format: uuid */
+      userId: string | null;
+      /** @description The user who sent the file; null for API keys and deleted users */
+      userName: string | null;
+      /** Format: uuid */
+      apiKeyId: string | null;
+      /** @description The API key that sent the file, if one did */
+      apiKeyName: string | null;
+    };
+    ImportJobDto: {
+      /** Format: uuid */
+      id: string;
+      mode: components['schemas']['CatalogImportMode'];
+      format: components['schemas']['CatalogImportFormat'];
+      fileName: string;
+      status: components['schemas']['ImportJobStatus'];
+      /** @description Products for create and update imports; stock rows for inventory imports */
+      counts: components['schemas']['ImportJobCountsDto'];
+      /** @description Why the whole file was rejected */
+      errorMessage: string | null;
+      actor: components['schemas']['ImportJobActorDto'];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      finishedAt: string | null;
+    };
+    ImportJobPageDto: {
+      items: components['schemas']['ImportJobDto'][];
+      /** @description Null on the last page */
+      nextCursor: string | null;
+    };
+    /** @enum {string} */
+    ImportIssueOutcome: ImportIssueOutcome;
+    ImportJobIssueDto: {
+      code: components['schemas']['ImportIssueCode'];
+      message: string;
+      handle?: string;
+      sku?: string;
+      /** @description Spreadsheet row number; the header is row 1 */
+      row?: number;
+      outcome: components['schemas']['ImportIssueOutcome'];
+    };
+    ImportJobDetailDto: {
+      /** Format: uuid */
+      id: string;
+      mode: components['schemas']['CatalogImportMode'];
+      format: components['schemas']['CatalogImportFormat'];
+      fileName: string;
+      status: components['schemas']['ImportJobStatus'];
+      /** @description Products for create and update imports; stock rows for inventory imports */
+      counts: components['schemas']['ImportJobCountsDto'];
+      /** @description Why the whole file was rejected */
+      errorMessage: string | null;
+      actor: components['schemas']['ImportJobActorDto'];
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      finishedAt: string | null;
+      /** @description Skipped and failed records, in file order */
+      issues: components['schemas']['ImportJobIssueDto'][];
     };
     /** @enum {string} */
     ImageContentType: ImageContentType;
@@ -1343,6 +1468,53 @@ export interface operations {
       };
     };
   };
+  ImportJobsController_list_v1: {
+    parameters: {
+      query?: {
+        /** @description `nextCursor` from the previous page */
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ImportJobPageDto'];
+        };
+      };
+    };
+  };
+  ImportJobsController_get_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        jobId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ImportJobDetailDto'];
+        };
+      };
+    };
+  };
   ProductImagesController_upload_v1: {
     parameters: {
       query?: never;
@@ -1610,6 +1782,12 @@ export enum BulkProductAction {
 }
 export enum CatalogImportFormat {
   shopify_csv = 'shopify_csv',
+  inventory_csv = 'inventory_csv',
+}
+export enum CatalogImportMode {
+  create = 'create',
+  update = 'update',
+  inventory = 'inventory',
 }
 export enum ImportIssueCode {
   already_exists = 'already_exists',
@@ -1617,6 +1795,19 @@ export enum ImportIssueCode {
   invalid_value = 'invalid_value',
   missing_value = 'missing_value',
   invalid_options = 'invalid_options',
+  not_found = 'not_found',
+  unknown_sku = 'unknown_sku',
+  not_tracked = 'not_tracked',
+  duplicate_row = 'duplicate_row',
+}
+export enum ImportJobStatus {
+  PROCESSING = 'PROCESSING',
+  COMPLETED = 'COMPLETED',
+  FAILED = 'FAILED',
+}
+export enum ImportIssueOutcome {
+  SKIPPED = 'SKIPPED',
+  FAILED = 'FAILED',
 }
 export enum ImageContentType {
   image_jpeg = 'image/jpeg',
@@ -1631,6 +1822,8 @@ export enum ActivityAction {
   products_bulk_updated = 'products_bulk_updated',
   products_bulk_deleted = 'products_bulk_deleted',
   products_imported = 'products_imported',
+  products_updated_by_import = 'products_updated_by_import',
+  stock_imported = 'stock_imported',
   product_view_created = 'product_view_created',
   product_view_deleted = 'product_view_deleted',
   api_key_created = 'api_key_created',
@@ -1644,7 +1837,7 @@ export enum ActivityOutcome {
 export enum ActivitySubjectType {
   product = 'product',
   product_view = 'product_view',
-  catalog_import = 'catalog_import',
+  import_job = 'import_job',
   api_key = 'api_key',
 }
 export enum ActivityActorType {
@@ -1671,4 +1864,5 @@ export enum InventoryMovementReason {
   DAMAGED = 'DAMAGED',
   LOST = 'LOST',
   SOLD = 'SOLD',
+  IMPORTED = 'IMPORTED',
 }

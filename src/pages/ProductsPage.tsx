@@ -9,7 +9,6 @@ import {
   ActiveFilterChip,
   BulkActionBar,
   CATALOG_GAP_COPY,
-  ImportProductsDialog,
   ProductFilters,
   type ProductListFilters,
   ProductsEmptyState,
@@ -25,6 +24,7 @@ import {
 } from '@/features/catalog';
 import type { Selection } from '@/hooks/useSelection';
 import { pluralize } from '@/lib/format';
+import { ImportProductsDialog } from '@/features/imports';
 import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
 
 function AddProductButton() {

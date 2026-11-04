@@ -8,6 +8,8 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.products_bulk_updated]: 'Bulk edit',
   [ActivityAction.products_bulk_deleted]: 'Bulk delete',
   [ActivityAction.products_imported]: 'Products imported',
+  [ActivityAction.products_updated_by_import]: 'Products updated by import',
+  [ActivityAction.stock_imported]: 'Stock imported',
   [ActivityAction.product_view_created]: 'View saved',
   [ActivityAction.product_view_deleted]: 'View deleted',
   [ActivityAction.api_key_created]: 'API key created',

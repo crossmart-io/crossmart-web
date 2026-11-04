@@ -1,4 +1,5 @@
 import {
+  FileUp,
   History,
   KeyRound,
   LayoutDashboard,
@@ -30,6 +31,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { label: 'Overview', to: ROUTES.home, icon: LayoutDashboard, end: true },
       { label: 'Products', to: ROUTES.products, icon: Package },
       { label: 'Inventory', to: ROUTES.inventory, icon: Warehouse },
+      { label: 'Imports', to: ROUTES.imports, icon: FileUp },
       { label: 'Channels', to: ROUTES.channels, icon: Share2 },
       { label: 'Activity', to: ROUTES.activity, icon: History },
     ],
@@ -54,4 +56,5 @@ export const PAGE_PARENTS = {
   topLevel: [],
   products: [{ label: 'Products', to: ROUTES.products }],
   settings: [{ label: 'Settings' }],
+  imports: [{ label: 'Imports', to: ROUTES.imports }],
 } as const satisfies Record<string, readonly Crumb[]>;

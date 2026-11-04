@@ -10,8 +10,8 @@ import { ActorAvatar } from './ActorAvatar';
 
 interface ActivityEventItemProps {
   event: ActivityEvent;
-  /** Hide the subject link, as on the subject's own page. */
-  linkSubject?: boolean;
+  /** The record whose page shows the event: links to it are left out, since it is already open. */
+  pageSubjectId?: string;
   /** Smaller avatar and type, for side cards. */
   compact?: boolean;
 }
@@ -19,7 +19,7 @@ interface ActivityEventItemProps {
 /** One line of the log: who, what (linked when it still exists), when, and how it went. */
 export function ActivityEventItem({
   event,
-  linkSubject = true,
+  pageSubjectId,
   compact = false,
 }: ActivityEventItemProps) {
   const failed = event.outcome === ActivityOutcome.FAILED;
@@ -30,7 +30,10 @@ export function ActivityEventItem({
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
         <div className="flex items-start justify-between gap-2">
           <p className={cn('min-w-0 text-sm break-words', !compact && 'font-medium')}>
-            <EventSummary event={event} route={linkSubject ? toSubjectRoute(event) : undefined} />
+            <EventSummary
+              event={event}
+              route={event.subject?.id === pageSubjectId ? undefined : toSubjectRoute(event)}
+            />
           </p>
           {failed && <Badge variant="destructive">Failed</Badge>}
         </div>

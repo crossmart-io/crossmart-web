@@ -1,4 +1,3 @@
-export { ImportProductsDialog } from './components/ImportProductsDialog';
 export { ProductFilters } from './components/ProductFilters';
 export { ProductStatusBadge } from './components/ProductStatusBadge';
 export { ProductsEmptyState } from './components/ProductsEmptyState';

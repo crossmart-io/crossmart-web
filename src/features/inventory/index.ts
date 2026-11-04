@@ -3,6 +3,7 @@ export { InventoryFilters } from './components/InventoryFilters';
 export { InventoryTable } from './components/InventoryTable';
 export { StockHistorySheet } from './components/StockHistorySheet';
 export { useInventory } from './hooks/useInventory';
+export { useInvalidateStock } from './hooks/useInvalidateStock';
 export {
   type InventoryListFilters,
   useInventoryListFilters,
