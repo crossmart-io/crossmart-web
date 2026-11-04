@@ -4,6 +4,7 @@ import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import type { ChannelInfo, ConnectableChannel } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
+import { reconnectAccountHandle } from '../connection-account';
 import { useDisconnectChannel } from '../hooks/useChannelConnections';
 import { ConnectChannelDialog } from './ConnectChannelDialog';
 
@@ -36,7 +37,7 @@ export function ConnectionActions({
           workspaceId={workspaceId}
           channel={channel}
           connect={connect}
-          initialAccount={connection.externalAccountId}
+          initialAccount={reconnectAccountHandle(connection)}
           trigger={
             <Button size="sm">
               <RefreshCw data-icon="inline-start" />

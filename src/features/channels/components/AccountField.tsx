@@ -1,11 +1,7 @@
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
-import {
-  InputGroup,
-  InputGroupAddon,
-  InputGroupInput,
-  InputGroupText,
-} from '@/components/ui/input-group';
-import type { AccountPrompt } from '../channels.constants';
+import { type AccountPrompt, AccountPromptKind } from '../channels.constants';
+import { AccountSelect } from './AccountSelect';
+import { AccountTextInput } from './AccountTextInput';
 
 const ACCOUNT_FIELD_ID = 'connect-channel-account';
 
@@ -16,29 +12,17 @@ interface AccountFieldProps {
   disabled: boolean;
 }
 
-/** The account to connect, such as a store's myshopify.com domain. */
+/** The account to connect: a store's myshopify.com domain, or an eBay marketplace. */
 export function AccountField({ prompt, value, onChange, disabled }: AccountFieldProps) {
+  const control = { id: ACCOUNT_FIELD_ID, value, onChange, disabled };
   return (
     <Field>
       <FieldLabel htmlFor={ACCOUNT_FIELD_ID}>{prompt.label}</FieldLabel>
-      <InputGroup>
-        <InputGroupInput
-          id={ACCOUNT_FIELD_ID}
-          value={value}
-          onChange={(event) => onChange(event.target.value)}
-          placeholder={prompt.placeholder}
-          autoComplete="off"
-          autoCapitalize="none"
-          spellCheck={false}
-          required
-          disabled={disabled}
-        />
-        {prompt.suffix && (
-          <InputGroupAddon align="inline-end">
-            <InputGroupText>{prompt.suffix}</InputGroupText>
-          </InputGroupAddon>
-        )}
-      </InputGroup>
+      {prompt.kind === AccountPromptKind.Select ? (
+        <AccountSelect prompt={prompt} {...control} />
+      ) : (
+        <AccountTextInput prompt={prompt} {...control} />
+      )}
       <FieldDescription>{prompt.description}</FieldDescription>
     </Field>
   );

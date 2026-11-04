@@ -1828,6 +1828,34 @@ export interface components {
       /** @description Where Crossmart reads and writes stock */
       primaryLocation: components['schemas']['ShopifyLocationDto'] | null;
     };
+    /** @enum {string} */
+    EbayMarketplaceId: EbayMarketplaceId;
+    EbayPolicyDto: {
+      /** @example 6000000001 */
+      id: string;
+      /** @example Free shipping */
+      name: string;
+    };
+    EbayBusinessPoliciesDto: {
+      fulfillment: components['schemas']['EbayPolicyDto'][];
+      payment: components['schemas']['EbayPolicyDto'][];
+      return: components['schemas']['EbayPolicyDto'][];
+    };
+    EbaySettingsDto: {
+      marketplaceId: components['schemas']['EbayMarketplaceId'];
+      /**
+       * @description ISO 4217 code of the marketplace’s currency
+       * @example USD
+       */
+      currencyCode: string;
+      /** @example demo_seller */
+      username: string;
+      /** @description eBay’s immutable id of the user */
+      userId: string;
+      /** @description False when the account has not opted in to business policies on eBay */
+      businessPoliciesEnabled: boolean;
+      policies: components['schemas']['EbayBusinessPoliciesDto'];
+    };
     ProductSelectionFilterDto: {
       /** @description Matches title, handle or SKU */
       search?: string;
@@ -1893,6 +1921,8 @@ export interface components {
       missingFeatures: components['schemas']['ChannelFeature'][];
       /** @description The store’s details, for Shopify connections */
       shopify: components['schemas']['ShopifySettingsDto'] | null;
+      /** @description The account’s details on its marketplace, for eBay connections */
+      ebay: components['schemas']['EbaySettingsDto'] | null;
       /** @description Which products the connection lists; null lists every product */
       productSelection: components['schemas']['ProductSelectionRuleDto'] | null;
       /** @description How the connection prices variants; null sends catalog prices */
@@ -1913,7 +1943,7 @@ export interface components {
     StartAuthorizationDto: {
       channel: components['schemas']['ChannelType'];
       /**
-       * @description The account to connect. For Shopify, the store’s myshopify.com domain or handle.
+       * @description The account to connect. For Shopify, the store’s myshopify.com domain or handle. For eBay, the marketplace id, such as `EBAY_US`.
        * @example demo-store.myshopify.com
        */
       accountHandle: string;
@@ -1921,7 +1951,16 @@ export interface components {
     StartedAuthorizationDto: {
       /** @description Send the merchant here to approve the app on the channel */
       authorizationUrl: string;
-      /** @example demo-store.myshopify.com */
+      /**
+       * @description The account handle, normalized: a myshopify.com domain, or an eBay marketplace id
+       * @example demo-store.myshopify.com
+       */
+      accountHandle: string;
+      /**
+       * @deprecated
+       * @description The same value as `accountHandle`. Use `accountHandle` instead.
+       * @example demo-store.myshopify.com
+       */
       externalAccountId: string;
     };
     /** @enum {string} */
@@ -4404,6 +4443,16 @@ export enum ChannelConnectionStatus {
 export enum ChannelFeature {
   storefront_visibility = 'storefront_visibility',
   order_sync = 'order_sync',
+}
+export enum EbayMarketplaceId {
+  EBAY_US = 'EBAY_US',
+  EBAY_GB = 'EBAY_GB',
+  EBAY_DE = 'EBAY_DE',
+  EBAY_AU = 'EBAY_AU',
+  EBAY_CA = 'EBAY_CA',
+  EBAY_FR = 'EBAY_FR',
+  EBAY_IT = 'EBAY_IT',
+  EBAY_ES = 'EBAY_ES',
 }
 export enum PriceRounding {
   none = 'none',

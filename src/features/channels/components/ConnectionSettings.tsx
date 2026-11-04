@@ -6,8 +6,11 @@ import { formatDate } from '@/lib/format';
 import { channelInfoFor } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
 import { connectionName } from '../connection-name';
+import { AccountDetail } from './AccountDetail';
 import { ChannelImportSection } from './ChannelImportSection';
 import { ConnectionActions } from './ConnectionActions';
+import { EbayAccountDetails } from './EbayAccountDetails';
+import { ShopifyAccountDetails } from './ShopifyAccountDetails';
 
 interface ConnectionSettingsProps {
   workspaceId: string;
@@ -21,18 +24,8 @@ interface ConnectionSettingsProps {
   resyncAction?: ReactNode;
 }
 
-function Detail({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <div className="flex flex-col gap-0.5">
-      <dt className="text-sm text-muted-foreground">{label}</dt>
-      <dd className="text-sm break-words">{children}</dd>
-    </div>
-  );
-}
-
 /** What Crossmart knows about the connected store, and the permissions it was granted. */
 function StoreDetailsCard({ connection }: { connection: ChannelConnection }) {
-  const shopify = connection.shopify;
   return (
     <Card>
       <CardHeader>
@@ -43,26 +36,14 @@ function StoreDetailsCard({ connection }: { connection: ChannelConnection }) {
       </CardHeader>
       <CardContent>
         <dl className="grid gap-4 sm:grid-cols-2">
-          <Detail label="Name">{connectionName(connection)}</Detail>
-          <Detail label="Domain">{connection.externalAccountId}</Detail>
-          {shopify?.primaryDomainUrl && (
-            <Detail label="Storefront">
-              <a
-                href={shopify.primaryDomainUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="underline underline-offset-4"
-              >
-                {shopify.primaryDomainUrl}
-              </a>
-            </Detail>
+          <AccountDetail label="Name">{connectionName(connection)}</AccountDetail>
+          {connection.ebay ? (
+            <EbayAccountDetails ebay={connection.ebay} />
+          ) : (
+            <ShopifyAccountDetails connection={connection} />
           )}
-          {shopify && <Detail label="Currency">{shopify.currencyCode}</Detail>}
-          {shopify?.primaryLocation && (
-            <Detail label="Stock location">{shopify.primaryLocation.name}</Detail>
-          )}
-          <Detail label="Connected">{formatDate(connection.connectedAt)}</Detail>
-          <Detail label="Permissions">
+          <AccountDetail label="Connected">{formatDate(connection.connectedAt)}</AccountDetail>
+          <AccountDetail label="Permissions">
             <span className="flex flex-wrap gap-1">
               {connection.grantedScopes.map((scope) => (
                 <Badge key={scope} variant="secondary">
@@ -70,7 +51,7 @@ function StoreDetailsCard({ connection }: { connection: ChannelConnection }) {
                 </Badge>
               ))}
             </span>
-          </Detail>
+          </AccountDetail>
         </dl>
       </CardContent>
     </Card>
@@ -151,11 +132,12 @@ export function ConnectionSettings({
   resyncAction,
 }: ConnectionSettingsProps) {
   const isConnected = connection.status === ChannelConnectionStatus.CONNECTED;
+  const importsCatalog = channelInfoFor(connection.channel)?.connect?.importsCatalog ?? false;
   return (
     <div className="flex flex-col gap-6">
       <StoreDetailsCard connection={connection} />
       {automaticRule}
-      {canImportProducts && isConnected && (
+      {canImportProducts && isConnected && importsCatalog && (
         <ImportCard workspaceId={workspaceId} connection={connection} />
       )}
       {canManage && (
