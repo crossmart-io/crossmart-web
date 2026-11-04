@@ -24,6 +24,10 @@ cp .env.example .env.local   # VITE_API_URL points at the API
 pnpm dev                     # http://localhost:5173
 ```
 
+## Signing in
+
+The app uses the API's session cookie (Better Auth). Open `http://localhost:5173`, create an account, and the API sets up your first workspace. For the cookie to be accepted, the web app's origin must be listed in the API's `CORS_ORIGINS` (it is by default).
+
 ## Project structure
 
 ```
