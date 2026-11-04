@@ -10,6 +10,7 @@ export const ROUTES = {
   newProduct: '/products/new',
   product: `/products/:${ROUTE_PARAMS.productId}`,
   channels: '/channels',
+  activity: '/activity',
   apiKeys: '/settings/api-keys',
   members: '/settings/members',
 } as const;
@@ -23,6 +24,12 @@ export const ROUTE_QUERY = {
   gap: 'gap',
   search: 'q',
   status: 'status',
+} as const;
+
+/** Filters of the activity page, kept in the URL so a filtered log can be shared. */
+export const ACTIVITY_ROUTE_QUERY = {
+  action: 'action',
+  outcome: 'outcome',
 } as const;
 
 export function toProductsRoute(filter: { gap?: string } = {}): string {

@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { DESKTOP_MEDIA_QUERY, useMediaQuery } from '@/hooks/useMediaQuery';
 import { ChannelsCard } from './ChannelsCard';
 import { InventoryCard } from './InventoryCard';
@@ -15,6 +16,8 @@ interface ProductEditorLayoutProps {
   /** With options, price and stock are edited per variant instead of in their own cards. */
   hasOptions: boolean;
   onPendingUploadsChange: (count: number) => void;
+  /** Extra cards for the side column, such as the product's recent activity. */
+  aside?: ReactNode;
 }
 
 /** Content on the left, status and organization on the right. */
@@ -23,6 +26,7 @@ export function ProductEditorLayout({
   currency,
   hasOptions,
   onPendingUploadsChange,
+  aside,
 }: ProductEditorLayoutProps) {
   // On one column, status comes first: it is what sellers check before anything else.
   const isDesktop = useMediaQuery(DESKTOP_MEDIA_QUERY);
@@ -46,6 +50,7 @@ export function ProductEditorLayout({
         {isDesktop && <StatusCard />}
         <ChannelsCard />
         <OrganizationCard />
+        {aside}
       </div>
     </div>
   );

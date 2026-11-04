@@ -2,8 +2,8 @@ import { Plus } from 'lucide-react';
 import { Link } from 'react-router';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Page } from '@/components/layout/Page';
+import { LoadMoreButton } from '@/components/lists/LoadMoreButton';
 import { Button } from '@/components/ui/button';
-import { Spinner } from '@/components/ui/spinner';
 import { ROUTES } from '@/config/routes';
 import {
   ActiveFilterChip,
@@ -135,15 +135,6 @@ function ResultCount({ count, hasMore }: { count: number; hasMore: boolean }) {
       {hasMore ? 'Showing the first ' : 'Showing '}
       {pluralize(count, 'product')}
     </p>
-  );
-}
-
-function LoadMoreButton({ isLoading, onLoadMore }: { isLoading: boolean; onLoadMore: () => void }) {
-  return (
-    <Button variant="outline" className="self-center" disabled={isLoading} onClick={onLoadMore}>
-      {isLoading && <Spinner data-icon="inline-start" />}
-      {isLoading ? 'Loading…' : 'Load more'}
-    </Button>
   );
 }
 

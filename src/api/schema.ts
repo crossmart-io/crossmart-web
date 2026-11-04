@@ -259,6 +259,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/activity': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Who changed what in the workspace, newest first
+     * @description Includes operations that failed, such as an import that created nothing.
+     */
+    get: operations['ActivityController_list_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/activity': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The history of one product, newest first
+     * @description Includes bulk actions that changed it, and its deletion.
+     */
+    get: operations['ProductActivityController_list_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -604,6 +644,53 @@ export interface components {
       outOfStockVariants: number;
       /** @description Products lacking what channels require */
       gaps: components['schemas']['CatalogGapCountDto'][];
+    };
+    /** @enum {string} */
+    ActivityAction: ActivityAction;
+    /** @enum {string} */
+    ActivityOutcome: ActivityOutcome;
+    /** @enum {string} */
+    ActivitySubjectType: ActivitySubjectType;
+    /** @enum {string} */
+    ActivityActorType: ActivityActorType;
+    ActivityActorDto: {
+      type: components['schemas']['ActivityActorType'];
+      /** Format: uuid */
+      userId: string | null;
+      /** Format: uuid */
+      apiKeyId: string | null;
+      /** @description User or API key name; null for system actions and deleted users or keys */
+      name: string | null;
+      /** @description Set for users only */
+      email: string | null;
+    };
+    ActivitySubjectDto: {
+      type: components['schemas']['ActivitySubjectType'];
+      /** Format: uuid */
+      id: string | null;
+      /** @description The name when the event happened */
+      label: string | null;
+    };
+    ActivityEventDto: {
+      /** Format: uuid */
+      id: string;
+      action: components['schemas']['ActivityAction'];
+      outcome: components['schemas']['ActivityOutcome'];
+      /** @example Updated product “Linen Shirt” */
+      summary: string;
+      actor: components['schemas']['ActivityActorDto'];
+      subject: components['schemas']['ActivitySubjectDto'] | null;
+      /** @description Items the action covered, such as products changed in bulk */
+      itemCount: number | null;
+      /** @description Why a failed action failed */
+      failureReason: string | null;
+      /** Format: date-time */
+      createdAt: string;
+    };
+    ActivityPageDto: {
+      items: components['schemas']['ActivityEventDto'][];
+      /** @description Null on the last page */
+      nextCursor: string | null;
     };
   };
   responses: never;
@@ -1186,6 +1273,70 @@ export interface operations {
       };
     };
   };
+  ActivityController_list_v1: {
+    parameters: {
+      query?: {
+        action?: components['schemas']['ActivityAction'];
+        /** @description `FAILED` lists only what went wrong */
+        outcome?: components['schemas']['ActivityOutcome'];
+        /** @description `nextCursor` from the previous page */
+        cursor?: string;
+        limit?: number;
+        subjectType?: components['schemas']['ActivitySubjectType'];
+        /** @description Events about this record, including bulk actions that touched it */
+        subjectId?: string;
+        /** @description Only what this user did */
+        actorUserId?: string;
+        /** @description Only what this API key did */
+        actorApiKeyId?: string;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ActivityPageDto'];
+        };
+      };
+    };
+  };
+  ProductActivityController_list_v1: {
+    parameters: {
+      query?: {
+        action?: components['schemas']['ActivityAction'];
+        /** @description `FAILED` lists only what went wrong */
+        outcome?: components['schemas']['ActivityOutcome'];
+        /** @description `nextCursor` from the previous page */
+        cursor?: string;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+        productId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ActivityPageDto'];
+        };
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -1270,4 +1421,31 @@ export enum ImageContentType {
   image_png = 'image/png',
   image_webp = 'image/webp',
   image_gif = 'image/gif',
+}
+export enum ActivityAction {
+  product_created = 'product_created',
+  product_updated = 'product_updated',
+  product_deleted = 'product_deleted',
+  products_bulk_updated = 'products_bulk_updated',
+  products_bulk_deleted = 'products_bulk_deleted',
+  products_imported = 'products_imported',
+  product_view_created = 'product_view_created',
+  product_view_deleted = 'product_view_deleted',
+  api_key_created = 'api_key_created',
+  api_key_revoked = 'api_key_revoked',
+}
+export enum ActivityOutcome {
+  SUCCEEDED = 'SUCCEEDED',
+  FAILED = 'FAILED',
+}
+export enum ActivitySubjectType {
+  product = 'product',
+  product_view = 'product_view',
+  catalog_import = 'catalog_import',
+  api_key = 'api_key',
+}
+export enum ActivityActorType {
+  USER = 'USER',
+  API_KEY = 'API_KEY',
+  SYSTEM = 'SYSTEM',
 }

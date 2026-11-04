@@ -1,4 +1,5 @@
 import { CircleAlert } from 'lucide-react';
+import type { ReactNode } from 'react';
 import { FormProvider } from 'react-hook-form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import type { Workspace } from '@/features/workspaces';
@@ -16,10 +17,12 @@ interface ProductEditorProps {
   workspace: Workspace;
   /** Absent when creating a product. */
   product?: Product;
+  /** Extra cards for the side column. */
+  aside?: ReactNode;
 }
 
 /** Create and edit a product, laid out like the store admins sellers already know. */
-export function ProductEditor({ workspace, product }: ProductEditorProps) {
+export function ProductEditor({ workspace, product, aside }: ProductEditorProps) {
   const editor = useProductEditorForm(workspace.id, product);
   const { isDirty, isSubmitting } = editor.form.formState;
 
@@ -48,6 +51,7 @@ export function ProductEditor({ workspace, product }: ProductEditorProps) {
             currency={workspace.currency}
             hasOptions={editor.hasOptions}
             onPendingUploadsChange={editor.setPendingUploads}
+            aside={aside}
           />
         </form>
         {product && (

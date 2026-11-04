@@ -6,6 +6,7 @@ import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { Page } from '@/components/layout/Page';
 import { PAGE_PARENTS } from '@/config/navigation';
 import { ROUTE_PARAMS } from '@/config/routes';
+import { RecentActivityCard } from '@/features/activity';
 import { ProductStatusBadge, useProduct } from '@/features/catalog';
 import { ProductEditor } from '@/features/catalog/editor';
 import type { Workspace } from '@/features/workspaces';
@@ -43,7 +44,12 @@ function EditProduct({ workspace, productId }: { workspace: Workspace; productId
       }
     >
       {/* Remount on a different product so the form starts from its values. */}
-      <ProductEditor key={product.id} workspace={workspace} product={product} />
+      <ProductEditor
+        key={product.id}
+        workspace={workspace}
+        product={product}
+        aside={<RecentActivityCard workspaceId={workspace.id} productId={product.id} />}
+      />
     </Page>
   );
 }
