@@ -1,0 +1,47 @@
+import { type PropsWithChildren, type ReactNode, useEffect } from 'react';
+import { toDocumentTitle } from '@/config/app';
+import { type Crumb, PAGE_PARENTS } from '@/config/navigation';
+import { useBreadcrumbs } from './useBreadcrumbs';
+import { PageHeader } from './PageHeader';
+
+interface PageProps extends PropsWithChildren {
+  /** Names the page in the browser tab and the last breadcrumb. */
+  name: string;
+  /** The heading, when it says more than the name ("Welcome, Dana"). */
+  title?: ReactNode;
+  description?: ReactNode;
+  actions?: ReactNode;
+  /** Pages above this one, outermost first. Pass a `PAGE_PARENTS` entry so it stays stable. */
+  parents?: readonly Crumb[];
+}
+
+/** Every app page: tab title, breadcrumbs, heading, then its content with even spacing. */
+export function Page({
+  name,
+  title,
+  description,
+  actions,
+  parents = PAGE_PARENTS.topLevel,
+  children,
+}: PageProps) {
+  const { setCrumbs } = useBreadcrumbs();
+
+  useEffect(() => {
+    setCrumbs([...parents, { label: name }]);
+  }, [name, parents, setCrumbs]);
+
+  const back = parents.findLast((crumb) => crumb.to);
+
+  return (
+    <div className="flex flex-col gap-6">
+      <title>{toDocumentTitle(name)}</title>
+      <PageHeader
+        title={title ?? name}
+        description={description}
+        actions={actions}
+        back={back?.to ? { to: back.to, label: back.label } : undefined}
+      />
+      {children}
+    </div>
+  );
+}

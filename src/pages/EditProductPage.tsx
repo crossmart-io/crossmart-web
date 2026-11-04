@@ -1,41 +1,50 @@
 import { useParams } from 'react-router';
-import { PageLoader } from '@/components/feedback/PageLoader';
+import { isNotFoundError } from '@/api/api-error';
+import { ContentLoader } from '@/components/feedback/ContentLoader';
+import { ErrorState } from '@/components/feedback/ErrorState';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
-import { PageHeader } from '@/components/layout/PageHeader';
-import { ROUTE_PARAMS, ROUTES } from '@/config/routes';
+import { Page } from '@/components/layout/Page';
+import { PAGE_PARENTS } from '@/config/navigation';
+import { ROUTE_PARAMS } from '@/config/routes';
 import { ProductStatusBadge, useProduct } from '@/features/catalog';
 import { ProductEditor } from '@/features/catalog/editor';
 import type { Workspace } from '@/features/workspaces';
 
-const BACK_TO_PRODUCTS = { to: ROUTES.products, label: 'Products' };
+const PRODUCT_PAGE_NAME = 'Product';
 
 function EditProduct({ workspace, productId }: { workspace: Workspace; productId: string }) {
-  const { data: product, isPending, isError } = useProduct(workspace.id, productId);
+  const { data: product, isPending, error, refetch } = useProduct(workspace.id, productId);
 
-  if (isError) {
+  if (isNotFoundError(error)) {
     return (
-      <>
-        <PageHeader title="Product not found" back={BACK_TO_PRODUCTS} />
+      <Page name="Product not found" parents={PAGE_PARENTS.products}>
         <p className="text-muted-foreground">This product does not exist or was deleted.</p>
-      </>
+      </Page>
     );
   }
-  if (isPending) return <PageLoader />;
+  if (error) {
+    return (
+      <Page name={PRODUCT_PAGE_NAME} parents={PAGE_PARENTS.products}>
+        <ErrorState title="This product could not be loaded" error={error} onRetry={refetch} />
+      </Page>
+    );
+  }
+  if (isPending) return <ContentLoader />;
 
   return (
-    <>
-      <PageHeader
-        title={
-          <>
-            {product.title}
-            <ProductStatusBadge status={product.status} />
-          </>
-        }
-        back={BACK_TO_PRODUCTS}
-      />
+    <Page
+      name={product.title}
+      parents={PAGE_PARENTS.products}
+      title={
+        <>
+          {product.title}
+          <ProductStatusBadge status={product.status} />
+        </>
+      }
+    >
       {/* Remount on a different product so the form starts from its values. */}
       <ProductEditor key={product.id} workspace={workspace} product={product} />
-    </>
+    </Page>
   );
 }
 

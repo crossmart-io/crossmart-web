@@ -5,6 +5,16 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Crossmart</title>
+    <!-- Sets the theme before the first paint, so dark mode never flashes white. Mirrors ThemeProvider. -->
+    <script>
+      try {
+        var theme = localStorage.getItem('crossmart-theme');
+        var dark =
+          theme === 'dark' ||
+          (theme !== 'light' && matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      } catch (error) {}
+    </script>
     <meta
       name="description"
       content="The open-source multichannel platform for sellers and their AI agents."

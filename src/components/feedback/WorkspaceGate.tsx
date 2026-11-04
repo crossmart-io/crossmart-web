@@ -1,13 +1,16 @@
 import type { ReactNode } from 'react';
 import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
-import { PageLoader } from './PageLoader';
+import { ContentLoader } from './ContentLoader';
+import { ErrorState } from './ErrorState';
 
 /** Renders once the current workspace is known, so pages never handle a missing one. */
 export function WorkspaceGate({ children }: { children: (workspace: Workspace) => ReactNode }) {
-  const { workspace, isError } = useCurrentWorkspace();
+  const { workspace, isError, error, refetch } = useCurrentWorkspace();
   if (isError) {
-    return <p className="text-muted-foreground">Your workspace could not be loaded. Try again.</p>;
+    return (
+      <ErrorState title="Your workspace could not be loaded" error={error} onRetry={refetch} />
+    );
   }
-  if (!workspace) return <PageLoader />;
+  if (!workspace) return <ContentLoader />;
   return children(workspace);
 }

@@ -9,3 +9,6 @@ export { useProduct } from './hooks/useProduct';
 export { useProducts } from './hooks/useProducts';
 export { ALL_STATUSES, type StatusFilter, toStatusQuery } from './product-status';
 export { SEARCH_DEBOUNCE_MS } from './catalog.constants';
+export { CATALOG_GAP_COPY, toCatalogGap } from './catalog-gap';
+export { ActiveFilterChip } from './components/ActiveFilterChip';
+export { type ProductListFilters, useProductListFilters } from './hooks/useProductListFilters';

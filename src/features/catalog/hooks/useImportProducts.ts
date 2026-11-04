@@ -1,7 +1,7 @@
 import { useMutation } from '@tanstack/react-query';
 import { fetchClient } from '@/api/client';
 import { CatalogImportFormat } from '@/api/schema';
-import { toApiErrorMessage } from '@/api/api-error';
+import { ApiRequestError } from '@/api/api-error';
 import { IMPORT_FORM_FIELDS, PRODUCT_IMPORTS_ENDPOINT } from '../catalog.constants';
 import type { CatalogImportResult } from '../catalog.types';
 import { useInvalidateCatalog } from './useInvalidateCatalog';
@@ -18,6 +18,7 @@ export function useImportProducts(workspaceId: string | undefined) {
   const invalidateCatalog = useInvalidateCatalog();
 
   return useMutation<CatalogImportResult, Error, File>({
+    meta: { inlineError: true },
     mutationFn: async (file) => {
       const { data, error } = await fetchClient.POST(PRODUCT_IMPORTS_ENDPOINT, {
         params: { path: { workspaceId: workspaceId ?? '' } },
@@ -25,7 +26,7 @@ export function useImportProducts(workspaceId: string | undefined) {
         body: { format: CatalogImportFormat.shopify_csv, file: file.name },
         bodySerializer: () => toImportForm(file),
       });
-      if (error) throw new Error(toApiErrorMessage(error));
+      if (error) throw ApiRequestError.from(error);
       return data;
     },
     onSuccess: invalidateCatalog,
