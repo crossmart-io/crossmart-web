@@ -363,7 +363,7 @@ export interface paths {
     put?: never;
     /**
      * Import products or stock from a file
-     * @description In `create` mode, products whose handle is already in the catalog are skipped, never overwritten. In `update` mode, products are found by handle and only the columns in the file change: a missing column keeps its value, an empty cell clears it. Variants are matched by SKU, then by option values, and are never deleted; stock is left as it is. In `inventory` mode, a `sku,available` CSV sets the stock of tracked variants. Invalid records are reported; the rest are applied. Every import is recorded in the import history.
+     * @description In `create` mode, products whose handle is already in the catalog are skipped, never overwritten. In `update` mode, products are found by handle and only the columns in the file change: a missing column keeps its value, an empty cell clears it. Variants are matched by SKU, then by option values, and are never deleted; stock is left as it is. In `inventory` mode, a `sku,available` CSV sets the stock of tracked variants. Invalid records are reported; the rest are applied. Every import is recorded in the import history. Product modes need `products:edit`, `inventory` needs `inventory:edit`.
      */
     post: operations['ProductImportsController_import_v1'];
     delete?: never;
@@ -956,6 +956,11 @@ export interface components {
      * @enum {string}
      */
     WorkspaceRole: WorkspaceRole;
+    /**
+     * @description What your role lets you do here. Check these, not the role, to adapt a UI.
+     * @enum {string}
+     */
+    WorkspacePermission: WorkspacePermission;
     WorkspaceDto: {
       /** Format: uuid */
       id: string;
@@ -972,6 +977,8 @@ export interface components {
       currency: string;
       /** @description Your role here */
       role: components['schemas']['WorkspaceRole'];
+      /** @description What your role lets you do here. Check these, not the role, to adapt a UI. */
+      permissions: components['schemas']['WorkspacePermission'][];
     };
     MeDto: {
       /** Format: uuid */
@@ -3862,6 +3869,25 @@ export enum WorkspaceRole {
   EDITOR = 'EDITOR',
   APPROVER = 'APPROVER',
   VIEWER = 'VIEWER',
+}
+export enum WorkspacePermission {
+  workspace_view = 'workspace:view',
+  workspace_manage = 'workspace:manage',
+  workspace_delete = 'workspace:delete',
+  members_view = 'members:view',
+  members_manage = 'members:manage',
+  api_keys_manage = 'api-keys:manage',
+  products_view = 'products:view',
+  products_edit = 'products:edit',
+  inventory_view = 'inventory:view',
+  inventory_edit = 'inventory:edit',
+  orders_view = 'orders:view',
+  reports_view = 'reports:view',
+  channels_view = 'channels:view',
+  channels_manage = 'channels:manage',
+  listings_edit = 'listings:edit',
+  activity_view = 'activity:view',
+  suggestions_approve = 'suggestions:approve',
 }
 export enum ProductStatus {
   DRAFT = 'DRAFT',

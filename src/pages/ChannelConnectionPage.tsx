@@ -1,6 +1,6 @@
 import { useNavigate, useParams } from 'react-router';
 import { isNotFoundError } from '@/api/api-error';
-import { ChannelConnectionStatus } from '@/api/schema';
+import { ChannelConnectionStatus, WorkspacePermission } from '@/api/schema';
 import { ContentLoader } from '@/components/feedback/ContentLoader';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
@@ -27,7 +27,7 @@ import {
   toChannelTab,
   useChannelConnection,
 } from '@/features/listings';
-import { canEditCatalog, canManageWorkspace, type Workspace } from '@/features/workspaces';
+import { hasPermission, type Workspace } from '@/features/workspaces';
 
 const CONNECTION_PAGE_NAME = 'Channel';
 
@@ -40,8 +40,8 @@ interface ChannelConnectionTabsProps {
 /** One tab per part of the connection; each tab has its own URL so it can be linked to. */
 function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnectionTabsProps) {
   const navigate = useNavigate();
-  const canManage = canManageWorkspace(workspace.role);
-  const canEdit = canEditCatalog(workspace.role);
+  const canManage = hasPermission(workspace, WorkspacePermission.channels_manage);
+  const canEditListings = hasPermission(workspace, WorkspacePermission.listings_edit);
   const currency = connection.shopify?.currencyCode ?? workspace.currency;
   const ref = { workspaceId: workspace.id, connectionId: connection.id };
   return (
@@ -59,7 +59,7 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
         ))}
       </TabsList>
       <TabsContent value={ChannelTab.Listings}>
-        <ChannelProductsCard {...ref} canEdit={canEdit} />
+        <ChannelProductsCard {...ref} canEdit={canEditListings} />
       </TabsContent>
       <TabsContent value={ChannelTab.Pricing}>
         <PricingRuleCard
@@ -74,7 +74,7 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
           workspaceId={workspace.id}
           connection={connection}
           canManage={canManage}
-          canEditCatalog={canEdit}
+          canImportProducts={hasPermission(workspace, WorkspacePermission.products_edit)}
           onDisconnected={() => void navigate(ROUTES.channels)}
           resyncAction={
             <ChannelSyncButton
@@ -126,7 +126,7 @@ function ChannelConnection({ workspace, connectionId, tab }: ChannelConnectionPr
   if (isPending) return <ContentLoader />;
 
   const name = connectionName(connection);
-  const canManage = canManageWorkspace(workspace.role);
+  const canManage = hasPermission(workspace, WorkspacePermission.channels_manage);
   return (
     <Page
       name={name}

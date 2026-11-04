@@ -1,6 +1,6 @@
-import { ChannelConnectionStatus } from '@/api/schema';
+import { ChannelConnectionStatus, WorkspacePermission } from '@/api/schema';
 import type { Workspace } from '@/features/workspaces';
-import { canManageWorkspace } from '@/features/workspaces';
+import { hasPermission } from '@/features/workspaces';
 import { CHANNELS } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
 import { useChannelConnections } from '../hooks/useChannelConnections';
@@ -15,7 +15,7 @@ export function ChannelGrid({ workspace }: { workspace: Workspace }) {
   const active = (data ?? NO_CONNECTIONS).filter(
     (connection) => connection.status !== ChannelConnectionStatus.DISCONNECTED,
   );
-  const canManage = canManageWorkspace(workspace.role);
+  const canManage = hasPermission(workspace, WorkspacePermission.channels_manage);
 
   return (
     <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">

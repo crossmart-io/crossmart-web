@@ -1,4 +1,5 @@
-import { WorkspaceRole } from '@/api/schema';
+import { type WorkspacePermission, WorkspaceRole } from '@/api/schema';
+import type { Workspace } from './hooks/useCurrentWorkspace';
 
 export const WORKSPACE_ROLE_LABELS: Record<WorkspaceRole, string> = {
   [WorkspaceRole.OWNER]: 'Owner',
@@ -16,25 +17,15 @@ export const WORKSPACE_ROLE_DESCRIPTIONS: Record<WorkspaceRole, string> = {
   [WorkspaceRole.VIEWER]: 'Read only',
 };
 
-/** Roles that may manage the workspace: connect channels, change settings, manage members. */
-const MANAGING_ROLES: ReadonlySet<WorkspaceRole> = new Set([
-  WorkspaceRole.OWNER,
-  WorkspaceRole.ADMIN,
-]);
-
-export function canManageWorkspace(role: WorkspaceRole): boolean {
-  return MANAGING_ROLES.has(role);
-}
-
-/** Roles that may change the catalog: edit products, import them, and set what each channel shows. */
-const EDITING_ROLES: ReadonlySet<WorkspaceRole> = new Set([
-  WorkspaceRole.OWNER,
-  WorkspaceRole.ADMIN,
-  WorkspaceRole.EDITOR,
-]);
-
-export function canEditCatalog(role: WorkspaceRole): boolean {
-  return EDITING_ROLES.has(role);
+/**
+ * Whether the user may do something here. The API sends the permissions of the user's role, so
+ * the app never reasons about role names and keeps working when roles change.
+ */
+export function hasPermission(
+  workspace: Pick<Workspace, 'permissions'>,
+  permission: WorkspacePermission,
+): boolean {
+  return workspace.permissions.includes(permission);
 }
 
 /** Every role, most access first. */
