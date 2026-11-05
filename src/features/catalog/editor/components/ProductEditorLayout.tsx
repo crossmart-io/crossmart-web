@@ -12,6 +12,8 @@ import { VariantsCard } from './VariantsCard';
 
 interface ProductEditorLayoutProps {
   workspaceId: string;
+  /** The saved product; AI writing needs one. Absent while creating. */
+  productId?: string;
   currency: string;
   /** With options, price and stock are edited per variant instead of in their own cards. */
   hasOptions: boolean;
@@ -25,6 +27,7 @@ interface ProductEditorLayoutProps {
 /** Content on the left, status and organization on the right. */
 export function ProductEditorLayout({
   workspaceId,
+  productId,
   currency,
   hasOptions,
   onPendingUploadsChange,
@@ -38,7 +41,7 @@ export function ProductEditorLayout({
     <div className="grid items-start gap-6 lg:grid-cols-[minmax(0,1fr)_20rem]">
       <div className="flex flex-col gap-6">
         {!isDesktop && <StatusCard />}
-        <TitleDescriptionCard />
+        <TitleDescriptionCard aiTarget={productId ? { workspaceId, productId } : undefined} />
         <MediaCard workspaceId={workspaceId} onPendingChange={onPendingUploadsChange} />
         {!hasOptions && (
           <>

@@ -50,6 +50,7 @@ export function ProductEditor({ workspace, product, aside, channels }: ProductEd
           )}
           <ProductEditorLayout
             workspaceId={workspace.id}
+            productId={product?.id}
             currency={workspace.currency}
             hasOptions={editor.hasOptions}
             onPendingUploadsChange={editor.setPendingUploads}

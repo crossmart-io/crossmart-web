@@ -4,6 +4,7 @@ import { MoneyInput } from '@/components/forms/MoneyInput';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { LabelRow } from '@/components/forms/LabelRow';
 import type { ProductFormValues } from '../product-form.schema';
 
 type ProductFieldPath = FieldPath<ProductFormValues>;
@@ -16,6 +17,8 @@ interface TextFieldProps {
   inputMode?: 'text' | 'numeric';
   /** Codes like SKUs and barcodes: no spell check, autocorrect or translation. */
   isCode?: boolean;
+  /** A small action beside the label. */
+  labelAction?: ReactNode;
 }
 
 /** Ids that tie a field's description and error to its control for screen readers. */
@@ -46,13 +49,16 @@ export function TextField({
   placeholder,
   inputMode,
   isCode = false,
+  labelAction,
 }: TextFieldProps) {
   const { register, getFieldState, formState } = useFormContext<ProductFormValues>();
   const { error } = getFieldState(name, formState);
 
   return (
     <Field data-invalid={Boolean(error)}>
-      <FieldLabel htmlFor={name}>{label}</FieldLabel>
+      <LabelRow action={labelAction}>
+        <FieldLabel htmlFor={name}>{label}</FieldLabel>
+      </LabelRow>
       <Input
         id={name}
         placeholder={placeholder}
