@@ -5,8 +5,10 @@ import {
   type VisibilityChoice,
 } from './listings.constants';
 import type { ListingOverride, ListingOverrideView, ProductChannel } from './listings.types';
-import { ListingVisibility } from '@/api/schema';
+import { type components, ListingVisibility } from '@/api/schema';
 import { optionalCount, optionalMoneyAmount } from '@/lib/form-schemas';
+
+type Product = components['schemas']['ProductDto'];
 
 export const overrideFormSchema = z.object({
   title: z.string().trim().max(OVERRIDE_TITLE_MAX_LENGTH),
@@ -31,12 +33,10 @@ export const overrideFormSchema = z.object({
 
 export type OverrideFormValues = z.infer<typeof overrideFormSchema>;
 
-/** What the product says where the listing does not override it. */
-export interface ProductDefaults {
-  descriptionHtml: string;
-  tags: string[];
-  media: { url: string }[];
-}
+/** What the product says where the listing does not override it; only its images' URLs matter. */
+export type ProductDefaults = Pick<Product, 'descriptionHtml' | 'tags'> & {
+  media: Pick<Product['media'][number], 'url'>[];
+};
 
 function countText(value: number | null | undefined): string {
   return value === null || value === undefined ? '' : String(value);
