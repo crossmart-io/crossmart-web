@@ -1,9 +1,8 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
-import { useForm } from 'react-hook-form';
 import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
+import { useSaveableForm } from '@/hooks/useSaveableForm';
 import {
   CHANNEL_CONNECTION_DETAIL_ENDPOINT,
   CHANNEL_CONNECTIONS_ENDPOINT,
@@ -15,12 +14,7 @@ import type {
   GoogleListingSetupBody,
   GoogleMerchantSettings,
 } from '../channels.types';
-import {
-  googleSetupFormSchema,
-  type GoogleSetupFormValues,
-  toGoogleSetupBody,
-  toGoogleSetupForm,
-} from '../google-setup-form';
+import { googleSetupFormSchema, toGoogleSetupBody, toGoogleSetupForm } from '../google-setup-form';
 
 const CONNECTION_ENDPOINTS = [
   CHANNEL_CONNECTIONS_ENDPOINT,
@@ -50,14 +44,12 @@ function useSaveGoogleSetup(ref: ConnectionRef) {
 
 /** The listing setup form, starting from the saved setup or the account's country and website. */
 export function useGoogleSetupForm(ref: ConnectionRef, settings: GoogleMerchantSettings) {
-  const form = useForm<GoogleSetupFormValues>({
-    resolver: zodResolver(googleSetupFormSchema),
-    defaultValues: toGoogleSetupForm(settings),
-  });
   const save = useSaveGoogleSetup(ref);
-  const submit = form.handleSubmit(async (values) => {
-    const saved = await save.mutateAsync(toGoogleSetupBody(values));
-    if (saved.googleMerchant) form.reset(toGoogleSetupForm(saved.googleMerchant));
+  const { form, submit } = useSaveableForm({
+    schema: googleSetupFormSchema,
+    defaults: toGoogleSetupForm(settings),
+    save: (values) => save.mutateAsync(toGoogleSetupBody(values)),
+    toForm: (saved) => (saved.googleMerchant ? toGoogleSetupForm(saved.googleMerchant) : null),
   });
   return { form, saveError: save.error, submit };
 }

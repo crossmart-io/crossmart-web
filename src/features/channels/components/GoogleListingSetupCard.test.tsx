@@ -7,7 +7,7 @@ import type { GoogleMerchantSettings } from '../channels.types';
 import { connectionFixture } from '../testing/channel-connection.fixture';
 import { GoogleListingSetupCard } from './GoogleListingSetupCard';
 
-vi.mock('@/api/client', () => ({ fetchClient: { PUT: vi.fn() } }));
+vi.mock('@/api/client', () => ({ fetchClient: { PUT: vi.fn<typeof fetchClient.PUT>() } }));
 
 const GOOGLE: GoogleMerchantSettings = {
   accountId: '123456789',
