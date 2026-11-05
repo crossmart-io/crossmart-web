@@ -1,7 +1,25 @@
 import { ListingVisibility, PriceSource } from '@/api/schema';
 import { FOLLOW_PRODUCT } from './listings.constants';
-import type { ProductChannel } from './listings.types';
+import type { ChannelVariant, ProductChannel } from './listings.types';
 import { toOverrideBody, toOverrideForm } from './override-form';
+
+function variant(overrides: Partial<ChannelVariant> = {}): ChannelVariant {
+  return {
+    variantId: 'v1',
+    title: 'Blue',
+    quantity: 4,
+    price: {
+      price: '10.00',
+      compareAtPrice: null,
+      source: PriceSource.base,
+      steps: [],
+      explanation: 'base price = $10.00',
+      warnings: [],
+      unitCost: null,
+    },
+    ...overrides,
+  };
+}
 
 function channel(overrides: Partial<ProductChannel> = {}): ProductChannel {
   return {
@@ -15,22 +33,7 @@ function channel(overrides: Partial<ProductChannel> = {}): ProductChannel {
     selected: true,
     listing: null,
     override: null,
-    variants: [
-      {
-        variantId: 'v1',
-        title: 'Blue',
-        quantity: 4,
-        price: {
-          price: '10.00',
-          compareAtPrice: null,
-          source: PriceSource.base,
-          steps: [],
-          explanation: 'base price = $10.00',
-          warnings: [],
-          unitCost: null,
-        },
-      },
-    ],
+    variants: [variant()],
     ...overrides,
   };
 }
@@ -50,7 +53,7 @@ describe('override form', () => {
       customDescription: false,
       descriptionHtml: '<p>Hi</p>',
       visibility: FOLLOW_PRODUCT,
-      prices: [{ variantId: 'v1', price: '' }],
+      prices: [{ variantId: 'v1', price: '', compareAtPrice: null }],
       customTags: false,
       tags: ['linen'],
       customMedia: false,
@@ -87,7 +90,7 @@ describe('override form', () => {
       title: ' Shopify title ',
       visibility: ListingVisibility.HIDDEN,
       inventoryBuffer: '2',
-      prices: [{ variantId: 'v1', price: '9.50' }],
+      prices: [{ variantId: 'v1', price: '9.50', compareAtPrice: null }],
     });
     expect(form).toMatchObject({ customTags: true, tags: ['shopify'], customMedia: true });
 
@@ -107,5 +110,33 @@ describe('override form', () => {
     expect(
       toOverrideBody({ ...form, customTags: true, tags: [], customMedia: false }),
     ).toMatchObject({ tags: [], mediaUrls: null });
+  });
+
+  it('keeps compare-at prices set through the API, even on variants with no price override', () => {
+    const current = {
+      title: null,
+      descriptionHtml: null,
+      tags: null,
+      mediaUrls: null,
+      visibility: null,
+      inventoryBuffer: null,
+      maxQuantity: null,
+      variantPrices: [
+        { variantId: 'v1', price: '9.00', compareAtPrice: '12.00' },
+        { variantId: 'v2', price: null, compareAtPrice: '15.00' },
+      ],
+      updatedAt: '2026-11-03T09:00:00Z',
+    };
+    const twoVariants = channel({
+      override: current,
+      variants: [variant(), variant({ variantId: 'v2', title: 'Red' })],
+    });
+
+    const body = toOverrideBody(toOverrideForm(twoVariants, PRODUCT));
+
+    expect(body.variantPrices).toEqual([
+      { variantId: 'v1', price: '9.00', compareAtPrice: '12.00' },
+      { variantId: 'v2', price: null, compareAtPrice: '15.00' },
+    ]);
   });
 });
