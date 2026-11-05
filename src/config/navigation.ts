@@ -2,6 +2,7 @@ import {
   FileUp,
   Gauge,
   History,
+  Inbox,
   KeyRound,
   CircleUser,
   LayoutDashboard,
@@ -29,6 +30,7 @@ export interface NavItem {
 /** Counts the sidebar can show on an item; `AppSidebar` maps each to its component. */
 export enum NavBadge {
   ChannelErrors = 'channel_errors',
+  PendingSuggestions = 'pending_suggestions',
 }
 
 export interface NavGroup {
@@ -46,6 +48,12 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { label: 'Inventory', to: ROUTES.inventory, icon: Warehouse },
       { label: 'Imports', to: ROUTES.imports, icon: FileUp },
       { label: 'Channels', to: ROUTES.channels, icon: Share2, badge: NavBadge.ChannelErrors },
+      {
+        label: 'Suggestions',
+        to: ROUTES.suggestions,
+        icon: Inbox,
+        badge: NavBadge.PendingSuggestions,
+      },
       { label: 'Activity', to: ROUTES.activity, icon: History },
     ],
   },

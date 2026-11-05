@@ -79,7 +79,15 @@ export const PERMISSION_GROUPS: readonly PermissionGroup[] = [
     label: 'Activity and AI',
     permissions: [
       { permission: WorkspacePermission.activity_view, label: 'See the activity log' },
-      { permission: WorkspacePermission.suggestions_approve, label: 'Approve AI suggestions' },
+      { permission: WorkspacePermission.suggestions_view, label: 'See AI suggestions' },
+      {
+        permission: WorkspacePermission.ai_generate,
+        label: 'Ask AI to write content (uses AI credits)',
+      },
+      {
+        permission: WorkspacePermission.suggestions_approve,
+        label: 'Approve and reject AI suggestions',
+      },
     ],
   },
 ];

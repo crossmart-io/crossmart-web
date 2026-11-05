@@ -14,6 +14,7 @@ import {
 } from '@/components/ui/sheet';
 import { Spinner } from '@/components/ui/spinner';
 import { ChannelType } from '@/api/schema';
+import { GenerateWithAiButton } from '@/features/suggestions';
 import {
   useAddToStore,
   useClearListingOverride,
@@ -95,7 +96,13 @@ function OverrideSheetFooter({
   );
 }
 
-function OverrideSheetHeader({ isAdding, store }: { isAdding: boolean; store: string }) {
+interface OverrideSheetHeaderProps {
+  isAdding: boolean;
+  store: string;
+  channelRef: ProductChannelRef;
+}
+
+function OverrideSheetHeader({ isAdding, store, channelRef }: OverrideSheetHeaderProps) {
   return (
     <SheetHeader className="pr-12">
       <SheetTitle>{isAdding ? `Add to ${store}` : `Override for ${store}`}</SheetTitle>
@@ -104,6 +111,7 @@ function OverrideSheetHeader({ isAdding, store }: { isAdding: boolean; store: st
           ? 'It is published there once you add it. Change anything this store should show differently; empty fields follow the product.'
           : 'Only this store changes. Empty fields follow the product.'}
       </SheetDescription>
+      <GenerateWithAiButton {...channelRef} />
     </SheetHeader>
   );
 }
@@ -174,7 +182,7 @@ export function ChannelOverrideSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-lg">
-        <OverrideSheetHeader isAdding={isAdding} store={store} />
+        <OverrideSheetHeader isAdding={isAdding} store={store} channelRef={ref} />
         <FormProvider {...form}>
           <form
             onSubmit={(event) => void submit(event)}

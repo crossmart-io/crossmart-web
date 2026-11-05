@@ -79,6 +79,13 @@ const appRoutes: RouteObject[] = [
       import('@/pages/ActivityPage').then(({ ActivityPage }) => ({ Component: ActivityPage })),
   },
   {
+    path: ROUTES.suggestions,
+    lazy: () =>
+      import('@/pages/SuggestionsPage').then(({ SuggestionsPage }) => ({
+        Component: SuggestionsPage,
+      })),
+  },
+  {
     path: ROUTES.members,
     lazy: () =>
       import('@/pages/MembersPage').then(({ MembersPage }) => ({ Component: MembersPage })),

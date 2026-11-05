@@ -15,12 +15,14 @@ import {
 } from '@/components/ui/sidebar';
 import { NAV_GROUPS, NavBadge, type NavItem } from '@/config/navigation';
 import { ChannelErrorsBadge } from '@/features/channels';
+import { PendingSuggestionsBadge } from '@/features/suggestions';
 import type { ComponentType } from 'react';
 import { ROUTES } from '@/config/routes';
 import { WorkspaceSwitcher } from '@/features/workspaces';
 
 const NAV_BADGES: Record<NavBadge, ComponentType> = {
   [NavBadge.ChannelErrors]: ChannelErrorsBadge,
+  [NavBadge.PendingSuggestions]: PendingSuggestionsBadge,
 };
 
 function NavItemBadge({ badge }: { badge?: NavBadge }) {

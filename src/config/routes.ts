@@ -22,6 +22,7 @@ export const ROUTES = {
   channelConnection: `/channels/:${ROUTE_PARAMS.connectionId}`,
   channelConnectionTab: `/channels/:${ROUTE_PARAMS.connectionId}/:${ROUTE_PARAMS.tab}`,
   activity: '/activity',
+  suggestions: '/suggestions',
   orders: '/orders',
   order: `/orders/:${ROUTE_PARAMS.orderId}`,
   imports: '/imports',

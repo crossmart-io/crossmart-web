@@ -46,6 +46,11 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.channel_default_policies_created]: 'Default policies created',
   [ActivityAction.listing_category_changed]: 'Channel category changed',
   [ActivityAction.stock_oversold]: 'Oversold',
+  [ActivityAction.content_generation_requested]: 'AI content requested',
+  [ActivityAction.content_generated]: 'AI content suggested',
+  [ActivityAction.suggestion_approved]: 'Suggestion approved',
+  [ActivityAction.suggestion_rejected]: 'Suggestion rejected',
+  [ActivityAction.suggestions_bulk_approved]: 'Suggestions approved in bulk',
 };
 
 export function toActivityAction(value: string | null): ActivityAction | undefined {
