@@ -1150,6 +1150,160 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/suggestions': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Suggestions, newest first
+     * @description Filter by `PENDING` for the inbox.
+     */
+    get: operations['SuggestionsController_list_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/suggestions/bulk-approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve several suggestions
+     * @description Applies each pending suggestion, or marks it `STALE` when its field changed since it was made. Suggestions that are not pending are skipped.
+     */
+    post: operations['SuggestionsController_bulkApprove_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/suggestions/{suggestionId}': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** One suggestion */
+    get: operations['SuggestionsController_get_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/suggestions/{suggestionId}/approve': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Approve a suggestion
+     * @description Applies the change the way an edit would (a channel override, synced to the store), and returns it `APPLIED`. When its field changed since it was made, nothing is applied and it returns `STALE`. A suggestion that is no longer pending answers 409.
+     */
+    post: operations['SuggestionsController_approve_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/suggestions/{suggestionId}/reject': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Reject a suggestion
+     * @description Nothing is changed. A suggestion that is no longer pending answers 409.
+     */
+    post: operations['SuggestionsController_reject_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/ai/status': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /** Whether AI features are available on this server */
+    get: operations['AiController_status_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/ai/usage': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * AI calls and tokens used by the workspace
+     * @description Per feature and model, in a period; the current UTC month by default.
+     */
+    get: operations['AiController_usageReport_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/ai/content-generations': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Generate channel content with AI
+     * @description Queues the Content Generator for each product: it writes a title and description fitted to the store’s channel. The results arrive as pending suggestions to review; nothing changes until one is approved. Answers 503 while AI is not configured.
+     */
+    post: operations['AiController_generateContent_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2677,6 +2831,131 @@ export interface components {
       lowStockThreshold: number;
       /** @description Every store, oldest first */
       stores: components['schemas']['StoreHealthDto'][];
+    };
+    /** @enum {string} */
+    SuggestionStatus: SuggestionStatus;
+    /** @enum {string} */
+    SuggestionKind: SuggestionKind;
+    SuggestionConnectionDto: {
+      /** Format: uuid */
+      id: string;
+      channel: components['schemas']['ChannelType'];
+      /** @example Demo Store */
+      displayName: string;
+    };
+    /** @enum {string} */
+    SuggestionCreatorType: SuggestionCreatorType;
+    /**
+     * @description The agent that made it, for `AGENT` suggestions
+     * @enum {string}
+     */
+    SuggestionAgent: SuggestionAgent;
+    SuggestionCreatorDto: {
+      type: components['schemas']['SuggestionCreatorType'];
+      /** @description The agent that made it, for `AGENT` suggestions */
+      agent: components['schemas']['SuggestionAgent'] | null;
+      /**
+       * Format: uuid
+       * @description Who asked for it
+       */
+      userId: string | null;
+      /** Format: uuid */
+      apiKeyId: string | null;
+      /** @description The user’s or API key’s name */
+      name: string | null;
+    };
+    SuggestionReviewDto: {
+      /** Format: uuid */
+      userId: string | null;
+      /** Format: uuid */
+      apiKeyId: string | null;
+      name: string | null;
+      /** Format: date-time */
+      reviewedAt: string;
+    };
+    SuggestionDto: {
+      /** Format: uuid */
+      id: string;
+      /** Format: uuid */
+      productId: string;
+      /** @example Stoneware Mug */
+      productTitle: string;
+      imageUrl: string | null;
+      /** @description The store the change is for; null for the product’s own content */
+      connection: components['schemas']['SuggestionConnectionDto'] | null;
+      kind: components['schemas']['SuggestionKind'];
+      status: components['schemas']['SuggestionStatus'];
+      /** @description The value it replaces, as it was when it was made */
+      currentValue: string;
+      proposedValue: string;
+      /** @description Why the agent proposes it */
+      rationale: string;
+      createdBy: components['schemas']['SuggestionCreatorDto'];
+      review: components['schemas']['SuggestionReviewDto'] | null;
+      /** Format: date-time */
+      createdAt: string;
+      /** Format: date-time */
+      updatedAt: string;
+    };
+    SuggestionPageDto: {
+      items: components['schemas']['SuggestionDto'][];
+      /** @description Null on the last page */
+      nextCursor: string | null;
+      /** @description How many match in all, for page numbers */
+      total: number;
+    };
+    BulkApproveSuggestionsDto: {
+      /** @description Pending suggestions to approve; others are skipped */
+      suggestionIds: string[];
+    };
+    BulkReviewResultDto: {
+      /** @description Each suggestion reviewed: `APPLIED`, or `STALE` when its field had changed */
+      items: components['schemas']['SuggestionDto'][];
+      /** @description Ids not found in the workspace or no longer pending */
+      skippedIds: string[];
+    };
+    AiStatusDto: {
+      /** @description False until the server has an AI provider key */
+      configured: boolean;
+      /** @example anthropic */
+      provider: string;
+      /** @example claude-sonnet-5-5 */
+      model: string;
+    };
+    AiUsageTotalsDto: {
+      calls: number;
+      inputTokens: number;
+      outputTokens: number;
+    };
+    /** @enum {string} */
+    AiFeature: AiFeature;
+    AiUsageLineDto: {
+      calls: number;
+      inputTokens: number;
+      outputTokens: number;
+      feature: components['schemas']['AiFeature'];
+      /** @example claude-sonnet-5-5 */
+      model: string;
+    };
+    AiUsageReportDto: {
+      /** Format: date-time */
+      from: string;
+      /** Format: date-time */
+      to: string;
+      totals: components['schemas']['AiUsageTotalsDto'];
+      lines: components['schemas']['AiUsageLineDto'][];
+    };
+    GenerateContentDto: {
+      /**
+       * Format: uuid
+       * @description The store to write for
+       */
+      connectionId: string;
+      productIds: string[];
+    };
+    ContentGenerationReceiptDto: {
+      /** @description Products queued; their suggestions arrive in the inbox */
+      queued: number;
     };
   };
   responses: never;
@@ -4662,6 +4941,203 @@ export interface operations {
       };
     };
   };
+  SuggestionsController_list_v1: {
+    parameters: {
+      query?: {
+        /** @description `PENDING` is the inbox */
+        status?: components['schemas']['SuggestionStatus'];
+        /** @description Suggestions for one product */
+        productId?: string;
+        /** @description Suggestions for one store */
+        connectionId?: string;
+        kind?: components['schemas']['SuggestionKind'];
+        /** @description `nextCursor` from the previous page */
+        cursor?: string;
+        /** @description 1-based page number, for tables with page numbers. It wins over `cursor`. */
+        page?: number;
+        limit?: number;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SuggestionPageDto'];
+        };
+      };
+    };
+  };
+  SuggestionsController_bulkApprove_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['BulkApproveSuggestionsDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['BulkReviewResultDto'];
+        };
+      };
+    };
+  };
+  SuggestionsController_get_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        suggestionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SuggestionDto'];
+        };
+      };
+    };
+  };
+  SuggestionsController_approve_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        suggestionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SuggestionDto'];
+        };
+      };
+    };
+  };
+  SuggestionsController_reject_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        suggestionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SuggestionDto'];
+        };
+      };
+    };
+  };
+  AiController_status_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: unknown;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AiStatusDto'];
+        };
+      };
+    };
+  };
+  AiController_usageReport_v1: {
+    parameters: {
+      query?: {
+        /** @description Start, included */
+        from?: string;
+        /** @description End, excluded */
+        to?: string;
+      };
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['AiUsageReportDto'];
+        };
+      };
+    };
+  };
+  AiController_generateContent_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['GenerateContentDto'];
+      };
+    };
+    responses: {
+      202: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ContentGenerationReceiptDto'];
+        };
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -4726,8 +5202,10 @@ export enum WorkspacePermission {
   channels_manage = 'channels:manage',
   listings_edit = 'listings:edit',
   activity_view = 'activity:view',
+  suggestions_view = 'suggestions:view',
   suggestions_approve = 'suggestions:approve',
   billing_view = 'billing:view',
+  ai_generate = 'ai:generate',
 }
 export enum EntitlementErrorCode {
   plan_limit_reached = 'plan_limit_reached',
@@ -4895,6 +5373,11 @@ export enum ActivityAction {
   listing_category_changed = 'listing_category_changed',
   channel_sync_requested = 'channel_sync_requested',
   stock_oversold = 'stock_oversold',
+  content_generation_requested = 'content_generation_requested',
+  content_generated = 'content_generated',
+  suggestion_approved = 'suggestion_approved',
+  suggestion_rejected = 'suggestion_rejected',
+  suggestions_bulk_approved = 'suggestions_bulk_approved',
 }
 export enum ActivityOutcome {
   SUCCEEDED = 'SUCCEEDED',
@@ -5055,4 +5538,25 @@ export enum SalesInterval {
   day = 'day',
   week = 'week',
   month = 'month',
+}
+export enum SuggestionStatus {
+  PENDING = 'PENDING',
+  APPLIED = 'APPLIED',
+  REJECTED = 'REJECTED',
+  STALE = 'STALE',
+}
+export enum SuggestionKind {
+  listing_title = 'listing_title',
+  listing_description = 'listing_description',
+}
+export enum SuggestionCreatorType {
+  AGENT = 'AGENT',
+  USER = 'USER',
+  API_KEY = 'API_KEY',
+}
+export enum SuggestionAgent {
+  content_generator = 'content_generator',
+}
+export enum AiFeature {
+  content_generation = 'content_generation',
 }

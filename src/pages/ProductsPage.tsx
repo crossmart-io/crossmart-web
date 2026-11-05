@@ -28,6 +28,7 @@ import type { Selection } from '@/hooks/useSelection';
 import { ImportProductsDialog } from '@/features/imports';
 import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
 import { ProductStoreFilterSelect, StoreMembershipMenu } from '@/features/listings';
+import { BulkGenerateMenu } from '@/features/suggestions';
 import { SortSelect } from '@/components/lists/SortSelect';
 
 function AddProductButton() {
@@ -170,7 +171,10 @@ function SelectionActions({
         workspaceId={workspaceId}
         selection={selection}
         renderActions={(productIds) => (
-          <StoreMembershipMenu workspaceId={workspaceId} productIds={productIds} />
+          <>
+            <StoreMembershipMenu workspaceId={workspaceId} productIds={productIds} />
+            <BulkGenerateMenu workspaceId={workspaceId} productIds={productIds} />
+          </>
         )}
       />
     </>

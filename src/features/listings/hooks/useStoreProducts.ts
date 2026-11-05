@@ -12,6 +12,7 @@ import {
   REMOVE_STORE_PRODUCTS_ENDPOINT,
   STORE_PRODUCTS_BATCH_SIZE,
 } from '../listings.constants';
+import { chunk } from '@/lib/chunk';
 
 const MEMBERSHIP_ENDPOINTS = [
   CHANNEL_PRODUCTS_ENDPOINT,
@@ -27,14 +28,6 @@ interface ConnectionRef {
 type MembershipEndpoint =
   typeof ADD_STORE_PRODUCTS_ENDPOINT | typeof REMOVE_STORE_PRODUCTS_ENDPOINT;
 
-function batches(productIds: readonly string[]): string[][] {
-  const result: string[][] = [];
-  for (let start = 0; start < productIds.length; start += STORE_PRODUCTS_BATCH_SIZE) {
-    result.push(productIds.slice(start, start + STORE_PRODUCTS_BATCH_SIZE));
-  }
-  return result;
-}
-
 /** Sends the products in batches the API accepts, and returns how many it took. */
 async function sendInBatches(
   endpoint: MembershipEndpoint,
@@ -42,7 +35,7 @@ async function sendInBatches(
   productIds: readonly string[],
 ): Promise<number> {
   let count = 0;
-  for (const batch of batches(productIds)) {
+  for (const batch of chunk(productIds, STORE_PRODUCTS_BATCH_SIZE)) {
     const { data, error } = await fetchClient.POST(endpoint, {
       params: { path: ref },
       body: { productIds: batch },
