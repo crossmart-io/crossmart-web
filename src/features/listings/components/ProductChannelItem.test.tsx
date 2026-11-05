@@ -14,7 +14,14 @@ vi.mock('../hooks/useProductChannels', async (importOriginal) => ({
   useAddToStore: vi.fn<typeof useAddToStore>(),
 }));
 
-const PRODUCT = { id: 'p-1', title: 'Linen shirt', descriptionHtml: '', tags: [], media: [] };
+const PRODUCT = {
+  id: 'p-1',
+  title: 'Linen shirt',
+  vendor: null,
+  descriptionHtml: '',
+  tags: [],
+  media: [],
+};
 
 function channel(overrides: Partial<ProductChannel> = {}): ProductChannel {
   return {
