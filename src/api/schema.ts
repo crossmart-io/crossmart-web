@@ -75,7 +75,7 @@ export interface paths {
     put?: never;
     /**
      * Create a workspace
-     * @description For owners of a workspace in the organization, such as one per client or brand. You own the new workspace. Refused (409) past 25 workspaces per organization.
+     * @description For owners of a workspace in the organization, such as one per client or brand. You own the new workspace. Refused (402) past the plan’s workspace limit.
      */
     post: operations['OrganizationWorkspacesController_create_v1'];
     delete?: never;
@@ -157,7 +157,7 @@ export interface paths {
     put?: never;
     /**
      * Invite someone by email
-     * @description Emails a link that works for 7 days. A new invitation to the same address replaces the pending one. Refused (409) for members and past 50 pending invitations.
+     * @description Emails a link that works for 7 days. A new invitation to the same address replaces the pending one. Refused (409) for members and past 50 pending invitations, and (402) when the plan has no seat for someone new to the organization.
      */
     post: operations['InvitationsController_invite_v1'];
     delete?: never;
@@ -312,6 +312,26 @@ export interface paths {
      * @description Lets a program, such as the MCP server, find the workspace its key works in.
      */
     get: operations['CurrentApiKeyController_get_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/organizations/{organizationId}/subscription': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * The organization’s plan, its limits and current usage
+     * @description For people holding `billing:view` (owners and admins) in a workspace of the organization; others in it get 403, and outsiders 404. Usage is counted across all of its workspaces. Needs a signed-in user.
+     */
+    get: operations['OrganizationSubscriptionController_get_v1'];
     put?: never;
     post?: never;
     delete?: never;
@@ -844,7 +864,7 @@ export interface paths {
     get?: never;
     /**
      * Set the store’s automatic rule
-     * @description Applies at once: products the rule now adds are published, and products it now drops are delisted. Products added by hand stay; those removed by hand stay out.
+     * @description Applies at once: products the rule now adds are published, and products it now drops are delisted. Products added by hand stay; those removed by hand stay out. Refused (402) without saving when the plan has no room for the active listings it would add.
      */
     put: operations['ChannelSelectionController_updateSelection_v1'];
     post?: never;
@@ -882,7 +902,7 @@ export interface paths {
     put?: never;
     /**
      * Publish the selected products and sync the connection
-     * @description Queues every selected product to be published (or updated when the channel has it) and every listing that is no longer selected to be delisted. Jobs run in the background; follow them in the listings.
+     * @description Queues every selected product to be published (or updated when the channel has it) and every listing that is no longer selected to be delisted. Jobs run in the background; follow them in the listings. Refused (402) before anything is queued when the plan has no room for the active listings it would add.
      */
     post: operations['ChannelSyncController_requestSync_v1'];
     delete?: never;
@@ -919,7 +939,7 @@ export interface paths {
     put?: never;
     /**
      * Add products to the store
-     * @description They stay until removed and are published at once.
+     * @description They stay until removed and are published at once. Refused (402) without changes when the plan has no room for the active listings they would add.
      */
     post: operations['StoreProductsController_add_v1'];
     delete?: never;
@@ -1210,6 +1230,30 @@ export interface components {
        */
       timeZone?: string;
     };
+    /** @enum {string} */
+    EntitlementErrorCode: EntitlementErrorCode;
+    /** @enum {string} */
+    Feature: Feature;
+    PlanLimitErrorDto: {
+      /** @example 402 */
+      statusCode: number;
+      /** @example Payment Required */
+      error: string;
+      code: components['schemas']['EntitlementErrorCode'];
+      /** @example The Free plan includes 2 connected channels, and 2 are in use. Upgrade the plan to add more. */
+      message: string;
+      feature: components['schemas']['Feature'];
+      /**
+       * @description The code of the organization’s plan
+       * @example free
+       */
+      plan: string;
+      /** @description Null is unlimited */
+      limit: number | null;
+      usage: number;
+      /** @description How many more the request asked for */
+      requested: number;
+    };
     WorkspaceMemberDto: {
       /** Format: uuid */
       userId: string;
@@ -1357,6 +1401,53 @@ export interface components {
       customRole: components['schemas']['CustomRoleRefDto'] | null;
       /** @description What the key may do */
       permissions: components['schemas']['WorkspacePermission'][];
+    };
+    PlanDto: {
+      /**
+       * @description Stable identifier of the plan
+       * @example growth
+       */
+      code: string;
+      /** @example Growth */
+      name: string;
+      /**
+       * @description The plan version the organization is on; later versions never change it
+       * @example 1
+       */
+      version: number;
+    };
+    /** @enum {string} */
+    SubscriptionStatus: SubscriptionStatus;
+    /**
+     * @description A counted limit, or a flag the plan turns on or off
+     * @enum {string}
+     */
+    FeatureKind: FeatureKind;
+    FeatureUsageDto: {
+      feature: components['schemas']['Feature'];
+      /** @description A counted limit, or a flag the plan turns on or off */
+      kind: components['schemas']['FeatureKind'];
+      /** @description Whether the plan includes the feature at all */
+      enabled: boolean;
+      /** @description How many the plan allows; null is unlimited, 0 is not included */
+      limit: number | null;
+      /** @description How many are in use now, across the organization; null for flags */
+      usage: number | null;
+    };
+    SubscriptionDto: {
+      /** Format: uuid */
+      organizationId: string;
+      plan: components['schemas']['PlanDto'];
+      status: components['schemas']['SubscriptionStatus'];
+      /**
+       * Format: date-time
+       * @description When the paid period ends; null until billing is connected
+       */
+      currentPeriodEnd: string | null;
+      /** @description Whether limits block actions here (402), or are only reported */
+      enforced: boolean;
+      /** @description Every feature, with what the plan allows and what is in use */
+      features: components['schemas']['FeatureUsageDto'][];
     };
     /** @enum {string} */
     ProductStatus: ProductStatus;
@@ -2872,6 +2963,15 @@ export interface operations {
           'application/json': components['schemas']['WorkspaceDto'];
         };
       };
+      /** @description The organization’s plan does not allow this (`ENTITLEMENTS_ENFORCED` is on). `code` and `feature` say why; upgrading the plan resolves it. */
+      402: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanLimitErrorDto'];
+        };
+      };
     };
   };
   MembersController_list_v1: {
@@ -3002,6 +3102,15 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['InvitationDto'];
+        };
+      };
+      /** @description The organization’s plan does not allow this (`ENTITLEMENTS_ENFORCED` is on). `code` and `feature` say why; upgrading the plan resolves it. */
+      402: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanLimitErrorDto'];
         };
       };
     };
@@ -3208,6 +3317,15 @@ export interface operations {
           'application/json': components['schemas']['IssuedApiKeyDto'];
         };
       };
+      /** @description The organization’s plan does not allow this (`ENTITLEMENTS_ENFORCED` is on). `code` and `feature` say why; upgrading the plan resolves it. */
+      402: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanLimitErrorDto'];
+        };
+      };
     };
   };
   ApiKeysController_revoke_v1: {
@@ -3245,6 +3363,27 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['CurrentApiKeyDto'];
+        };
+      };
+    };
+  };
+  OrganizationSubscriptionController_get_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        organizationId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SubscriptionDto'];
         };
       };
     };
@@ -3813,6 +3952,15 @@ export interface operations {
           'application/json': components['schemas']['StartedAuthorizationDto'];
         };
       };
+      /** @description The organization’s plan does not allow this (`ENTITLEMENTS_ENFORCED` is on). `code` and `feature` say why; upgrading the plan resolves it. */
+      402: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanLimitErrorDto'];
+        };
+      };
     };
   };
   ChannelConnectionsController_get_v1: {
@@ -4081,6 +4229,15 @@ export interface operations {
           'application/json': components['schemas']['ChannelConnectionDto'];
         };
       };
+      /** @description The organization’s plan does not allow this (`ENTITLEMENTS_ENFORCED` is on). `code` and `feature` say why; upgrading the plan resolves it. */
+      402: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanLimitErrorDto'];
+        };
+      };
     };
   };
   ChannelSelectionController_previewSelection_v1: {
@@ -4131,6 +4288,15 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['SyncRequestResultDto'];
+        };
+      };
+      /** @description The organization’s plan does not allow this (`ENTITLEMENTS_ENFORCED` is on). `code` and `feature` say why; upgrading the plan resolves it. */
+      402: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanLimitErrorDto'];
         };
       };
     };
@@ -4185,6 +4351,15 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['StoreProductsResultDto'];
+        };
+      };
+      /** @description The organization’s plan does not allow this (`ENTITLEMENTS_ENFORCED` is on). `code` and `feature` say why; upgrading the plan resolves it. */
+      402: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['PlanLimitErrorDto'];
         };
       };
     };
@@ -4552,6 +4727,31 @@ export enum WorkspacePermission {
   listings_edit = 'listings:edit',
   activity_view = 'activity:view',
   suggestions_approve = 'suggestions:approve',
+  billing_view = 'billing:view',
+}
+export enum EntitlementErrorCode {
+  plan_limit_reached = 'plan_limit_reached',
+  plan_feature_not_included = 'plan_feature_not_included',
+}
+export enum Feature {
+  active_listings = 'active_listings',
+  channel_connections = 'channel_connections',
+  workspaces = 'workspaces',
+  members = 'members',
+  api_keys = 'api_keys',
+  ai_credits = 'ai_credits',
+  autonomous_agents = 'autonomous_agents',
+  bring_your_own_key = 'bring_your_own_key',
+}
+export enum SubscriptionStatus {
+  ACTIVE = 'ACTIVE',
+  TRIALING = 'TRIALING',
+  PAST_DUE = 'PAST_DUE',
+  CANCELED = 'CANCELED',
+}
+export enum FeatureKind {
+  limit = 'limit',
+  flag = 'flag',
 }
 export enum ProductStatus {
   DRAFT = 'DRAFT',
@@ -4752,6 +4952,7 @@ export enum ConnectFailure {
   missing_scopes = 'missing_scopes',
   not_permitted = 'not_permitted',
   channel_unavailable = 'channel_unavailable',
+  plan_limit_reached = 'plan_limit_reached',
   unexpected = 'unexpected',
 }
 export enum ChannelConnectionStatus {

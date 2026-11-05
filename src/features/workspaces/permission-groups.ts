@@ -23,6 +23,7 @@ export const PERMISSION_GROUPS: readonly PermissionGroup[] = [
     permissions: [
       { permission: WorkspacePermission.workspace_view, label: 'Open the workspace' },
       { permission: WorkspacePermission.workspace_manage, label: 'Change workspace settings' },
+      { permission: WorkspacePermission.billing_view, label: 'See the plan and its usage' },
     ],
   },
   {

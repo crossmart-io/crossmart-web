@@ -28,6 +28,7 @@ export const ROUTES = {
   importJob: `/imports/:${ROUTE_PARAMS.jobId}`,
   apiKeys: '/settings/api-keys',
   workspaceSettings: '/settings/workspace',
+  plan: '/settings/plan',
   members: '/settings/members',
   roles: '/settings/roles',
   account: '/settings/account',

@@ -1,5 +1,6 @@
 import {
   FileUp,
+  Gauge,
   History,
   KeyRound,
   CircleUser,
@@ -52,6 +53,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     label: 'Settings',
     items: [
       { label: 'Workspace', to: ROUTES.workspaceSettings, icon: Store },
+      { label: 'Plan & usage', to: ROUTES.plan, icon: Gauge },
       { label: 'Members', to: ROUTES.members, icon: Users },
       { label: 'Roles', to: ROUTES.roles, icon: ShieldCheck },
       { label: 'API keys', to: ROUTES.apiKeys, icon: KeyRound },

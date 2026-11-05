@@ -64,6 +64,8 @@ export const CONNECT_FAILURE_MESSAGES: Record<ConnectFailure, string> = {
     'Some permissions Crossmart needs were not granted. Please try again.',
   [ConnectFailure.not_permitted]: 'You can no longer manage this workspace.',
   [ConnectFailure.channel_unavailable]: 'The channel is not responding. Try again in a moment.',
+  [ConnectFailure.plan_limit_reached]:
+    'Your plan has no room for another connected channel. See Plan & usage in Settings.',
   [ConnectFailure.unexpected]: 'Something went wrong while connecting. Please try again.',
 };
 
