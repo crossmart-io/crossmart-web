@@ -6,17 +6,7 @@ import {
 } from './listings.constants';
 import type { ListingOverride, ListingOverrideView, ProductChannel } from './listings.types';
 import { ListingVisibility } from '@/api/schema';
-
-const AMOUNT_PATTERN = /^\d{1,10}(\.\d{1,2})?$/;
-const COUNT_PATTERN = /^\d{1,7}$/;
-const optionalAmount = z
-  .string()
-  .trim()
-  .refine((value) => value === '' || AMOUNT_PATTERN.test(value), 'Enter an amount like 19.90');
-const optionalCount = z
-  .string()
-  .trim()
-  .refine((value) => value === '' || COUNT_PATTERN.test(value), 'Enter a whole number');
+import { optionalCount, optionalMoneyAmount } from '@/lib/form-schemas';
 
 export const overrideFormSchema = z.object({
   title: z.string().trim().max(OVERRIDE_TITLE_MAX_LENGTH),
@@ -32,7 +22,7 @@ export const overrideFormSchema = z.object({
   prices: z.array(
     z.object({
       variantId: z.string(),
-      price: optionalAmount,
+      price: optionalMoneyAmount,
       /** Not editable here; carried through so saving keeps one set through the API or MCP. */
       compareAtPrice: z.string().nullable(),
     }),

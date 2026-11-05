@@ -1,5 +1,6 @@
 import { z } from 'zod';
 import { CompareAtMode, PriceRounding } from '@/api/schema';
+import { signedAmount } from '@/lib/form-schemas';
 import {
   PRICING_MAX_MARGIN_PERCENT,
   RateMode,
@@ -8,17 +9,14 @@ import {
 } from './listings.constants';
 import type { PricingRule } from './listings.types';
 
-const SIGNED_DECIMAL = /^-?\d{1,10}(\.\d{1,2})?$/;
-const DECIMAL_MESSAGE = 'Enter a number with at most two decimals';
 const EXCHANGE_RATE = /^\d{1,9}(\.\d{1,6})?$/;
 const EXCHANGE_RATE_MESSAGE = 'Enter a rate above zero with at most six decimals';
 
 function decimalBetween(min: number, max: number) {
-  return z
-    .string()
-    .trim()
-    .regex(SIGNED_DECIMAL, DECIMAL_MESSAGE)
-    .refine((value) => Number(value) >= min && Number(value) <= max, `Between ${min} and ${max}`);
+  return signedAmount.refine(
+    (value) => Number(value) >= min && Number(value) <= max,
+    `Between ${min} and ${max}`,
+  );
 }
 
 /**
@@ -28,7 +26,7 @@ function decimalBetween(min: number, max: number) {
 export const pricingRuleFormSchema = z
   .object({
     adjustmentPercent: decimalBetween(PRICING_MIN_PERCENT, PRICING_MAX_PERCENT),
-    fixedAmount: z.string().trim().regex(SIGNED_DECIMAL, DECIMAL_MESSAGE),
+    fixedAmount: signedAmount,
     rounding: z.enum(PriceRounding),
     floorEnabled: z.boolean(),
     minMarginPercent: decimalBetween(0, PRICING_MAX_MARGIN_PERCENT),
