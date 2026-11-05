@@ -13,7 +13,7 @@ import { PRODUCTS_ENDPOINT } from '../catalog.constants';
 import type { ProductSummary } from '../catalog.types';
 
 interface ProductsFilter {
-  workspaceId: string | undefined;
+  workspaceId: string;
   search: string;
   status: ProductStatus | undefined;
   gap: CatalogGap | undefined;
@@ -31,7 +31,7 @@ async function fetchProductPage(
   return unwrap(
     fetchClient.GET(PRODUCTS_ENDPOINT, {
       params: {
-        path: { workspaceId: workspaceId ?? '' },
+        path: { workspaceId },
         query: { ...filters, search: search || undefined, ...page },
       },
       signal,
@@ -46,7 +46,6 @@ export function useProducts(filter: ProductsFilter, pagination: Pagination) {
     params: filter,
     pagination,
     fetchPage: (page, signal) => fetchProductPage(filter, page, signal),
-    enabled: Boolean(filter.workspaceId),
   });
   return { ...query, products: query.items };
 }

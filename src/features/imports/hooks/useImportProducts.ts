@@ -30,7 +30,7 @@ function toImportForm({ mode, file }: ImportFile): FormData {
 }
 
 /** Uploads a file in the chosen mode, then refreshes the catalog, stock, history and the log. */
-export function useImportProducts(workspaceId: string | undefined) {
+export function useImportProducts(workspaceId: string) {
   const invalidateHistory = useInvalidateEndpoints(IMPORT_HISTORY_ENDPOINTS);
   const invalidateActivity = useInvalidateActivity();
   const invalidateCatalog = useInvalidateCatalog();
@@ -41,7 +41,7 @@ export function useImportProducts(workspaceId: string | undefined) {
     mutationFn: async (upload) => {
       const data = await unwrap(
         fetchClient.POST(PRODUCT_IMPORTS_ENDPOINT, {
-          params: { path: { workspaceId: workspaceId ?? '' } },
+          params: { path: { workspaceId } },
           // The generated type describes the form; the browser sends it as multipart.
           body: {
             mode: upload.mode,

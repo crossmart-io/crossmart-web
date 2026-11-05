@@ -8,13 +8,8 @@ import type { ProductView } from '../catalog.types';
 
 type NewProductView = components['schemas']['CreateProductViewDto'];
 
-export function useProductViews(workspaceId: string | undefined) {
-  return api.useQuery(
-    'get',
-    PRODUCT_VIEWS_ENDPOINT,
-    { params: { path: { workspaceId: workspaceId ?? '' } } },
-    { enabled: Boolean(workspaceId) },
-  );
+export function useProductViews(workspaceId: string) {
+  return api.useQuery('get', PRODUCT_VIEWS_ENDPOINT, { params: { path: { workspaceId } } });
 }
 
 const VIEW_LIST_ENDPOINTS = [PRODUCT_VIEWS_ENDPOINT];
