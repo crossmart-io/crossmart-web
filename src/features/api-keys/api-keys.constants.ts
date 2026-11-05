@@ -12,5 +12,4 @@ export const DEFAULT_KEY_ROLE: string = WorkspaceRole.EDITOR;
 export const API_KEY_FEEDBACK = {
   revoked: 'API key revoked',
   copied: 'Key copied to the clipboard',
-  copyFailed: 'Could not copy. Select the key and copy it yourself.',
 } as const;
