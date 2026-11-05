@@ -1,17 +1,7 @@
-import { CircleAlert } from 'lucide-react';
 import { FormProvider } from 'react-hook-form';
-import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Button } from '@/components/ui/button';
-import {
-  Card,
-  CardContent,
-  CardDescription,
-  CardFooter,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card';
+import { CardSaveFooter } from '@/components/forms/CardSaveFooter';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
-import { Spinner } from '@/components/ui/spinner';
 import { EBAY_DEFAULTS_COPY } from '../channels.constants';
 import type { EbaySettings } from '../channels.types';
 import { isMissingPolicies } from '../ebay-defaults-form';
@@ -24,31 +14,6 @@ interface EbayListingDefaultsCardProps {
   connectionId: string;
   ebay: EbaySettings;
   canManage: boolean;
-}
-
-function SaveFooter({
-  error,
-  isSaving,
-  disabled,
-}: {
-  error: Error | null;
-  isSaving: boolean;
-  disabled: boolean;
-}) {
-  return (
-    <CardFooter className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
-      {error && (
-        <Alert variant="destructive" className="sm:mr-auto sm:w-auto">
-          <CircleAlert />
-          <AlertDescription>{error.message}</AlertDescription>
-        </Alert>
-      )}
-      <Button type="submit" disabled={disabled || isSaving}>
-        {isSaving && <Spinner data-icon="inline-start" />}
-        {EBAY_DEFAULTS_COPY.save}
-      </Button>
-    </CardFooter>
-  );
 }
 
 /** The policies, condition and ship-from address every eBay listing is published with. */
@@ -95,7 +60,8 @@ export function EbayListingDefaultsCard({
             )}
           </CardContent>
           {canManage && (
-            <SaveFooter
+            <CardSaveFooter
+              label={EBAY_DEFAULTS_COPY.save}
               error={saveError}
               isSaving={form.formState.isSubmitting}
               disabled={!form.formState.isDirty}
