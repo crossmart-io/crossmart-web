@@ -34,6 +34,8 @@ export const CATEGORY_SUGGESTIONS_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/category-suggestions';
 export const LISTING_CATEGORY_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/category';
+export const ITEM_SPECIFICS_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/item-specifics';
 
 /** Previews wait for typing to pause, so each keystroke is not a request. */
 export const PREVIEW_DEBOUNCE_MS = 400;
@@ -60,6 +62,7 @@ export const LISTINGS_FEEDBACK = {
   removedFromStore: 'Removed from the store',
   addedToStore: 'Added to the store; publishing now',
   categorySaved: 'Category saved',
+  itemSpecificsSaved: 'Item specifics saved',
 } as const;
 
 /** What the eBay category field in the override sheet says. */
@@ -73,6 +76,31 @@ export const CATEGORY_COPY = {
   useSuggested: 'Let eBay suggest',
   savedNote: 'Changing it updates the listing on eBay.',
 } as const;
+
+/** What the eBay item specifics section of the override sheet says. */
+export const ITEM_SPECIFICS_COPY = {
+  title: 'Item specifics',
+  description:
+    'Details buyers filter by on eBay. Required ones must be filled in before the listing is published.',
+  required: 'Required',
+  moreShow: 'More specifics',
+  moreHide: 'Fewer specifics',
+  missing: 'Still required:',
+  save: 'Save item specifics',
+  savedNote: 'Saved apart from the fields below. Saving updates the listing on eBay.',
+  choose: 'Choose a value',
+  clear: 'Clear',
+  addValue: 'Add a value',
+  removeValue: 'Remove',
+  valuesSuffix: 'values',
+  multipleHint: 'Press Enter or comma to add each value.',
+  empty: 'eBay lists no item specifics for this category.',
+} as const;
+
+/** eBay's brand aspect, prefilled from the product's vendor. */
+export const BRAND_ASPECT = 'Brand';
+/** Keys that add the value typed into a multi-value item specific. */
+export const VALUE_SEPARATOR_KEYS: readonly string[] = ['Enter', ','];
 
 export const ROUNDING_OPTIONS: readonly { value: PriceRounding; label: string; example: string }[] =
   [

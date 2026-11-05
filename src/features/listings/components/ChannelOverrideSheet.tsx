@@ -38,11 +38,14 @@ import {
 } from './OverrideFields';
 import { MediaOverrideField, TagsOverrideField } from './OverrideTagsAndMediaFields';
 import { ChannelCategoryField } from './ChannelCategoryField';
+import { ItemSpecificsSection } from './ItemSpecificsSection';
 import type { ProductChannelRef } from '../hooks/useProductChannels';
 
 export interface OverrideProduct extends ProductDefaults {
   id: string;
   title: string;
+  /** Prefills eBay's Brand item specific. */
+  vendor: string | null;
 }
 
 interface ChannelOverrideSheetProps {
@@ -133,6 +136,30 @@ function WriteWithAi({ channelRef }: { channelRef: ProductChannelRef }) {
   );
 }
 
+/** eBay's category and the item specifics it asks for; both save at once, apart from the form. */
+function EbayListingFields({
+  channelRef,
+  product,
+  channel,
+}: {
+  channelRef: ProductChannelRef;
+  product: OverrideProduct;
+  channel: ProductChannel;
+}) {
+  const category = channel.listing?.category ?? null;
+  return (
+    <>
+      <ChannelCategoryField channelRef={channelRef} category={category} />
+      <ItemSpecificsSection
+        channelRef={channelRef}
+        hasCategory={category !== null}
+        vendor={product.vendor}
+      />
+      <Separator />
+    </>
+  );
+}
+
 /** Every field the store can show differently, in the order a merchant reads the listing. */
 function OverrideFieldList({
   channelRef,
@@ -148,13 +175,7 @@ function OverrideFieldList({
   return (
     <div className="flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 pb-4">
       {channel.connection.channel === ChannelType.ebay && (
-        <>
-          <ChannelCategoryField
-            channelRef={channelRef}
-            category={channel.listing?.category ?? null}
-          />
-          <Separator />
-        </>
+        <EbayListingFields channelRef={channelRef} product={product} channel={channel} />
       )}
       <ContentOverrideFields productTitle={product.title} aiTarget={channelRef} />
       <TagsOverrideField />
