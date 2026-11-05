@@ -7,6 +7,7 @@ import {
   DropdownMenuSubContent,
   DropdownMenuSubTrigger,
 } from '@/components/ui/dropdown-menu';
+import { parseEnum } from '@/lib/enum';
 import { THEME_OPTIONS, Theme } from './theme.constants';
 import { useTheme } from './useTheme';
 
@@ -15,7 +16,7 @@ export function ThemeSubMenu() {
   const { theme, setTheme } = useTheme();
 
   function selectTheme(value: string) {
-    const next = Object.values(Theme).find((option) => option === value);
+    const next = parseEnum(Theme, value);
     if (next) setTheme(next);
   }
 

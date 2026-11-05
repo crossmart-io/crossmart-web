@@ -1,22 +1,16 @@
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { ContentField } from '@/api/schema';
+import { EnumSelectField } from '@/components/forms/EnumSelectField';
 import { LabelRow } from '@/components/forms/LabelRow';
 import { RichTextEditor } from '@/components/forms/RichTextEditor';
 import { MoneyInput } from '@/components/forms/MoneyInput';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { AiRewriteButton, type ContentDraftTarget } from '@/features/ai-writer';
 import { formatMoney } from '@/lib/format';
 import { useOverrideAiWriter } from '../hooks/useOverrideAiWriter';
-import { VISIBILITY_OPTIONS, type VisibilityChoice } from '../listings.constants';
+import { VISIBILITY_OPTIONS } from '../listings.constants';
 import type { ChannelVariant } from '../listings.types';
 import type { OverrideFormValues } from '../override-form';
 
@@ -86,26 +80,11 @@ export function VisibilityField() {
   return (
     <Field>
       <FieldLabel htmlFor="override-visibility">Visibility</FieldLabel>
-      <Controller
+      <EnumSelectField
         control={control}
         name="visibility"
-        render={({ field }) => (
-          <Select
-            value={field.value}
-            onValueChange={(value) => field.onChange(value as VisibilityChoice)}
-          >
-            <SelectTrigger id="override-visibility" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {VISIBILITY_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        id="override-visibility"
+        options={VISIBILITY_OPTIONS}
       />
     </Field>
   );

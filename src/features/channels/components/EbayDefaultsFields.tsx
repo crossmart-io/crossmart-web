@@ -1,5 +1,5 @@
 import { Controller, useFormContext } from 'react-hook-form';
-import { EbayCondition } from '@/api/schema';
+import { EnumSelectField } from '@/components/forms/EnumSelectField';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import {
@@ -9,6 +9,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { toEnumOptions } from '@/lib/enum';
 import { EBAY_CONDITION_LABELS, EBAY_DEFAULTS_COPY } from '../channels.constants';
 import type { EbayPolicy, EbaySettings } from '../channels.types';
 import type { EbayDefaultsFormValues, EbayPolicyField } from '../ebay-defaults-form';
@@ -81,31 +82,19 @@ export function EbayPolicyFields({ policies }: { policies: EbaySettings['policie
   );
 }
 
+const CONDITION_OPTIONS = toEnumOptions(EBAY_CONDITION_LABELS);
+
 export function EbayConditionField() {
   const { control } = useFormContext<EbayDefaultsFormValues>();
   return (
     <Field>
       <FieldLabel htmlFor="ebay-condition">Condition</FieldLabel>
-      <Controller
+      <EnumSelectField
         control={control}
         name="condition"
-        render={({ field }) => (
-          <Select
-            value={field.value}
-            onValueChange={(value) => field.onChange(value as EbayCondition)}
-          >
-            <SelectTrigger id="ebay-condition" className="w-full sm:w-72">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.values(EbayCondition).map((condition) => (
-                <SelectItem key={condition} value={condition}>
-                  {EBAY_CONDITION_LABELS[condition]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        id="ebay-condition"
+        options={CONDITION_OPTIONS}
+        className="sm:w-72"
       />
       <FieldDescription>Some eBay categories accept only some conditions.</FieldDescription>
     </Field>

@@ -1,7 +1,8 @@
 import { useSearchParams } from 'react-router';
-import { type ActivityAction, ActivityOutcome } from '@/api/schema';
+import { ActivityAction, ActivityOutcome } from '@/api/schema';
 import { ACTIVITY_ROUTE_QUERY } from '@/config/routes';
 import { useSearchParamsUpdater } from '@/hooks/useSearchParamsUpdater';
+import { parseEnum } from '@/lib/enum';
 import { setOrDeleteParam } from '@/lib/search-params';
 import {
   type ByTime,
@@ -9,7 +10,6 @@ import {
   TIME_SORTS,
   toSortOption,
 } from '@/components/lists/sort-options';
-import { toActivityAction } from '../activity-action';
 
 export interface ActivityFilters {
   action: ActivityAction | undefined;
@@ -26,7 +26,7 @@ export interface ActivityFilters {
 export function useActivityFilters(): ActivityFilters {
   const [searchParams] = useSearchParams();
   const updateParams = useSearchParamsUpdater();
-  const action = toActivityAction(searchParams.get(ACTIVITY_ROUTE_QUERY.action));
+  const action = parseEnum(ActivityAction, searchParams.get(ACTIVITY_ROUTE_QUERY.action));
   const failuresOnly = searchParams.get(ACTIVITY_ROUTE_QUERY.outcome) === ActivityOutcome.FAILED;
   const sort = toSortOption(TIME_SORTS, searchParams.get(ACTIVITY_ROUTE_QUERY.sort));
 

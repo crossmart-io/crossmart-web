@@ -1,11 +1,11 @@
 import { useSearchParams } from 'react-router';
-import type { CatalogGap, ProductStatus } from '@/api/schema';
+import { CatalogGap, type ProductStatus } from '@/api/schema';
 import { ROUTE_QUERY } from '@/config/routes';
 import { useDebouncedSearchParam } from '@/hooks/useDebouncedSearchParam';
 import { useSearchParamsUpdater } from '@/hooks/useSearchParamsUpdater';
+import { parseEnum } from '@/lib/enum';
 import { setOrDeleteParam } from '@/lib/search-params';
 import { SEARCH_DEBOUNCE_MS } from '../catalog.constants';
-import { toCatalogGap } from '../catalog-gap';
 import { ALL_STATUSES, type StatusFilter, toStatusFilter, toStatusQuery } from '../product-status';
 import { type ProductSort, ProductStoreFilter } from '@/api/schema';
 import { type SortOption, toSortOption } from '@/components/lists/sort-options';
@@ -24,7 +24,7 @@ const STORE_FILTERS_WITH_STORE: ReadonlySet<ProductStoreFilter> = new Set([
 ]);
 
 function toStoreFilter(filter: string | null, storeId: string | null): StoreFilterValue {
-  const known = Object.values(ProductStoreFilter).find((value) => value === filter);
+  const known = parseEnum(ProductStoreFilter, filter);
   if (!known) return {};
   if (STORE_FILTERS_WITH_STORE.has(known)) return storeId ? { filter: known, storeId } : {};
   return { filter: known };
@@ -66,7 +66,7 @@ export function useProductListFilters(): ProductListFilters {
   const [searchParams] = useSearchParams();
   const updateParams = useSearchParamsUpdater();
   const status = toStatusFilter(searchParams.get(ROUTE_QUERY.status));
-  const gap = toCatalogGap(searchParams.get(ROUTE_QUERY.gap));
+  const gap = parseEnum(CatalogGap, searchParams.get(ROUTE_QUERY.gap));
   const store = toStoreFilter(
     searchParams.get(ROUTE_QUERY.storeFilter),
     searchParams.get(ROUTE_QUERY.storeId),
