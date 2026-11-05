@@ -1,6 +1,6 @@
-import { CircleAlert, Download } from 'lucide-react';
+import { Download } from 'lucide-react';
 import type { FormEvent } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -41,12 +41,7 @@ export function ImportFileForm({
 
   return (
     <form id={formId} onSubmit={handleSubmit} className="flex flex-col gap-5">
-      {error && (
-        <Alert variant="destructive">
-          <CircleAlert />
-          <AlertDescription>{error.message}</AlertDescription>
-        </Alert>
-      )}
+      <FormError error={error} />
       <ImportModePicker value={mode} onChange={onModeChange} />
       <Field>
         <FieldLabel htmlFor={FILE_INPUT_ID}>{copy.fileLabel}</FieldLabel>

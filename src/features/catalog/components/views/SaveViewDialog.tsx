@@ -1,6 +1,6 @@
-import { BookmarkPlus, CircleAlert } from 'lucide-react';
+import { BookmarkPlus } from 'lucide-react';
 import { type FormEvent, useId, useState } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -69,12 +69,7 @@ export function SaveViewDialog({ workspaceId, filters }: SaveViewDialogProps) {
               Everyone in the workspace sees it above the product list.
             </DialogDescription>
           </DialogHeader>
-          {createView.error && (
-            <Alert variant="destructive">
-              <CircleAlert />
-              <AlertDescription>{createView.error.message}</AlertDescription>
-            </Alert>
-          )}
+          <FormError error={createView.error} />
           <ViewNameField value={name} onChange={setName} />
           <DialogFooter>
             <Button type="submit" disabled={!name.trim() || createView.isPending}>

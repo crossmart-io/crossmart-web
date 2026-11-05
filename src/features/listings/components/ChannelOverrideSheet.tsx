@@ -1,7 +1,6 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import { CircleAlert } from 'lucide-react';
 import { FormProvider, useForm } from 'react-hook-form';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import {
@@ -56,16 +55,6 @@ interface ChannelOverrideSheetProps {
   onOpenChange: (open: boolean) => void;
   /** Adding saves any overrides first, then adds the product, so it is published with them. */
   mode?: OverrideSheetMode;
-}
-
-function SaveError({ error }: { error: Error | null }) {
-  if (!error) return null;
-  return (
-    <Alert variant="destructive">
-      <CircleAlert />
-      <AlertDescription>{error.message}</AlertDescription>
-    </Alert>
-  );
 }
 
 interface OverrideSheetFooterProps {
@@ -185,7 +174,7 @@ function OverrideFieldList({
       <Separator />
       <VisibilityField />
       <StockOverrideFields />
-      <SaveError error={error} />
+      <FormError error={error} />
     </div>
   );
 }

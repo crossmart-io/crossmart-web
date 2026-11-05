@@ -1,11 +1,11 @@
 import type { FormEvent } from 'react';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
 import { AuthField, LEGAL_LINKS } from '../auth.constants';
 import { useSignUp } from '../hooks/useSignUp';
 import { readAuthField, readPassword } from '../read-auth-form';
 import { EmailField, NameField, PasswordField } from './AuthFields';
-import { AuthFormError } from './AuthFormError';
 
 /** Signing up also signs in; the API creates the user's first workspace. */
 export function SignUpForm() {
@@ -24,7 +24,7 @@ export function SignUpForm() {
   return (
     <form onSubmit={handleSubmit}>
       <FieldGroup>
-        <AuthFormError error={signUp.error} />
+        <FormError error={signUp.error} />
         <NameField />
         <EmailField />
         <PasswordField autoComplete="new-password" showHint />

@@ -1,5 +1,6 @@
 import type { FormEvent } from 'react';
 import { Link } from 'react-router';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
 import { ROUTES } from '@/config/routes';
@@ -7,7 +8,6 @@ import { AuthField } from '../auth.constants';
 import { useSignIn } from '../hooks/useSignIn';
 import { readAuthField, readPassword } from '../read-auth-form';
 import { EmailField, PasswordField } from './AuthFields';
-import { AuthFormError } from './AuthFormError';
 
 /** On success the session updates and `RedirectIfSignedIn` moves the user on. */
 export function SignInForm() {
@@ -25,7 +25,7 @@ export function SignInForm() {
   return (
     <form onSubmit={handleSubmit}>
       <FieldGroup>
-        <AuthFormError error={signIn.error} />
+        <FormError error={signIn.error} />
         <EmailField />
         <PasswordField autoComplete="current-password" />
         <Link

@@ -1,5 +1,4 @@
-import { CircleAlert } from 'lucide-react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import { CardFooter } from '@/components/ui/card';
 import { Spinner } from '@/components/ui/spinner';
@@ -26,12 +25,7 @@ export function CardSaveFooter({
 }: CardSaveFooterProps) {
   return (
     <CardFooter className="mt-6 flex flex-col items-stretch gap-3 sm:flex-row sm:items-center sm:justify-end">
-      {error && (
-        <Alert variant="destructive" className="sm:mr-auto sm:w-auto">
-          <CircleAlert />
-          <AlertDescription>{error.message}</AlertDescription>
-        </Alert>
-      )}
+      <FormError error={error} className="sm:mr-auto sm:w-auto" />
       {note && !error && <p className="text-sm text-muted-foreground sm:mr-auto">{note}</p>}
       <Button type={onSave ? 'button' : 'submit'} disabled={disabled || isSaving} onClick={onSave}>
         {isSaving && <Spinner data-icon="inline-start" />}
