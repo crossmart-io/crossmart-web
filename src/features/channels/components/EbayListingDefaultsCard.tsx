@@ -1,6 +1,5 @@
-import { zodResolver } from '@hookform/resolvers/zod';
 import { CircleAlert } from 'lucide-react';
-import { FormProvider, useForm } from 'react-hook-form';
+import { FormProvider } from 'react-hook-form';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import {
@@ -15,14 +14,8 @@ import { Separator } from '@/components/ui/separator';
 import { Spinner } from '@/components/ui/spinner';
 import { EBAY_DEFAULTS_COPY } from '../channels.constants';
 import type { EbaySettings } from '../channels.types';
-import {
-  ebayDefaultsFormSchema,
-  type EbayDefaultsFormOutput,
-  type EbayDefaultsFormValues,
-  toEbayDefaultsBody,
-  toEbayDefaultsForm,
-} from '../ebay-defaults-form';
-import { useSaveEbayDefaults } from '../hooks/useEbaySetup';
+import { isMissingPolicies } from '../ebay-defaults-form';
+import { useEbayDefaultsForm } from '../hooks/useEbayDefaultsForm';
 import { EbayConditionField, EbayPolicyFields, EbayShipFromFields } from './EbayDefaultsFields';
 import { EbayPolicyActions } from './EbayPolicyActions';
 
@@ -65,15 +58,10 @@ export function EbayListingDefaultsCard({
   ebay,
   canManage,
 }: EbayListingDefaultsCardProps) {
-  const form = useForm<EbayDefaultsFormValues, unknown, EbayDefaultsFormOutput>({
-    resolver: zodResolver(ebayDefaultsFormSchema),
-    defaultValues: toEbayDefaultsForm(ebay.listingDefaults),
-  });
-  const save = useSaveEbayDefaults({ workspaceId, connectionId });
-  const submit = form.handleSubmit(async (values) => {
-    const saved = await save.mutateAsync(toEbayDefaultsBody(values));
-    if (saved.ebay) form.reset(toEbayDefaultsForm(saved.ebay.listingDefaults));
-  });
+  const { form, saveError, submit, choosePolicies } = useEbayDefaultsForm(
+    { workspaceId, connectionId },
+    ebay.listingDefaults,
+  );
   return (
     <Card>
       <CardHeader>
@@ -100,13 +88,15 @@ export function EbayListingDefaultsCard({
                   workspaceId={workspaceId}
                   connectionId={connectionId}
                   businessPoliciesEnabled={ebay.businessPoliciesEnabled}
+                  missingPolicies={isMissingPolicies(ebay.policies)}
+                  onDefaultsCreated={choosePolicies}
                 />
               </>
             )}
           </CardContent>
           {canManage && (
             <SaveFooter
-              error={save.error}
+              error={saveError}
               isSaving={form.formState.isSubmitting}
               disabled={!form.formState.isDirty}
             />

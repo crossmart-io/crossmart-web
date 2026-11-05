@@ -5,6 +5,7 @@ import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
   CHANNEL_CONNECTION_DETAIL_ENDPOINT,
   CHANNEL_CONNECTIONS_ENDPOINT,
+  EBAY_DEFAULT_POLICIES_ENDPOINT,
   EBAY_DEFAULTS_COPY,
   EBAY_LISTING_DEFAULTS_ENDPOINT,
   EBAY_POLICIES_OPT_IN_ENDPOINT,
@@ -62,6 +63,25 @@ export function useRefreshEbayPolicies(ref: ConnectionRef) {
     meta: { successMessage: EBAY_DEFAULTS_COPY.refreshed },
     mutationFn: async () => {
       const { data, error } = await fetchClient.POST(EBAY_POLICIES_REFRESH_ENDPOINT, {
+        params: { path: ref },
+      });
+      if (error) throw ApiRequestError.from(error);
+      return data;
+    },
+    onSuccess: refresh,
+  });
+}
+
+/**
+ * Creates free shipping, immediate payment and 30-day return policies on the eBay account
+ * (opting it in first when needed); the API chooses them as the listing defaults.
+ */
+export function useCreateEbayDefaultPolicies(ref: ConnectionRef) {
+  const refresh = useInvalidateEndpoints(CONNECTION_ENDPOINTS);
+  return useMutation<ChannelConnection, Error>({
+    meta: { successMessage: EBAY_DEFAULTS_COPY.defaultsCreated },
+    mutationFn: async () => {
+      const { data, error } = await fetchClient.POST(EBAY_DEFAULT_POLICIES_ENDPOINT, {
         params: { path: ref },
       });
       if (error) throw ApiRequestError.from(error);

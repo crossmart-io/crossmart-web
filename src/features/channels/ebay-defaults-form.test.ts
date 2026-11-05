@@ -1,6 +1,7 @@
 import { EbayCondition } from '@/api/schema';
 import {
   ebayDefaultsFormSchema,
+  isMissingPolicies,
   toEbayDefaultsBody,
   toEbayDefaultsForm,
 } from './ebay-defaults-form';
@@ -46,5 +47,12 @@ describe('eBay listing defaults form', () => {
     });
 
     expect(result.success).toBe(false);
+  });
+
+  it('says an account lacks policies until it has one of each kind', () => {
+    const policy = [{ id: 'x', name: 'X' }];
+
+    expect(isMissingPolicies({ fulfillment: policy, payment: policy, return: [] })).toBe(true);
+    expect(isMissingPolicies({ fulfillment: policy, payment: policy, return: policy })).toBe(false);
   });
 });
