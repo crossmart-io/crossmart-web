@@ -5,12 +5,12 @@ import { pageCountOf } from '@/components/lists/pagination';
 import type { Pagination } from './usePagination';
 
 /** One page of an API list that also says how many rows match in all. */
-export interface NumberedPage<TItem> {
+interface NumberedPage<TItem> {
   items: TItem[];
   total: number;
 }
 
-export interface PagedListOptions<TPage> {
+interface PagedListOptions<TPage> {
   endpoint: string;
   /** What the list depends on, such as the workspace and the filters. */
   params: object;

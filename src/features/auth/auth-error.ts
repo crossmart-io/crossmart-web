@@ -1,7 +1,7 @@
 import { AUTH_ERROR_MESSAGES, AuthErrorCode, FALLBACK_AUTH_ERROR_MESSAGE } from './auth.constants';
 
 /** The error shape Better Auth's client returns instead of throwing. */
-export interface AuthClientError {
+interface AuthClientError {
   code?: string;
   message?: string;
 }

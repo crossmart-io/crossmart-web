@@ -8,7 +8,7 @@ import { reconnectAccountHandle } from '../connection-account';
 import { useDisconnectChannel } from '../hooks/useChannelConnections';
 import { ConnectChannelDialog } from './ConnectChannelDialog';
 
-export interface ConnectionActionsProps {
+interface ConnectionActionsProps {
   workspaceId: string;
   channel: ChannelInfo;
   connect: ConnectableChannel;

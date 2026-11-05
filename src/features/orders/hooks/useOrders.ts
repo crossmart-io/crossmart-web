@@ -6,7 +6,7 @@ import type { Pagination } from '@/hooks/usePagination';
 import { ORDER_ENDPOINT, ORDERS_ENDPOINT } from '../orders.constants';
 import type { OrderSummary } from '../orders.types';
 
-export interface OrdersQuery {
+interface OrdersQuery {
   search?: string;
   status?: OrderStatus;
   connectionId?: string;

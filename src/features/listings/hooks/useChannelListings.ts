@@ -44,7 +44,7 @@ export function useChannelListings(ref: ConnectionRef) {
 }
 
 /** What the merchant reads once a sync is queued. */
-export function describeSyncRequest({ queued, delisting }: SyncRequestResult): string {
+function describeSyncRequest({ queued, delisting }: SyncRequestResult): string {
   const parts = [`${pluralize(queued, 'product')} queued to publish`];
   if (delisting > 0) parts.push(`${pluralize(delisting, 'listing')} to delist`);
   return parts.join(', ');

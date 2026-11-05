@@ -7,7 +7,7 @@ export enum ChannelTab {
   Settings = 'settings',
 }
 
-export interface ChannelTabInfo {
+interface ChannelTabInfo {
   value: ChannelTab;
   label: string;
   icon: LucideIcon;
@@ -20,7 +20,7 @@ export const CHANNEL_TABS: readonly ChannelTabInfo[] = [
   { value: ChannelTab.Settings, label: 'Settings', icon: Settings },
 ];
 
-export const DEFAULT_CHANNEL_TAB = ChannelTab.Listings;
+const DEFAULT_CHANNEL_TAB = ChannelTab.Listings;
 
 /** The tab a URL segment names, or the default tab for a missing or unknown one. */
 export function toChannelTab(segment: string | undefined): ChannelTab {

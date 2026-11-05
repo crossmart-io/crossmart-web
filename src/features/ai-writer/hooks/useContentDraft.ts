@@ -5,7 +5,7 @@ import type { ContentField } from '@/api/schema';
 import { CONTENT_DRAFTS_ENDPOINT } from '../ai-writer.constants';
 import type { ContentDraft, ContentDraftCurrent, ContentDraftTarget } from '../ai-writer.types';
 
-export interface ContentDraftInput {
+interface ContentDraftInput {
   fields: readonly ContentField[];
   instruction: string;
   current: ContentDraftCurrent;

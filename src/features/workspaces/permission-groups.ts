@@ -1,6 +1,6 @@
 import { WorkspacePermission } from '@/api/schema';
 
-export interface PermissionChoice {
+interface PermissionChoice {
   permission: WorkspacePermission;
   label: string;
 }

@@ -18,7 +18,7 @@ export function useRequestPasswordReset() {
   });
 }
 
-export interface NewPassword {
+interface NewPassword {
   token: string;
   newPassword: string;
 }

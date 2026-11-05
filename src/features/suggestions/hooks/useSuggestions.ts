@@ -6,7 +6,7 @@ import type { Pagination } from '@/hooks/usePagination';
 import { PENDING_COUNT_REFRESH_MS, SUGGESTIONS_ENDPOINT } from '../suggestions.constants';
 import type { Suggestion } from '../suggestions.types';
 
-export interface SuggestionFilter {
+interface SuggestionFilter {
   workspaceId: string;
   status: SuggestionStatus;
 }

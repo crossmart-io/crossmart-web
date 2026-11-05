@@ -11,7 +11,7 @@ import {
 } from '../suggestions.constants';
 import type { ContentGenerationReceipt } from '../suggestions.types';
 
-export interface ContentGenerationInput {
+interface ContentGenerationInput {
   connectionId: string;
   productIds: readonly string[];
 }

@@ -162,7 +162,6 @@ function ChannelItemActions(props: ChannelItemActionsProps) {
   );
 }
 
-/** The product on one channel: listing status, channel price with its explanation, shown stock. */
 /** The store with its logo, how the product joined it, and where it stands there. */
 function ItemHeader({ channel }: { channel: ProductChannel }) {
   const { connection, listing } = channel;

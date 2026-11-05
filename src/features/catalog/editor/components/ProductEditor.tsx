@@ -11,7 +11,7 @@ import { ProductEditorLayout } from './ProductEditorLayout';
 import { SaveBar } from './SaveBar';
 import { UnsavedChangesGuard } from './UnsavedChangesGuard';
 
-export const PRODUCT_FORM_ID = 'product-form';
+const PRODUCT_FORM_ID = 'product-form';
 
 interface ProductEditorProps {
   workspace: Workspace;

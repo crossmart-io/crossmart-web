@@ -3,7 +3,6 @@ import type { components } from '@/api/schema';
 type Schemas = components['schemas'];
 
 export type PricingRule = Schemas['PricingRuleDto'];
-export type PricingPreview = Schemas['PricingPreviewDto'];
 export type ResolvedPrice = Schemas['ResolvedPriceDto'];
 export type ProductSelectionRule = Schemas['ProductSelectionRuleDto'];
 export type ProductSelectionFilter = Schemas['ProductSelectionFilterDto'];

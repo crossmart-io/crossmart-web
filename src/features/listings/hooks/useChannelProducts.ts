@@ -6,7 +6,7 @@ import type { Pagination } from '@/hooks/usePagination';
 import { CHANNEL_PRODUCTS_ENDPOINT } from '../listings.constants';
 import type { ChannelProduct, ChannelProductCounts, ChannelProductPage } from '../listings.types';
 
-export interface ChannelProductsQuery {
+interface ChannelProductsQuery {
   state?: ChannelProductState;
   search?: string;
   sort: ChannelProductSort;

@@ -99,7 +99,7 @@ export const CHANNEL_FEEDBACK = {
 } as const;
 
 /** Single-colour marks are painted in the text colour, so they stay visible in dark mode. */
-export const FOREGROUND_TINT = 'currentColor';
+const FOREGROUND_TINT = 'currentColor';
 
 export interface ChannelLogo {
   src: string;
@@ -126,7 +126,7 @@ export interface TextAccountPrompt extends AccountPromptBase {
   suffix?: string;
 }
 
-export interface AccountOption {
+interface AccountOption {
   /** The account handle sent to the API, such as `EBAY_US`. */
   value: string;
   label: string;

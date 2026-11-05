@@ -12,7 +12,7 @@ import { type SortOption, toSortOption } from '@/components/lists/sort-options';
 import { PRODUCT_SORTS } from '../catalog.constants';
 
 /** The products table's store filter, as the URL holds it. */
-export interface StoreFilterValue {
+interface StoreFilterValue {
   filter?: ProductStoreFilter;
   storeId?: string;
 }
@@ -31,7 +31,7 @@ function toStoreFilter(filter: string | null, storeId: string | null): StoreFilt
 }
 
 /** The filters a saved view stores: absent ones mean "any". */
-export interface ListFilterValues {
+interface ListFilterValues {
   search?: string | null;
   status?: ProductStatus | null;
   gap?: CatalogGap | null;

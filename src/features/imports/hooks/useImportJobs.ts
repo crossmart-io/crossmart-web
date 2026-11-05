@@ -10,7 +10,7 @@ import {
 } from '../imports.constants';
 import type { ImportJob } from '../imports.types';
 
-export interface ImportJobsQuery {
+interface ImportJobsQuery {
   status?: ImportJobStatus;
   format?: CatalogImportFormat;
   direction: SortDirection;

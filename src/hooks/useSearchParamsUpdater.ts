@@ -2,7 +2,7 @@ import { useCallback } from 'react';
 import { useSearchParams } from 'react-router';
 import { PAGINATION_QUERY } from '@/config/routes';
 
-export type SearchParamsUpdate = (params: URLSearchParams) => void;
+type SearchParamsUpdate = (params: URLSearchParams) => void;
 
 /**
  * Edits the current query parameters in place. Filter changes replace the history entry,

@@ -16,7 +16,7 @@ import type { CatalogImportResult } from '../imports.types';
 
 const IMPORT_HISTORY_ENDPOINTS = [IMPORT_JOBS_ENDPOINT];
 
-export interface ImportFile {
+interface ImportFile {
   mode: FileImportMode;
   file: File;
 }

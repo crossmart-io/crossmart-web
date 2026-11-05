@@ -24,7 +24,7 @@ export const ebayDefaultsFormSchema = z
   });
 
 export type EbayDefaultsFormValues = z.input<typeof ebayDefaultsFormSchema>;
-export type EbayDefaultsFormOutput = z.output<typeof ebayDefaultsFormSchema>;
+type EbayDefaultsFormOutput = z.output<typeof ebayDefaultsFormSchema>;
 
 /** The form fields that pick a business policy. */
 export const EBAY_POLICY_FIELDS = [

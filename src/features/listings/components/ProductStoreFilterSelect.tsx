@@ -13,7 +13,7 @@ import {
 import { connectionName, useChannelConnections } from '@/features/channels';
 import { ANY_STORE, STORE_FILTER_LABELS } from '../listings.constants';
 
-export interface StoreFilterChoice {
+interface StoreFilterChoice {
   filter?: ProductStoreFilter;
   storeId?: string;
 }

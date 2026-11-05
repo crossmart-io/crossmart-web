@@ -9,8 +9,7 @@ export const CONNECT_REDIRECT_PARAMS = {
   channel: 'channel',
 } as const satisfies Record<keyof ConnectRedirect, keyof ConnectRedirect>;
 
-export type ConnectOutcome =
-  { kind: 'connected'; message: string } | { kind: 'failed'; message: string };
+type ConnectOutcome = { kind: 'connected'; message: string } | { kind: 'failed'; message: string };
 
 function findValue<TValue extends string>(values: readonly TValue[], raw: string | null) {
   return values.find((value) => value === raw);

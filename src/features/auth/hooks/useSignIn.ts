@@ -2,7 +2,7 @@ import { useMutation } from '@tanstack/react-query';
 import { authClient } from '@/api/auth-client';
 import { AuthRequestError } from '../auth-error';
 
-export interface SignInCredentials {
+interface SignInCredentials {
   email: string;
   password: string;
 }
