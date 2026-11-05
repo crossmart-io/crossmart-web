@@ -3,12 +3,15 @@ import { toast } from 'sonner';
 import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { SuggestionStatus } from '@/api/schema';
+import { useInvalidateCatalog } from '@/features/catalog';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import { PRODUCT_CHANNELS_ENDPOINT } from '@/features/listings/listings.constants';
+import { chunk } from '@/lib/chunk';
 import { pluralize } from '@/lib/format';
 import {
   APPROVE_SUGGESTION_ENDPOINT,
   BULK_APPROVE_ENDPOINT,
+  BULK_APPROVE_MAX,
   REJECT_SUGGESTION_ENDPOINT,
   SUGGESTIONS_ENDPOINT,
   SUGGESTIONS_FEEDBACK,
@@ -31,9 +34,34 @@ function announceBulk({ items }: BulkReviewResult): void {
   toast.success(`Applied ${pluralize(applied, 'suggestion')}${staleNote}`);
 }
 
+/** A suggestion without a store edits the product itself, so the catalog shows it too. */
+function changesProduct(suggestion: Suggestion): boolean {
+  return suggestion.connection === null && suggestion.status === SuggestionStatus.APPLIED;
+}
+
+/** Approves in batches the API accepts, and reports them as one result. */
+async function approveInBatches(
+  workspaceId: string,
+  suggestionIds: readonly string[],
+): Promise<BulkReviewResult> {
+  const result: BulkReviewResult = { items: [], skippedIds: [] };
+  for (const batch of chunk(suggestionIds, BULK_APPROVE_MAX)) {
+    const reviewed = await unwrap(
+      fetchClient.POST(BULK_APPROVE_ENDPOINT, {
+        params: { path: { workspaceId } },
+        body: { suggestionIds: batch },
+      }),
+    );
+    result.items.push(...reviewed.items);
+    result.skippedIds.push(...reviewed.skippedIds);
+  }
+  return result;
+}
+
 /** Approves or rejects one suggestion of the workspace. */
 export function useSuggestionReview(workspaceId: string) {
   const refresh = useInvalidateEndpoints(REVIEW_ENDPOINTS);
+  const refreshCatalog = useInvalidateCatalog();
   const approve = useMutation<Suggestion, Error, string>({
     mutationFn: (suggestionId) =>
       unwrap(
@@ -41,7 +69,10 @@ export function useSuggestionReview(workspaceId: string) {
           params: { path: { workspaceId, suggestionId } },
         }),
       ),
-    onSuccess: announceApproval,
+    onSuccess: async (suggestion) => {
+      announceApproval(suggestion);
+      if (changesProduct(suggestion)) await refreshCatalog();
+    },
     onSettled: refresh,
   });
   const reject = useMutation<Suggestion, Error, string>({
@@ -57,18 +88,19 @@ export function useSuggestionReview(workspaceId: string) {
   return { approve, reject };
 }
 
-/** Approves many pending suggestions at once; the ones no longer pending are skipped. */
+/**
+ * Approves many pending suggestions, in as many requests as the API's limit needs; the ones no
+ * longer pending are skipped.
+ */
 export function useBulkApproveSuggestions(workspaceId: string) {
   const refresh = useInvalidateEndpoints(REVIEW_ENDPOINTS);
+  const refreshCatalog = useInvalidateCatalog();
   return useMutation<BulkReviewResult, Error, string[]>({
-    mutationFn: (suggestionIds) =>
-      unwrap(
-        fetchClient.POST(BULK_APPROVE_ENDPOINT, {
-          params: { path: { workspaceId } },
-          body: { suggestionIds },
-        }),
-      ),
-    onSuccess: announceBulk,
+    mutationFn: (suggestionIds) => approveInBatches(workspaceId, suggestionIds),
+    onSuccess: async (result) => {
+      announceBulk(result);
+      if (result.items.some(changesProduct)) await refreshCatalog();
+    },
     onSettled: refresh,
   });
 }
