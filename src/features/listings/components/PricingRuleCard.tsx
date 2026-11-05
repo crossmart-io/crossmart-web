@@ -1,6 +1,6 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { FormProvider, useForm, useWatch } from 'react-hook-form';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { useWatch } from 'react-hook-form';
+import { SettingsFormCard } from '@/components/forms/SettingsFormCard';
+import { useSaveableForm } from '@/hooks/useSaveableForm';
 import { useUpdatePricing } from '../hooks/useConnectionRules';
 import type { PricingRule } from '../listings.types';
 import {
@@ -10,7 +10,6 @@ import {
   toPricingRule,
   toPricingRuleForm,
 } from '../pricing-rule-form';
-import { CardSaveFooter } from '@/components/forms/CardSaveFooter';
 import { PricingExample } from './PricingExample';
 import {
   AdjustmentFields,
@@ -44,55 +43,40 @@ export function PricingRuleCard({
   rule,
   canManage,
 }: PricingRuleCardProps) {
-  const form = useForm<PricingRuleFormValues>({
-    resolver: zodResolver(pricingRuleFormSchema),
-    defaultValues: toPricingRuleForm(rule),
+  const save = useUpdatePricing({ workspaceId, connectionId });
+  const { form, submit } = useSaveableForm({
+    schema: pricingRuleFormSchema,
+    defaults: toPricingRuleForm(rule),
+    save: (values) => save.mutateAsync(toPricingRule(values)),
+    toForm: (saved) => toPricingRuleForm(saved.pricing),
     // The live example depends on a valid rule, so say what is wrong as the merchant types.
     mode: 'onChange',
   });
   const values = useWatch({ control: form.control }) as PricingRuleFormValues;
-  const save = useUpdatePricing({ workspaceId, connectionId });
-  const submit = form.handleSubmit(async (submitted) => {
-    const saved = await save.mutateAsync(toPricingRule(submitted));
-    form.reset(toPricingRuleForm(saved.pricing));
-  });
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <h2>Pricing</h2>
-        </CardTitle>
-        <CardDescription>{PRICING_DESCRIPTION}</CardDescription>
-      </CardHeader>
-      <FormProvider {...form}>
-        <form onSubmit={(event) => void submit(event)} noValidate>
-          <CardContent className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]">
-            <fieldset disabled={!canManage} className="flex min-w-0 flex-col gap-5">
-              {catalogCurrency !== currency && (
-                <ConversionField from={catalogCurrency} to={currency} />
-              )}
-              <AdjustmentFields currency={currency} />
-              <RoundingField />
-              <FloorField />
-              <CompareAtField />
-            </fieldset>
-            <PricingExample
-              workspaceId={workspaceId}
-              connectionId={connectionId}
-              rule={toPreviewRule(values)}
-            />
-          </CardContent>
-          {canManage && (
-            <CardSaveFooter
-              label="Save and apply"
-              error={save.error}
-              isSaving={form.formState.isSubmitting}
-              disabled={!form.formState.isDirty}
-            />
-          )}
-        </form>
-      </FormProvider>
-    </Card>
+    <SettingsFormCard
+      title="Pricing"
+      description={PRICING_DESCRIPTION}
+      form={form}
+      onSubmit={submit}
+      canManage={canManage}
+      saveLabel="Save and apply"
+      saveError={save.error}
+      contentClassName="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]"
+      after={
+        <PricingExample
+          workspaceId={workspaceId}
+          connectionId={connectionId}
+          rule={toPreviewRule(values)}
+        />
+      }
+    >
+      {catalogCurrency !== currency && <ConversionField from={catalogCurrency} to={currency} />}
+      <AdjustmentFields currency={currency} />
+      <RoundingField />
+      <FloorField />
+      <CompareAtField />
+    </SettingsFormCard>
   );
 }

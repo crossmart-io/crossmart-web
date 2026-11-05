@@ -1,7 +1,7 @@
-import { ArrowRight, CircleAlert } from 'lucide-react';
+import { ArrowRight } from 'lucide-react';
 import { type FormEvent, type ReactNode, useId } from 'react';
+import { FormError } from '@/components/feedback/FormError';
 import { StockAdjustmentMode } from '@/api/schema';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -36,10 +36,10 @@ export function AdjustStockForm({ workspaceId, item, onDone }: AdjustStockFormPr
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!form.body) return;
-    adjust
-      .mutateAsync({ inventoryItemId: item.inventoryItemId, body: form.body })
-      .then(onDone)
-      .catch(() => undefined);
+    adjust.mutate(
+      { inventoryItemId: item.inventoryItemId, body: form.body },
+      { onSuccess: onDone },
+    );
   }
 
   return (
@@ -68,12 +68,7 @@ export function AdjustStockForm({ workspaceId, item, onDone }: AdjustStockFormPr
         />
       </FormRow>
       <StockPreview id={ids.preview} item={item} mode={form.mode} quantity={form.quantity} />
-      {adjust.error && (
-        <Alert variant="destructive">
-          <CircleAlert />
-          <AlertDescription>{adjust.error.message}</AlertDescription>
-        </Alert>
-      )}
+      <FormError error={adjust.error} />
       <Button type="submit" disabled={!form.body || adjust.isPending}>
         {adjust.isPending && <Spinner data-icon="inline-start" />}
         Save

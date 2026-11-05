@@ -29,7 +29,3 @@ export function hasPermission(
 ): boolean {
   return workspace.permissions.includes(permission);
 }
-
-export function isWorkspaceRole(value: string): value is WorkspaceRole {
-  return Object.values<string>(WorkspaceRole).includes(value);
-}

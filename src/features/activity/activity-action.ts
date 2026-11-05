@@ -53,7 +53,3 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.suggestion_rejected]: 'Suggestion rejected',
   [ActivityAction.suggestions_bulk_approved]: 'Suggestions approved in bulk',
 };
-
-export function toActivityAction(value: string | null): ActivityAction | undefined {
-  return Object.values(ActivityAction).find((action) => action === value);
-}

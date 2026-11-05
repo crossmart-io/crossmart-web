@@ -3,7 +3,7 @@ import { ActivityActorType } from '@/api/schema';
 import { BrandMark } from '@/components/brand/BrandMark';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { toInitials } from '@/features/auth';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import type { ActivityActor } from '../activity.types';
 import { toActorName } from '../activity-actor';
 

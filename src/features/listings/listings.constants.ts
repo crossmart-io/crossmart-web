@@ -177,7 +177,7 @@ export const IN_STORE_STATES = [
   ChannelProductState.failed,
   ChannelProductState.removing,
 ] as const;
-export type InStoreState = (typeof IN_STORE_STATES)[number];
+type InStoreState = (typeof IN_STORE_STATES)[number];
 /** The tab's filters: the store's states, and products removed by hand, to add them back. */
 export type ChannelProductFilter =
   InStoreState | ChannelProductState.removed_by_hand | typeof ALL_CHANNEL_PRODUCTS;

@@ -22,7 +22,10 @@ function setup() {
 describe('useSaveItemSpecifics', () => {
   it('replaces the listing’s item specifics and reads them again', async () => {
     const saved = { category: null, aspects: [], itemSpecifics: SPECIFICS };
-    vi.mocked(fetchClient.PUT).mockResolvedValue({ data: saved } as never);
+    vi.mocked(fetchClient.PUT).mockResolvedValue({
+      data: saved,
+      response: new Response(),
+    } as never);
     const { result, invalidate } = setup();
 
     await act(() => result.current.mutateAsync(SPECIFICS));
@@ -37,6 +40,7 @@ describe('useSaveItemSpecifics', () => {
   it('throws the API’s message', async () => {
     vi.mocked(fetchClient.PUT).mockResolvedValue({
       error: { statusCode: 400, message: 'Set each item specific once: color' },
+      response: new Response(null, { status: 400 }),
     } as never);
     const { result } = setup();
 

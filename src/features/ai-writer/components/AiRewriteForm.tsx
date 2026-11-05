@@ -1,6 +1,5 @@
-import { CircleAlert } from 'lucide-react';
 import { useId, useState } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import { Field, FieldLabel } from '@/components/ui/field';
 import { Spinner } from '@/components/ui/spinner';
@@ -52,12 +51,7 @@ export function AiRewriteForm({ isWriting, error, onSubmit }: AiRewriteFormProps
           </Button>
         ))}
       </div>
-      {error && (
-        <Alert variant="destructive">
-          <CircleAlert />
-          <AlertDescription>{error.message}</AlertDescription>
-        </Alert>
-      )}
+      <FormError error={error} />
       <Button type="submit" size="sm" className="self-end" disabled={isWriting}>
         {isWriting && <Spinner data-icon="inline-start" />}
         {isWriting ? AI_WRITER_COPY.writing : AI_WRITER_COPY.submit}

@@ -1,8 +1,7 @@
 import { z } from 'zod';
 import { OutOfStockPolicy, ProductStatus } from '@/api/schema';
+import { moneyAmount, optionalMoneyAmount } from '@/lib/form-schemas';
 
-/** Mirrors the API: up to 10 integer digits and 2 decimals. */
-const AMOUNT_PATTERN = /^\d{1,10}(\.\d{1,2})?$/;
 const INTEGER_PATTERN = /^-?\d+$/;
 const NON_NEGATIVE_INTEGER_PATTERN = /^\d+$/;
 
@@ -10,13 +9,6 @@ export const MAX_OPTIONS = 3;
 export const MAX_VARIANTS = 250;
 export const MAX_TEXT_LENGTH = 255;
 
-const AMOUNT_MESSAGE = 'Enter an amount like 19.90';
-
-const amount = z.string().trim().regex(AMOUNT_PATTERN, AMOUNT_MESSAGE);
-const optionalAmount = z
-  .string()
-  .trim()
-  .refine((value) => value === '' || AMOUNT_PATTERN.test(value), AMOUNT_MESSAGE);
 const optionalText = z.string().trim().max(MAX_TEXT_LENGTH);
 
 export const variantFormSchema = z.object({
@@ -24,9 +16,9 @@ export const variantFormSchema = z.object({
   optionValues: z.array(z.string()),
   sku: optionalText,
   barcode: optionalText,
-  price: amount,
-  compareAtPrice: optionalAmount,
-  cost: optionalAmount,
+  price: moneyAmount,
+  compareAtPrice: optionalMoneyAmount,
+  cost: optionalMoneyAmount,
   weightGrams: z
     .string()
     .trim()

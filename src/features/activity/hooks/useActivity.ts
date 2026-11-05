@@ -1,4 +1,4 @@
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import type { ActivityAction, ActivityOutcome, SortDirection } from '@/api/schema';
 import { usePagedList } from '@/hooks/usePagedList';
@@ -18,15 +18,15 @@ async function fetchActivityPage(
   page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
-  const { data, error } = await fetchClient.GET(ACTIVITY_ENDPOINT, {
-    params: {
-      path: { workspaceId },
-      query: { action, outcome, direction, ...page },
-    },
-    signal,
-  });
-  if (error) throw ApiRequestError.from(error);
-  return data;
+  return unwrap(
+    fetchClient.GET(ACTIVITY_ENDPOINT, {
+      params: {
+        path: { workspaceId },
+        query: { action, outcome, direction, ...page },
+      },
+      signal,
+    }),
+  );
 }
 
 /** One numbered page of the workspace log, newest first. Refetched when the page opens. */

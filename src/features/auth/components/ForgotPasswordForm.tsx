@@ -1,5 +1,6 @@
 import { MailCheck } from 'lucide-react';
 import type { FormEvent } from 'react';
+import { FormError } from '@/components/feedback/FormError';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
@@ -7,7 +8,6 @@ import { AuthField } from '../auth.constants';
 import { useRequestPasswordReset } from '../hooks/usePasswordReset';
 import { readAuthField } from '../read-auth-form';
 import { EmailField } from './AuthFields';
-import { AuthFormError } from './AuthFormError';
 
 export function ForgotPasswordForm() {
   const request = useRequestPasswordReset();
@@ -32,7 +32,7 @@ export function ForgotPasswordForm() {
   return (
     <form onSubmit={handleSubmit}>
       <FieldGroup>
-        <AuthFormError error={request.error} />
+        <FormError error={request.error} />
         <EmailField />
         <Button type="submit" disabled={request.isPending}>
           {request.isPending ? 'Sending…' : 'Email me a link'}

@@ -1,8 +1,8 @@
-import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { useMutation, useQuery } from '@tanstack/react-query';
+import { unwrap } from '@/api/unwrap';
 import { api, fetchClient } from '@/api/client';
-import { endpointQueryKey } from '@/api/query-keys';
 import type { components } from '@/api/schema';
+import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import { selectWorkspace } from '../selected-workspace';
 import {
   INVITATION_ACCEPT_ENDPOINT,
@@ -21,36 +21,34 @@ export function useInvitations(workspaceId: string) {
   return api.useQuery('get', INVITATIONS_ENDPOINT, { params: { path: { workspaceId } } });
 }
 
-function useRefreshInvitations() {
-  const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: endpointQueryKey(INVITATIONS_ENDPOINT) });
-}
+const INVITATION_LIST_ENDPOINTS = [INVITATIONS_ENDPOINT];
+const ME_ENDPOINTS = [ME_ENDPOINT];
 
 export function useInviteMember(workspaceId: string) {
-  const refresh = useRefreshInvitations();
+  const refresh = useInvalidateEndpoints(INVITATION_LIST_ENDPOINTS);
   return useMutation<Invitation, Error, NewInvitation>({
     meta: { inlineError: true, successMessage: MEMBERS_FEEDBACK.invited },
-    mutationFn: async (body) => {
-      const { data, error } = await fetchClient.POST(INVITATIONS_ENDPOINT, {
-        params: { path: { workspaceId } },
-        body,
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (body) =>
+      unwrap(
+        fetchClient.POST(INVITATIONS_ENDPOINT, {
+          params: { path: { workspaceId } },
+          body,
+        }),
+      ),
     onSuccess: refresh,
   });
 }
 
 export function useRevokeInvitation(workspaceId: string) {
-  const refresh = useRefreshInvitations();
+  const refresh = useInvalidateEndpoints(INVITATION_LIST_ENDPOINTS);
   return useMutation<void, Error, string>({
     meta: { successMessage: MEMBERS_FEEDBACK.invitationRevoked },
     mutationFn: async (invitationId) => {
-      const { error } = await fetchClient.DELETE(INVITATION_ENDPOINT, {
-        params: { path: { workspaceId, invitationId } },
-      });
-      if (error) throw ApiRequestError.from(error);
+      await unwrap(
+        fetchClient.DELETE(INVITATION_ENDPOINT, {
+          params: { path: { workspaceId, invitationId } },
+        }),
+      );
     },
     onSuccess: refresh,
   });
@@ -62,28 +60,28 @@ export function useInvitationPreview(token: string) {
     queryKey: [INVITATION_PREVIEW_ENDPOINT, token],
     enabled: token.length > 0,
     retry: false,
-    queryFn: async () => {
-      const { data, error } = await fetchClient.POST(INVITATION_PREVIEW_ENDPOINT, {
-        body: { token },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    queryFn: () =>
+      unwrap(
+        fetchClient.POST(INVITATION_PREVIEW_ENDPOINT, {
+          body: { token },
+        }),
+      ),
   });
 }
 
 /** Joins the workspace and makes it the one the app opens. */
 export function useAcceptInvitation() {
-  const queryClient = useQueryClient();
+  const refreshMe = useInvalidateEndpoints(ME_ENDPOINTS);
   return useMutation<void, Error, string>({
     meta: { inlineError: true },
     mutationFn: async (token) => {
-      const { data, error } = await fetchClient.POST(INVITATION_ACCEPT_ENDPOINT, {
-        body: { token },
-      });
-      if (error) throw ApiRequestError.from(error);
+      const data = await unwrap(
+        fetchClient.POST(INVITATION_ACCEPT_ENDPOINT, {
+          body: { token },
+        }),
+      );
       selectWorkspace(data.workspaceId);
     },
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: endpointQueryKey(ME_ENDPOINT) }),
+    onSuccess: refreshMe,
   });
 }

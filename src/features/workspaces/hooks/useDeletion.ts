@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { ROUTES } from '@/config/routes';
 import { DELETION_FEEDBACK, ME_ENDPOINT, WORKSPACE_ENDPOINT } from '../workspaces.constants';
@@ -10,11 +10,12 @@ export function useDeleteWorkspace(workspaceId: string) {
   return useMutation<void, Error, string>({
     meta: { successMessage: DELETION_FEEDBACK.workspaceDeleted },
     mutationFn: async (confirmName) => {
-      const { error } = await fetchClient.DELETE(WORKSPACE_ENDPOINT, {
-        params: { path: { workspaceId } },
-        body: { confirmName },
-      });
-      if (error) throw ApiRequestError.from(error);
+      await unwrap(
+        fetchClient.DELETE(WORKSPACE_ENDPOINT, {
+          params: { path: { workspaceId } },
+          body: { confirmName },
+        }),
+      );
     },
     // Every cached list belonged to the deleted workspace.
     onSuccess: () => queryClient.clear(),
@@ -28,8 +29,7 @@ export function useDeleteWorkspace(workspaceId: string) {
 export function useDeleteAccount() {
   return useMutation<void, Error>({
     mutationFn: async () => {
-      const { error } = await fetchClient.DELETE(ME_ENDPOINT);
-      if (error) throw ApiRequestError.from(error);
+      await unwrap(fetchClient.DELETE(ME_ENDPOINT));
     },
     onSuccess: () => window.location.assign(ROUTES.signIn),
   });

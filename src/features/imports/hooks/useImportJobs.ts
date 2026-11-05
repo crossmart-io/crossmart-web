@@ -1,4 +1,4 @@
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { api, fetchClient } from '@/api/client';
 import { usePagedList } from '@/hooks/usePagedList';
 import type { Pagination } from '@/hooks/usePagination';
@@ -10,7 +10,7 @@ import {
 } from '../imports.constants';
 import type { ImportJob } from '../imports.types';
 
-export interface ImportJobsQuery {
+interface ImportJobsQuery {
   status?: ImportJobStatus;
   format?: CatalogImportFormat;
   direction: SortDirection;
@@ -22,12 +22,12 @@ async function fetchImportJobPage(
   page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
-  const { data, error } = await fetchClient.GET(IMPORT_JOBS_ENDPOINT, {
-    params: { path: { workspaceId }, query: { ...query, ...page } },
-    signal,
-  });
-  if (error) throw ApiRequestError.from(error);
-  return data;
+  return unwrap(
+    fetchClient.GET(IMPORT_JOBS_ENDPOINT, {
+      params: { path: { workspaceId }, query: { ...query, ...page } },
+      signal,
+    }),
+  );
 }
 
 /** One numbered page of the import history, newest first. */

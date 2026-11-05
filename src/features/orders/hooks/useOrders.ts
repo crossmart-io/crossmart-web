@@ -1,4 +1,4 @@
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { api, fetchClient } from '@/api/client';
 import type { OrderStatus, SortDirection } from '@/api/schema';
 import { usePagedList } from '@/hooks/usePagedList';
@@ -6,7 +6,7 @@ import type { Pagination } from '@/hooks/usePagination';
 import { ORDER_ENDPOINT, ORDERS_ENDPOINT } from '../orders.constants';
 import type { OrderSummary } from '../orders.types';
 
-export interface OrdersQuery {
+interface OrdersQuery {
   search?: string;
   status?: OrderStatus;
   connectionId?: string;
@@ -19,14 +19,13 @@ export function useOrders(workspaceId: string, query: OrdersQuery, pagination: P
     endpoint: ORDERS_ENDPOINT,
     params: { workspaceId, ...query },
     pagination,
-    fetchPage: async (page, signal) => {
-      const { data, error } = await fetchClient.GET(ORDERS_ENDPOINT, {
-        params: { path: { workspaceId }, query: { ...query, ...page } },
-        signal,
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    fetchPage: (page, signal) =>
+      unwrap(
+        fetchClient.GET(ORDERS_ENDPOINT, {
+          params: { path: { workspaceId }, query: { ...query, ...page } },
+          signal,
+        }),
+      ),
     staleTime: 0,
   });
   return { ...list, orders: list.items };

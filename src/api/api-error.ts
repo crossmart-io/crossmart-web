@@ -1,6 +1,6 @@
 const FALLBACK_API_ERROR_MESSAGE = 'Something went wrong. Please try again.';
 
-export enum HttpStatus {
+enum HttpStatus {
   Unauthorized = 401,
   NotFound = 404,
 }

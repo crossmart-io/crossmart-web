@@ -2,13 +2,13 @@ import { keepPreviousData, useInfiniteQuery } from '@tanstack/react-query';
 import { endpointQueryKey } from '@/api/query-keys';
 
 /** One page of a cursor-paged API list. */
-export interface CursorPage<TItem> {
+interface CursorPage<TItem> {
   items: TItem[];
   /** Null or absent on the last page. */
   nextCursor?: string | null;
 }
 
-export interface CursorPagesOptions<TItem, TPage extends CursorPage<TItem> = CursorPage<TItem>> {
+interface CursorPagesOptions<TItem, TPage extends CursorPage<TItem> = CursorPage<TItem>> {
   endpoint: string;
   /** What the list depends on, such as the workspace and the filters. A change starts over. */
   params: object;

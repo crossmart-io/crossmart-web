@@ -17,7 +17,7 @@ import { ImportResultSummary } from './ImportResultSummary';
 
 const IMPORT_FORM_ID = 'catalog-import-form';
 
-export function ImportProductsDialog({ workspaceId }: { workspaceId: string | undefined }) {
+export function ImportProductsDialog({ workspaceId }: { workspaceId: string }) {
   const [open, setOpen] = useState(false);
   const [mode, setMode] = useState<FileImportMode>(DEFAULT_IMPORT_MODE);
   const [file, setFile] = useState<File | null>(null);

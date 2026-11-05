@@ -1,7 +1,6 @@
-import { CircleAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { FormProvider } from 'react-hook-form';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormError } from '@/components/feedback/FormError';
 import type { Workspace } from '@/features/workspaces';
 import { EDITOR_FEEDBACK } from '../../catalog.constants';
 import type { Product } from '../../catalog.types';
@@ -11,7 +10,7 @@ import { ProductEditorLayout } from './ProductEditorLayout';
 import { SaveBar } from './SaveBar';
 import { UnsavedChangesGuard } from './UnsavedChangesGuard';
 
-export const PRODUCT_FORM_ID = 'product-form';
+const PRODUCT_FORM_ID = 'product-form';
 
 interface ProductEditorProps {
   workspace: Workspace;
@@ -42,12 +41,7 @@ export function ProductEditor({ workspace, product, aside, channels }: ProductEd
             />
           )}
           <UnsavedChangesGuard when={isDirty && !isSubmitting} />
-          {editor.saveError && (
-            <Alert variant="destructive" className="mb-6">
-              <CircleAlert />
-              <AlertDescription>{editor.saveError.message}</AlertDescription>
-            </Alert>
-          )}
+          <FormError error={editor.saveError} className="mb-6" />
           <ProductEditorLayout
             workspaceId={workspace.id}
             productId={product?.id}

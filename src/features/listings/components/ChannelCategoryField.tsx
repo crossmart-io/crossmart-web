@@ -1,6 +1,6 @@
-import { CircleAlert, Search } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { type KeyboardEvent, useState } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -82,16 +82,6 @@ function CategorySearch({
   );
 }
 
-function CategoryError({ error }: { error: Error | null }) {
-  if (!error) return null;
-  return (
-    <Alert variant="destructive">
-      <CircleAlert />
-      <AlertDescription>{error.message}</AlertDescription>
-    </Alert>
-  );
-}
-
 /**
  * The eBay category the listing goes in: the current one, and a search through eBay's
  * suggestions to change it. A choice is saved at once, apart from the sheet's other fields.
@@ -101,7 +91,7 @@ export function ChannelCategoryField({ channelRef, category }: ChannelCategoryFi
   const suggestions = useCategorySuggestions(channelRef, search);
   const choose = useChooseListingCategory(channelRef);
   const pick = (next: ChannelCategory | null) =>
-    void choose.mutateAsync(next).then(() => setSearch(null));
+    choose.mutate(next, { onSuccess: () => setSearch(null) });
   return (
     <Field>
       <FieldLabel htmlFor={SEARCH_INPUT_ID}>{CATEGORY_COPY.label}</FieldLabel>
@@ -114,7 +104,7 @@ export function ChannelCategoryField({ channelRef, category }: ChannelCategoryFi
           disabled={choose.isPending}
         />
       )}
-      <CategoryError error={suggestions.error ?? choose.error} />
+      <FormError error={suggestions.error ?? choose.error} />
       <FieldDescription>
         {CATEGORY_COPY.savedNote}{' '}
         {category && (

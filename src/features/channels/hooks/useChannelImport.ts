@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { useEffect, useState } from 'react';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { ImportJobStatus } from '@/api/schema';
 import { useInvalidateCatalog } from '@/features/catalog';
@@ -33,13 +33,12 @@ export function useChannelImport(workspaceId: string, connectionId: string) {
   const [jobId, setJobId] = useState<string>();
   const start = useMutation<ImportJobDetail, Error, void>({
     meta: { inlineError: true },
-    mutationFn: async () => {
-      const { data, error } = await fetchClient.POST(CHANNEL_IMPORTS_ENDPOINT, {
-        params: { path: { workspaceId, connectionId } },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: () =>
+      unwrap(
+        fetchClient.POST(CHANNEL_IMPORTS_ENDPOINT, {
+          params: { path: { workspaceId, connectionId } },
+        }),
+      ),
     onSuccess: (job) => setJobId(job.id),
   });
   const { data: polled } = useImportJob(workspaceId, jobId);

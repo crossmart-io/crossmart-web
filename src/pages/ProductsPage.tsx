@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { Page } from '@/components/layout/Page';
 import { TablePagination } from '@/components/lists/TablePagination';
 import { Button } from '@/components/ui/button';
@@ -26,7 +27,7 @@ import {
 import { useUrlPagination } from '@/hooks/usePagination';
 import type { Selection } from '@/hooks/useSelection';
 import { ImportProductsDialog } from '@/features/imports';
-import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
+import type { Workspace } from '@/features/workspaces';
 import { ProductStoreFilterSelect, StoreMembershipMenu } from '@/features/listings';
 import { BulkGenerateMenu } from '@/features/suggestions';
 import { SortSelect } from '@/components/lists/SortSelect';
@@ -42,7 +43,7 @@ function AddProductButton() {
   );
 }
 
-function AddProductActions({ workspaceId }: { workspaceId: string | undefined }) {
+function AddProductActions({ workspaceId }: { workspaceId: string }) {
   return (
     <>
       <ImportProductsDialog workspaceId={workspaceId} />
@@ -52,18 +53,21 @@ function AddProductActions({ workspaceId }: { workspaceId: string | undefined })
 }
 
 export function ProductsPage() {
-  const { workspace } = useCurrentWorkspace();
+  return <WorkspaceGate>{(workspace) => <Products workspace={workspace} />}</WorkspaceGate>;
+}
+
+function Products({ workspace }: { workspace: Workspace }) {
   const filters = useProductListFilters();
-  const { data: stats } = useCatalogStats(workspace?.id);
+  const { data: stats } = useCatalogStats(workspace.id);
   const counts = stats && toStatusCounts(stats);
 
   return (
     <Page
       name="Products"
       description="One catalog for every channel you sell on."
-      actions={<AddProductActions workspaceId={workspace?.id} />}
+      actions={<AddProductActions workspaceId={workspace.id} />}
     >
-      {workspace && <ProductViewsBar workspaceId={workspace.id} filters={filters} />}
+      <ProductViewsBar workspaceId={workspace.id} filters={filters} />
       <ProductFilters
         search={filters.search}
         onSearchChange={filters.setSearch}
@@ -73,13 +77,11 @@ export function ProductsPage() {
       />
       <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex flex-wrap items-center gap-2">
-          {workspace && (
-            <ProductStoreFilterSelect
-              workspaceId={workspace.id}
-              value={filters.store}
-              onChange={filters.setStore}
-            />
-          )}
+          <ProductStoreFilterSelect
+            workspaceId={workspace.id}
+            value={filters.store}
+            onChange={filters.setStore}
+          />
           {filters.gap && (
             <ActiveFilterChip
               label={CATALOG_GAP_COPY[filters.gap].label}
@@ -95,7 +97,7 @@ export function ProductsPage() {
 }
 
 interface ProductResultsProps {
-  workspace: Workspace | undefined;
+  workspace: Workspace;
   filters: ProductListFilters;
 }
 
@@ -104,7 +106,7 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
   const pagination = useUrlPagination();
   const products = useProducts(
     {
-      workspaceId: workspace?.id,
+      workspaceId: workspace.id,
       search: filters.debouncedSearch,
       status: toStatusQuery(filters.status),
       gap: filters.gap,
@@ -131,7 +133,7 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
       <ProductsEmptyState
         isFiltered={filters.isFiltered}
         onClearFilters={filters.clearAll}
-        actions={<AddProductActions workspaceId={workspace?.id} />}
+        actions={<AddProductActions workspaceId={workspace.id} />}
       />
     );
   }
@@ -139,7 +141,7 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
     <>
       <ProductsTable
         products={products.products}
-        currency={workspace?.currency ?? ''}
+        currency={workspace.currency}
         isRefreshing={products.isPlaceholderData}
         selection={selection}
       />
@@ -150,7 +152,7 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
         noun="product"
         isFetching={products.isPlaceholderData}
       />
-      {workspace && <SelectionActions workspaceId={workspace.id} selection={selection} />}
+      <SelectionActions workspaceId={workspace.id} selection={selection} />
     </>
   );
 }

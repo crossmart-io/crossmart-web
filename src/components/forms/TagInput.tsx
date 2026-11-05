@@ -1,6 +1,6 @@
 import { X } from 'lucide-react';
 import { type KeyboardEvent, useId, useState } from 'react';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 
 /** Keys that turn the typed text into a tag. */
 const COMMIT_KEYS = new Set(['Enter', ',']);

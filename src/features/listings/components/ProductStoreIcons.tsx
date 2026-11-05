@@ -2,7 +2,7 @@ import { ListingStatus } from '@/api/schema';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ChannelLogoSize, channelInfoFor } from '@/features/channels/channels.constants';
 import { ChannelLogo } from '@/features/channels/components/ChannelLogo';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { LISTING_STATUS_LABELS, PRODUCT_STORE_ICONS_SHOWN } from '../listings.constants';
 import type { ProductStore } from '../listings.types';
 

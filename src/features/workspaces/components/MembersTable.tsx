@@ -26,7 +26,7 @@ interface MembersTableProps {
 }
 
 /** What the user may do to one member: change or remove them only if they cover that role. */
-export interface MemberAccess {
+interface MemberAccess {
   manageable: boolean;
   /** The roles the user may give. */
   grantable: readonly RoleOption[];

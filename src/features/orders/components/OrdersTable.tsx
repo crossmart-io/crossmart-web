@@ -9,7 +9,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { toOrderRoute } from '@/config/routes';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { formatDateTime, formatMoney, pluralize } from '@/lib/format';
 import type { OrderSummary } from '../orders.types';
 import { OrderStatusBadge } from './OrderStatusBadge';

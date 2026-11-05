@@ -5,6 +5,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { findOptionValue } from '@/lib/enum';
 import { ANY_VALUE, type FilterOption } from './filter-options';
 
 interface FilterSelectProps<Value extends string> {
@@ -27,7 +28,7 @@ export function FilterSelect<Value extends string>({
   return (
     <Select
       value={value ?? ANY_VALUE}
-      onValueChange={(next) => onChange(options.find((option) => option.value === next)?.value)}
+      onValueChange={(next) => onChange(findOptionValue(options, next))}
     >
       <SelectTrigger className="w-full sm:w-48" aria-label={label}>
         <SelectValue />

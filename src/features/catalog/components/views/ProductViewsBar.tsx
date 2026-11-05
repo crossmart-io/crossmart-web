@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { matchesFilters, type ProductListFilters } from '../../hooks/useProductListFilters';
 import { useDeleteProductView, useProductViews } from '../../hooks/useProductViews';

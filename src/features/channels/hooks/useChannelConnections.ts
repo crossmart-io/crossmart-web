@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { api, fetchClient } from '@/api/client';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
@@ -30,14 +30,13 @@ export function useChannelConnections(workspaceId: string | undefined) {
 export function useStartChannelAuthorization(workspaceId: string) {
   return useMutation<StartedAuthorization, Error, AuthorizationRequest>({
     meta: { inlineError: true },
-    mutationFn: async (body) => {
-      const { data, error } = await fetchClient.POST(CHANNEL_AUTHORIZATIONS_ENDPOINT, {
-        params: { path: { workspaceId } },
-        body,
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (body) =>
+      unwrap(
+        fetchClient.POST(CHANNEL_AUTHORIZATIONS_ENDPOINT, {
+          params: { path: { workspaceId } },
+          body,
+        }),
+      ),
     onSuccess: ({ authorizationUrl }) => window.location.assign(authorizationUrl),
   });
 }
@@ -46,13 +45,12 @@ export function useDisconnectChannel(workspaceId: string) {
   const refresh = useInvalidateEndpoints(CONNECTION_ENDPOINTS);
   return useMutation<ChannelConnection, Error, string>({
     meta: { successMessage: CHANNEL_FEEDBACK.disconnected },
-    mutationFn: async (connectionId) => {
-      const { data, error } = await fetchClient.POST(CHANNEL_DISCONNECT_ENDPOINT, {
-        params: { path: { workspaceId, connectionId } },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (connectionId) =>
+      unwrap(
+        fetchClient.POST(CHANNEL_DISCONNECT_ENDPOINT, {
+          params: { path: { workspaceId, connectionId } },
+        }),
+      ),
     onSuccess: refresh,
   });
 }

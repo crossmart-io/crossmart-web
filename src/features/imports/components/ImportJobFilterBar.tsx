@@ -1,13 +1,13 @@
 import { FilterSelect } from '@/components/lists/FilterSelect';
-import { toFilterOptions } from '@/components/lists/filter-options';
+import { toEnumOptions } from '@/lib/enum';
 import { SortSelect } from '@/components/lists/SortSelect';
 import { TIME_SORTS } from '@/components/lists/sort-options';
 import type { CatalogImportFormat, ImportJobStatus } from '@/api/schema';
 import type { ImportJobFilters } from '../hooks/useImportJobFilters';
 import { IMPORT_FORMAT_LABELS, IMPORT_JOB_STATUS_LABELS } from '../imports.constants';
 
-const STATUS_OPTIONS = toFilterOptions<ImportJobStatus>(IMPORT_JOB_STATUS_LABELS);
-const FORMAT_OPTIONS = toFilterOptions<CatalogImportFormat>(IMPORT_FORMAT_LABELS);
+const STATUS_OPTIONS = toEnumOptions<ImportJobStatus>(IMPORT_JOB_STATUS_LABELS);
+const FORMAT_OPTIONS = toEnumOptions<CatalogImportFormat>(IMPORT_FORMAT_LABELS);
 
 /** Narrows the import history by status and source, and orders it by time. */
 export function ImportJobFilterBar({ filters }: { filters: ImportJobFilters }) {

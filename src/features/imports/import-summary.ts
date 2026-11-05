@@ -13,7 +13,7 @@ const READING_SOURCE = 'reading the store';
 const DELETED_USER = 'A removed member';
 const DELETED_API_KEY = 'A revoked API key';
 
-export interface ImportCount extends ImportCountLabel {
+interface ImportCount extends ImportCountLabel {
   value: number;
 }
 

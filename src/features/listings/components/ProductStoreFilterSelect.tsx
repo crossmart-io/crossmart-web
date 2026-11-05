@@ -11,9 +11,10 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { connectionName, useChannelConnections } from '@/features/channels';
+import { parseEnum } from '@/lib/enum';
 import { ANY_STORE, STORE_FILTER_LABELS } from '../listings.constants';
 
-export interface StoreFilterChoice {
+interface StoreFilterChoice {
   filter?: ProductStoreFilter;
   storeId?: string;
 }
@@ -34,7 +35,7 @@ function toValue({ filter, storeId }: StoreFilterChoice): string {
 function toChoice(value: string): StoreFilterChoice {
   if (value === ANY_STORE) return {};
   const [filter, storeId] = value.split(VALUE_SEPARATOR);
-  const known = Object.values(ProductStoreFilter).find((candidate) => candidate === filter);
+  const known = parseEnum(ProductStoreFilter, filter);
   return known ? { filter: known, storeId } : {};
 }
 

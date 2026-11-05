@@ -1,5 +1,6 @@
 import type { FormEvent } from 'react';
 import { Link, useNavigate } from 'react-router';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import { FieldGroup } from '@/components/ui/field';
 import { ROUTES } from '@/config/routes';
@@ -8,7 +9,6 @@ import { AuthField } from '../auth.constants';
 import { useResetPassword } from '../hooks/usePasswordReset';
 import { readPassword } from '../read-auth-form';
 import { PasswordField } from './AuthFields';
-import { AuthFormError } from './AuthFormError';
 
 interface ResetPasswordFormProps {
   /** From the emailed link; null when the link was invalid or expired. */
@@ -24,7 +24,7 @@ export function ResetPasswordForm({ token, linkError }: ResetPasswordFormProps) 
   if (!token || linkError) {
     return (
       <div className="flex flex-col gap-4">
-        <AuthFormError error={new AuthRequestError(linkError ?? undefined)} />
+        <FormError error={new AuthRequestError(linkError ?? undefined)} />
         <Button asChild variant="outline">
           <Link to={ROUTES.forgotPassword}>Get a new link</Link>
         </Button>
@@ -44,7 +44,7 @@ export function ResetPasswordForm({ token, linkError }: ResetPasswordFormProps) 
   return (
     <form onSubmit={handleSubmit}>
       <FieldGroup>
-        <AuthFormError error={reset.error} />
+        <FormError error={reset.error} />
         <PasswordField autoComplete="new-password" showHint />
         <Button type="submit" disabled={reset.isPending}>
           {reset.isPending ? 'Saving…' : 'Save new password'}

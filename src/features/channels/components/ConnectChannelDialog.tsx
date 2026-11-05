@@ -1,6 +1,5 @@
-import { CircleAlert } from 'lucide-react';
 import { type FormEvent, type ReactNode, useState } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import {
   Dialog,
@@ -29,15 +28,6 @@ interface ConnectChannelDialogProps {
   onOpenChange?: (open: boolean) => void;
   /** Prefills the account, to connect it again. */
   initialAccount?: string;
-}
-
-function ConnectError({ message }: { message: string }) {
-  return (
-    <Alert variant="destructive">
-      <CircleAlert />
-      <AlertDescription>{message}</AlertDescription>
-    </Alert>
-  );
 }
 
 /** Asks which account to connect, then hands the merchant over to the channel to approve. */
@@ -82,7 +72,7 @@ export function ConnectChannelDialog({
             You will approve Crossmart on {channel.name}, then come back here.
           </DialogDescription>
         </DialogHeader>
-        {start.error && <ConnectError message={start.error.message} />}
+        <FormError error={start.error} />
         <form id={FORM_ID} onSubmit={handleSubmit}>
           <AccountField
             prompt={connect.account}

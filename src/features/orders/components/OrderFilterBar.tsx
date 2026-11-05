@@ -1,14 +1,14 @@
 import { Search } from 'lucide-react';
 import type { OrderStatus } from '@/api/schema';
 import { FilterSelect } from '@/components/lists/FilterSelect';
-import { toFilterOptions } from '@/components/lists/filter-options';
+import { toEnumOptions } from '@/lib/enum';
 import { SortSelect } from '@/components/lists/SortSelect';
 import { TIME_SORTS } from '@/components/lists/sort-options';
 import { InputGroup, InputGroupAddon, InputGroupInput } from '@/components/ui/input-group';
 import type { OrderFilters } from '../hooks/useOrderFilters';
 import { ORDER_STATUS_LABELS } from '../orders.constants';
 
-const STATUS_OPTIONS = toFilterOptions<OrderStatus>(ORDER_STATUS_LABELS);
+const STATUS_OPTIONS = toEnumOptions<OrderStatus>(ORDER_STATUS_LABELS);
 
 interface OrderFilterBarProps {
   filters: OrderFilters;

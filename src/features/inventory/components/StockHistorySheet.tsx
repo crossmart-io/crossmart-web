@@ -5,7 +5,7 @@ import { TablePagination } from '@/components/lists/TablePagination';
 import { useState } from 'react';
 import type { InventoryMovementReason } from '@/api/schema';
 import { FilterSelect } from '@/components/lists/FilterSelect';
-import { toFilterOptions } from '@/components/lists/filter-options';
+import { toEnumOptions } from '@/lib/enum';
 import { SortSelect } from '@/components/lists/SortSelect';
 import { TIME_SORTS, toSortOption } from '@/components/lists/sort-options';
 import { useLocalPagination } from '@/hooks/usePagination';
@@ -32,7 +32,7 @@ import { MovementList } from './MovementList';
 import { StockSummary } from './StockSummary';
 
 const HISTORY_SKELETON_ROWS = 4;
-const REASON_OPTIONS = toFilterOptions<InventoryMovementReason>(MOVEMENT_REASON_LABELS);
+const REASON_OPTIONS = toEnumOptions<InventoryMovementReason>(MOVEMENT_REASON_LABELS);
 
 interface StockHistorySheetProps {
   workspaceId: string;

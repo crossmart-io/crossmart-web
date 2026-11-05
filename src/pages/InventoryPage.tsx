@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { ListSkeleton } from '@/components/lists/ListSkeleton';
 import { TablePagination } from '@/components/lists/TablePagination';
 import { useUrlPagination } from '@/hooks/usePagination';
@@ -15,16 +16,17 @@ import {
   useInventory,
   useInventoryListFilters,
 } from '@/features/inventory';
-import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
+import type { Workspace } from '@/features/workspaces';
 
 export function InventoryPage() {
-  const { workspace } = useCurrentWorkspace();
   const filters = useInventoryListFilters();
 
   return (
     <Page name="Inventory" description="Stock of every variant, and every change to it.">
       <InventoryFilters filters={filters} />
-      {workspace && <InventoryResults workspace={workspace} filters={filters} />}
+      <WorkspaceGate>
+        {(workspace) => <InventoryResults workspace={workspace} filters={filters} />}
+      </WorkspaceGate>
     </Page>
   );
 }
