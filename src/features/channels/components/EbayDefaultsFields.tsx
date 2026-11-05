@@ -11,13 +11,11 @@ import {
 } from '@/components/ui/select';
 import { EBAY_CONDITION_LABELS, EBAY_DEFAULTS_COPY } from '../channels.constants';
 import type { EbayPolicy, EbaySettings } from '../channels.types';
-import type { EbayDefaultsFormValues } from '../ebay-defaults-form';
-
-type PolicyField = 'fulfillmentPolicyId' | 'paymentPolicyId' | 'returnPolicyId';
+import type { EbayDefaultsFormValues, EbayPolicyField } from '../ebay-defaults-form';
 
 /** Each policy select: its field, its label, and the account's policies of that kind. */
 const POLICY_SELECTS: readonly {
-  field: PolicyField;
+  field: EbayPolicyField;
   label: string;
   kind: keyof EbaySettings['policies'];
 }[] = [
@@ -31,7 +29,7 @@ function PolicySelect({
   label,
   policies,
 }: {
-  field: PolicyField;
+  field: EbayPolicyField;
   label: string;
   policies: readonly EbayPolicy[];
 }) {

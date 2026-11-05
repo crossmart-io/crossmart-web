@@ -43,6 +43,7 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.channel_sync_requested]: 'Channel sync started',
   [ActivityAction.channel_listing_defaults_updated]: 'Listing defaults changed',
   [ActivityAction.channel_policies_opted_in]: 'Business policies opted in',
+  [ActivityAction.channel_default_policies_created]: 'Default policies created',
   [ActivityAction.listing_category_changed]: 'Channel category changed',
   [ActivityAction.stock_oversold]: 'Oversold',
 };

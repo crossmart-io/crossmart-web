@@ -5,7 +5,7 @@ import {
   COUNTRY_CODE_PATTERN,
   POSTAL_CODE_MAX_LENGTH,
 } from './channels.constants';
-import type { EbayListingDefaults, EbayListingDefaultsBody } from './channels.types';
+import type { EbayListingDefaults, EbayListingDefaultsBody, EbaySettings } from './channels.types';
 
 /** Policies are picked by id; an empty string is "not chosen yet". */
 export const ebayDefaultsFormSchema = z
@@ -26,12 +26,34 @@ export const ebayDefaultsFormSchema = z
 export type EbayDefaultsFormValues = z.input<typeof ebayDefaultsFormSchema>;
 export type EbayDefaultsFormOutput = z.output<typeof ebayDefaultsFormSchema>;
 
-/** The saved defaults as form values. */
-export function toEbayDefaultsForm(defaults: EbayListingDefaults): EbayDefaultsFormValues {
+/** The form fields that pick a business policy. */
+export const EBAY_POLICY_FIELDS = [
+  'fulfillmentPolicyId',
+  'paymentPolicyId',
+  'returnPolicyId',
+] as const;
+export type EbayPolicyField = (typeof EBAY_POLICY_FIELDS)[number];
+
+/** The saved policy choices as form values. */
+export function toEbayPolicyFormValues(
+  defaults: EbayListingDefaults,
+): Pick<EbayDefaultsFormValues, EbayPolicyField> {
   return {
     fulfillmentPolicyId: defaults.fulfillmentPolicyId ?? '',
     paymentPolicyId: defaults.paymentPolicyId ?? '',
     returnPolicyId: defaults.returnPolicyId ?? '',
+  };
+}
+
+/** Whether the account lacks a policy of some kind, so it cannot list yet. */
+export function isMissingPolicies(policies: EbaySettings['policies']): boolean {
+  return Object.values(policies).some((list) => list.length === 0);
+}
+
+/** The saved defaults as form values. */
+export function toEbayDefaultsForm(defaults: EbayListingDefaults): EbayDefaultsFormValues {
+  return {
+    ...toEbayPolicyFormValues(defaults),
     condition: defaults.condition,
     postalCode: defaults.location?.postalCode ?? '',
     country: defaults.location?.country ?? '',

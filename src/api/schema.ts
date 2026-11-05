@@ -734,6 +734,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/business-policies/defaults': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Create default business policies on an eBay account
+     * @description Creates free standard shipping, immediate payment and 30-day return policies on the eBay account (opting it in to business policies first when needed), reads the policies again and chooses the new ones as the listing defaults. Policies that already exist are used as they are, so calling this twice is harmless. Marketplaces without a default shipping service answer 422.
+     */
+    post: operations['EbayAccountController_createDefaultPolicies_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/business-policies/refresh': {
     parameters: {
       query?: never;
@@ -3909,6 +3929,28 @@ export interface operations {
       };
     };
   };
+  EbayAccountController_createDefaultPolicies_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
   EbayAccountController_refreshPolicies_v1: {
     parameters: {
       query?: never;
@@ -4649,6 +4691,7 @@ export enum ActivityAction {
   channel_selection_updated = 'channel_selection_updated',
   channel_listing_defaults_updated = 'channel_listing_defaults_updated',
   channel_policies_opted_in = 'channel_policies_opted_in',
+  channel_default_policies_created = 'channel_default_policies_created',
   listing_category_changed = 'listing_category_changed',
   channel_sync_requested = 'channel_sync_requested',
   stock_oversold = 'stock_oversold',

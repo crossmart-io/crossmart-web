@@ -29,6 +29,8 @@ export const EBAY_POLICIES_OPT_IN_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/business-policies/opt-in';
 export const EBAY_POLICIES_REFRESH_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/business-policies/refresh';
+export const EBAY_DEFAULT_POLICIES_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/business-policies/defaults';
 
 export enum ChannelStatus {
   /** Its connector has shipped: it can be connected. */
@@ -204,7 +206,12 @@ export const EBAY_DEFAULTS_COPY = {
   manage: 'Manage policies on eBay',
   manageNote: 'Opens eBay’s site; sandbox accounts manage policies on the sandbox site.',
   policiesOff:
-    'eBay lists items only under business policies. Opt this account in, then create shipping, payment and return policies on eBay.',
+    'eBay lists items only under business policies. Create default policies here, or opt this account in and create your own on eBay.',
+  policiesMissing: 'eBay needs a shipping, payment and return policy before it lists items.',
+  createDefaults: 'Create default policies',
+  createDefaultsNote:
+    'Creates free shipping, immediate payment and 30-day returns on your eBay account. You can edit them on eBay later.',
+  defaultsCreated: 'Default policies created and chosen',
 } as const;
 
 /** The country of a ship-from address: two capital letters (ISO 3166). */
