@@ -91,6 +91,10 @@ const appRoutes: RouteObject[] = [
       })),
   },
   {
+    path: ROUTES.plan,
+    lazy: () => import('@/pages/PlanPage').then(({ PlanPage }) => ({ Component: PlanPage })),
+  },
+  {
     path: ROUTES.roles,
     lazy: () => import('@/pages/RolesPage').then(({ RolesPage }) => ({ Component: RolesPage })),
   },
