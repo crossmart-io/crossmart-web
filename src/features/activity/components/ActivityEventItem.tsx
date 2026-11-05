@@ -2,7 +2,7 @@ import { ActivityActorType, ActivityOutcome } from '@/api/schema';
 import { Link } from 'react-router';
 import { Badge } from '@/components/ui/badge';
 import { RelativeTime } from '@/components/time/RelativeTime';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import type { ActivityEvent } from '../activity.types';
 import { toActorName } from '../activity-actor';
 import { toSubjectRoute } from '../activity-subject';

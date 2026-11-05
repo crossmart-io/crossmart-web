@@ -1,5 +1,5 @@
 import { Package } from 'lucide-react';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 
 interface ProductThumbnailProps {
   url: string | null;

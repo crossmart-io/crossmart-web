@@ -2,7 +2,7 @@ import { EditorContent, useEditor, useEditorState, type Editor } from '@tiptap/r
 import { useEffect } from 'react';
 import StarterKit from '@tiptap/starter-kit';
 import { Bold, Heading2, Italic, List, ListOrdered, type LucideIcon } from 'lucide-react';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { shortcutAria, shortcutLabel } from '@/lib/platform';
 

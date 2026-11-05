@@ -1,4 +1,4 @@
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 
 /** Spoke end points: one source on the left fanning out to the channels on the right. */
 const CHANNEL_NODES = [

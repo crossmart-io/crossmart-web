@@ -1,6 +1,6 @@
 import { CircleCheck, Circle } from 'lucide-react';
 import { Link } from 'react-router';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
 import { ROUTES } from '@/config/routes';

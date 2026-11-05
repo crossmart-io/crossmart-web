@@ -1,6 +1,6 @@
 import { History } from 'lucide-react';
 import { Link } from 'react-router';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { StockLevel } from '@/api/schema';
 import { Button } from '@/components/ui/button';
 import {

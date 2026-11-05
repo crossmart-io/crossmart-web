@@ -1,4 +1,4 @@
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { formatDateTime } from '@/lib/format';
 import type { InventoryMovement } from '../inventory.types';
 import { MOVEMENT_REASON_LABELS } from '../movement-reason';
