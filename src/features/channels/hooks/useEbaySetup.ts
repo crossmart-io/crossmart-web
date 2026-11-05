@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
@@ -28,14 +28,13 @@ export function useSaveEbayDefaults(ref: ConnectionRef) {
   const refresh = useInvalidateEndpoints(CONNECTION_ENDPOINTS);
   return useMutation<ChannelConnection, Error, EbayListingDefaultsBody>({
     meta: { inlineError: true, successMessage: EBAY_DEFAULTS_COPY.saved },
-    mutationFn: async (body) => {
-      const { data, error } = await fetchClient.PUT(EBAY_LISTING_DEFAULTS_ENDPOINT, {
-        params: { path: ref },
-        body,
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (body) =>
+      unwrap(
+        fetchClient.PUT(EBAY_LISTING_DEFAULTS_ENDPOINT, {
+          params: { path: ref },
+          body,
+        }),
+      ),
     onSuccess: refresh,
   });
 }
@@ -45,13 +44,12 @@ export function useOptInToEbayPolicies(ref: ConnectionRef) {
   const refresh = useInvalidateEndpoints(CONNECTION_ENDPOINTS);
   return useMutation<ChannelConnection, Error>({
     meta: { successMessage: EBAY_DEFAULTS_COPY.optedIn },
-    mutationFn: async () => {
-      const { data, error } = await fetchClient.POST(EBAY_POLICIES_OPT_IN_ENDPOINT, {
-        params: { path: ref },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: () =>
+      unwrap(
+        fetchClient.POST(EBAY_POLICIES_OPT_IN_ENDPOINT, {
+          params: { path: ref },
+        }),
+      ),
     onSuccess: refresh,
   });
 }
@@ -61,13 +59,12 @@ export function useRefreshEbayPolicies(ref: ConnectionRef) {
   const refresh = useInvalidateEndpoints(CONNECTION_ENDPOINTS);
   return useMutation<ChannelConnection, Error>({
     meta: { successMessage: EBAY_DEFAULTS_COPY.refreshed },
-    mutationFn: async () => {
-      const { data, error } = await fetchClient.POST(EBAY_POLICIES_REFRESH_ENDPOINT, {
-        params: { path: ref },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: () =>
+      unwrap(
+        fetchClient.POST(EBAY_POLICIES_REFRESH_ENDPOINT, {
+          params: { path: ref },
+        }),
+      ),
     onSuccess: refresh,
   });
 }
@@ -80,13 +77,12 @@ export function useCreateEbayDefaultPolicies(ref: ConnectionRef) {
   const refresh = useInvalidateEndpoints(CONNECTION_ENDPOINTS);
   return useMutation<ChannelConnection, Error>({
     meta: { successMessage: EBAY_DEFAULTS_COPY.defaultsCreated },
-    mutationFn: async () => {
-      const { data, error } = await fetchClient.POST(EBAY_DEFAULT_POLICIES_ENDPOINT, {
-        params: { path: ref },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: () =>
+      unwrap(
+        fetchClient.POST(EBAY_DEFAULT_POLICIES_ENDPOINT, {
+          params: { path: ref },
+        }),
+      ),
     onSuccess: refresh,
   });
 }

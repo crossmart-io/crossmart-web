@@ -1,4 +1,4 @@
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import type {
   CatalogGap,
@@ -28,15 +28,15 @@ async function fetchProductPage(
   page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
-  const { data, error } = await fetchClient.GET(PRODUCTS_ENDPOINT, {
-    params: {
-      path: { workspaceId: workspaceId ?? '' },
-      query: { ...filters, search: search || undefined, ...page },
-    },
-    signal,
-  });
-  if (error) throw ApiRequestError.from(error);
-  return data;
+  return unwrap(
+    fetchClient.GET(PRODUCTS_ENDPOINT, {
+      params: {
+        path: { workspaceId: workspaceId ?? '' },
+        query: { ...filters, search: search || undefined, ...page },
+      },
+      signal,
+    }),
+  );
 }
 
 /** One numbered page of products in the chosen order. */

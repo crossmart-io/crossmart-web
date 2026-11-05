@@ -1,5 +1,5 @@
 import { keepPreviousData, useQuery } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { endpointQueryKey } from '@/api/query-keys';
 import { useDebouncedValue } from '@/hooks/useDebouncedValue';
@@ -24,15 +24,14 @@ export function usePricingPreview(ref: ConnectionRef, rule: PricingRule | null, 
   const debouncedRule = useDebouncedValue(rule, PREVIEW_DEBOUNCE_MS);
   return useQuery({
     queryKey: [...endpointQueryKey(PRICING_PREVIEW_ENDPOINT), ref, debouncedRule],
-    queryFn: async ({ signal }) => {
-      const { data, error } = await fetchClient.POST(PRICING_PREVIEW_ENDPOINT, {
-        params: { path: ref },
-        body: { rule: debouncedRule },
-        signal,
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    queryFn: ({ signal }) =>
+      unwrap(
+        fetchClient.POST(PRICING_PREVIEW_ENDPOINT, {
+          params: { path: ref },
+          body: { rule: debouncedRule },
+          signal,
+        }),
+      ),
     enabled,
     placeholderData: keepPreviousData,
   });
@@ -43,15 +42,14 @@ export function useSelectionPreview(ref: ConnectionRef, rule: ProductSelectionRu
   const debouncedRule = useDebouncedValue(rule, PREVIEW_DEBOUNCE_MS);
   return useQuery({
     queryKey: [...endpointQueryKey(SELECTION_PREVIEW_ENDPOINT), ref, debouncedRule],
-    queryFn: async ({ signal }) => {
-      const { data, error } = await fetchClient.POST(SELECTION_PREVIEW_ENDPOINT, {
-        params: { path: ref, query: { limit: SELECTION_PREVIEW_PAGE_SIZE } },
-        body: { rule: debouncedRule },
-        signal,
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    queryFn: ({ signal }) =>
+      unwrap(
+        fetchClient.POST(SELECTION_PREVIEW_ENDPOINT, {
+          params: { path: ref, query: { limit: SELECTION_PREVIEW_PAGE_SIZE } },
+          body: { rule: debouncedRule },
+          signal,
+        }),
+      ),
     placeholderData: keepPreviousData,
   });
 }

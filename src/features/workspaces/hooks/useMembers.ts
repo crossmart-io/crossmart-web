@@ -1,8 +1,8 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { api, fetchClient } from '@/api/client';
-import { endpointQueryKey } from '@/api/query-keys';
 import type { components } from '@/api/schema';
+import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import type { RoleAssignment } from '../role-options';
 import {
   MEMBER_ENDPOINT,
@@ -21,35 +21,34 @@ export function useMembers(workspaceId: string) {
   return api.useQuery('get', MEMBERS_ENDPOINT, { params: { path: { workspaceId } } });
 }
 
-function useRefreshMembers() {
-  const queryClient = useQueryClient();
-  return () => queryClient.invalidateQueries({ queryKey: endpointQueryKey(MEMBERS_ENDPOINT) });
-}
+const MEMBER_LIST_ENDPOINTS = [MEMBERS_ENDPOINT];
 
 export function useChangeMemberRole(workspaceId: string) {
-  const refresh = useRefreshMembers();
+  const refresh = useInvalidateEndpoints(MEMBER_LIST_ENDPOINTS);
   return useMutation<void, Error, RoleChange>({
     meta: { successMessage: MEMBERS_FEEDBACK.roleChanged },
     mutationFn: async ({ userId, ...assignment }) => {
-      const { error } = await fetchClient.PATCH(MEMBER_ENDPOINT, {
-        params: { path: { workspaceId, userId } },
-        body: assignment,
-      });
-      if (error) throw ApiRequestError.from(error);
+      await unwrap(
+        fetchClient.PATCH(MEMBER_ENDPOINT, {
+          params: { path: { workspaceId, userId } },
+          body: assignment,
+        }),
+      );
     },
     onSuccess: refresh,
   });
 }
 
 export function useRemoveMember(workspaceId: string) {
-  const refresh = useRefreshMembers();
+  const refresh = useInvalidateEndpoints(MEMBER_LIST_ENDPOINTS);
   return useMutation<void, Error, string>({
     meta: { successMessage: MEMBERS_FEEDBACK.removed },
     mutationFn: async (userId) => {
-      const { error } = await fetchClient.DELETE(MEMBER_ENDPOINT, {
-        params: { path: { workspaceId, userId } },
-      });
-      if (error) throw ApiRequestError.from(error);
+      await unwrap(
+        fetchClient.DELETE(MEMBER_ENDPOINT, {
+          params: { path: { workspaceId, userId } },
+        }),
+      );
     },
     onSuccess: refresh,
   });
@@ -61,10 +60,11 @@ export function useLeaveWorkspace(workspaceId: string) {
   return useMutation<void, Error>({
     meta: { successMessage: MEMBERS_FEEDBACK.left },
     mutationFn: async () => {
-      const { error } = await fetchClient.DELETE(MEMBERSHIP_ENDPOINT, {
-        params: { path: { workspaceId } },
-      });
-      if (error) throw ApiRequestError.from(error);
+      await unwrap(
+        fetchClient.DELETE(MEMBERSHIP_ENDPOINT, {
+          params: { path: { workspaceId } },
+        }),
+      );
     },
     onSuccess: () => queryClient.clear(),
   });

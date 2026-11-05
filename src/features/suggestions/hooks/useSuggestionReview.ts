@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { SuggestionStatus } from '@/api/schema';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
@@ -35,25 +35,23 @@ function announceBulk({ items }: BulkReviewResult): void {
 export function useSuggestionReview(workspaceId: string) {
   const refresh = useInvalidateEndpoints(REVIEW_ENDPOINTS);
   const approve = useMutation<Suggestion, Error, string>({
-    mutationFn: async (suggestionId) => {
-      const { data, error } = await fetchClient.POST(APPROVE_SUGGESTION_ENDPOINT, {
-        params: { path: { workspaceId, suggestionId } },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (suggestionId) =>
+      unwrap(
+        fetchClient.POST(APPROVE_SUGGESTION_ENDPOINT, {
+          params: { path: { workspaceId, suggestionId } },
+        }),
+      ),
     onSuccess: announceApproval,
     onSettled: refresh,
   });
   const reject = useMutation<Suggestion, Error, string>({
     meta: { successMessage: SUGGESTIONS_FEEDBACK.rejected },
-    mutationFn: async (suggestionId) => {
-      const { data, error } = await fetchClient.POST(REJECT_SUGGESTION_ENDPOINT, {
-        params: { path: { workspaceId, suggestionId } },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (suggestionId) =>
+      unwrap(
+        fetchClient.POST(REJECT_SUGGESTION_ENDPOINT, {
+          params: { path: { workspaceId, suggestionId } },
+        }),
+      ),
     onSettled: refresh,
   });
   return { approve, reject };
@@ -63,14 +61,13 @@ export function useSuggestionReview(workspaceId: string) {
 export function useBulkApproveSuggestions(workspaceId: string) {
   const refresh = useInvalidateEndpoints(REVIEW_ENDPOINTS);
   return useMutation<BulkReviewResult, Error, string[]>({
-    mutationFn: async (suggestionIds) => {
-      const { data, error } = await fetchClient.POST(BULK_APPROVE_ENDPOINT, {
-        params: { path: { workspaceId } },
-        body: { suggestionIds },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (suggestionIds) =>
+      unwrap(
+        fetchClient.POST(BULK_APPROVE_ENDPOINT, {
+          params: { path: { workspaceId } },
+          body: { suggestionIds },
+        }),
+      ),
     onSuccess: announceBulk,
     onSettled: refresh,
   });

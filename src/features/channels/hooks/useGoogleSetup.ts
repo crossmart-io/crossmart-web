@@ -1,7 +1,7 @@
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useMutation } from '@tanstack/react-query';
 import { useForm } from 'react-hook-form';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
@@ -37,14 +37,13 @@ function useSaveGoogleSetup(ref: ConnectionRef) {
   const refresh = useInvalidateEndpoints(CONNECTION_ENDPOINTS);
   return useMutation<ChannelConnection, Error, GoogleListingSetupBody>({
     meta: { inlineError: true, successMessage: GOOGLE_SETUP_COPY.saved },
-    mutationFn: async (body) => {
-      const { data, error } = await fetchClient.PUT(GOOGLE_LISTING_SETUP_ENDPOINT, {
-        params: { path: ref },
-        body,
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (body) =>
+      unwrap(
+        fetchClient.PUT(GOOGLE_LISTING_SETUP_ENDPOINT, {
+          params: { path: ref },
+          body,
+        }),
+      ),
     onSuccess: refresh,
   });
 }

@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { fetchClient } from '@/api/client';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { useInvalidateActivity } from '@/features/activity';
 import { useInvalidateCatalog } from '@/features/catalog';
 import { useInvalidateStock } from '@/features/inventory';
@@ -39,17 +39,18 @@ export function useImportProducts(workspaceId: string | undefined) {
   return useMutation<CatalogImportResult, Error, ImportFile>({
     meta: { inlineError: true },
     mutationFn: async (upload) => {
-      const { data, error } = await fetchClient.POST(PRODUCT_IMPORTS_ENDPOINT, {
-        params: { path: { workspaceId: workspaceId ?? '' } },
-        // The generated type describes the form; the browser sends it as multipart.
-        body: {
-          mode: upload.mode,
-          format: FILE_IMPORT_MODE_COPY[upload.mode].format,
-          file: upload.file.name,
-        },
-        bodySerializer: () => toImportForm(upload),
-      });
-      if (error) throw ApiRequestError.from(error);
+      const data = await unwrap(
+        fetchClient.POST(PRODUCT_IMPORTS_ENDPOINT, {
+          params: { path: { workspaceId: workspaceId ?? '' } },
+          // The generated type describes the form; the browser sends it as multipart.
+          body: {
+            mode: upload.mode,
+            format: FILE_IMPORT_MODE_COPY[upload.mode].format,
+            file: upload.file.name,
+          },
+          bodySerializer: () => toImportForm(upload),
+        }),
+      );
       return data;
     },
     // A rejected file is in the history and the log too, so refresh them either way.

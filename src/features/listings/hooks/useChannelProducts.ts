@@ -1,4 +1,4 @@
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import type { ChannelProductSort, ChannelProductState, SortDirection } from '@/api/schema';
 import { usePagedList } from '@/hooks/usePagedList';
@@ -28,14 +28,13 @@ export function useChannelProducts(
     endpoint: CHANNEL_PRODUCTS_ENDPOINT,
     params: { ...ref, ...query },
     pagination,
-    fetchPage: async (page, signal) => {
-      const { data, error } = await fetchClient.GET(CHANNEL_PRODUCTS_ENDPOINT, {
-        params: { path: ref, query: { ...query, ...page } },
-        signal,
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    fetchPage: (page, signal) =>
+      unwrap(
+        fetchClient.GET(CHANNEL_PRODUCTS_ENDPOINT, {
+          params: { path: ref, query: { ...query, ...page } },
+          signal,
+        }),
+      ),
     staleTime: 0,
   });
   const counts: ChannelProductCounts | undefined = pages.data?.counts;

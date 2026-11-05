@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import { pluralize } from '@/lib/format';
@@ -36,11 +36,12 @@ async function sendInBatches(
 ): Promise<number> {
   let count = 0;
   for (const batch of chunk(productIds, STORE_PRODUCTS_BATCH_SIZE)) {
-    const { data, error } = await fetchClient.POST(endpoint, {
-      params: { path: ref },
-      body: { productIds: batch },
-    });
-    if (error) throw ApiRequestError.from(error);
+    const data = await unwrap(
+      fetchClient.POST(endpoint, {
+        params: { path: ref },
+        body: { productIds: batch },
+      }),
+    );
     count += data.count;
   }
   return count;

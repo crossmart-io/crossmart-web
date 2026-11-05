@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { api, fetchClient } from '@/api/client';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
@@ -35,14 +35,13 @@ export function useChooseListingCategory(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(CATEGORY_ENDPOINTS);
   return useMutation<ProductChannel, Error, ChannelCategory | null>({
     meta: { inlineError: true, successMessage: LISTINGS_FEEDBACK.categorySaved },
-    mutationFn: async (category) => {
-      const { data, error } = await fetchClient.PUT(LISTING_CATEGORY_ENDPOINT, {
-        params: { path: ref },
-        body: { category },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (category) =>
+      unwrap(
+        fetchClient.PUT(LISTING_CATEGORY_ENDPOINT, {
+          params: { path: ref },
+          body: { category },
+        }),
+      ),
     onSuccess: refresh,
   });
 }

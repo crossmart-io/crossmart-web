@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { api, fetchClient } from '@/api/client';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
@@ -36,14 +36,13 @@ export function useSaveListingOverride(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(OVERRIDE_ENDPOINTS);
   return useMutation<ProductChannel, Error, ListingOverride>({
     meta: { inlineError: true, successMessage: LISTINGS_FEEDBACK.overrideSaved },
-    mutationFn: async (body) => {
-      const { data, error } = await fetchClient.PUT(LISTING_OVERRIDE_ENDPOINT, {
-        params: { path: ref },
-        body,
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (body) =>
+      unwrap(
+        fetchClient.PUT(LISTING_OVERRIDE_ENDPOINT, {
+          params: { path: ref },
+          body,
+        }),
+      ),
     onSuccess: refresh,
   });
 }
@@ -52,13 +51,12 @@ export function useClearListingOverride(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(OVERRIDE_ENDPOINTS);
   return useMutation<ProductChannel, Error>({
     meta: { successMessage: LISTINGS_FEEDBACK.overrideCleared },
-    mutationFn: async () => {
-      const { data, error } = await fetchClient.DELETE(LISTING_OVERRIDE_ENDPOINT, {
-        params: { path: ref },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: () =>
+      unwrap(
+        fetchClient.DELETE(LISTING_OVERRIDE_ENDPOINT, {
+          params: { path: ref },
+        }),
+      ),
     onSuccess: refresh,
   });
 }
@@ -68,13 +66,12 @@ export function useAddToStore(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(MEMBERSHIP_ENDPOINTS);
   return useMutation<ProductChannel, Error>({
     meta: { successMessage: LISTINGS_FEEDBACK.addedToStore },
-    mutationFn: async () => {
-      const { data, error } = await fetchClient.POST(PRODUCT_CHANNEL_ENDPOINT, {
-        params: { path: ref },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: () =>
+      unwrap(
+        fetchClient.POST(PRODUCT_CHANNEL_ENDPOINT, {
+          params: { path: ref },
+        }),
+      ),
     onSuccess: refresh,
   });
 }
@@ -84,13 +81,12 @@ export function useRemoveFromStore(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(MEMBERSHIP_ENDPOINTS);
   return useMutation<ProductChannel, Error>({
     meta: { successMessage: LISTINGS_FEEDBACK.removedFromStore },
-    mutationFn: async () => {
-      const { data, error } = await fetchClient.DELETE(PRODUCT_CHANNEL_ENDPOINT, {
-        params: { path: ref },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: () =>
+      unwrap(
+        fetchClient.DELETE(PRODUCT_CHANNEL_ENDPOINT, {
+          params: { path: ref },
+        }),
+      ),
     onSuccess: refresh,
   });
 }

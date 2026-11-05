@@ -1,4 +1,4 @@
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { api, fetchClient } from '@/api/client';
 import { SuggestionStatus } from '@/api/schema';
 import { usePagedList } from '@/hooks/usePagedList';
@@ -16,12 +16,12 @@ async function fetchSuggestionPage(
   page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
-  const { data, error } = await fetchClient.GET(SUGGESTIONS_ENDPOINT, {
-    params: { path: { workspaceId }, query: { status, ...page } },
-    signal,
-  });
-  if (error) throw ApiRequestError.from(error);
-  return data;
+  return unwrap(
+    fetchClient.GET(SUGGESTIONS_ENDPOINT, {
+      params: { path: { workspaceId }, query: { status, ...page } },
+      signal,
+    }),
+  );
 }
 
 /** One numbered page of suggestions with a status, newest first. Refetched on each visit. */

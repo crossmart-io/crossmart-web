@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import { chunk } from '@/lib/chunk';
@@ -29,11 +29,12 @@ export function useGenerateContent(workspaceId: string) {
     mutationFn: async ({ connectionId, productIds }) => {
       let queued = 0;
       for (const batch of chunk(productIds, CONTENT_GENERATION_BATCH_SIZE)) {
-        const { data, error } = await fetchClient.POST(CONTENT_GENERATIONS_ENDPOINT, {
-          params: { path: { workspaceId } },
-          body: { connectionId, productIds: batch },
-        });
-        if (error) throw ApiRequestError.from(error);
+        const data = await unwrap(
+          fetchClient.POST(CONTENT_GENERATIONS_ENDPOINT, {
+            params: { path: { workspaceId } },
+            body: { connectionId, productIds: batch },
+          }),
+        );
         queued += data.queued;
       }
       return { queued };
