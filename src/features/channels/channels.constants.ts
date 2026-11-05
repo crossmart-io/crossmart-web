@@ -5,6 +5,7 @@ import {
   ConnectFailure,
   EbayCondition,
   EbayMarketplaceId,
+  GoogleTargetCountry,
 } from '@/api/schema';
 import amazonLogo from './assets/logos/amazon.svg';
 import ebayLogo from './assets/logos/ebay.svg';
@@ -31,6 +32,9 @@ export const EBAY_POLICIES_REFRESH_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/business-policies/refresh';
 export const EBAY_DEFAULT_POLICIES_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/ebay/business-policies/defaults';
+
+export const GOOGLE_LISTING_SETUP_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/google-merchant/listing-setup';
 
 export enum ChannelStatus {
   /** Its connector has shipped: it can be connected. */
@@ -228,6 +232,44 @@ export const EBAY_POLICY_KIND_LABELS = {
   return: 'return',
 } as const;
 
+/** The countries Google listings can target, with the currency they sell in. */
+export const GOOGLE_COUNTRY_LABELS: Record<GoogleTargetCountry, string> = {
+  [GoogleTargetCountry.US]: 'United States (USD)',
+  [GoogleTargetCountry.GB]: 'United Kingdom (GBP)',
+  [GoogleTargetCountry.CA]: 'Canada (CAD)',
+  [GoogleTargetCountry.AU]: 'Australia (AUD)',
+  [GoogleTargetCountry.DE]: 'Germany (EUR)',
+  [GoogleTargetCountry.FR]: 'France (EUR)',
+  [GoogleTargetCountry.IT]: 'Italy (EUR)',
+  [GoogleTargetCountry.ES]: 'Spain (EUR)',
+  [GoogleTargetCountry.NL]: 'Netherlands (EUR)',
+  [GoogleTargetCountry.IL]: 'Israel (ILS)',
+};
+
+/** Where a product's handle goes in the product page address. */
+export const PRODUCT_URL_HANDLE_PLACEHOLDER = '{handle}';
+/** The usual product page path, appended to the account's website as a first suggestion. */
+export const DEFAULT_PRODUCT_PATH = '/products/{handle}';
+
+/** What the Google listing setup card says. */
+export const GOOGLE_SETUP_COPY = {
+  title: 'Listing setup',
+  description:
+    'Where your Google listings sell, and the page on your website each product links to.',
+  ready: 'Ready to list.',
+  notReady: 'Choose the country and the product page address before publishing.',
+  country: 'Country',
+  countryNote: 'Listings are priced in its currency and written for it.',
+  productUrl: 'Product page address',
+  productUrlNote:
+    'Your website’s address for a product, with {handle} where the product’s handle goes.',
+  productUrlInvalid: 'Enter an https address that contains {handle}',
+  homepageNotClaimed:
+    'Google shows products only from a website you verified and claimed in Merchant Center. Claim your website there before publishing.',
+  save: 'Save setup',
+  saved: 'Google listing setup saved',
+} as const;
+
 export interface ChannelInfo {
   name: string;
   description: string;
@@ -278,8 +320,19 @@ export const CHANNELS: readonly ChannelInfo[] = [
   {
     name: 'Google Merchant Center',
     description: 'Show your products in Google Shopping and free listings.',
-    status: ChannelStatus.Planned,
+    status: ChannelStatus.Available,
     logo: { src: googleLogo, tint: '#4285f4' },
+    connect: {
+      type: ChannelType.google_merchant,
+      importsCatalog: false,
+      account: {
+        kind: AccountPromptKind.Text,
+        label: 'Merchant Center ID',
+        placeholder: '123456789',
+        description:
+          'The number at the top right of Merchant Center (merchants.google.com). Sign in with a Google account that manages it.',
+      },
+    },
   },
   {
     name: 'Etsy',

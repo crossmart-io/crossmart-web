@@ -9,3 +9,5 @@ export type EbaySettings = components['schemas']['EbaySettingsDto'];
 export type EbayListingDefaults = components['schemas']['EbayListingDefaultsDto'];
 export type EbayListingDefaultsBody = components['schemas']['UpdateEbayListingDefaultsDto'];
 export type EbayPolicy = components['schemas']['EbayPolicyDto'];
+export type GoogleMerchantSettings = components['schemas']['GoogleMerchantSettingsDto'];
+export type GoogleListingSetupBody = components['schemas']['UpdateGoogleListingSetupDto'];

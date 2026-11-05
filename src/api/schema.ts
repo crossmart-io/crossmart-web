@@ -794,6 +794,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/google-merchant/listing-setup': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Set where a Google Merchant Center connection lists
+     * @description The country listings target (their currency and language follow) and each product’s page address. Saving creates the Merchant Center API data source for a new country.
+     */
+    put: operations['GoogleMerchantAccountController_saveListingSetup_v1'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/products': {
     parameters: {
       query?: never;
@@ -2267,6 +2287,40 @@ export interface components {
       /** @description Whether listings can be published: policies of each type and a ship-from set */
       readyToList: boolean;
     };
+    /** @enum {string} */
+    GoogleTargetCountry: GoogleTargetCountry;
+    GoogleListingSetupDto: {
+      country: components['schemas']['GoogleTargetCountry'];
+      /** @example https://acme.example/products/{handle} */
+      productUrlTemplate: string;
+      /** @description The Merchant Center API data source Crossmart publishes into */
+      dataSourceId: string;
+    };
+    GoogleMerchantSettingsDto: {
+      /** @example 123456789 */
+      accountId: string;
+      /** @example Acme Goods */
+      accountName: string;
+      /** @description The website the account claimed; product links must be on it */
+      homepageUri: string | null;
+      /** @description Whether the account verified and claimed its website */
+      homepageClaimed: boolean;
+      country: components['schemas']['GoogleTargetCountry'];
+      /**
+       * @description ISO 4217 code of the country’s currency
+       * @example USD
+       */
+      currencyCode: string;
+      /**
+       * @description The language listings are written in
+       * @example en
+       */
+      contentLanguage: string;
+      /** @description Null until the merchant saves it; publishing needs it */
+      listingSetup: components['schemas']['GoogleListingSetupDto'] | null;
+      /** @description Whether the listing setup is saved, so products can be listed */
+      readyToList: boolean;
+    };
     ProductSelectionFilterDto: {
       /** @description Matches title, handle or SKU */
       search?: string;
@@ -2334,6 +2388,8 @@ export interface components {
       shopify: components['schemas']['ShopifySettingsDto'] | null;
       /** @description The account’s details on its marketplace, for eBay connections */
       ebay: components['schemas']['EbaySettingsDto'] | null;
+      /** @description The Merchant Center account and its listing setup, for Google connections */
+      googleMerchant: components['schemas']['GoogleMerchantSettingsDto'] | null;
       /** @description Which products the connection lists; null lists every product */
       productSelection: components['schemas']['ProductSelectionRuleDto'] | null;
       /** @description How the connection prices variants; null sends catalog prices */
@@ -2382,6 +2438,15 @@ export interface components {
       condition: components['schemas']['EbayCondition'];
       /** @description Saved on eBay as the account’s Crossmart inventory location */
       location: components['schemas']['EbayShipFromDto'] | null;
+    };
+    UpdateGoogleListingSetupDto: {
+      /** @description Where listings sell; their currency and language follow */
+      country: components['schemas']['GoogleTargetCountry'];
+      /**
+       * @description Each product’s page on the merchant’s website, with {handle} for its handle
+       * @example https://acme.example/products/{handle}
+       */
+      productUrlTemplate: string;
     };
     /** @enum {string} */
     ChannelProductState: ChannelProductState;
@@ -4448,6 +4513,32 @@ export interface operations {
       };
     };
   };
+  GoogleMerchantAccountController_saveListingSetup_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateGoogleListingSetupDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
   ChannelProductsController_listProducts_v1: {
     parameters: {
       query?: {
@@ -5546,6 +5637,18 @@ export enum EbayCondition {
   USED_GOOD = 'USED_GOOD',
   USED_ACCEPTABLE = 'USED_ACCEPTABLE',
   FOR_PARTS_OR_NOT_WORKING = 'FOR_PARTS_OR_NOT_WORKING',
+}
+export enum GoogleTargetCountry {
+  US = 'US',
+  GB = 'GB',
+  CA = 'CA',
+  AU = 'AU',
+  DE = 'DE',
+  FR = 'FR',
+  IT = 'IT',
+  ES = 'ES',
+  NL = 'NL',
+  IL = 'IL',
 }
 export enum PriceRounding {
   none = 'none',

@@ -6,7 +6,7 @@ import { useSelectionEditor } from '../hooks/useSelectionEditor';
 import { SELECTION_MODE_LABELS, SelectionMode } from '../listings.constants';
 import type { ProductSelectionRule, SelectionPreview } from '../listings.types';
 import type { SelectionDraft } from '../selection-draft';
-import { CardSaveFooter } from './CardSaveFooter';
+import { CardSaveFooter } from '@/components/forms/CardSaveFooter';
 import { SelectionFilters } from './SelectionFilters';
 import { SelectionPreviewList } from './SelectionPreviewList';
 

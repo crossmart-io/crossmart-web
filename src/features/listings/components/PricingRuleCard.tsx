@@ -10,7 +10,7 @@ import {
   toPricingRule,
   toPricingRuleForm,
 } from '../pricing-rule-form';
-import { CardSaveFooter } from './CardSaveFooter';
+import { CardSaveFooter } from '@/components/forms/CardSaveFooter';
 import { PricingExample } from './PricingExample';
 import {
   AdjustmentFields,

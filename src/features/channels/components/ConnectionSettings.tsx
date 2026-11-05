@@ -11,6 +11,8 @@ import { ChannelImportSection } from './ChannelImportSection';
 import { ConnectionActions } from './ConnectionActions';
 import { EbayAccountDetails } from './EbayAccountDetails';
 import { EbayListingDefaultsCard } from './EbayListingDefaultsCard';
+import { GoogleAccountDetails } from './GoogleAccountDetails';
+import { GoogleListingSetupCard } from './GoogleListingSetupCard';
 import { ShopifyAccountDetails } from './ShopifyAccountDetails';
 
 interface ConnectionSettingsProps {
@@ -23,6 +25,46 @@ interface ConnectionSettingsProps {
   automaticRule?: ReactNode;
   /** Sends the whole store again, from the listings feature; for recovery. */
   resyncAction?: ReactNode;
+}
+
+/** The channel's own account details. */
+function ChannelAccountDetails({ connection }: { connection: ChannelConnection }) {
+  if (connection.ebay) return <EbayAccountDetails ebay={connection.ebay} />;
+  if (connection.googleMerchant) return <GoogleAccountDetails google={connection.googleMerchant} />;
+  return <ShopifyAccountDetails connection={connection} />;
+}
+
+/** What the channel needs before it can list: eBay's defaults, Google's listing setup. */
+function ChannelSetupCard({
+  workspaceId,
+  connection,
+  canManage,
+}: {
+  workspaceId: string;
+  connection: ChannelConnection;
+  canManage: boolean;
+}) {
+  if (connection.ebay) {
+    return (
+      <EbayListingDefaultsCard
+        workspaceId={workspaceId}
+        connectionId={connection.id}
+        ebay={connection.ebay}
+        canManage={canManage}
+      />
+    );
+  }
+  if (connection.googleMerchant) {
+    return (
+      <GoogleListingSetupCard
+        workspaceId={workspaceId}
+        connectionId={connection.id}
+        googleMerchant={connection.googleMerchant}
+        canManage={canManage}
+      />
+    );
+  }
+  return null;
 }
 
 /** What Crossmart knows about the connected store, and the permissions it was granted. */
@@ -38,11 +80,7 @@ function StoreDetailsCard({ connection }: { connection: ChannelConnection }) {
       <CardContent>
         <dl className="grid gap-4 sm:grid-cols-2">
           <AccountDetail label="Name">{connectionName(connection)}</AccountDetail>
-          {connection.ebay ? (
-            <EbayAccountDetails ebay={connection.ebay} />
-          ) : (
-            <ShopifyAccountDetails connection={connection} />
-          )}
+          <ChannelAccountDetails connection={connection} />
           <AccountDetail label="Connected">{formatDate(connection.connectedAt)}</AccountDetail>
           <AccountDetail label="Permissions">
             <span className="flex flex-wrap gap-1">
@@ -137,14 +175,11 @@ export function ConnectionSettings({
   return (
     <div className="flex flex-col gap-6">
       <StoreDetailsCard connection={connection} />
-      {connection.ebay && (
-        <EbayListingDefaultsCard
-          workspaceId={workspaceId}
-          connectionId={connection.id}
-          ebay={connection.ebay}
-          canManage={canManage && isConnected}
-        />
-      )}
+      <ChannelSetupCard
+        workspaceId={workspaceId}
+        connection={connection}
+        canManage={canManage && isConnected}
+      />
       {automaticRule}
       {canImportProducts && isConnected && importsCatalog && (
         <ImportCard workspaceId={workspaceId} connection={connection} />
