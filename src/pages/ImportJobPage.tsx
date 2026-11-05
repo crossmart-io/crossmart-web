@@ -1,9 +1,7 @@
 import { useParams } from 'react-router';
-import { isNotFoundError } from '@/api/api-error';
-import { ContentLoader } from '@/components/feedback/ContentLoader';
-import { ErrorState } from '@/components/feedback/ErrorState';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { Page } from '@/components/layout/Page';
+import { type ResourcePageCopy, ResourcePage } from '@/components/layout/ResourcePage';
 import { PAGE_PARENTS } from '@/config/navigation';
 import { ROUTE_PARAMS } from '@/config/routes';
 import {
@@ -16,41 +14,33 @@ import {
 } from '@/features/imports';
 import { formatDateTime } from '@/lib/format';
 
-const IMPORT_PAGE_NAME = 'Import';
+const IMPORT_PAGE_COPY: ResourcePageCopy = {
+  name: 'Import',
+  notFoundName: 'Import not found',
+  notFound: 'This import does not exist in this workspace.',
+  loadFailed: 'This import could not be loaded',
+};
 
 function ImportJob({ workspaceId, jobId }: { workspaceId: string; jobId: string }) {
-  const { data: job, isPending, error, refetch } = useImportJob(workspaceId, jobId);
-
-  if (isNotFoundError(error)) {
-    return (
-      <Page name="Import not found" parents={PAGE_PARENTS.imports}>
-        <p className="text-muted-foreground">This import does not exist in this workspace.</p>
-      </Page>
-    );
-  }
-  if (error) {
-    return (
-      <Page name={IMPORT_PAGE_NAME} parents={PAGE_PARENTS.imports}>
-        <ErrorState title="This import could not be loaded" error={error} onRetry={refetch} />
-      </Page>
-    );
-  }
-  if (isPending) return <ContentLoader />;
-
+  const query = useImportJob(workspaceId, jobId);
   return (
-    <Page
-      name={job.fileName}
-      parents={PAGE_PARENTS.imports}
-      title={
-        <>
-          <span className="min-w-0 break-all">{job.fileName}</span>
-          <ImportJobStatusBadge status={job.status} />
-        </>
-      }
-      description={`${IMPORT_FORMAT_LABELS[job.format]} · ${IMPORT_MODE_COPY[job.mode].label} · ${formatDateTime(job.createdAt)} · ${describeActor(job.actor)}`}
-    >
-      <ImportJobDetails job={job} />
-    </Page>
+    <ResourcePage query={query} copy={IMPORT_PAGE_COPY} parents={PAGE_PARENTS.imports}>
+      {(job) => (
+        <Page
+          name={job.fileName}
+          parents={PAGE_PARENTS.imports}
+          title={
+            <>
+              <span className="min-w-0 break-all">{job.fileName}</span>
+              <ImportJobStatusBadge status={job.status} />
+            </>
+          }
+          description={`${IMPORT_FORMAT_LABELS[job.format]} · ${IMPORT_MODE_COPY[job.mode].label} · ${formatDateTime(job.createdAt)} · ${describeActor(job.actor)}`}
+        >
+          <ImportJobDetails job={job} />
+        </Page>
+      )}
+    </ResourcePage>
   );
 }
 
