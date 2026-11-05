@@ -11,6 +11,7 @@ import type { ActivityEvent } from './activity.types';
 const GONE_SUBJECT_ACTIONS: ReadonlySet<ActivityAction> = new Set([
   ActivityAction.product_deleted,
   ActivityAction.api_key_revoked,
+  ActivityAction.agent_disconnected,
   ActivityAction.product_view_deleted,
 ]);
 
@@ -18,6 +19,7 @@ const GONE_SUBJECT_ACTIONS: ReadonlySet<ActivityAction> = new Set([
 const SUBJECT_ROUTES: Record<ActivitySubjectType, (subjectId: string) => string | undefined> = {
   [ActivitySubjectType.product]: toProductRoute,
   [ActivitySubjectType.api_key]: () => ROUTES.apiKeys,
+  [ActivitySubjectType.agent_connection]: () => ROUTES.agentConnections,
   [ActivitySubjectType.import_job]: toImportJobRoute,
   [ActivitySubjectType.channel_connection]: (subjectId) => toChannelConnectionRoute(subjectId),
   [ActivitySubjectType.member]: () => ROUTES.members,

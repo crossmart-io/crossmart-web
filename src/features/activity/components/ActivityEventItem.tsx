@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { RelativeTime } from '@/components/time/RelativeTime';
 import { cn } from 'cn';
 import type { ActivityEvent } from '../activity.types';
-import { toActorName } from '../activity-actor';
+import { toActorName, toAgentUserName } from '../activity-actor';
 import { toSubjectRoute } from '../activity-subject';
 import { ActorAvatar } from './ActorAvatar';
 
@@ -61,10 +61,23 @@ function EventSummary({ event, route }: { event: ActivityEvent; route: string | 
 
 function ActorName({ event }: { event: ActivityEvent }) {
   const name = toActorName(event.actor);
-  if (event.actor.type !== ActivityActorType.API_KEY) return <span>{name}</span>;
-  return (
-    <span>
-      {name} <span className="text-muted-foreground/80">(API key)</span>
-    </span>
-  );
+  switch (event.actor.type) {
+    case ActivityActorType.API_KEY:
+      return (
+        <span>
+          {name} <span className="text-muted-foreground/80">(API key)</span>
+        </span>
+      );
+    case ActivityActorType.AGENT:
+      return (
+        <span>
+          {name}{' '}
+          <span className="text-muted-foreground/80">
+            (agent, for {toAgentUserName(event.actor)})
+          </span>
+        </span>
+      );
+    default:
+      return <span>{name}</span>;
+  }
 }

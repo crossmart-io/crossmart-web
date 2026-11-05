@@ -1,4 +1,4 @@
-import { KeyRound } from 'lucide-react';
+import { Bot, KeyRound } from 'lucide-react';
 import { ActivityActorType } from '@/api/schema';
 import { BrandMark } from '@/components/brand/BrandMark';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
@@ -12,7 +12,7 @@ interface ActorAvatarProps {
   className?: string;
 }
 
-/** Initials for people, a key for API keys, the Crossmart mark for system work. */
+/** Initials for people, a key for API keys, a robot for agents, the Crossmart mark for system work. */
 export function ActorAvatar({ actor, className }: ActorAvatarProps) {
   return (
     <Avatar className={cn('size-8', className)} aria-hidden="true">
@@ -29,6 +29,8 @@ function ActorGlyph({ actor }: { actor: ActivityActor }) {
       return toInitials(toActorName(actor)) || '?';
     case ActivityActorType.API_KEY:
       return <KeyRound className="size-4" />;
+    case ActivityActorType.AGENT:
+      return <Bot className="size-4" />;
     case ActivityActorType.SYSTEM:
       return <BrandMark className="size-4" />;
   }
