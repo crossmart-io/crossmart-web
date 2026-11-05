@@ -1,4 +1,6 @@
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
+import { ContentField } from '@/api/schema';
+import { LabelRow } from '@/components/forms/LabelRow';
 import { RichTextEditor } from '@/components/forms/RichTextEditor';
 import { MoneyInput } from '@/components/forms/MoneyInput';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,20 +13,33 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { AiRewriteButton, type ContentDraftTarget } from '@/features/ai-writer';
 import { formatMoney } from '@/lib/format';
+import { useOverrideAiWriter } from '../hooks/useOverrideAiWriter';
 import { VISIBILITY_OPTIONS, type VisibilityChoice } from '../listings.constants';
 import type { ChannelVariant } from '../listings.types';
 import type { OverrideFormValues } from '../override-form';
 
 const DESCRIPTION_LABEL_ID = 'override-description-label';
 
-export function ContentOverrideFields({ productTitle }: { productTitle: string }) {
+interface ContentOverrideFieldsProps {
+  productTitle: string;
+  aiTarget: ContentDraftTarget;
+}
+
+export function ContentOverrideFields({ productTitle, aiTarget }: ContentOverrideFieldsProps) {
   const { register, control } = useFormContext<OverrideFormValues>();
   const custom = useWatch({ control, name: 'customDescription' });
+  const writer = useOverrideAiWriter();
+  const rewrite = (field: ContentField) => (
+    <AiRewriteButton target={aiTarget} fields={[field]} {...writer} />
+  );
   return (
     <>
       <Field>
-        <FieldLabel htmlFor="override-title">Title in this store</FieldLabel>
+        <LabelRow action={rewrite(ContentField.title)}>
+          <FieldLabel htmlFor="override-title">Title in this store</FieldLabel>
+        </LabelRow>
         <Input id="override-title" placeholder={productTitle} {...register('title')} />
         <FieldDescription>Leave empty to use the product’s title.</FieldDescription>
       </Field>
@@ -46,7 +61,9 @@ export function ContentOverrideFields({ productTitle }: { productTitle: string }
       />
       {custom && (
         <Field>
-          <FieldLabel id={DESCRIPTION_LABEL_ID}>Description in this store</FieldLabel>
+          <LabelRow action={rewrite(ContentField.description)}>
+            <FieldLabel id={DESCRIPTION_LABEL_ID}>Description in this store</FieldLabel>
+          </LabelRow>
           <Controller
             control={control}
             name="descriptionHtml"

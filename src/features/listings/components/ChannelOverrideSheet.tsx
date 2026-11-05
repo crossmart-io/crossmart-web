@@ -14,7 +14,8 @@ import {
 } from '@/components/ui/sheet';
 import { Spinner } from '@/components/ui/spinner';
 import { ChannelType } from '@/api/schema';
-import { GenerateWithAiButton } from '@/features/suggestions';
+import { AI_WRITER_COPY, ALL_CONTENT_FIELDS, AiRewriteButton } from '@/features/ai-writer';
+import { useOverrideAiWriter } from '../hooks/useOverrideAiWriter';
 import {
   useAddToStore,
   useClearListingOverride,
@@ -111,8 +112,24 @@ function OverrideSheetHeader({ isAdding, store, channelRef }: OverrideSheetHeade
           ? 'It is published there once you add it. Change anything this store should show differently; empty fields follow the product.'
           : 'Only this store changes. Empty fields follow the product.'}
       </SheetDescription>
-      <GenerateWithAiButton {...channelRef} />
+      <WriteWithAi channelRef={channelRef} />
     </SheetHeader>
+  );
+}
+
+/** Rewrites this store's title and description into the form, unsaved. */
+function WriteWithAi({ channelRef }: { channelRef: ProductChannelRef }) {
+  const writer = useOverrideAiWriter();
+  return (
+    <div>
+      <AiRewriteButton
+        target={channelRef}
+        fields={ALL_CONTENT_FIELDS}
+        label={AI_WRITER_COPY.writeAll}
+        prominent
+        {...writer}
+      />
+    </div>
   );
 }
 
@@ -139,7 +156,7 @@ function OverrideFieldList({
           <Separator />
         </>
       )}
-      <ContentOverrideFields productTitle={product.title} />
+      <ContentOverrideFields productTitle={product.title} aiTarget={channelRef} />
       <TagsOverrideField />
       <MediaOverrideField imageUrls={product.media.map(({ url }) => url)} />
       <Separator />
@@ -182,8 +199,8 @@ export function ChannelOverrideSheet({
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent className="gap-0 data-[side=right]:w-full data-[side=right]:sm:max-w-lg">
-        <OverrideSheetHeader isAdding={isAdding} store={store} channelRef={ref} />
         <FormProvider {...form}>
+          <OverrideSheetHeader isAdding={isAdding} store={store} channelRef={ref} />
           <form
             onSubmit={(event) => void submit(event)}
             noValidate

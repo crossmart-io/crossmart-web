@@ -1304,6 +1304,26 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/ai/content-drafts': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Rewrite a product’s title or description with AI, right away
+     * @description Rewrites the fields asked for, for the catalog or for one store, optionally following an instruction. The answer is a draft for the editor: nothing is stored until the merchant saves it. Answers 503 while AI is not configured.
+     */
+    post: operations['AiController_draftContent_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2956,6 +2976,34 @@ export interface components {
     ContentGenerationReceiptDto: {
       /** @description Products queued; their suggestions arrive in the inbox */
       queued: number;
+    };
+    /**
+     * @description The fields to rewrite
+     * @enum {string}
+     */
+    ContentField: ContentField;
+    CreateContentDraftDto: {
+      /** Format: uuid */
+      productId: string;
+      /**
+       * Format: uuid
+       * @description The store the text is for; leave out for the catalog’s own content
+       */
+      connectionId?: string;
+      /** @description The fields to rewrite */
+      fields: components['schemas']['ContentField'][];
+      /** @description What to change, such as "shorter" or "mention it is dishwasher-safe" */
+      instruction?: string;
+      /** @description The title as edited and not yet saved; the saved one when left out */
+      title?: string;
+      /** @description The description as edited and not yet saved; the saved one when left out */
+      descriptionHtml?: string;
+    };
+    ContentDraftDto: {
+      /** @description Null when not asked for */
+      title: string | null;
+      /** @description Null when not asked for */
+      descriptionHtml: string | null;
     };
   };
   responses: never;
@@ -5138,6 +5186,31 @@ export interface operations {
       };
     };
   };
+  AiController_draftContent_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['CreateContentDraftDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ContentDraftDto'];
+        };
+      };
+    };
+  };
 }
 export enum PathsApiV1HealthGetResponses200ContentApplicationJsonStatus {
   ok = 'ok',
@@ -5559,4 +5632,9 @@ export enum SuggestionAgent {
 }
 export enum AiFeature {
   content_generation = 'content_generation',
+  content_draft = 'content_draft',
+}
+export enum ContentField {
+  title = 'title',
+  description = 'description',
 }

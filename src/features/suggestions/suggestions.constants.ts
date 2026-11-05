@@ -61,6 +61,4 @@ export const AI_COPY = {
   notConfiguredDescription:
     'Set ANTHROPIC_API_KEY on the server and restart it to turn on AI content and suggestions.',
   generate: 'Generate with AI',
-  generateHint:
-    'Writes a title and description for this store. You review them before anything changes.',
 } as const;
