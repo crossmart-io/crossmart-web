@@ -199,10 +199,15 @@ export function ChannelOverrideSheet({
   const clear = useClearListingOverride(ref);
   const add = useAddToStore(ref);
   const submit = form.handleSubmit(async (values) => {
-    if (!isAdding || form.formState.isDirty) {
-      await save.mutateAsync(toOverrideBody(values));
+    try {
+      if (!isAdding || form.formState.isDirty) {
+        await save.mutateAsync(toOverrideBody(values));
+      }
+      if (isAdding) await add.mutateAsync();
+    } catch {
+      // Shown in the sheet from the mutations' state.
+      return;
     }
-    if (isAdding) await add.mutateAsync();
     onOpenChange(false);
   });
 
@@ -226,7 +231,7 @@ export function ChannelOverrideSheet({
               canClear={Boolean(channel.override)}
               isClearing={clear.isPending}
               isSaving={form.formState.isSubmitting}
-              onClear={() => void clear.mutateAsync().then(() => onOpenChange(false))}
+              onClear={() => clear.mutate(undefined, { onSuccess: () => onOpenChange(false) })}
               submitLabel={isAdding ? 'Add to store' : 'Save'}
             />
           </form>

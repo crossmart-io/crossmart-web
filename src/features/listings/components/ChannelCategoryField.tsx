@@ -91,7 +91,7 @@ export function ChannelCategoryField({ channelRef, category }: ChannelCategoryFi
   const suggestions = useCategorySuggestions(channelRef, search);
   const choose = useChooseListingCategory(channelRef);
   const pick = (next: ChannelCategory | null) =>
-    void choose.mutateAsync(next).then(() => setSearch(null));
+    choose.mutate(next, { onSuccess: () => setSearch(null) });
   return (
     <Field>
       <FieldLabel htmlFor={SEARCH_INPUT_ID}>{CATEGORY_COPY.label}</FieldLabel>

@@ -112,7 +112,7 @@ export function ProductSelectionCard({
           error={editor.save.error}
           isSaving={editor.save.isPending}
           disabled={!editor.isDirty}
-          onSave={() => void editor.submit()}
+          onSave={editor.submit}
         />
       )}
     </Card>

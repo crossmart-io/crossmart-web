@@ -39,15 +39,15 @@ export function SaveViewDialog({ workspaceId, filters }: SaveViewDialogProps) {
     }
   }
 
-  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    await createView.mutateAsync({
+    const view = {
       name: name.trim(),
       search: filters.debouncedSearch || undefined,
       status: toStatusQuery(filters.status),
       gap: filters.gap,
-    });
-    handleOpenChange(false);
+    };
+    createView.mutate(view, { onSuccess: () => handleOpenChange(false) });
   }
 
   return (
@@ -59,10 +59,7 @@ export function SaveViewDialog({ workspaceId, filters }: SaveViewDialogProps) {
         </Button>
       </DialogTrigger>
       <DialogContent>
-        <form
-          onSubmit={(event) => void handleSubmit(event).catch(() => undefined)}
-          className="contents"
-        >
+        <form onSubmit={handleSubmit} className="contents">
           <DialogHeader>
             <DialogTitle>Save this view</DialogTitle>
             <DialogDescription>

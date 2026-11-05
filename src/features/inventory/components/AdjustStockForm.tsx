@@ -36,10 +36,10 @@ export function AdjustStockForm({ workspaceId, item, onDone }: AdjustStockFormPr
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     if (!form.body) return;
-    adjust
-      .mutateAsync({ inventoryItemId: item.inventoryItemId, body: form.body })
-      .then(onDone)
-      .catch(() => undefined);
+    adjust.mutate(
+      { inventoryItemId: item.inventoryItemId, body: form.body },
+      { onSuccess: onDone },
+    );
   }
 
   return (
