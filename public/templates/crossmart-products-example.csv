@@ -1,0 +1,6 @@
+Handle,Title,Body (HTML),Vendor,Type,Tags,Status,Option1 Name,Option1 Value,Option2 Name,Option2 Value,Variant SKU,Variant Barcode,Variant Price,Variant Compare At Price,Cost per item,Variant Grams,Variant Inventory Tracker,Variant Inventory Qty,Variant Inventory Policy,Variant Requires Shipping,Variant Taxable,Image Src,Image Alt Text
+cotton-hoodie,Organic Cotton Hoodie,"<p>Heavyweight organic cotton hoodie with a brushed inside.</p><ul><li>100% organic cotton</li><li>Relaxed fit</li></ul>",Your Brand,Hoodies,"apparel, cotton, unisex",active,Size,S,Color,Black,HOOD-S-BLK,,59.00,69.00,22.00,550,shopify,10,deny,TRUE,TRUE,,
+cotton-hoodie,,,,,,,,M,,Black,HOOD-M-BLK,,59.00,69.00,22.00,580,shopify,15,deny,TRUE,TRUE,,
+cotton-hoodie,,,,,,,,L,,Black,HOOD-L-BLK,,59.00,69.00,22.00,610,shopify,8,deny,TRUE,TRUE,,
+cotton-hoodie,,,,,,,,M,,Grey,HOOD-M-GRY,,59.00,69.00,22.00,580,shopify,12,deny,TRUE,TRUE,,
+ceramic-mug,Ceramic Coffee Mug,<p>Stoneware mug that holds 350 ml. Dishwasher and microwave safe.</p>,Your Brand,Mugs,"kitchen, gifts",active,Title,Default Title,,,MUG-WHT-350,0123456789012,18.00,,6.50,400,shopify,40,deny,TRUE,TRUE,,

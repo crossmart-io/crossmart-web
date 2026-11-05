@@ -1,6 +1,5 @@
 import { CircleAlert, Download } from 'lucide-react';
 import type { FormEvent } from 'react';
-import { CatalogImportMode } from '@/api/schema';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
@@ -9,8 +8,7 @@ import {
   CSV_FILE_ACCEPT,
   FILE_IMPORT_MODE_COPY,
   type FileImportMode,
-  INVENTORY_TEMPLATE_FILE_NAME,
-  INVENTORY_TEMPLATE_HREF,
+  type ImportExampleFile,
 } from '../imports.constants';
 import { ImportModePicker } from './ImportModePicker';
 
@@ -53,6 +51,7 @@ export function ImportFileForm({
       <Field>
         <FieldLabel htmlFor={FILE_INPUT_ID}>{copy.fileLabel}</FieldLabel>
         <FieldDescription>{copy.instructions}</FieldDescription>
+        <ExampleFileLink example={copy.example} />
         <Input
           id={FILE_INPUT_ID}
           type="file"
@@ -62,17 +61,16 @@ export function ImportFileForm({
         />
         <FieldDescription>Up to 5 MB and 10,000 rows.</FieldDescription>
       </Field>
-      {mode === CatalogImportMode.inventory && <InventoryTemplateLink />}
     </form>
   );
 }
 
-function InventoryTemplateLink() {
+function ExampleFileLink({ example }: { example: ImportExampleFile }) {
   return (
     <Button variant="outline" size="sm" className="self-start" asChild>
-      <a href={INVENTORY_TEMPLATE_HREF} download={INVENTORY_TEMPLATE_FILE_NAME}>
+      <a href={example.href} download={example.fileName}>
         <Download data-icon="inline-start" />
-        Download template
+        Download example file
       </a>
     </Button>
   );

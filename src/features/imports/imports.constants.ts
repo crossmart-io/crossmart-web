@@ -15,12 +15,24 @@ export const CSV_FILE_ACCEPT = '.csv,text/csv';
 /** Field names of the multipart import form. */
 export const IMPORT_FORM_FIELDS = { mode: 'mode', format: 'format', file: 'file' } as const;
 
-/** The header of an inventory CSV. Mirrors the API, which matches it ignoring case. */
-export const INVENTORY_CSV_COLUMNS = ['sku', 'available'] as const;
-export const INVENTORY_TEMPLATE_FILE_NAME = 'crossmart-inventory.csv';
-export const INVENTORY_TEMPLATE_HREF = `data:text/csv;charset=utf-8,${encodeURIComponent(
-  `${INVENTORY_CSV_COLUMNS.join(',')}\n`,
-)}`;
+/** A sample file the merchant can download and fill in, served from `public/templates`. */
+export interface ImportExampleFile {
+  href: string;
+  fileName: string;
+}
+
+const PRODUCTS_EXAMPLE_FILE_NAME = 'crossmart-products-example.csv';
+const INVENTORY_EXAMPLE_FILE_NAME = 'crossmart-inventory-example.csv';
+
+export const PRODUCTS_EXAMPLE: ImportExampleFile = {
+  href: `/templates/${PRODUCTS_EXAMPLE_FILE_NAME}`,
+  fileName: PRODUCTS_EXAMPLE_FILE_NAME,
+};
+
+export const INVENTORY_EXAMPLE: ImportExampleFile = {
+  href: `/templates/${INVENTORY_EXAMPLE_FILE_NAME}`,
+  fileName: INVENTORY_EXAMPLE_FILE_NAME,
+};
 
 /** The modes a file upload can use. Channel imports are started from the Channels page. */
 export type FileImportMode = Exclude<CatalogImportMode, CatalogImportMode.create_or_link>;
@@ -42,24 +54,28 @@ export interface FileImportModeCopy extends ImportModeCopy {
   fileLabel: string;
   /** The file format this mode reads. */
   format: CatalogImportFormat;
+  example: ImportExampleFile;
 }
 
 export const FILE_IMPORT_MODE_COPY: Record<FileImportMode, FileImportModeCopy> = {
   [CatalogImportMode.create]: {
     label: 'Add new products',
     summary: 'Products already in your catalog are left unchanged.',
-    instructions: 'In Shopify, go to Products → Export and choose CSV.',
-    fileLabel: 'Shopify product CSV',
+    instructions:
+      'Fill in the example file, or export from Shopify (Products → Export → CSV). One row per variant; rows with the same Handle are one product.',
+    fileLabel: 'Product CSV',
     format: CatalogImportFormat.shopify_csv,
+    example: PRODUCTS_EXAMPLE,
     record: 'product',
   },
   [CatalogImportMode.update]: {
     label: 'Update existing products',
     summary: 'Changes only the columns in your file. Variants and stock are never removed.',
     instructions:
-      'Use a Shopify product CSV with a Handle column. Leave out a column to keep it; an empty cell clears it. Variants are matched by SKU, then by option values; images stay unless the file lists some.',
-    fileLabel: 'Shopify product CSV',
+      'Use the same columns as the example file. Only Handle is required. Leave out a column to keep it; an empty cell clears it. Variants are matched by SKU, then by option values; images stay unless the file lists some.',
+    fileLabel: 'Product CSV',
     format: CatalogImportFormat.shopify_csv,
+    example: PRODUCTS_EXAMPLE,
     record: 'product',
   },
   [CatalogImportMode.inventory]: {
@@ -69,6 +85,7 @@ export const FILE_IMPORT_MODE_COPY: Record<FileImportMode, FileImportModeCopy> =
       'A CSV with two columns, sku and available. Only variants that track stock are changed.',
     fileLabel: 'Inventory CSV',
     format: CatalogImportFormat.inventory_csv,
+    example: INVENTORY_EXAMPLE,
     record: 'row',
   },
 };
