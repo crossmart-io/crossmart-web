@@ -1,11 +1,11 @@
-import { ChevronDown, CircleAlert } from 'lucide-react';
+import { ChevronDown } from 'lucide-react';
 import { useState } from 'react';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { FormError } from '@/components/feedback/FormError';
 import { Button } from '@/components/ui/button';
 import { FieldDescription, FieldGroup, FieldLegend, FieldSet } from '@/components/ui/field';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import type { ProductChannelRef } from '../hooks/useProductChannels';
 import { useItemSpecifics, useSaveItemSpecifics } from '../hooks/useItemSpecifics';
 import {
@@ -84,16 +84,6 @@ function MissingRequired({ names }: { names: readonly string[] }) {
   );
 }
 
-function SaveError({ error }: { error: Error | null }) {
-  if (!error) return null;
-  return (
-    <Alert variant="destructive">
-      <CircleAlert />
-      <AlertDescription>{error.message}</AlertDescription>
-    </Alert>
-  );
-}
-
 /** The editable values of one category's aspects, saved with their own button. */
 function ItemSpecificsForm({
   channelRef,
@@ -117,13 +107,13 @@ function ItemSpecificsForm({
       <AspectList aspects={required} values={values} onChange={onChange} />
       <MoreAspects aspects={more} values={values} onChange={onChange} />
       <MissingRequired names={missingRequired(view.aspects, values)} />
-      <SaveError error={save.error} />
+      <FormError error={save.error} />
       <div className="flex flex-wrap items-center gap-3">
         <Button
           type="button"
           variant="outline"
           disabled={save.isPending || sameItemSpecifics(values, initial)}
-          onClick={() => void save.mutateAsync(toItemSpecificsBody(values))}
+          onClick={() => save.mutate(toItemSpecificsBody(values))}
         >
           {save.isPending && <Spinner data-icon="inline-start" />}
           {ITEM_SPECIFICS_COPY.save}
@@ -150,7 +140,7 @@ export function ItemSpecificsSection({
       <FieldLegend>{ITEM_SPECIFICS_COPY.title}</FieldLegend>
       <FieldDescription>{ITEM_SPECIFICS_COPY.description}</FieldDescription>
       {query.isPending && <Skeleton className="h-24 w-full" />}
-      <SaveError error={query.error} />
+      <FormError error={query.error} />
       {query.data && (
         // Remount when the saved values or the category change, so the form starts from them.
         <ItemSpecificsForm

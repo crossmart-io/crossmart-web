@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
 import { api, fetchClient } from '@/api/client';
+import { unwrap } from '@/api/unwrap';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
   CHANNEL_LISTINGS_ENDPOINT,
@@ -27,14 +27,13 @@ export function useSaveItemSpecifics(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(ITEM_SPECIFICS_ENDPOINTS);
   return useMutation<ListingItemSpecifics, Error, ItemSpecific[]>({
     meta: { inlineError: true, successMessage: LISTINGS_FEEDBACK.itemSpecificsSaved },
-    mutationFn: async (itemSpecifics) => {
-      const { data, error } = await fetchClient.PUT(ITEM_SPECIFICS_ENDPOINT, {
-        params: { path: ref },
-        body: { itemSpecifics },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (itemSpecifics) =>
+      unwrap(
+        fetchClient.PUT(ITEM_SPECIFICS_ENDPOINT, {
+          params: { path: ref },
+          body: { itemSpecifics },
+        }),
+      ),
     onSuccess: refresh,
   });
 }

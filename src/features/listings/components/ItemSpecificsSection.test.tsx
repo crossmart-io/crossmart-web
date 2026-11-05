@@ -35,7 +35,7 @@ const VIEW: ListingItemSpecifics = {
 };
 
 function setup(view: ListingItemSpecifics = VIEW) {
-  const save = vi.fn<(body: unknown) => Promise<unknown>>().mockResolvedValue(view);
+  const save = vi.fn<(body: unknown) => void>();
   vi.mocked(useItemSpecifics).mockReturnValue({
     data: view,
     dataUpdatedAt: 1,
@@ -43,7 +43,7 @@ function setup(view: ListingItemSpecifics = VIEW) {
     error: null,
   } as never);
   vi.mocked(useSaveItemSpecifics).mockReturnValue({
-    mutateAsync: save,
+    mutate: save,
     isPending: false,
     error: null,
   } as never);
