@@ -41,6 +41,12 @@ export const BUCKET_TOOLTIP_PREFIX: Record<SalesInterval, string> = {
   [SalesInterval.month]: '',
 };
 
+/** How a change against the previous period reads, such as "No sales in the previous 30 days". */
+export const CHANGE_COPY = {
+  flat: 'No change',
+  noPreviousSales: (comparedTo: string) => `No sales in the ${comparedTo}`,
+} as const;
+
 export const PERCENT = 100;
 /** Changes smaller than this read as flat. */
 export const FLAT_CHANGE_PERCENT = 0.5;

@@ -1,4 +1,4 @@
-import { formatPriceRange, pluralize } from './format';
+import { formatAlternatives, formatPriceRange, pluralize } from './format';
 
 describe('formatPriceRange', () => {
   it('shows one price when min and max match', () => {
@@ -16,5 +16,12 @@ describe('pluralize', () => {
   it('picks the singular for one', () => {
     expect(pluralize(1, 'variant')).toBe('1 variant');
     expect(pluralize(5, 'variant')).toBe('5 variants');
+  });
+});
+
+describe('formatAlternatives', () => {
+  it('joins choices with "or" and no serial comma', () => {
+    expect(formatAlternatives(['Shopify', 'eBay', 'Google'])).toBe('Shopify, eBay or Google');
+    expect(formatAlternatives(['Shopify'])).toBe('Shopify');
   });
 });

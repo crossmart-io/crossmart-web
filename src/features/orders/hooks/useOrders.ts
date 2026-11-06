@@ -34,3 +34,14 @@ export function useOrders(workspaceId: string, query: OrdersQuery, pagination: P
 export function useOrder(workspaceId: string, orderId: string) {
   return api.useQuery('get', ORDER_ENDPOINT, { params: { path: { workspaceId, orderId } } });
 }
+
+/** Enough of the list to tell whether the workspace has any order at all. */
+const ANY_ORDER_PAGE = { page: 1, limit: 1 } as const;
+
+/** Whether any store has sent an order yet; undefined while loading. */
+export function useHasOrders(workspaceId: string): boolean | undefined {
+  const { data } = api.useQuery('get', ORDERS_ENDPOINT, {
+    params: { path: { workspaceId }, query: ANY_ORDER_PAGE },
+  });
+  return data ? data.total > 0 : undefined;
+}

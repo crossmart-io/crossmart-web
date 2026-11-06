@@ -3,7 +3,7 @@ import { SalesInterval } from '@/api/schema';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { type ChartConfig, ChartContainer, ChartTooltip } from '@/components/ui/chart';
 import { BUCKET_TOOLTIP_PREFIX, SALES_CHART } from '../sales.constants';
-import { formatBucket, formatCompactMoney } from '../sales-format';
+import { formatBucket, formatCompactMoney, hasSales } from '../sales-format';
 import { SalesChartLegend } from './SalesChartLegend';
 import { SalesChartTooltip, type SalesPoint } from './SalesChartTooltip';
 import type { SalesReport } from '../sales.types';
@@ -23,6 +23,16 @@ function toPoints(report: SalesReport): SalesPoint[] {
     name: name(bucket.startsOn),
     previousName: name(bucket.previousStartsOn),
   }));
+}
+
+/** Weeks and months end in the future, so the last one is only part of a bucket. */
+function PartialBucketNote({ interval }: { interval: SalesInterval }) {
+  if (interval === SalesInterval.day) return null;
+  return (
+    <p className="mt-2 text-xs text-muted-foreground">
+      The last {interval} is still in progress, so it shows only the days so far.
+    </p>
+  );
 }
 
 /** Sales per day, week or month, with the previous period dashed behind it. */
@@ -54,9 +64,11 @@ export function SalesChart({ report, comparedTo }: { report: SalesReport; compar
               width={SALES_CHART.yAxisWidth}
               tickFormatter={(amount: number) => formatCompactMoney(amount, report.currencyCode)}
             />
-            <ChartTooltip
-              content={(props) => <SalesChartTooltip {...props} currency={report.currencyCode} />}
-            />
+            {hasSales(report) && (
+              <ChartTooltip
+                content={(props) => <SalesChartTooltip {...props} currency={report.currencyCode} />}
+              />
+            )}
             <Area
               dataKey="previousSales"
               type="monotone"
@@ -77,11 +89,7 @@ export function SalesChart({ report, comparedTo }: { report: SalesReport; compar
             />
           </AreaChart>
         </ChartContainer>
-        {interval !== SalesInterval.day && (
-          <p className="mt-2 text-xs text-muted-foreground">
-            The last {interval} is still in progress, so it shows only the days so far.
-          </p>
-        )}
+        <PartialBucketNote interval={interval} />
       </CardContent>
     </Card>
   );

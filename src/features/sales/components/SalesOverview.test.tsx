@@ -1,7 +1,9 @@
 import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { SalesInterval, SalesRange } from '@/api/schema';
+import { ChangeDirection } from '../sales-format';
 import type { SalesReport } from '../sales.types';
+import { ChangeBadge } from './ChangeBadge';
 import { SalesKpiGrid } from './SalesKpiGrid';
 import { StoreSalesCard } from './StoreSalesCard';
 import { TopProductsCard } from './TopProductsCard';
@@ -45,7 +47,7 @@ describe('SalesKpiGrid', () => {
     expect(screen.getByText('+50%')).toBeInTheDocument();
     expect(screen.getByText('+25%')).toBeInTheDocument();
     expect(screen.getByText('No change')).toBeInTheDocument();
-    expect(screen.getByText('New')).toBeInTheDocument();
+    expect(screen.getByText('No sales in the previous 7 days')).toBeInTheDocument();
   });
 });
 
@@ -71,5 +73,18 @@ describe('TopProductsCard', () => {
       '/products/p-1',
     );
     expect(screen.getByText('4 units')).toBeInTheDocument();
+  });
+});
+
+describe('ChangeBadge', () => {
+  it('says the previous period had no sales instead of a percent', () => {
+    render(
+      <ChangeBadge
+        change={{ direction: ChangeDirection.New, percent: null }}
+        comparedTo="previous 30 days"
+      />,
+    );
+    expect(screen.getByText('No sales in the previous 30 days')).toBeInTheDocument();
+    expect(screen.queryByText(/vs/)).not.toBeInTheDocument();
   });
 });
