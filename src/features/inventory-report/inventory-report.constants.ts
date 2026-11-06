@@ -1,4 +1,4 @@
-import { ListingStatus, StockLevel } from '@/api/schema';
+import { StockLevel } from '@/api/schema';
 
 export const INVENTORY_REPORT_ENDPOINT = '/api/v1/workspaces/{workspaceId}/analytics/inventory';
 
@@ -18,10 +18,13 @@ export const STOCK_BAR_FILLS: Record<StockLevel, string> = {
   [StockLevel.untracked]: 'bg-muted-foreground/40',
 };
 
-/** Listing statuses a store row spells out; delisted ones are history. */
-export const STORE_HEALTH_STATUSES: readonly ListingStatus[] = [
-  ListingStatus.ACTIVE,
-  ListingStatus.PENDING,
-  ListingStatus.INACTIVE,
-  ListingStatus.ERROR,
-];
+export const LOWEST_STOCK_COPY = {
+  title: 'Restock first',
+  description: (threshold: number) =>
+    `Variants out of stock, then those with ${threshold} or fewer available.`,
+  empty: 'Nothing is out of stock or running low.',
+  viewAll: 'View out-of-stock inventory',
+} as const;
+
+/** Shown instead of a figure the data cannot support. */
+export const NO_VALUE = '—';

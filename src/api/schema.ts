@@ -820,6 +820,46 @@ export interface paths {
     patch?: never;
     trace?: never;
   };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/etsy/listing-setup': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    /**
+     * Set an Etsy connection’s listing setup
+     * @description Who made the items, when, whether they are supplies, and the shop’s shipping and processing profiles every listing uses. Etsy requires all of them for physical listings.
+     */
+    put: operations['EtsyShopController_saveListingSetup_v1'];
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/etsy/shop/refresh': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Read an Etsy shop and its profiles again
+     * @description After the merchant creates or edits shipping or processing profiles on Etsy. The listing setup is kept.
+     */
+    post: operations['EtsyShopController_refreshShop_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/products': {
     parameters: {
       query?: never;
@@ -829,7 +869,7 @@ export interface paths {
     };
     /**
      * The store’s products with their state on the channel
-     * @description Products the store should have or still has: listed, pending (being published), failed or removing (being delisted). Pass `state=excluded` for the catalog products it does not have. Counts per state follow `search`, so they can label filter tabs.
+     * @description Products the store should have or still has: listed, pending (being published), failed or removing (being delisted). Pass `state=excluded` for the catalog products it does not have. `displayState` narrows them to the state a merchant reads (`needs_details`, `ready`, …). Counts per state follow `search`, so they can label filter tabs.
      */
     get: operations['ChannelProductsController_listProducts_v1'];
     put?: never;
@@ -1240,6 +1280,26 @@ export interface paths {
      * @description Values are in the workspace currency; variants without a cost are counted apart.
      */
     get: operations['InventoryReportController_get_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/analytics/listings': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Each store’s products by display state, and the latest failed listings, as of now
+     * @description Counts follow the same rule as each store’s product list. Each failed listing carries `displayState`, `displayReason` and `displayRequirement`, so a client can link to the fix.
+     */
+    get: operations['ListingHealthReportController_get_v1'];
     put?: never;
     post?: never;
     delete?: never;
@@ -2481,6 +2541,49 @@ export interface components {
       /** @description Whether the listing setup is saved, so products can be listed */
       readyToList: boolean;
     };
+    EtsyProfileDto: {
+      /** @example 6722757781 */
+      id: string;
+      /** @example Free US shipping */
+      name: string;
+    };
+    EtsyShopProfilesDto: {
+      shipping: components['schemas']['EtsyProfileDto'][];
+      /** @description Processing profiles: whether items are ready to ship or made to order, and how long they take */
+      processing: components['schemas']['EtsyProfileDto'][];
+    };
+    /** @enum {string} */
+    EtsyWhoMade: EtsyWhoMade;
+    /** @enum {string} */
+    EtsyWhenMade: EtsyWhenMade;
+    EtsyListingSetupDto: {
+      whoMade: components['schemas']['EtsyWhoMade'];
+      whenMade: components['schemas']['EtsyWhenMade'];
+      /** @description Whether the items are craft supplies rather than finished products */
+      isSupply: boolean;
+      /** @description The shipping profile listings use; null when the shop has none or several and none is chosen */
+      shippingProfileId: string | null;
+      /** @description The processing profile listings use */
+      processingProfileId: string | null;
+    };
+    EtsySettingsDto: {
+      /** @example 87654321 */
+      shopId: string;
+      /** @example ClayAndKiln */
+      shopName: string;
+      /**
+       * @description ISO 4217 code of the shop’s currency
+       * @example USD
+       */
+      currencyCode: string;
+      /** @example https://www.etsy.com/shop/ClayAndKiln */
+      shopUrl: string | null;
+      profiles: components['schemas']['EtsyShopProfilesDto'];
+      /** @description Null until the merchant saves it; publishing needs it */
+      listingSetup: components['schemas']['EtsyListingSetupDto'] | null;
+      /** @description Whether the listing setup is complete, so products can be listed */
+      readyToList: boolean;
+    };
     ProductSelectionFilterDto: {
       /** @description Matches title, handle or SKU */
       search?: string;
@@ -2531,7 +2634,7 @@ export interface components {
       /** @description True when listings can be published to this store */
       ready: boolean;
       /**
-       * @description What to finish before publishing, in order; empty when ready. `reconnect` alone when the store needs to be connected again. eBay: `shipping_policy`, `payment_policy`, `return_policy`, `ship_from_location`. Google: `listing_setup`. `account_settings` when the account was never read.
+       * @description What to finish before publishing, in order; empty when ready. `reconnect` alone when the store needs to be connected again. eBay: `shipping_policy`, `payment_policy`, `return_policy`, `ship_from_location`. Google: `listing_setup`. Etsy: `item_details`, `shipping_profile`, `processing_profile`. `account_settings` when the account was never read.
        * @example [
        *       "shipping_policy",
        *       "ship_from_location"
@@ -2562,6 +2665,8 @@ export interface components {
       ebay: components['schemas']['EbaySettingsDto'] | null;
       /** @description The Merchant Center account and its listing setup, for Google connections */
       googleMerchant: components['schemas']['GoogleMerchantSettingsDto'] | null;
+      /** @description The Etsy shop, its profiles and its listing setup, for Etsy connections */
+      etsy: components['schemas']['EtsySettingsDto'] | null;
       /** @description Which products the connection lists; null lists every product */
       productSelection: components['schemas']['ProductSelectionRuleDto'] | null;
       /** @description How the connection prices variants; null sends catalog prices */
@@ -2584,7 +2689,7 @@ export interface components {
     StartAuthorizationDto: {
       channel: components['schemas']['ChannelType'];
       /**
-       * @description The account to connect. For Shopify, the store’s myshopify.com domain or handle. For eBay, the marketplace id, such as `EBAY_US`.
+       * @description The account to connect. For Shopify, the store’s myshopify.com domain or handle. For eBay, the marketplace id, such as `EBAY_US`. For Etsy, the shop name (the merchant must sign in to that shop).
        * @example demo-store.myshopify.com
        */
       accountHandle: string;
@@ -2593,7 +2698,7 @@ export interface components {
       /** @description Send the merchant here to approve the app on the channel */
       authorizationUrl: string;
       /**
-       * @description The account handle, normalized: a myshopify.com domain, or an eBay marketplace id
+       * @description The account handle, normalized: a myshopify.com domain, an eBay marketplace id, or a lower-cased Etsy shop name
        * @example demo-store.myshopify.com
        */
       accountHandle: string;
@@ -2621,6 +2726,24 @@ export interface components {
        * @example https://acme.example/products/{handle}
        */
       productUrlTemplate: string;
+    };
+    UpdateEtsyListingSetupDto: {
+      /** @description Who made the items */
+      whoMade: components['schemas']['EtsyWhoMade'];
+      /** @description When the items were made: `made_to_order`, or an era for vintage items */
+      whenMade: components['schemas']['EtsyWhenMade'];
+      /** @description Whether the items are craft supplies rather than finished products */
+      isSupply: boolean;
+      /**
+       * @description One of the shop’s shipping profiles; null follows the shop’s only one
+       * @example 6722757781
+       */
+      shippingProfileId: string | null;
+      /**
+       * @description One of the shop’s processing profiles; null follows the shop’s only one
+       * @example 18201076875
+       */
+      processingProfileId: string | null;
     };
     /** @enum {string} */
     ChannelProductState: ChannelProductState;
@@ -2863,6 +2986,7 @@ export interface components {
     ListingOverrideViewDto: {
       title: string | null;
       descriptionHtml: string | null;
+      vendor: string | null;
       tags: string[] | null;
       mediaUrls: string[] | null;
       visibility: components['schemas']['ListingVisibility'] | null;
@@ -2878,6 +3002,11 @@ export interface components {
       /** @example Blue / Large */
       title: string;
       price: components['schemas']['ResolvedPriceDto'];
+      /**
+       * @description In the store’s currency: what its pricing rule gives, before a fixed price on the listing. Equal to the effective price unless the price is overridden.
+       * @example 102.99
+       */
+      rulePrice: string;
       /** @description The stock the channel shows; null when the variant does not track stock */
       quantity: number | null;
     };
@@ -2916,6 +3045,8 @@ export interface components {
     ListingOverrideDto: {
       title?: string | null;
       descriptionHtml?: string | null;
+      /** @description The brand this channel shows instead of the product’s vendor */
+      vendor?: string | null;
       /** @description Replaces the product’s tags */
       tags?: string[] | null;
       /** @description The product’s image URLs to show, in order */
@@ -2931,6 +3062,8 @@ export interface components {
     ListingOverridePatchDto: {
       title?: string | null;
       descriptionHtml?: string | null;
+      /** @description The brand this channel shows instead of the product’s vendor */
+      vendor?: string | null;
       /** @description Replaces the product’s tags */
       tags?: string[] | null;
       /** @description The product’s image URLs to show, in order */
@@ -2950,6 +3083,16 @@ export interface components {
       override: string | null;
       /** @description What the store gets */
       effective: string;
+      /** @description Whether the store overrides it; reverting sets `override` to null */
+      overridden: boolean;
+    };
+    InheritedOptionalTextDto: {
+      /** @description The product’s value */
+      product: string | null;
+      /** @description Null when it follows the product */
+      override: string | null;
+      /** @description What the store gets */
+      effective: string | null;
       /** @description Whether the store overrides it; reverting sets `override` to null */
       overridden: boolean;
     };
@@ -3007,6 +3150,11 @@ export interface components {
       title: string;
       sku: string | null;
       price: components['schemas']['InheritedPriceDto'];
+      /**
+       * @description In the store’s currency: what its pricing rule gives, before a fixed price on the listing. Equal to the effective price unless the price is overridden.
+       * @example 102.99
+       */
+      rulePrice: string;
       compareAtPrice: components['schemas']['InheritedCompareAtPriceDto'];
       /** @description How the effective price was reached */
       resolvedPrice: components['schemas']['ResolvedPriceDto'];
@@ -3050,6 +3198,8 @@ export interface components {
       listing: components['schemas']['ListingSummaryDto'] | null;
       title: components['schemas']['InheritedTextDto'];
       descriptionHtml: components['schemas']['InheritedTextDto'];
+      /** @description The brand the store shows */
+      vendor: components['schemas']['InheritedOptionalTextDto'];
       tags: components['schemas']['InheritedTextListDto'];
       /** @description Image URLs in order; an override is a subset of the product’s, in its order */
       images: components['schemas']['InheritedTextListDto'];
@@ -3328,8 +3478,82 @@ export interface components {
       stockLevels: components['schemas']['StockLevelCountsDto'];
       /** @description Available units at or below which stock counts as low */
       lowStockThreshold: number;
+      /** @description Tracked variants out of stock or low, fewest available first (oversold before sold out), at most a few: the ones to restock first */
+      lowestStock: components['schemas']['InventoryItemDto'][];
       /** @description Every store, oldest first */
       stores: components['schemas']['StoreHealthDto'][];
+    };
+    ListingStateCountDto: {
+      state: components['schemas']['ListingDisplayState'];
+      /** @description Products of the catalog in this state on the store */
+      count: number;
+    };
+    StoreListingHealthDto: {
+      /** Format: uuid */
+      connectionId: string;
+      channel: components['schemas']['ChannelType'];
+      /** @example Demo Store */
+      displayName: string;
+      status: components['schemas']['ChannelConnectionStatus'];
+      /** @description Why the store needs reconnecting or is in error; null otherwise */
+      statusReason: string | null;
+      /** Format: date-time */
+      lastSyncedAt: string | null;
+      /** @description Every display state, in order, with how many products are in it: the same states and rule as the store’s product list (`draft` counts the catalog products not in the store) */
+      states: components['schemas']['ListingStateCountDto'][];
+      /** @description Listings the channel refused on their last sync */
+      failedListings: number;
+    };
+    StoreListingFailureDto: {
+      /** Format: uuid */
+      id: string;
+      status: components['schemas']['ListingStatus'];
+      /** @description How the product joined the store: by hand, by an import, or by the automatic rule */
+      source: components['schemas']['ListingSource'];
+      /** @description The product’s id on the channel */
+      externalId: string | null;
+      /** @description Where to see it on the channel */
+      externalUrl: string | null;
+      /** @description Why the last sync failed */
+      lastError: string | null;
+      /** @description What the channel refused the last publish for lacking (such as `item_specifics`), when the merchant can add it; null otherwise */
+      missingRequirement: components['schemas']['PublishRequirement'] | null;
+      /** Format: date-time */
+      lastSyncedAt: string | null;
+      /**
+       * Format: date-time
+       * @description When a sync or retry queued its publish, update or delist; null once that job finished or gave up. While set, a selected listing shows `displayState: publishing`.
+       */
+      syncRequestedAt: string | null;
+      /** @description The channel category it is listed in, on channels with categories (eBay) */
+      category: components['schemas']['ChannelCategoryDto'] | null;
+      /** Format: uuid */
+      productId: string;
+      productTitle: string;
+      imageUrl: string | null;
+      variantCount: number;
+      /** @description The product on this store, in one state computed by the server: `draft` (not selected for the store), `needs_details` (selected, but the store setup or the product lacks something publishing needs), `ready` (publishable, not sent yet), `publishing` (queued or in flight, including an update of a published listing that a sync or retry queued), `published`, `failed`, `removing` (being taken off) or `removed`. */
+      displayState: components['schemas']['ListingDisplayState'];
+      /**
+       * @description For `needs_details` and `failed`: a short, merchant-readable reason (what to add, or the channel’s message). Never holds secrets. Null for the other states.
+       * @example Choose a shipping policy in this eBay connection’s listing defaults.
+       */
+      displayReason: string | null;
+      /** @description For `needs_details`: the requirement to fix first, so a client can open the right place. Store-setup requirements (`reconnect`, `account_settings`, `shipping_policy`, `payment_policy`, `return_policy`, `ship_from_location`, `listing_setup`) come before the product’s (`images`, `active_product`, `option_names`), which the server checks before publishing; `category` and `item_specifics` are known once the channel refused a publish. Null for the other states. */
+      displayRequirement: components['schemas']['PublishRequirement'] | null;
+      /**
+       * Format: uuid
+       * @description The store the listing is on
+       */
+      connectionId: string;
+    };
+    ListingHealthReportDto: {
+      /** @description Every store, oldest first */
+      stores: components['schemas']['StoreListingHealthDto'][];
+      /** @description The latest listings a channel refused, latest first, each with its display state and requirement so a client can link to the fix */
+      recentFailures: components['schemas']['StoreListingFailureDto'][];
+      /** @description Failed listings in all, across the stores */
+      failedListings: number;
     };
     /** @enum {string} */
     SuggestionStatus: SuggestionStatus;
@@ -4991,10 +5215,60 @@ export interface operations {
       };
     };
   };
+  EtsyShopController_saveListingSetup_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['UpdateEtsyListingSetupDto'];
+      };
+    };
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
+  EtsyShopController_refreshShop_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+        connectionId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ChannelConnectionDto'];
+        };
+      };
+    };
+  };
   ChannelProductsController_listProducts_v1: {
     parameters: {
       query?: {
         state?: components['schemas']['ChannelProductState'];
+        /** @description Only products showing this display state. Without `state` it looks at every catalog product, so `draft` and `removed` find those not in the store. */
+        displayState?: components['schemas']['ListingDisplayState'];
         /** @description Matches title, handle or SKU */
         search?: string;
         sort?: components['schemas']['ChannelProductSort'];
@@ -5709,6 +5983,27 @@ export interface operations {
       };
     };
   };
+  ListingHealthReportController_get_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ListingHealthReportDto'];
+        };
+      };
+    };
+  };
   SuggestionsController_list_v1: {
     parameters: {
       query?: {
@@ -6183,6 +6478,9 @@ export enum PublishRequirement {
   return_policy = 'return_policy',
   ship_from_location = 'ship_from_location',
   listing_setup = 'listing_setup',
+  item_details = 'item_details',
+  shipping_profile = 'shipping_profile',
+  processing_profile = 'processing_profile',
   images = 'images',
   active_product = 'active_product',
   category = 'category',
@@ -6402,6 +6700,32 @@ export enum GoogleTargetCountry {
   ES = 'ES',
   NL = 'NL',
   IL = 'IL',
+}
+export enum EtsyWhoMade {
+  i_did = 'i_did',
+  someone_else = 'someone_else',
+  collective = 'collective',
+}
+export enum EtsyWhenMade {
+  made_to_order = 'made_to_order',
+  Value2020_2026 = '2020_2026',
+  Value2010_2019 = '2010_2019',
+  Value2007_2009 = '2007_2009',
+  before_2007 = 'before_2007',
+  Value2000_2006 = '2000_2006',
+  Value1990s = '1990s',
+  Value1980s = '1980s',
+  Value1970s = '1970s',
+  Value1960s = '1960s',
+  Value1950s = '1950s',
+  Value1940s = '1940s',
+  Value1930s = '1930s',
+  Value1920s = '1920s',
+  Value1910s = '1910s',
+  Value1900s = '1900s',
+  Value1800s = '1800s',
+  Value1700s = '1700s',
+  before_1700 = 'before_1700',
 }
 export enum PriceRounding {
   none = 'none',

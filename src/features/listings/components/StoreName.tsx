@@ -3,7 +3,7 @@ import { ChannelLogo } from '@/features/channels/components/ChannelLogo';
 import type { ProductChannel } from '../listings.types';
 
 interface StoreNameProps {
-  connection: ProductChannel['connection'];
+  connection: Pick<ProductChannel['connection'], 'channel' | 'displayName'>;
 }
 
 /** A store's logo and name, the name cut short when it does not fit. */

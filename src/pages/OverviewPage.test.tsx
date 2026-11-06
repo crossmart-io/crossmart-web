@@ -29,6 +29,9 @@ vi.mock('@/features/sales', () => ({ SalesOverview: () => <p>Sales dashboard</p>
 vi.mock('@/features/inventory-report', () => ({
   InventoryOverview: () => <p>Inventory dashboard</p>,
 }));
+vi.mock('@/features/listing-health', () => ({
+  ListingHealthOverview: () => <p>Listing health</p>,
+}));
 
 const NEW_SELLER: OnboardingState = {
   hasProducts: false,
@@ -71,12 +74,14 @@ describe('OverviewPage', () => {
     expect(isBefore(gettingStarted, noSales)).toBe(true);
     expect(screen.queryByText('Sales dashboard')).not.toBeInTheDocument();
     expect(screen.queryByText('Inventory dashboard')).not.toBeInTheDocument();
+    expect(screen.queryByText('Listing health')).not.toBeInTheDocument();
   });
 
   it('keeps the sales note while a set-up seller waits for the first order', () => {
     renderOverview(SET_UP_SELLER, false);
     expect(screen.getByText('No sales yet')).toBeInTheDocument();
     expect(screen.getByText('Inventory dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Listing health')).toBeInTheDocument();
   });
 
   it('reads as a sales dashboard once set up and selling', () => {

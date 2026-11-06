@@ -6,6 +6,7 @@ import { StoreOnlyFields } from './StoreOnlyFields';
 import { TagsField } from './TagsField';
 import { TitleField } from './TitleField';
 import { VariantPricesField } from './VariantPricesField';
+import { VendorField } from './VendorField';
 import { StockField, VisibilityField } from './VisibilityAndStockFields';
 import { useListingEditorContext } from './listing-editor-context';
 
@@ -20,6 +21,7 @@ export function ListingEditorFields({ error }: { error: Error | null }) {
       <fieldset disabled={readOnly} className="flex min-w-0 flex-col gap-6">
         <StoreOnlyFields />
         <TitleField />
+        <VendorField />
         <DescriptionField />
         <TagsField />
         <ImagesField />
