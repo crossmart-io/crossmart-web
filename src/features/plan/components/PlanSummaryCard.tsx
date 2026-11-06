@@ -8,6 +8,7 @@ import { UpgradeButton } from './UpgradeButton';
 /** The plan the organization is on, its status, and whether its limits block anything yet. */
 export function PlanSummaryCard({ subscription }: { subscription: Subscription }) {
   const { plan, status, enforced } = subscription;
+  const legacy = !plan.offered;
   return (
     <Card>
       <CardContent className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
@@ -18,7 +19,9 @@ export function PlanSummaryCard({ subscription }: { subscription: Subscription }
             <Badge variant={status === SubscriptionStatus.ACTIVE ? 'success' : 'warning'}>
               {SUBSCRIPTION_STATUS_LABELS[status]}
             </Badge>
+            {legacy && <Badge variant="secondary">{PLAN_COPY.legacy}</Badge>}
           </div>
+          {legacy && <p className="max-w-prose text-sm">{PLAN_COPY.legacyNote}</p>}
           <p className="max-w-prose text-xs text-muted-foreground">
             {enforced ? PLAN_COPY.enforced : PLAN_COPY.notEnforced}
           </p>

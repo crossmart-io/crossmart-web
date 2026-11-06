@@ -16,13 +16,13 @@ function flag(feature: Feature, enabled: boolean): FeatureUsage {
 
 const SUBSCRIPTION: Subscription = {
   organizationId: 'org-1',
-  plan: { code: 'free', name: 'Free', version: 1 },
+  plan: { code: 'starter', name: 'Starter', version: 2, offered: true },
   status: SubscriptionStatus.ACTIVE,
   currentPeriodEnd: null,
   enforced: false,
   features: [
     limit(Feature.active_listings, 12, 50),
-    limit(Feature.channel_connections, 3, 2),
+    limit(Feature.channel_connections, 4, 3),
     limit(Feature.members, 4, null),
     flag(Feature.autonomous_agents, false),
     flag(Feature.bring_your_own_key, true),
@@ -32,12 +32,23 @@ const SUBSCRIPTION: Subscription = {
 describe('PlanSummaryCard', () => {
   it('names the plan and offers an upgrade that is not available yet', () => {
     render(<PlanSummaryCard subscription={SUBSCRIPTION} />);
-    expect(screen.getByText('Free')).toBeInTheDocument();
+    expect(screen.getByText('Starter')).toBeInTheDocument();
+    expect(screen.queryByText('Legacy plan')).not.toBeInTheDocument();
     expect(screen.getByText('Active')).toBeInTheDocument();
     const upgrade = screen.getByRole('button', { name: 'Upgrade' });
     expect(upgrade).toBeDisabled();
     expect(upgrade).toHaveAccessibleDescription('Billing coming soon');
     expect(screen.getByText(/Limits are not enforced yet/)).toBeInTheDocument();
+  });
+
+  it('says when the plan is a legacy one that is no longer offered', () => {
+    const legacy = {
+      ...SUBSCRIPTION,
+      plan: { code: 'free', name: 'Free', version: 1, offered: false },
+    };
+    render(<PlanSummaryCard subscription={legacy} />);
+    expect(screen.getByText('Legacy plan')).toBeInTheDocument();
+    expect(screen.getByText(/no longer offered/)).toBeInTheDocument();
   });
 
   it('says when limits block actions', () => {
