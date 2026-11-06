@@ -54,6 +54,7 @@ export const PRICING_MIN_PERCENT = -90;
 export const PRICING_MAX_PERCENT = 500;
 export const PRICING_MAX_MARGIN_PERCENT = 1000;
 export const OVERRIDE_TITLE_MAX_LENGTH = 255;
+export const OVERRIDE_VENDOR_MAX_LENGTH = 255;
 /** Variants a store card's details list before "and N more". */
 export const CHANNEL_CARD_VARIANT_LIMIT = 5;
 /** Variants the pricing rule's live example shows: enough to see the rule, not a whole catalog. */
@@ -378,6 +379,7 @@ export const LISTING_EDITOR_COPY = {
   storeOnly: 'Only in this store',
   storeOnlyDescription: 'eBay asks for these; the product has no value for them.',
   noTags: 'No tags',
+  noVendor: 'No vendor',
   noDescription: 'No description',
   firstImageNote: 'The first one chosen is the main image.',
   allImages: (count: number) => `all ${count} images`,
@@ -385,7 +387,7 @@ export const LISTING_EDITOR_COPY = {
   priceHint: 'Empty prices follow the store’s pricing rule.',
   price: 'Price',
   singleVariantPrice: 'Price and compare-at price',
-  rulePrice: (price: string) => `Pricing rule: ${price}`,
+  rulePrice: (price: string) => `Rule price ${price}`,
   compareAtPrice: 'Compare-at price',
 } as const;
 
@@ -402,6 +404,7 @@ export const STOCK_FIELD_COPY = {
 /** Labels of the listing's fields, as the editor and its summary name them. */
 export const LISTING_FIELD_LABELS = {
   title: 'Title',
+  vendor: 'Vendor',
   description: 'Description',
   tags: 'Tags',
   images: 'Images',
