@@ -36,6 +36,8 @@ export const LISTING_CATEGORY_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/category';
 export const ITEM_SPECIFICS_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/item-specifics';
+export const RETRY_LISTING_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/retry';
 
 /** Previews wait for typing to pause, so each keystroke is not a request. */
 export const PREVIEW_DEBOUNCE_MS = 400;
@@ -53,6 +55,9 @@ export const OVERRIDE_TITLE_MAX_LENGTH = 255;
 export const CHANNEL_CARD_VARIANT_LIMIT = 3;
 /** Store icons a products table row shows before "+N". */
 export const PRODUCT_STORE_ICONS_SHOWN = 4;
+/** Beside a products table row's store icons when some refused the product. */
+export const PRODUCT_STORE_FAILED_LABEL = (count: number) =>
+  count === 1 ? 'Failed' : `Failed in ${count}`;
 
 export const LISTINGS_FEEDBACK = {
   pricingSaved: 'Pricing saved; sending the new prices to the store',
@@ -61,6 +66,7 @@ export const LISTINGS_FEEDBACK = {
   overrideCleared: 'Store overrides removed',
   removedFromStore: 'Removed from the store',
   addedToStore: 'Added to the store; publishing now',
+  retryQueued: 'Publishing again',
   categorySaved: 'Category saved',
   itemSpecificsSaved: 'Item specifics saved',
 } as const;
@@ -122,13 +128,55 @@ export const COMPARE_AT_OPTIONS: readonly { value: CompareAtMode; label: string 
   { value: CompareAtMode.omit, label: 'Don’t send a compare-at price' },
 ];
 
+/** Listing statuses in the words the listing states use, for counts per status. */
 export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
-  [ListingStatus.PENDING]: 'Pending',
-  [ListingStatus.ACTIVE]: 'Active',
+  [ListingStatus.PENDING]: 'Publishing',
+  [ListingStatus.ACTIVE]: 'Published',
   [ListingStatus.INACTIVE]: 'Hidden',
-  [ListingStatus.ERROR]: 'Error',
-  [ListingStatus.DELISTED]: 'Delisted',
+  [ListingStatus.ERROR]: 'Failed',
+  [ListingStatus.DELISTED]: 'Removed',
 };
+
+/** Why "Try again" did not go through, as the API answered. */
+export enum RetryFailure {
+  /** 409: the store needs reconnecting, or no longer has the product. */
+  Blocked = 'blocked',
+  /** 402: the plan has no room for another listing. */
+  PlanFull = 'plan_full',
+  /** 403: the member's role may not edit listings. */
+  NotAllowed = 'not_allowed',
+  Other = 'other',
+}
+
+export const RETRY_COPY = {
+  action: 'Try again',
+  pending: 'Sending again…',
+  failures: {
+    [RetryFailure.Blocked]:
+      'This store cannot take it now. Reconnect the store, or add the product to it again.',
+    [RetryFailure.PlanFull]: 'Your plan has no room for another listing.',
+    [RetryFailure.NotAllowed]: 'Your role cannot publish listings. Ask a workspace admin.',
+  },
+  planLink: 'See your plan',
+} as const;
+
+/** How long a sync is watched before "nothing left to send" is believed: its jobs need to start. */
+export const SYNC_MIN_WATCH_MS = 6_000;
+
+/** "Send all products again": what it does, in place of a vague "Resync". */
+export const SYNC_COPY = {
+  resend: (channel: string) => `Send all products to ${channel} again`,
+  firstPublish: (channel: string) => `Publish all products to ${channel}`,
+  description: (channel: string) =>
+    `Sends every product in this store again and takes off the ones it no longer has. Use it after an outage or a change made on ${channel}.`,
+  inProgress: 'Sending…',
+  waiting: (count: number) => `${count} still to send`,
+  finished: (channel: string) => `Finished sending to ${channel}`,
+  stillWorking: (channel: string) =>
+    `Still sending to ${channel}. The Listings tab shows each product as it lands.`,
+  /** For a store that is not a known channel. */
+  fallbackChannel: 'the store',
+} as const;
 
 /** Where a store's conversion rate comes from: the ECB's daily rate, or one the merchant fixes. */
 export const RateMode = {
@@ -188,23 +236,14 @@ type InStoreState = (typeof IN_STORE_STATES)[number];
 export type ChannelProductFilter =
   InStoreState | ChannelProductState.removed_by_hand | typeof ALL_CHANNEL_PRODUCTS;
 
+/** The listings tab's filters, in the words of the listing states they group. */
 export const CHANNEL_PRODUCT_STATE_LABELS: Record<ChannelProductState, string> = {
-  [ChannelProductState.listed]: 'Live',
-  [ChannelProductState.pending]: 'Waiting to publish',
-  [ChannelProductState.failed]: 'Error',
-  [ChannelProductState.removing]: 'Being removed',
-  [ChannelProductState.removed_by_hand]: 'Removed by hand',
+  [ChannelProductState.listed]: 'Published',
+  [ChannelProductState.pending]: 'Not published yet',
+  [ChannelProductState.failed]: 'Failed',
+  [ChannelProductState.removing]: 'Removing',
+  [ChannelProductState.removed_by_hand]: 'Removed',
   [ChannelProductState.excluded]: 'Not in this store',
-};
-
-/** What each state means, under its badge. */
-export const CHANNEL_PRODUCT_STATE_HINTS: Record<ChannelProductState, string> = {
-  [ChannelProductState.listed]: 'Live in the store.',
-  [ChannelProductState.pending]: 'Being published now.',
-  [ChannelProductState.failed]: 'The last sync failed.',
-  [ChannelProductState.removing]: 'Being taken off the store.',
-  [ChannelProductState.removed_by_hand]: 'The automatic rule leaves it out until you add it back.',
-  [ChannelProductState.excluded]: 'Not in this store.',
 };
 
 export const CHANNEL_PRODUCT_FILTERS: readonly { value: ChannelProductFilter; label: string }[] = [

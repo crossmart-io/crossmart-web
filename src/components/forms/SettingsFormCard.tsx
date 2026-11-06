@@ -6,6 +6,8 @@ import { CardSaveFooter } from './CardSaveFooter';
 
 interface SettingsFormCardProps<Values extends FieldValues, Output> {
   title: string;
+  /** Lets a link scroll straight to this card (`#id`). */
+  id?: string;
   description: ReactNode;
   form: UseFormReturn<Values, unknown, Output>;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
@@ -28,6 +30,7 @@ interface SettingsFormCardProps<Values extends FieldValues, Output> {
 /** A settings card holding one form: its heading, fields, and a save button with the last error. */
 export function SettingsFormCard<Values extends FieldValues, Output>({
   title,
+  id,
   description,
   form,
   onSubmit,
@@ -42,7 +45,7 @@ export function SettingsFormCard<Values extends FieldValues, Output>({
 }: SettingsFormCardProps<Values, Output>) {
   const { isDirty, isSubmitting } = form.formState;
   return (
-    <Card>
+    <Card id={id}>
       <CardHeader>
         <CardTitle>
           <h2>{title}</h2>

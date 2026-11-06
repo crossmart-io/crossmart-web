@@ -10,6 +10,7 @@ import { ProductStatusBadge, useProduct } from '@/features/catalog';
 import { ProductEditor } from '@/features/catalog/editor';
 import { ProductChannelsCard } from '@/features/listings';
 import { WorkspacePermission } from '@/api/schema';
+import { useScrollToSection } from '@/hooks/useScrollToSection';
 import { hasPermission, type Workspace } from '@/features/workspaces';
 
 const PRODUCT_PAGE_COPY: ResourcePageCopy = {
@@ -23,6 +24,7 @@ function EditProduct({ workspace, productId }: { workspace: Workspace; productId
   const query = useProduct(workspace.id, productId);
   const canEdit = hasPermission(workspace, WorkspacePermission.products_edit);
   const parents = useParentsOrReturnTo(PAGE_PARENTS.products);
+  useScrollToSection(query.isSuccess);
   return (
     <ResourcePage query={query} copy={PRODUCT_PAGE_COPY} parents={parents}>
       {(product) => (

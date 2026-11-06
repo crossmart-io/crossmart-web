@@ -27,10 +27,12 @@ import {
   ChannelTab,
   PricingRuleCard,
   ProductSelectionCard,
+  PublishReadinessAlert,
   toChannelTab,
   useChannelConnection,
 } from '@/features/listings';
 import { hasPermission, type Workspace } from '@/features/workspaces';
+import { useScrollToSection } from '@/hooks/useScrollToSection';
 
 const CONNECTION_PAGE_COPY: ResourcePageCopy = {
   name: 'Channel',
@@ -43,6 +45,33 @@ interface ChannelConnectionTabsProps {
   workspace: Workspace;
   connection: ChannelConnection;
   tab: ChannelTab;
+}
+
+/** The connection's settings, with the listings feature's sync button and automatic rule. */
+function SettingsTab({ workspace, connection }: Omit<ChannelConnectionTabsProps, 'tab'>) {
+  const navigate = useNavigate();
+  const canManage = hasPermission(workspace, WorkspacePermission.channels_manage);
+  const ref = { workspaceId: workspace.id, connectionId: connection.id };
+  useScrollToSection();
+  return (
+    <ConnectionSettings
+      workspaceId={workspace.id}
+      connection={connection}
+      canManage={canManage}
+      canImportProducts={hasPermission(workspace, WorkspacePermission.products_edit)}
+      onDisconnected={() => void navigate(ROUTES.channels)}
+      resyncAction={
+        <ChannelSyncButton
+          {...ref}
+          channel={connection.channel}
+          disabled={connection.status !== ChannelConnectionStatus.CONNECTED}
+        />
+      }
+      automaticRule={
+        <ProductSelectionCard {...ref} rule={connection.productSelection} canManage={canManage} />
+      }
+    />
+  );
 }
 
 /** One tab per part of the connection; each tab has its own URL so it can be linked to. */
@@ -67,7 +96,11 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
         ))}
       </TabsList>
       <TabsContent value={ChannelTab.Listings}>
-        <ChannelProductsCard {...ref} canEdit={canEditListings} />
+        <ChannelProductsCard
+          workspaceId={workspace.id}
+          connection={connection}
+          canEdit={canEditListings}
+        />
       </TabsContent>
       <TabsContent value={ChannelTab.Pricing}>
         <PricingRuleCard
@@ -79,26 +112,7 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
         />
       </TabsContent>
       <TabsContent value={ChannelTab.Settings}>
-        <ConnectionSettings
-          workspaceId={workspace.id}
-          connection={connection}
-          canManage={canManage}
-          canImportProducts={hasPermission(workspace, WorkspacePermission.products_edit)}
-          onDisconnected={() => void navigate(ROUTES.channels)}
-          resyncAction={
-            <ChannelSyncButton
-              {...ref}
-              disabled={connection.status !== ChannelConnectionStatus.CONNECTED}
-            />
-          }
-          automaticRule={
-            <ProductSelectionCard
-              {...ref}
-              rule={connection.productSelection}
-              canManage={canManage}
-            />
-          }
-        />
+        <SettingsTab workspace={workspace} connection={connection} />
       </TabsContent>
     </Tabs>
   );
@@ -166,6 +180,11 @@ function ConnectionView({ workspace, connection, tab }: ConnectionViewProps) {
           canManage={canManage}
         />
       )}
+      <PublishReadinessAlert
+        workspaceId={workspace.id}
+        connection={connection}
+        canManage={canManage}
+      />
       <ReturnToProvider parents={PAGE_PARENTS.channels} label={name}>
         <ChannelConnectionTabs workspace={workspace} connection={connection} tab={tab} />
       </ReturnToProvider>

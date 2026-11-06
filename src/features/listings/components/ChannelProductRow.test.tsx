@@ -1,12 +1,44 @@
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
-import { ChannelProductState, ListingSource, ListingStatus, ProductStatus } from '@/api/schema';
+import { ApiRequestError } from '@/api/api-error';
+import {
+  ChannelProductState,
+  ListingDisplayState,
+  ListingSource,
+  ListingStatus,
+  ProductStatus,
+  PublishRequirement,
+} from '@/api/schema';
 import { Table, TableBody } from '@/components/ui/table';
-import type { ChannelProduct } from '../listings.types';
+import type * as ProductChannelHooks from '../hooks/useProductChannels';
+import { useRetryListing } from '../hooks/useProductChannels';
+import { RETRY_COPY, RetryFailure } from '../listings.constants';
+import type { ChannelProduct, ListingStore } from '../listings.types';
 import { ChannelProductRow } from './ChannelProductRow';
 
-function row(state: ChannelProductState, lastError: string | null = null): ChannelProduct {
+vi.mock('../hooks/useProductChannels', async (importOriginal) => ({
+  ...(await importOriginal<typeof ProductChannelHooks>()),
+  useRetryListing: vi.fn<typeof useRetryListing>(),
+}));
+
+const STORE: ListingStore = {
+  workspaceId: 'ws-1',
+  connectionId: 'c-1',
+  missing: [],
+  connected: true,
+};
+
+interface RowOptions {
+  displayState?: ListingDisplayState;
+  displayReason?: string | null;
+  missingRequirement?: PublishRequirement | null;
+}
+
+function row(state: ChannelProductState, options: RowOptions = {}): ChannelProduct {
+  const inStore =
+    state !== ChannelProductState.excluded && state !== ChannelProductState.removed_by_hand;
   return {
     product: {
       id: 'p-1',
@@ -23,44 +55,77 @@ function row(state: ChannelProductState, lastError: string | null = null): Chann
       updatedAt: '2026-11-03T09:00:00Z',
     },
     state,
-    listing:
-      state === ChannelProductState.excluded || state === ChannelProductState.removed_by_hand
-        ? null
-        : {
-            id: 'l-1',
-            status: lastError ? ListingStatus.ERROR : ListingStatus.ACTIVE,
-            source: ListingSource.MANUAL,
-            externalId: 'gid://shopify/Product/1',
-            externalUrl: 'https://demo.example.com/products/linen-shirt',
-            lastError,
-            lastSyncedAt: null,
-            category: null,
-          },
+    displayState: options.displayState ?? ListingDisplayState.published,
+    displayReason: options.displayReason ?? null,
+    listing: inStore
+      ? {
+          id: 'l-1',
+          status: ListingStatus.ACTIVE,
+          source: ListingSource.MANUAL,
+          externalId: 'gid://shopify/Product/1',
+          externalUrl: 'https://demo.example.com/products/linen-shirt',
+          lastError: options.displayReason ?? null,
+          missingRequirement: options.missingRequirement ?? null,
+          lastSyncedAt: null,
+          category: null,
+        }
+      : null,
   };
 }
 
-function renderRow(
-  product: ChannelProduct,
-  onRemove?: (id: string) => Promise<unknown>,
-  onAddBack?: (id: string) => void,
-) {
+interface RenderOptions {
+  store?: ListingStore;
+  canEdit?: boolean;
+  onRemove?: (id: string) => Promise<unknown>;
+  onAddBack?: (id: string) => void;
+}
+
+function mockRetry(state: { isPending?: boolean; error?: Error | null } = {}) {
+  const mutate = vi.fn<() => void>();
+  vi.mocked(useRetryListing).mockReturnValue({
+    mutate,
+    isPending: state.isPending ?? false,
+    error: state.error ?? null,
+  } as unknown as ReturnType<typeof useRetryListing>);
+  return mutate;
+}
+
+function renderRow(product: ChannelProduct, options: RenderOptions = {}) {
   render(
-    <MemoryRouter>
-      <Table>
-        <TableBody>
-          <ChannelProductRow row={product} onRemove={onRemove} onAddBack={onAddBack} />
-        </TableBody>
-      </Table>
-    </MemoryRouter>,
+    <QueryClientProvider client={new QueryClient()}>
+      <MemoryRouter>
+        <Table>
+          <TableBody>
+            <ChannelProductRow
+              row={product}
+              store={options.store ?? STORE}
+              canEdit={options.canEdit ?? true}
+              onRemove={options.onRemove}
+              onAddBack={options.onAddBack}
+            />
+          </TableBody>
+        </Table>
+      </MemoryRouter>
+    </QueryClientProvider>,
   );
 }
 
-describe('ChannelProductRow', () => {
-  it('shows a live product with a link to it on the channel, and removes it once confirmed', async () => {
-    const onRemove = vi.fn<(id: string) => Promise<unknown>>().mockResolvedValue(undefined);
-    renderRow(row(ChannelProductState.listed), onRemove);
+const failedRow = () =>
+  row(ChannelProductState.failed, {
+    displayState: ListingDisplayState.failed,
+    displayReason: 'Handle already taken',
+  });
 
-    expect(screen.getByText('Live')).toBeInTheDocument();
+describe('ChannelProductRow', () => {
+  beforeEach(() => {
+    mockRetry();
+  });
+
+  it('shows a published product with a link to it on the channel, and removes it once confirmed', async () => {
+    const onRemove = vi.fn<(id: string) => Promise<unknown>>().mockResolvedValue(undefined);
+    renderRow(row(ChannelProductState.listed), { onRemove });
+
+    expect(screen.getByText('Published')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open Linen shirt in the store' })).toHaveAttribute(
       'href',
       'https://demo.example.com/products/linen-shirt',
@@ -74,16 +139,85 @@ describe('ChannelProductRow', () => {
     expect(onRemove).toHaveBeenCalledWith('p-1');
   });
 
-  it('says why the last sync failed', () => {
-    renderRow(row(ChannelProductState.failed, 'Handle already taken'));
+  it('says why publishing failed, and tries again in place', async () => {
+    const retry = mockRetry();
+    renderRow(failedRow());
 
+    expect(screen.getByText('Failed')).toBeInTheDocument();
     expect(screen.getByText('Handle already taken')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: RETRY_COPY.action }));
+
+    expect(retry).toHaveBeenCalled();
+    expect(useRetryListing).toHaveBeenCalledWith({
+      workspaceId: 'ws-1',
+      connectionId: 'c-1',
+      productId: 'p-1',
+    });
+  });
+
+  it('shows the retry in flight', () => {
+    mockRetry({ isPending: true });
+    renderRow(failedRow());
+
+    expect(screen.getByRole('button', { name: new RegExp(RETRY_COPY.pending) })).toBeDisabled();
+  });
+
+  it.each([
+    [409, RetryFailure.Blocked],
+    [402, RetryFailure.PlanFull],
+    [403, RetryFailure.NotAllowed],
+  ] as const)('explains a %i from the retry beside it', (status, failure) => {
+    mockRetry({ error: new ApiRequestError('Conflict', status) });
+    renderRow(failedRow());
+
+    expect(screen.getByRole('alert')).toHaveTextContent(RETRY_COPY.failures[failure]);
+  });
+
+  it('offers no retry to members who may not edit listings, or while the store is disconnected', () => {
+    renderRow(failedRow(), { canEdit: false });
+    renderRow(failedRow(), { store: { ...STORE, connected: false } });
+
+    expect(screen.queryByRole('button', { name: RETRY_COPY.action })).not.toBeInTheDocument();
+  });
+
+  it('sends store setup problems to the store’s settings card', () => {
+    renderRow(
+      row(ChannelProductState.pending, {
+        displayState: ListingDisplayState.needs_details,
+        displayReason: 'Choose a shipping policy in this eBay connection’s listing defaults.',
+      }),
+      { store: { ...STORE, missing: [PublishRequirement.shipping_policy] } },
+    );
+
+    expect(screen.getByText('Needs details')).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Open listing defaults' })).toHaveAttribute(
+      'href',
+      '/channels/c-1/settings#listing-defaults',
+    );
+  });
+
+  it('sends missing item specifics to the product’s overrides for this store', () => {
+    renderRow(
+      row(ChannelProductState.failed, {
+        displayState: ListingDisplayState.needs_details,
+        displayReason: 'Brand is required',
+        missingRequirement: PublishRequirement.item_specifics,
+      }),
+    );
+
+    expect(screen.getByRole('link', { name: 'Fill in item specifics' })).toHaveAttribute(
+      'href',
+      '/products/p-1?override=c-1',
+    );
   });
 
   it('offers no removal while it is being removed, or to members who may not', () => {
-    renderRow(row(ChannelProductState.removing), vi.fn<(id: string) => Promise<unknown>>());
+    renderRow(row(ChannelProductState.removing, { displayState: ListingDisplayState.removing }), {
+      onRemove: vi.fn<(id: string) => Promise<unknown>>(),
+    });
     renderRow(row(ChannelProductState.listed));
 
+    expect(screen.getByText('Removing')).toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /from this store/ })).not.toBeInTheDocument();
   });
 
@@ -95,9 +229,12 @@ describe('ChannelProductRow', () => {
 
   it('adds back a product removed by hand', async () => {
     const onAddBack = vi.fn<(id: string) => void>();
-    renderRow(row(ChannelProductState.removed_by_hand), undefined, onAddBack);
+    renderRow(
+      row(ChannelProductState.removed_by_hand, { displayState: ListingDisplayState.removed }),
+      { onAddBack },
+    );
 
-    expect(screen.getByText('Removed by hand')).toBeInTheDocument();
+    expect(screen.getByText('Removed')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Add back' }));
 
     expect(onAddBack).toHaveBeenCalledWith('p-1');

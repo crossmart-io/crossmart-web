@@ -53,8 +53,8 @@ describe('StoreHealthCard', () => {
   it('shows each store’s connection and listings, failures included', () => {
     renderInRouter(<StoreHealthCard report={REPORT} />);
     expect(screen.getByRole('link', { name: 'North shop' })).toBeInTheDocument();
-    expect(screen.getByText('7 active')).toBeInTheDocument();
-    expect(screen.getByText('1 error')).toHaveClass('text-destructive');
+    expect(screen.getByText('7 published')).toBeInTheDocument();
+    expect(screen.getByText('1 failed')).toHaveClass('text-destructive');
     expect(screen.getByText('Synced never')).toBeInTheDocument();
   });
 });

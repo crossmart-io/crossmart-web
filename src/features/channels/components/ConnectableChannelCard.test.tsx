@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import { MemoryRouter } from 'react-router';
-import { ChannelConnectionStatus, ChannelType } from '@/api/schema';
+import { ChannelConnectionStatus, ChannelType, PublishRequirement } from '@/api/schema';
 import {
   CHANNELS,
   CONNECT_STORE_LABEL,
@@ -40,6 +40,31 @@ function renderCard(connections: ChannelConnection[], canManage = true) {
 }
 
 describe('ConnectableChannelCard', () => {
+  it('says a store must finish its setup before it publishes, and links to it', () => {
+    renderCard([
+      connection({
+        publishReadiness: { ready: false, missing: [PublishRequirement.listing_setup] },
+      }),
+    ]);
+
+    expect(screen.getByText(/Finish setup to publish/)).toBeInTheDocument();
+    expect(screen.getByRole('link', { name: 'Finish setup' })).toHaveAttribute(
+      'href',
+      '/channels/c-1',
+    );
+  });
+
+  it('leaves a store that needs reconnecting to the reconnect message', () => {
+    renderCard([
+      connection({
+        status: ChannelConnectionStatus.NEEDS_REAUTH,
+        publishReadiness: { ready: false, missing: [PublishRequirement.reconnect] },
+      }),
+    ]);
+
+    expect(screen.queryByRole('link', { name: 'Finish setup' })).not.toBeInTheDocument();
+  });
+
   it('offers to connect a store, asking for its domain', async () => {
     renderCard([]);
 

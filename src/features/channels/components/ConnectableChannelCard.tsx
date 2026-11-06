@@ -1,4 +1,4 @@
-import { Plus, Settings2 } from 'lucide-react';
+import { CircleDashed, Plus, Settings2 } from 'lucide-react';
 import { Link } from 'react-router';
 import { ChannelConnectionStatus } from '@/api/schema';
 import { Badge } from '@/components/ui/badge';
@@ -11,7 +11,8 @@ import {
   type ConnectableChannel,
 } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
-import { connectionsSummary, headlineStatus } from '../connection-status';
+import { connectionsSummary, headlineStatus, needsReconnect } from '../connection-status';
+import { missingSetup, PUBLISH_READINESS_COPY } from '../publish-requirements';
 import { ChannelCardHeader } from './ChannelCardHeader';
 import { ConnectChannelDialog } from './ConnectChannelDialog';
 import { ConnectionStatusBadge } from './ConnectionStatusBadge';
@@ -31,6 +32,36 @@ function storeToManage(connections: readonly ChannelConnection[]): ChannelConnec
   return (
     connections.find((connection) => connection.status !== ChannelConnectionStatus.CONNECTED) ??
     connections[0]
+  );
+}
+
+/** The first connected store that cannot publish until its setup is finished. */
+function storeNeedingSetup(
+  connections: readonly ChannelConnection[],
+): ChannelConnection | undefined {
+  return connections.find(
+    (connection) => !needsReconnect(connection.status) && missingSetup(connection).length > 0,
+  );
+}
+
+/** Says a store waits on its setup, and links to the store, where the alert lists what. */
+function SetupNeededNote({ connections }: { connections: readonly ChannelConnection[] }) {
+  const store = storeNeedingSetup(connections);
+  if (!store) return null;
+  return (
+    <p className="flex items-center gap-1.5 text-sm text-warning">
+      <CircleDashed className="size-4 shrink-0" aria-hidden="true" />
+      <span>
+        {PUBLISH_READINESS_COPY.cardNote}
+        {connections.length > 1 && ` (${store.displayName})`}.{' '}
+        <Link
+          to={toChannelConnectionRoute(store.id)}
+          className="font-medium text-foreground underline"
+        >
+          {PUBLISH_READINESS_COPY.cardAction}
+        </Link>
+      </span>
+    </p>
   );
 }
 
@@ -104,6 +135,7 @@ export function ConnectableChannelCard(props: ConnectableChannelCardProps) {
         {connections.length > 0 && (
           <p className="text-sm text-muted-foreground">{connectionsSummary(connections)}</p>
         )}
+        <SetupNeededNote connections={connections} />
       </CardContent>
       <CardFooter className="mt-auto">
         <CardActions {...props} />

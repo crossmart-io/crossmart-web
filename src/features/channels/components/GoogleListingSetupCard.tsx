@@ -1,3 +1,4 @@
+import { PageSection } from '@/config/routes';
 import { TriangleAlert } from 'lucide-react';
 import { useFormContext } from 'react-hook-form';
 import { EnumSelectField } from '@/components/forms/EnumSelectField';
@@ -71,6 +72,7 @@ export function GoogleListingSetupCard({
   return (
     <SettingsFormCard
       title={GOOGLE_SETUP_COPY.title}
+      id={PageSection.StoreListingSetup}
       description={`${GOOGLE_SETUP_COPY.description} ${
         googleMerchant.readyToList ? GOOGLE_SETUP_COPY.ready : GOOGLE_SETUP_COPY.notReady
       }`}

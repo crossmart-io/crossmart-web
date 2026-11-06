@@ -8,14 +8,27 @@ import { useChannelProductFilters } from '../hooks/useChannelProductFilters';
 import { useChannelProducts } from '../hooks/useChannelProducts';
 import { useAddStoreProducts, useRemoveStoreProducts } from '../hooks/useStoreProducts';
 import { ALL_CHANNEL_PRODUCTS } from '../listings.constants';
+import type { ListingStore } from '../listings.types';
+import type { ChannelConnection } from '@/features/channels/channels.types';
+import { needsReconnect } from '@/features/channels/connection-status';
 import { ChannelProductFilters } from './ChannelProductFilters';
 import { ChannelProductsTable } from './ChannelProductsTable';
 import { useUrlPagination } from '@/hooks/usePagination';
 
 interface ChannelProductsCardProps {
   workspaceId: string;
-  connectionId: string;
+  connection: ChannelConnection;
   canEdit: boolean;
+}
+
+/** The store as its rows need it: what its setup lacks, and whether it can take a retry. */
+function listingStoreOf(workspaceId: string, connection: ChannelConnection): ListingStore {
+  return {
+    workspaceId,
+    connectionId: connection.id,
+    missing: connection.publishReadiness.missing,
+    connected: !needsReconnect(connection.status),
+  };
 }
 
 /** Opens the products table on the products this store does not have yet, to add them. */
@@ -41,9 +54,10 @@ function AddProductsButton({ connectionId }: { connectionId: string }) {
  */
 export function ChannelProductsCard({
   workspaceId,
-  connectionId,
+  connection,
   canEdit,
 }: ChannelProductsCardProps) {
+  const connectionId = connection.id;
   const ref = { workspaceId, connectionId };
   const filters = useChannelProductFilters();
   const pagination = useUrlPagination();
@@ -70,6 +84,8 @@ export function ChannelProductsCard({
         <ChannelProductsTable
           products={products}
           pagination={pagination}
+          store={listingStoreOf(workspaceId, connection)}
+          canEdit={canEdit}
           onRemove={
             canEdit
               ? (productId) => remove.mutateAsync({ ref, productIds: [productId] })

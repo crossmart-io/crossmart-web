@@ -1,4 +1,4 @@
-import type { components } from '@/api/schema';
+import type { components, PublishRequirement } from '@/api/schema';
 
 type Schemas = components['schemas'];
 
@@ -21,3 +21,13 @@ export type ProductStore = components['schemas']['ProductStoreBadgeDto'];
 export type CategoryAspect = Schemas['CategoryAspectDto'];
 export type ItemSpecific = Schemas['ItemSpecificDto'];
 export type ListingItemSpecifics = Schemas['ListingItemSpecificsDto'];
+
+/** The store a listing row is in, as its fix and retry need it. */
+export interface ListingStore {
+  workspaceId: string;
+  connectionId: string;
+  /** What the store's setup still lacks; empty when it can publish. */
+  missing: readonly PublishRequirement[];
+  /** False while the store needs reconnecting: nothing can be retried there. */
+  connected: boolean;
+}

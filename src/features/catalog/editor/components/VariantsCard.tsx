@@ -1,3 +1,4 @@
+import { PageSection } from '@/config/routes';
 import { useFormContext, useWatch } from 'react-hook-form';
 import { pluralize } from '@/lib/format';
 import type { ProductFormValues } from '../product-form.schema';
@@ -14,6 +15,7 @@ export function VariantsCard({ currency }: { currency: string }) {
   return (
     <EditorCard
       title="Variants"
+      id={PageSection.ProductVariants}
       action={
         hasOptions && (
           <span className="text-sm text-muted-foreground">

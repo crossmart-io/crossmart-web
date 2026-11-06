@@ -13,8 +13,11 @@ import {
   STORE_PRODUCTS_BATCH_SIZE,
 } from '../listings.constants';
 import { chunk } from '@/lib/chunk';
+import { PRODUCTS_ENDPOINT } from '@/features/catalog/catalog.constants';
 
+/** The products table too: its store badges show the products publishing. */
 const MEMBERSHIP_ENDPOINTS = [
+  PRODUCTS_ENDPOINT,
   CHANNEL_PRODUCTS_ENDPOINT,
   CHANNEL_LISTINGS_ENDPOINT,
   PRODUCT_CHANNELS_ENDPOINT,
