@@ -23,6 +23,8 @@ interface ConnectionSettingsProps {
   onDisconnected: () => void;
   /** The store's automatic product rule, from the listings feature. */
   automaticRule?: ReactNode;
+  /** The store-wide pricing rule, from the listings feature; shown near the top. */
+  pricing?: ReactNode;
   /** Sends the whole store again, from the listings feature; for recovery. */
   resyncAction?: ReactNode;
 }
@@ -131,7 +133,7 @@ function ConnectionCard({
   connection,
   onDisconnected,
   resyncAction,
-}: Omit<ConnectionSettingsProps, 'canManage' | 'canImportProducts' | 'automaticRule'>) {
+}: Omit<ConnectionSettingsProps, 'canManage' | 'canImportProducts' | 'automaticRule' | 'pricing'>) {
   const channel = channelInfoFor(connection.channel);
   if (!channel?.connect) return null;
   return (
@@ -162,7 +164,10 @@ function ConnectionCard({
   );
 }
 
-/** The connection's own settings: the store, its automatic rule, importing, and the connection. */
+/**
+ * The connection's own settings: the store, what it needs to publish, its prices, its automatic
+ * rule, importing, and the connection.
+ */
 export function ConnectionSettings({
   workspaceId,
   connection,
@@ -170,6 +175,7 @@ export function ConnectionSettings({
   canImportProducts,
   onDisconnected,
   automaticRule,
+  pricing,
   resyncAction,
 }: ConnectionSettingsProps) {
   const isConnected = connection.status === ChannelConnectionStatus.CONNECTED;
@@ -182,6 +188,7 @@ export function ConnectionSettings({
         connection={connection}
         canManage={canManage && isConnected}
       />
+      {pricing}
       {automaticRule}
       {canImportProducts && isConnected && importsCatalog && (
         <ImportCard workspaceId={workspaceId} connection={connection} />

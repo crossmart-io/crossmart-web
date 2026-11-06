@@ -2,6 +2,7 @@ import type { components, PublishRequirement } from '@/api/schema';
 
 type Schemas = components['schemas'];
 
+export type Product = Schemas['ProductDto'];
 export type PricingRule = Schemas['PricingRuleDto'];
 export type ResolvedPrice = Schemas['ResolvedPriceDto'];
 export type ProductSelectionRule = Schemas['ProductSelectionRuleDto'];

@@ -46,7 +46,12 @@ function EditProduct({ workspace, productId }: { workspace: Workspace; productId
             readOnly={!canEdit}
             aside={<RecentActivityCard workspaceId={workspace.id} productId={product.id} />}
             channels={
-              <ProductChannelsCard workspaceId={workspace.id} product={product} canEdit={canEdit} />
+              <ProductChannelsCard
+                workspaceId={workspace.id}
+                productId={product.id}
+                catalogCurrency={workspace.currency}
+                canEdit={canEdit}
+              />
             }
           />
         </Page>

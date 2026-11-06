@@ -55,7 +55,7 @@ describe('override form', () => {
       customDescription: false,
       descriptionHtml: '<p>Hi</p>',
       visibility: FOLLOW_PRODUCT,
-      prices: [{ variantId: 'v1', price: '', compareAtPrice: null }],
+      prices: [{ variantId: 'v1', price: '', compareAtPrice: '' }],
       customTags: false,
       tags: ['linen'],
       customMedia: false,
@@ -92,7 +92,7 @@ describe('override form', () => {
       title: ' Shopify title ',
       visibility: ListingVisibility.HIDDEN,
       inventoryBuffer: '2',
-      prices: [{ variantId: 'v1', price: '9.50', compareAtPrice: null }],
+      prices: [{ variantId: 'v1', price: '9.50', compareAtPrice: '' }],
     });
     expect(form).toMatchObject({ customTags: true, tags: ['shopify'], customMedia: true });
 
@@ -112,6 +112,19 @@ describe('override form', () => {
     expect(
       toOverrideBody({ ...form, customTags: true, tags: [], customMedia: false }),
     ).toMatchObject({ tags: [], mediaUrls: null });
+  });
+
+  it('sends a compare-at price set for this store, and drops one cleared again', () => {
+    const form = toOverrideForm(channel(), PRODUCT);
+
+    expect(
+      toOverrideBody({ ...form, prices: [{ variantId: 'v1', price: '', compareAtPrice: ' 14 ' }] })
+        .variantPrices,
+    ).toEqual([{ variantId: 'v1', price: null, compareAtPrice: '14' }]);
+    expect(
+      toOverrideBody({ ...form, prices: [{ variantId: 'v1', price: '', compareAtPrice: '' }] })
+        .variantPrices,
+    ).toEqual([]);
   });
 
   it('keeps compare-at prices set through the API, even on variants with no price override', () => {

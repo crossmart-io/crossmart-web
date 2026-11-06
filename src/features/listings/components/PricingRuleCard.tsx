@@ -18,13 +18,12 @@ import {
   FloorField,
   RoundingField,
 } from './PricingRuleFields';
-
-const PRICING_DESCRIPTION =
-  'Prices in this store follow the rule unless a product sets its own price for it. Saving ' +
-  'sends the new prices to the store at once.';
+import { PRICING_RULE_COPY } from '../listings.constants';
 
 interface PricingRuleCardProps {
   workspaceId: string;
+  /** Lets a link scroll straight to the rule (`#pricing`). */
+  id?: string;
   connectionId: string;
   /** The store's currency. */
   currency: string;
@@ -37,6 +36,7 @@ interface PricingRuleCardProps {
 /** How this channel prices products: the rule's fields, and the rule applied live to a product. */
 export function PricingRuleCard({
   workspaceId,
+  id,
   connectionId,
   currency,
   catalogCurrency,
@@ -56,12 +56,13 @@ export function PricingRuleCard({
 
   return (
     <SettingsFormCard
-      title="Pricing"
-      description={PRICING_DESCRIPTION}
+      id={id}
+      title={PRICING_RULE_COPY.title}
+      description={PRICING_RULE_COPY.description}
       form={form}
       onSubmit={submit}
       canManage={canManage}
-      saveLabel="Save and apply"
+      saveLabel={PRICING_RULE_COPY.save}
       saveError={save.error}
       contentClassName="grid gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,22rem)]"
       after={

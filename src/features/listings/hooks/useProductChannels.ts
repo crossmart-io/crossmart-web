@@ -87,20 +87,6 @@ export function useSaveListingOverride(ref: ProductChannelRef) {
   });
 }
 
-export function useClearListingOverride(ref: ProductChannelRef) {
-  const refresh = useInvalidateEndpoints(OVERRIDE_ENDPOINTS);
-  return useMutation<ProductChannel, Error>({
-    meta: { successMessage: LISTINGS_FEEDBACK.overrideCleared },
-    mutationFn: () =>
-      unwrap(
-        fetchClient.DELETE(LISTING_OVERRIDE_ENDPOINT, {
-          params: { path: ref },
-        }),
-      ),
-    onSuccess: refresh,
-  });
-}
-
 /** Adds the product to the store: it stays until removed, and is published at once. */
 export function useAddToStore(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(MEMBERSHIP_ENDPOINTS);

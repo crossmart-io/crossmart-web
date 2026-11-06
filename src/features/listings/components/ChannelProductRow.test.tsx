@@ -76,6 +76,8 @@ function row(state: ChannelProductState, options: RowOptions = {}): ChannelProdu
 interface RenderOptions {
   store?: ListingStore;
   canEdit?: boolean;
+  onOpenListing?: (id: string) => void;
+  initialEntry?: string;
   onRemove?: (id: string) => Promise<unknown>;
   onAddBack?: (id: string) => void;
 }
@@ -93,13 +95,14 @@ function mockRetry(state: { isPending?: boolean; error?: Error | null } = {}) {
 function renderRow(product: ChannelProduct, options: RenderOptions = {}) {
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter>
+      <MemoryRouter initialEntries={[options.initialEntry ?? '/channels/c-1']}>
         <Table>
           <TableBody>
             <ChannelProductRow
               row={product}
               store={options.store ?? STORE}
               canEdit={options.canEdit ?? true}
+              onOpenListing={options.onOpenListing ?? vi.fn<(id: string) => void>()}
               onRemove={options.onRemove}
               onAddBack={options.onAddBack}
             />
@@ -196,19 +199,45 @@ describe('ChannelProductRow', () => {
     );
   });
 
-  it('sends missing item specifics to the product’s overrides for this store', () => {
+  it('opens the listing editor in place to fill in missing item specifics', async () => {
+    const onOpenListing = vi.fn<(id: string) => void>();
     renderRow(
       row(ChannelProductState.failed, {
         displayState: ListingDisplayState.needs_details,
         displayReason: 'Brand is required',
         missingRequirement: PublishRequirement.item_specifics,
       }),
+      { onOpenListing },
     );
 
-    expect(screen.getByRole('link', { name: 'Fill in item specifics' })).toHaveAttribute(
+    await userEvent.click(screen.getByRole('button', { name: 'Fill in item specifics' }));
+
+    expect(onOpenListing).toHaveBeenCalledWith('p-1');
+  });
+
+  it('links the product to its listing editor on this page, keeping the list’s filters', () => {
+    renderRow(row(ChannelProductState.listed), { initialEntry: '/channels/c-1?state=failed' });
+
+    expect(screen.getByRole('link', { name: 'Linen shirt' })).toHaveAttribute(
       'href',
-      '/products/p-1?override=c-1',
+      '/channels/c-1?state=failed&listing=p-1',
     );
+  });
+
+  it('opens the listing editor when the row is clicked, but not from its own controls', async () => {
+    const onOpenListing = vi.fn<(id: string) => void>();
+    const onRemove = vi.fn<(id: string) => Promise<unknown>>().mockResolvedValue(undefined);
+    renderRow(row(ChannelProductState.listed), { onOpenListing, onRemove });
+
+    await userEvent.click(screen.getByText('Added by hand'));
+    expect(onOpenListing).toHaveBeenCalledWith('p-1');
+
+    onOpenListing.mockClear();
+    await userEvent.click(
+      screen.getByRole('button', { name: 'Remove Linen shirt from this store' }),
+    );
+    await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+    expect(onOpenListing).not.toHaveBeenCalled();
   });
 
   it('offers no removal while it is being removed, or to members who may not', () => {

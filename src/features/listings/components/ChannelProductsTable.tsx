@@ -22,6 +22,8 @@ interface ChannelProductsTableProps {
   pagination: Pagination;
   store: ListingStore;
   canEdit: boolean;
+  /** Opens the product's listing editor over the list. */
+  onOpenListing: (productId: string) => void;
   onRemove?: (productId: string) => Promise<unknown>;
   onAddBack?: (productId: string) => void;
 }
@@ -48,6 +50,7 @@ export function ChannelProductsTable({
   pagination,
   store,
   canEdit,
+  onOpenListing,
   onRemove,
   onAddBack,
 }: ChannelProductsTableProps) {
@@ -83,6 +86,7 @@ export function ChannelProductsTable({
                 row={row}
                 store={store}
                 canEdit={canEdit}
+                onOpenListing={onOpenListing}
                 onRemove={onRemove}
                 onAddBack={onAddBack}
               />
