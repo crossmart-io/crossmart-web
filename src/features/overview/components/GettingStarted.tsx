@@ -3,63 +3,13 @@ import { Link } from 'react-router';
 import { cn } from '@/lib/utils';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Progress } from '@/components/ui/progress';
-import { ROUTES } from '@/config/routes';
-import { ChannelSetup } from '@/features/channels';
+import { type OnboardingState, type OnboardingStep, onboardingSteps } from '../onboarding';
 
 const PERCENT = 100;
 
-interface Step {
-  title: string;
-  description: string;
-  to: string;
-  done: boolean;
-}
-
-interface GettingStartedProps {
-  hasProducts: boolean;
-  hasApiKey: boolean;
-  channelSetup: ChannelSetup | undefined;
-}
-
-/** A connected store whose products were never imported gets its own nudge. */
-function channelStep(setup: ChannelSetup | undefined): Step {
-  if (setup === ChannelSetup.Connected) {
-    return {
-      title: 'Import products from your store',
-      description: 'Your store is connected. Import its products to link them to your catalog.',
-      to: ROUTES.channels,
-      done: false,
-    };
-  }
-  return {
-    title: 'Connect a channel',
-    description: 'Connect your Shopify store to sync products and stock.',
-    to: ROUTES.channels,
-    done: setup === ChannelSetup.Imported,
-  };
-}
-
-function toSteps({ hasProducts, hasApiKey, channelSetup }: GettingStartedProps): Step[] {
-  return [
-    {
-      title: 'Add your products',
-      description: 'Import a Shopify export or add a product by hand.',
-      to: ROUTES.products,
-      done: hasProducts,
-    },
-    channelStep(channelSetup),
-    {
-      title: 'Give your AI agent a key',
-      description: 'Let Claude or your own agent work with your catalog.',
-      to: ROUTES.apiKeys,
-      done: hasApiKey,
-    },
-  ];
-}
-
 /** The first things a new seller does. Each step reflects what is really done. */
-export function GettingStarted(props: GettingStartedProps) {
-  const steps = toSteps(props);
+export function GettingStarted(props: OnboardingState) {
+  const steps = onboardingSteps(props);
   const doneCount = steps.filter((step) => step.done).length;
 
   return (
@@ -86,7 +36,7 @@ export function GettingStarted(props: GettingStartedProps) {
   );
 }
 
-function StepItem({ step }: { step: Step }) {
+function StepItem({ step }: { step: OnboardingStep }) {
   const Icon = step.done ? CircleCheck : Circle;
   return (
     <li>

@@ -54,3 +54,12 @@ export function formatDate(value: string | null | undefined, fallback = '—'): 
 export function formatDateTime(value: string | null | undefined, fallback = '—'): string {
   return value ? DATE_TIME_FORMAT.format(new Date(value)) : fallback;
 }
+
+/** The app's copy is English without a serial comma, which is how British English lists read. */
+const COPY_LIST_LOCALE = 'en-GB';
+const ALTERNATIVES_FORMAT = new Intl.ListFormat(COPY_LIST_LOCALE, { type: 'disjunction' });
+
+/** Choices as they read in a sentence: "Shopify, eBay or Google". */
+export function formatAlternatives(items: readonly string[]): string {
+  return ALTERNATIVES_FORMAT.format(items);
+}
