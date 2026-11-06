@@ -11,11 +11,19 @@ interface MemberActionsProps {
   isYou: boolean;
   /** Whether the user may remove this member: their role covers the member's. */
   manageable: boolean;
+  /** False for the workspace's only owner, who cannot leave it without an owner. */
+  canLeave?: boolean;
 }
 
-/** Leave for the user's own row, remove for members they may manage, nothing otherwise. */
-export function MemberActions({ workspace, member, isYou, manageable }: MemberActionsProps) {
-  if (isYou) return <LeaveButton workspace={workspace} />;
+/** Leave for the user's own row unless they are its only owner, remove for members they may manage, nothing otherwise. */
+export function MemberActions({
+  workspace,
+  member,
+  isYou,
+  manageable,
+  canLeave = true,
+}: MemberActionsProps) {
+  if (isYou) return canLeave ? <LeaveButton workspace={workspace} /> : null;
   if (!manageable) return null;
   return <RemoveButton workspaceId={workspace.id} member={member} />;
 }

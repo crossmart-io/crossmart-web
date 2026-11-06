@@ -16,7 +16,8 @@ import {
   useInventory,
   useInventoryListFilters,
 } from '@/features/inventory';
-import type { Workspace } from '@/features/workspaces';
+import { WorkspacePermission } from '@/api/schema';
+import { hasPermission, type Workspace } from '@/features/workspaces';
 
 export function InventoryPage() {
   const filters = useInventoryListFilters();
@@ -37,6 +38,7 @@ interface InventoryResultsProps {
 }
 
 function InventoryResults({ workspace, filters }: InventoryResultsProps) {
+  const canAdjust = hasPermission(workspace, WorkspacePermission.inventory_edit);
   const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null);
   const pagination = useUrlPagination();
   const inventory = useInventory(
@@ -76,6 +78,7 @@ function InventoryResults({ workspace, filters }: InventoryResultsProps) {
         items={inventory.items}
         isRefreshing={inventory.isPlaceholderData}
         onOpenHistory={setHistoryItem}
+        canAdjust={canAdjust}
       />
       <TablePagination
         pagination={pagination}
@@ -88,6 +91,7 @@ function InventoryResults({ workspace, filters }: InventoryResultsProps) {
         workspaceId={workspace.id}
         item={openItem}
         onClose={() => setHistoryItem(null)}
+        canAdjust={canAdjust}
       />
     </>
   );

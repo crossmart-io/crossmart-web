@@ -15,6 +15,7 @@ import { connectionsSummary, headlineStatus } from '../connection-status';
 import { ChannelCardHeader } from './ChannelCardHeader';
 import { ConnectChannelDialog } from './ConnectChannelDialog';
 import { ConnectionStatusBadge } from './ConnectionStatusBadge';
+import { ConnectStoreButton } from './ConnectStoreButton';
 
 interface ConnectableChannelCardProps {
   workspaceId: string;
@@ -43,12 +44,22 @@ function CardActions({
   const store = storeToManage(connections);
   if (store) {
     return (
-      <Button asChild variant="outline" size="sm">
-        <Link to={toChannelConnectionRoute(store.id)}>
-          <Settings2 data-icon="inline-start" />
-          Manage
-        </Link>
-      </Button>
+      <div className="flex flex-wrap gap-2">
+        <Button asChild variant="outline" size="sm">
+          <Link to={toChannelConnectionRoute(store.id)}>
+            <Settings2 data-icon="inline-start" />
+            Manage
+          </Link>
+        </Button>
+        {canManage && (
+          <ConnectStoreButton
+            workspaceId={workspaceId}
+            channel={channel}
+            connect={connect}
+            variant="ghost"
+          />
+        )}
+      </div>
     );
   }
   if (!canManage) {

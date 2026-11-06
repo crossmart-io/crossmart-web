@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import type { ActivityEvent } from '../activity.types';
 import { toActorName } from '../activity-actor';
 import { toSubjectRoute } from '../activity-subject';
+import { splitSummary } from '../summary-parts';
 import { ActorAvatar } from './ActorAvatar';
 
 interface ActivityEventItemProps {
@@ -50,21 +51,28 @@ export function ActivityEventItem({
   );
 }
 
+/** The summary with each quoted name isolated, so right-to-left names keep their place. */
+function SummaryText({ summary }: { summary: string }) {
+  return splitSummary(summary).map((part, index) =>
+    part.isUserContent ? <bdi key={index}>{part.text}</bdi> : part.text,
+  );
+}
+
 function EventSummary({ event, route }: { event: ActivityEvent; route: string | undefined }) {
-  if (!route) return event.summary;
+  if (!route) return <SummaryText summary={event.summary} />;
   return (
     <Link to={route} className="underline-offset-4 hover:underline">
-      {event.summary}
+      <SummaryText summary={event.summary} />
     </Link>
   );
 }
 
 function ActorName({ event }: { event: ActivityEvent }) {
   const name = toActorName(event.actor);
-  if (event.actor.type !== ActivityActorType.API_KEY) return <span>{name}</span>;
+  if (event.actor.type !== ActivityActorType.API_KEY) return <bdi>{name}</bdi>;
   return (
     <span>
-      {name} <span className="text-muted-foreground/80">(API key)</span>
+      <bdi>{name}</bdi> <span className="text-muted-foreground/80">(API key)</span>
     </span>
   );
 }

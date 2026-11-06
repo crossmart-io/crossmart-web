@@ -23,7 +23,9 @@ export function HeaderBreadcrumbs() {
             {index > 0 && <BreadcrumbSeparator className="hidden sm:block" />}
             <BreadcrumbItem className={index < lastIndex ? 'hidden sm:inline-flex' : 'min-w-0'}>
               {index === lastIndex ? (
-                <BreadcrumbPage className="truncate">{crumb.label}</BreadcrumbPage>
+                <BreadcrumbPage dir="auto" title={crumb.label} className="block truncate">
+                  {crumb.label}
+                </BreadcrumbPage>
               ) : crumb.to ? (
                 <BreadcrumbLink asChild>
                   <Link to={crumb.to}>{crumb.label}</Link>

@@ -9,12 +9,16 @@ import { PAGE_PARENTS } from '@/config/navigation';
 import { ROUTE_PARAMS, ROUTES, toChannelConnectionRoute } from '@/config/routes';
 import {
   type ChannelConnection,
+  channelInfoFor,
   ConnectionSettings,
+  ConnectStoreButton,
   ConnectionStatusBadge,
   ConnectionSwitcher,
   connectionCurrency,
   connectionName,
   MissingFeaturesAlert,
+  needsReconnect,
+  ReconnectAlert,
 } from '@/features/channels';
 import {
   CHANNEL_TABS,
@@ -112,6 +116,21 @@ interface ConnectionViewProps {
   tab: ChannelTab;
 }
 
+/** Connecting one more store of this channel, for admins, beside the store switcher. */
+function ConnectAnotherStore({
+  workspaceId,
+  connection,
+}: {
+  workspaceId: string;
+  connection: ChannelConnection;
+}) {
+  const channel = channelInfoFor(connection.channel);
+  if (!channel?.connect) return null;
+  return (
+    <ConnectStoreButton workspaceId={workspaceId} channel={channel} connect={channel.connect} />
+  );
+}
+
 /** The connection once it has loaded: its switcher, status, missing features and tabs. */
 function ConnectionView({ workspace, connection, tab }: ConnectionViewProps) {
   const name = connectionName(connection);
@@ -120,6 +139,9 @@ function ConnectionView({ workspace, connection, tab }: ConnectionViewProps) {
     <Page
       name={name}
       parents={PAGE_PARENTS.channels}
+      actions={
+        canManage && <ConnectAnotherStore workspaceId={workspace.id} connection={connection} />
+      }
       title={
         <>
           <ConnectionSwitcher
@@ -133,11 +155,17 @@ function ConnectionView({ workspace, connection, tab }: ConnectionViewProps) {
       }
       description={connection.externalAccountId}
     >
-      <MissingFeaturesAlert
-        workspaceId={workspace.id}
-        connection={connection}
-        canManage={canManage}
-      />
+      {/* A store that must be reconnected says why first; reconnecting also grants the
+          permissions the missing-features alert asks for. */}
+      {needsReconnect(connection.status) ? (
+        <ReconnectAlert workspaceId={workspace.id} connection={connection} canManage={canManage} />
+      ) : (
+        <MissingFeaturesAlert
+          workspaceId={workspace.id}
+          connection={connection}
+          canManage={canManage}
+        />
+      )}
       <ReturnToProvider parents={PAGE_PARENTS.channels} label={name}>
         <ChannelConnectionTabs workspace={workspace} connection={connection} tab={tab} />
       </ReturnToProvider>

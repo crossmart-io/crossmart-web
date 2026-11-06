@@ -1,4 +1,4 @@
-import { WorkspacePermission } from '@/api/schema';
+import { WorkspacePermission, WorkspaceRole } from '@/api/schema';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -10,6 +10,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ActionsTableHead } from '@/components/lists/ActionsTableHead';
 import { formatDate } from '@/lib/format';
 import type { Workspace } from '../hooks/useCurrentWorkspace';
 import { useMembers, type WorkspaceMember } from '../hooks/useMembers';
@@ -30,6 +31,8 @@ interface MemberAccess {
   manageable: boolean;
   /** The roles the user may give. */
   grantable: readonly RoleOption[];
+  /** A workspace keeps at least one owner, so its only owner cannot leave. */
+  canLeave: boolean;
 }
 
 export function MembersTable({ workspace, currentUserId }: MembersTableProps) {
@@ -46,9 +49,14 @@ export function MembersTable({ workspace, currentUserId }: MembersTableProps) {
   const options = roleOptions(catalog.data);
   const grantable = grantableOptions(options, workspace.permissions);
   const canManage = hasPermission(workspace, WorkspacePermission.members_manage);
+  const ownerCount = members.data.filter((member) => member.role === WorkspaceRole.OWNER).length;
   const accessTo = (member: WorkspaceMember): MemberAccess => {
     const held = options.find((option) => option.value === roleValue(member));
-    return { manageable: canManage && !!held && covers(workspace.permissions, held), grantable };
+    return {
+      manageable: canManage && !!held && covers(workspace.permissions, held),
+      grantable,
+      canLeave: member.role !== WorkspaceRole.OWNER || ownerCount > 1,
+    };
   };
 
   return (
@@ -59,7 +67,7 @@ export function MembersTable({ workspace, currentUserId }: MembersTableProps) {
             <TableHead>Member</TableHead>
             <TableHead>Role</TableHead>
             <TableHead className="hidden sm:table-cell">Joined</TableHead>
-            <TableHead className="w-24" />
+            <ActionsTableHead className="w-24" />
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -119,6 +127,7 @@ function MemberRow({ workspace, member, isYou, access }: MemberRowProps) {
           member={member}
           isYou={isYou}
           manageable={access.manageable}
+          canLeave={access.canLeave}
         />
       </TableCell>
     </TableRow>

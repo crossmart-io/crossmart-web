@@ -8,6 +8,8 @@ const NON_NEGATIVE_INTEGER_PATTERN = /^\d+$/;
 export const MAX_OPTIONS = 3;
 export const MAX_VARIANTS = 250;
 export const MAX_TEXT_LENGTH = 255;
+/** Mirrors the API's limit on product titles, so the input stops there. */
+export const MAX_TITLE_LENGTH = MAX_TEXT_LENGTH;
 
 const optionalText = z.string().trim().max(MAX_TEXT_LENGTH);
 
@@ -37,7 +39,7 @@ export const optionFormSchema = z.object({
 
 export const productFormSchema = z
   .object({
-    title: z.string().trim().min(1, 'A product needs a title').max(MAX_TEXT_LENGTH),
+    title: z.string().trim().min(1, 'A product needs a title').max(MAX_TITLE_LENGTH),
     handle: z.string().trim().max(MAX_TEXT_LENGTH),
     descriptionHtml: z.string(),
     status: z.enum(ProductStatus),

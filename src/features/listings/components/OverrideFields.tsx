@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
 import { AiRewriteButton, type ContentDraftTarget } from '@/features/ai-writer';
-import { formatMoney } from '@/lib/format';
+import { formatAmount } from '@/lib/format';
 import { useOverrideAiWriter } from '../hooks/useOverrideAiWriter';
 import { VISIBILITY_OPTIONS } from '../listings.constants';
 import type { ChannelVariant } from '../listings.types';
@@ -142,7 +142,8 @@ export function PriceOverrideFields({
           <MoneyInput
             id={`override-price-${index}`}
             currency={currency}
-            placeholder={formatMoney(variant.price.price, currency)}
+            // The input shows the currency already, so the hint is the bare amount.
+            placeholder={formatAmount(variant.price.price, currency)}
             {...register(`prices.${index}.price`)}
           />
           <FieldError errors={[formState.errors.prices?.[index]?.price]} />

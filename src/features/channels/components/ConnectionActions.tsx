@@ -1,12 +1,11 @@
-import { RefreshCw, Unplug } from 'lucide-react';
-import { ChannelConnectionStatus } from '@/api/schema';
+import { Unplug } from 'lucide-react';
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import type { ChannelInfo, ConnectableChannel } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
-import { reconnectAccountHandle } from '../connection-account';
+import { needsReconnect } from '../connection-status';
 import { useDisconnectChannel } from '../hooks/useChannelConnections';
-import { ConnectChannelDialog } from './ConnectChannelDialog';
+import { ReconnectButton } from './ReconnectButton';
 
 interface ConnectionActionsProps {
   workspaceId: string;
@@ -28,22 +27,14 @@ export function ConnectionActions({
   onDisconnected,
 }: ConnectionActionsProps) {
   const disconnect = useDisconnectChannel(workspaceId);
-  const needsReauth = connection.status === ChannelConnectionStatus.NEEDS_REAUTH;
-
   return (
     <>
-      {needsReauth && (
-        <ConnectChannelDialog
+      {needsReconnect(connection.status) && (
+        <ReconnectButton
           workspaceId={workspaceId}
           channel={channel}
           connect={connect}
-          initialAccount={reconnectAccountHandle(connection)}
-          trigger={
-            <Button size="sm">
-              <RefreshCw data-icon="inline-start" />
-              Reconnect
-            </Button>
-          }
+          connection={connection}
         />
       )}
       <ConfirmDialog

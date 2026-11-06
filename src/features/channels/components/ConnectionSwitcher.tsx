@@ -79,10 +79,10 @@ export function ConnectionSwitcher({
         <DropdownMenuTrigger asChild>
           <Button
             variant="ghost"
-            className="-ml-2 h-auto px-2 py-1 font-heading text-2xl font-semibold tracking-tight"
+            className="-ml-2 h-auto max-w-full min-w-0 px-2 py-1 font-heading text-2xl font-semibold tracking-tight"
           >
             <span className="sr-only">Switch store, current store: </span>
-            {connectionName(connection)}
+            <span className="truncate">{connectionName(connection)}</span>
             <ChevronsUpDown className="size-5 text-muted-foreground" aria-hidden="true" />
           </Button>
         </DropdownMenuTrigger>

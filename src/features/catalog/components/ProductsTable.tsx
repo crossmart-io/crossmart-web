@@ -121,32 +121,9 @@ function ProductRow({ product, currency, selection, isRefreshing }: ProductRowPr
           />
         </TableCell>
       )}
-      <TableCell className="max-w-0 md:max-w-none">
-        <Link
-          to={toProductRoute(product.id)}
-          className="flex items-center gap-3 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-        >
-          <ProductThumbnail url={product.imageUrl} alt="" />
-          <span className="flex min-w-0 flex-col">
-            <span className="truncate font-medium group-hover/row:underline">{product.title}</span>
-            <span className="hidden truncate text-xs text-muted-foreground sm:block">
-              {product.handle}
-            </span>
-            {/* On narrow screens the status, price and stock columns fold into this cell. */}
-            <span className="mt-1 flex min-w-0 items-center gap-2 text-xs text-muted-foreground md:hidden">
-              <span className="sm:hidden">
-                <ProductStatusBadge status={product.status} />
-              </span>
-              <span className="truncate">
-                <span className="tabular-nums">{price}</span> ·{' '}
-                <StockLabel
-                  totalAvailable={product.totalAvailable}
-                  variantCount={product.variantCount}
-                />
-              </span>
-            </span>
-          </span>
-        </Link>
+      {/* Takes the width the other columns leave, so a long title wraps instead of widening the table. */}
+      <TableCell className="w-full max-w-0 whitespace-normal">
+        <ProductCell product={product} price={price} />
       </TableCell>
       <TableCell className="hidden sm:table-cell">
         <ProductStatusBadge status={product.status} />
@@ -159,8 +136,45 @@ function ProductRow({ product, currency, selection, isRefreshing }: ProductRowPr
       </TableCell>
       <TableCell className="hidden text-right tabular-nums md:table-cell">{price}</TableCell>
       <TableCell className="hidden text-muted-foreground lg:table-cell">
-        {product.vendor ?? NO_VALUE}
+        {product.vendor?.trim() ? product.vendor : NO_VALUE}
       </TableCell>
     </TableRow>
+  );
+}
+
+/** Thumbnail, title and handle; on narrow screens also the columns that do not fit. */
+function ProductCell({ product, price }: { product: ProductSummary; price: string }) {
+  return (
+    <Link
+      to={toProductRoute(product.id)}
+      className="flex items-center gap-3 rounded-md focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+    >
+      <ProductThumbnail url={product.imageUrl} alt="" />
+      <span className="flex min-w-0 flex-col">
+        <span
+          dir="auto"
+          title={product.title}
+          className="line-clamp-2 font-medium break-words group-hover/row:underline"
+        >
+          {product.title}
+        </span>
+        <span className="hidden truncate text-xs text-muted-foreground sm:block">
+          {product.handle}
+        </span>
+        {/* On narrow screens the status, price and stock columns fold into this cell. */}
+        <span className="mt-1 flex min-w-0 items-center gap-2 text-xs text-muted-foreground md:hidden">
+          <span className="sm:hidden">
+            <ProductStatusBadge status={product.status} />
+          </span>
+          <span className="truncate">
+            <span className="tabular-nums">{price}</span> ·{' '}
+            <StockLabel
+              totalAvailable={product.totalAvailable}
+              variantCount={product.variantCount}
+            />
+          </span>
+        </span>
+      </span>
+    </Link>
   );
 }

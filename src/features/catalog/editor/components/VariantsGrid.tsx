@@ -12,10 +12,32 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { cn } from '@/lib/utils';
 import { COST_HELP } from '../../catalog.constants';
 import type { ProductFormValues } from '../product-form.schema';
 
 const COST_HELP_ID = 'variants-cost-help';
+
+type VariantColumn = 'price' | 'cost' | 'sku' | 'quantity';
+
+const COLUMN_LABELS: Record<VariantColumn, string> = {
+  price: 'Price',
+  cost: 'Cost',
+  sku: 'SKU',
+  quantity: 'Available',
+};
+
+/**
+ * Below `sm` the table stacks: each variant becomes a small card of labelled fields, since five
+ * inputs side by side do not fit a phone. From `sm` up it is a regular table again.
+ */
+const STACKED = {
+  table: 'block sm:table',
+  body: 'block sm:table-row-group',
+  row: 'grid grid-cols-2 gap-x-3 gap-y-1 p-2 sm:table-row sm:p-0',
+  cell: 'block p-0 sm:table-cell sm:p-2',
+  nameCell: 'col-span-2 block p-0 pt-1 sm:table-cell sm:p-2 sm:pt-4',
+} as const;
 
 /** The id of a cell's error message, so the input can point at it. */
 function errorId(index: number, column: string): string {
@@ -34,19 +56,19 @@ export function VariantsGrid({ currency }: { currency: string }) {
   return (
     <div className="flex flex-col gap-2">
       <div className="rounded-lg border">
-        <Table>
-          <TableHeader>
+        <Table className={STACKED.table}>
+          <TableHeader className="hidden sm:table-header-group">
             <TableRow>
               <TableHead>Variant</TableHead>
-              <TableHead className="w-36">Price</TableHead>
+              <TableHead className="w-36">{COLUMN_LABELS.price}</TableHead>
               <TableHead className="w-36" aria-describedby={COST_HELP_ID}>
-                Cost
+                {COLUMN_LABELS.cost}
               </TableHead>
-              <TableHead className="w-40">SKU</TableHead>
-              <TableHead className="w-28 text-right">Available</TableHead>
+              <TableHead className="w-40">{COLUMN_LABELS.sku}</TableHead>
+              <TableHead className="w-28 text-right">{COLUMN_LABELS.quantity}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody>
+          <TableBody className={STACKED.body}>
             {variants.fields.map((variant, index) => (
               <VariantRow
                 key={variant.rowKey}
@@ -70,16 +92,34 @@ interface CellParts {
   inputProps: { 'aria-invalid': boolean; 'aria-describedby': string | undefined };
 }
 
+interface StackedCellProps {
+  column: VariantColumn;
+  children: ReactNode;
+}
+
+/** A cell that names its column itself while the table is stacked on phones. */
+function StackedCell({ column, children }: StackedCellProps) {
+  return (
+    <TableCell className={STACKED.cell}>
+      <span className="mb-1 block text-xs text-muted-foreground sm:hidden" aria-hidden="true">
+        {COLUMN_LABELS[column]}
+      </span>
+      {children}
+    </TableCell>
+  );
+}
+
 interface MoneyCellProps {
   currency: string;
+  column: VariantColumn;
   label: string;
   cell: CellParts;
   field: UseFormRegisterReturn;
 }
 
-function MoneyCell({ currency, label, cell, field }: MoneyCellProps) {
+function MoneyCell({ currency, column, label, cell, field }: MoneyCellProps) {
   return (
-    <TableCell>
+    <StackedCell column={column}>
       <MoneyInput
         currency={currency}
         placeholder="0.00"
@@ -88,7 +128,7 @@ function MoneyCell({ currency, label, cell, field }: MoneyCellProps) {
         {...field}
       />
       {cell.message}
-    </TableCell>
+    </StackedCell>
   );
 }
 
@@ -97,8 +137,6 @@ interface VariantRowProps {
   label: string;
   currency: string;
 }
-
-type VariantColumn = 'price' | 'cost' | 'sku' | 'quantity';
 
 function VariantRow({ index, label, currency }: VariantRowProps) {
   const { register, formState } = useFormContext<ProductFormValues>();
@@ -119,21 +157,25 @@ function VariantRow({ index, label, currency }: VariantRowProps) {
   const quantity = cell('quantity');
 
   return (
-    <TableRow className="align-top">
-      <TableCell className="pt-4 font-medium">{label}</TableCell>
+    <TableRow className={cn('align-top', STACKED.row)}>
+      <TableCell className={cn('font-medium whitespace-normal', STACKED.nameCell)}>
+        {label}
+      </TableCell>
       <MoneyCell
         currency={currency}
+        column="price"
         label={`Price of ${label}`}
         cell={price}
         field={register(`variants.${index}.price`)}
       />
       <MoneyCell
         currency={currency}
+        column="cost"
         label={`Cost of ${label}`}
         cell={cost}
         field={register(`variants.${index}.cost`)}
       />
-      <TableCell>
+      <StackedCell column="sku">
         <Input
           aria-label={`SKU of ${label}`}
           spellCheck={false}
@@ -143,8 +185,8 @@ function VariantRow({ index, label, currency }: VariantRowProps) {
           {...register(`variants.${index}.sku`)}
         />
         {sku.message}
-      </TableCell>
-      <TableCell>
+      </StackedCell>
+      <StackedCell column="quantity">
         <Input
           inputMode="numeric"
           className="text-right tabular-nums"
@@ -153,7 +195,7 @@ function VariantRow({ index, label, currency }: VariantRowProps) {
           {...register(`variants.${index}.quantity`)}
         />
         {quantity.message}
-      </TableCell>
+      </StackedCell>
     </TableRow>
   );
 }

@@ -11,6 +11,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { ActionsTableHead } from '@/components/lists/ActionsTableHead';
 import { formatDate } from '@/lib/format';
 import { type Invitation, useInvitations, useRevokeInvitation } from '../hooks/useInvitations';
 import { roleLabel } from '../role-options';
@@ -36,7 +37,7 @@ export function PendingInvitations({ workspaceId }: { workspaceId: string }) {
               <TableHead>Role</TableHead>
               <TableHead className="hidden md:table-cell">Invited by</TableHead>
               <TableHead className="hidden sm:table-cell">Expires</TableHead>
-              <TableHead className="w-24" />
+              <ActionsTableHead className="w-24" />
             </TableRow>
           </TableHeader>
           <TableBody>

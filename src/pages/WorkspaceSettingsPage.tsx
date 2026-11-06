@@ -30,7 +30,10 @@ export function WorkspaceSettingsPage() {
               <TimeZoneCard key={`${workspace.id}:${workspace.timeZone}`} workspace={workspace} />
             )}
             {hasPermission(workspace, WorkspacePermission.workspace_delete) && (
-              <DeleteWorkspaceCard workspaceId={workspace.id} workspaceName={workspace.name} />
+              <DeleteWorkspaceCard
+                workspaceId={workspace.id}
+                workspaceName={workspace.displayName}
+              />
             )}
           </div>
         )}
