@@ -1,9 +1,8 @@
 import { WorkspacePermission } from '@/api/schema';
-import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
+import { PermissionGate } from '@/components/feedback/PermissionGate';
 import { Page } from '@/components/layout/Page';
 import { PAGE_PARENTS } from '@/config/navigation';
 import { PLAN_COPY, PlanUsage } from '@/features/plan';
-import { hasPermission } from '@/features/workspaces';
 
 export function PlanPage() {
   return (
@@ -12,15 +11,9 @@ export function PlanPage() {
       parents={PAGE_PARENTS.settings}
       description="Your organization's plan, what it includes, and how much of it is in use across all workspaces."
     >
-      <WorkspaceGate>
-        {(workspace) =>
-          hasPermission(workspace, WorkspacePermission.billing_view) ? (
-            <PlanUsage organizationId={workspace.organizationId} />
-          ) : (
-            <p className="text-sm text-muted-foreground">{PLAN_COPY.noAccess}</p>
-          )
-        }
-      </WorkspaceGate>
+      <PermissionGate permission={WorkspacePermission.billing_view} denied={PLAN_COPY.noAccess}>
+        {(workspace) => <PlanUsage organizationId={workspace.organizationId} />}
+      </PermissionGate>
     </Page>
   );
 }

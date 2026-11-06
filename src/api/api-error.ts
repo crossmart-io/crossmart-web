@@ -80,6 +80,11 @@ export function isNotFoundError(error: unknown): boolean {
   return statusCodeOf(error) === HttpStatus.NotFound;
 }
 
+/** The organization's plan has no room for this; upgrading the plan resolves it. */
+export function isPlanLimitError(error: unknown): boolean {
+  return statusCodeOf(error) === HttpStatus.PaymentRequired;
+}
+
 /** The machine-readable `code` an API error body or an `ApiRequestError` carries, if any. */
 export function errorCodeOf(error: unknown): string | undefined {
   if (typeof error !== 'object' || error === null || !('code' in error)) return undefined;

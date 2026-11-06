@@ -111,6 +111,18 @@ const appRoutes: RouteObject[] = [
       import('@/pages/ApiKeysPage').then(({ ApiKeysPage }) => ({ Component: ApiKeysPage })),
   },
   {
+    path: ROUTES.webhooks,
+    lazy: () =>
+      import('@/pages/WebhooksPage').then(({ WebhooksPage }) => ({ Component: WebhooksPage })),
+  },
+  {
+    path: ROUTES.webhookEndpoint,
+    lazy: () =>
+      import('@/pages/WebhookEndpointPage').then(({ WebhookEndpointPage }) => ({
+        Component: WebhookEndpointPage,
+      })),
+  },
+  {
     path: ROUTES.agentConnections,
     lazy: () =>
       import('@/pages/AgentConnectionsPage').then(({ AgentConnectionsPage }) => ({

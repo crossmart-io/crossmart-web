@@ -73,6 +73,10 @@ export const PERMISSION_GROUPS: readonly PermissionGroup[] = [
         label: 'Invite and remove members, change and edit roles',
       },
       { permission: WorkspacePermission.api_keys_manage, label: 'Create and revoke API keys' },
+      {
+        permission: WorkspacePermission.webhooks_manage,
+        label: 'Add, change and remove webhook endpoints',
+      },
     ],
   },
   {
