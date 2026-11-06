@@ -13,6 +13,7 @@ describe('override form', () => {
   it('starts empty where the store follows the product, with its values ready to edit', () => {
     expect(toOverrideForm(LISTING)).toEqual({
       title: '',
+      vendor: '',
       customDescription: false,
       descriptionHtml: '<p>Soft washed linen.</p>',
       customTags: false,
@@ -112,6 +113,21 @@ describe('override patch', () => {
         { variantId: 'v-2', price: null, compareAtPrice: '90' },
       ],
     });
+  });
+
+  it('sends a trimmed vendor for the store, and null once it follows the product', () => {
+    const withVendor = { ...saved, vendor: ' Shop brand ' };
+
+    expect(toOverridePatch(saved, withVendor)).toEqual({ vendor: 'Shop brand' });
+    expect(toOverridePatch(withVendor, saved)).toEqual({ vendor: null });
+  });
+
+  it('holds the store’s vendor where it overrides it', () => {
+    const form = toOverrideForm(
+      listingEditorFixture({ vendor: overridden<string | null>('Northfield', 'Shop brand') }),
+    );
+
+    expect(form.vendor).toBe('Shop brand');
   });
 
   it('sends a description written for the store, and null once it follows the product', () => {

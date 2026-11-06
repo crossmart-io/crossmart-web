@@ -20,6 +20,7 @@ export function channelVariantFixture(overrides: Partial<ChannelVariant> = {}): 
     variantId: 'v-1',
     title: 'Blue',
     quantity: 4,
+    rulePrice: '64.00',
     price: {
       price: '64.00',
       compareAtPrice: '80.00',
@@ -88,6 +89,7 @@ export function listingEditorVariantFixture(
     sku: null,
     price: { product: '64.00', override: null, effective: '64.00', overridden: false },
     compareAtPrice: { product: '80.00', override: null, effective: '80.00', overridden: false },
+    rulePrice: '64.00',
     resolvedPrice: channelVariantFixture().price,
     quantity: 4,
     ...overrides,
@@ -106,6 +108,7 @@ export function listingEditorFixture(overrides: Partial<ListingEditor> = {}): Li
     displayRequirement: null,
     listing: listingFixture(),
     title: inherited('Linen shirt'),
+    vendor: inherited<string | null>('Northfield'),
     descriptionHtml: inherited('<p>Soft washed linen.</p>'),
     tags: inherited(['linen', 'summer']),
     images: inherited(['https://cdn.example.com/a.jpg']),

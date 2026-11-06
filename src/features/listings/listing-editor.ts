@@ -10,6 +10,7 @@ export enum FieldOrigin {
 /** The listing's fields a store can change as a whole; prices are per variant. */
 export enum ListingField {
   Title = 'title',
+  Vendor = 'vendor',
   Description = 'description',
   Tags = 'tags',
   Images = 'images',
@@ -20,6 +21,7 @@ export enum ListingField {
 /** In the order the editor shows them. */
 export const LISTING_FIELDS: readonly ListingField[] = [
   ListingField.Title,
+  ListingField.Vendor,
   ListingField.Description,
   ListingField.Tags,
   ListingField.Images,
@@ -44,6 +46,8 @@ function isFieldChanged(values: OverrideFormValues, field: ListingField): boolea
   switch (field) {
     case ListingField.Title:
       return values.title.trim() !== '';
+    case ListingField.Vendor:
+      return values.vendor.trim() !== '';
     case ListingField.Description:
       return values.customDescription;
     case ListingField.Tags:
@@ -70,6 +74,8 @@ export function productValuePatch(
   switch (field) {
     case ListingField.Title:
       return { title: '' };
+    case ListingField.Vendor:
+      return { vendor: '' };
     case ListingField.Description:
       return { customDescription: false, descriptionHtml: product.descriptionHtml };
     case ListingField.Tags:
