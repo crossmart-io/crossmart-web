@@ -33,6 +33,7 @@ describe('listing editor fields', () => {
   it('marks each field the store changes', () => {
     const values = formFor({
       title: 'Shop title',
+      vendor: 'Shop brand',
       customDescription: true,
       customTags: true,
       customMedia: true,

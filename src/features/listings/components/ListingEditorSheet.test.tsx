@@ -7,14 +7,13 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { GenerateAvailability } from '@/features/suggestions';
 import type * as Suggestions from '@/features/suggestions';
 import { useListingEditor } from '../hooks/useListingEditor';
-import type * as Previews from '../hooks/usePreviews';
-import { useRulePrices } from '../hooks/usePreviews';
 import type * as ProductChannelHooks from '../hooks/useProductChannels';
 import {
   useAddToStore,
   usePatchListingOverride,
   useRemoveFromStore,
 } from '../hooks/useProductChannels';
+import { FieldOrigin } from '../listing-editor';
 import { LISTING_EDITOR_COPY, OverrideSheetMode } from '../listings.constants';
 import type { ListingEditor, ListingOverridePatch, ProductChannel } from '../listings.types';
 import {
@@ -27,10 +26,6 @@ import { ListingEditorSheet } from './ListingEditorSheet';
 
 vi.mock('../hooks/useListingEditor', () => ({
   useListingEditor: vi.fn<typeof useListingEditor>(),
-}));
-vi.mock('../hooks/usePreviews', async (importOriginal) => ({
-  ...(await importOriginal<typeof Previews>()),
-  useRulePrices: vi.fn<typeof useRulePrices>(),
 }));
 vi.mock('../hooks/useProductChannels', async (importOriginal) => ({
   ...(await importOriginal<typeof ProductChannelHooks>()),
@@ -81,7 +76,6 @@ function renderEditor(listing: ListingEditor, options: RenderOptions = {}) {
     isMissing: false,
     refetch: vi.fn<() => void>(),
   });
-  vi.mocked(useRulePrices).mockReturnValue(new Map([['v-1', '62.00']]));
   const mutations = mockMutations();
   const onClose = vi.fn<() => void>();
   render(
@@ -215,6 +209,7 @@ describe('ListingEditorSheet', () => {
         variants: [
           listingEditorVariantFixture({
             price: { product: '64.00', override: '59.00', effective: '59.00', overridden: true },
+            rulePrice: '62.00',
           }),
         ],
       }),
@@ -223,7 +218,7 @@ describe('ListingEditorSheet', () => {
     const price = screen.getByLabelText('Price');
     expect(price).toHaveValue('59.00');
     expect(price).toHaveAttribute('placeholder', '62.00');
-    expect(within(fieldOf(price)).getByText('Pricing rule: $62.00')).toBeInTheDocument();
+    expect(within(fieldOf(price)).getByText('Rule price $62.00')).toBeInTheDocument();
     expect(within(fieldOf(price)).getByText(/\$64\.00/)).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText('Compare-at price'), '75');
     await save();
@@ -236,6 +231,46 @@ describe('ListingEditorSheet', () => {
     expect(patch).toHaveBeenLastCalledWith({
       variantPrices: [{ variantId: 'v-1', price: null, compareAtPrice: null }],
     });
+  });
+
+  it('shows no rule price beside a price that follows the rule', () => {
+    renderEditor(listingEditorFixture());
+
+    expect(screen.queryByText(/^Rule price/)).not.toBeInTheDocument();
+    expect(screen.getByLabelText('Price')).toHaveAttribute('placeholder', '64.00');
+  });
+
+  it('follows the product’s vendor, overrides it for this store, and reverts it', async () => {
+    const { patch } = renderEditor(listingEditorFixture());
+
+    const vendor = screen.getByLabelText('Vendor');
+    expect(vendor).toHaveAttribute('placeholder', 'Northfield');
+    expect(fieldOf(vendor)).toHaveAttribute('data-origin', FieldOrigin.Product);
+    await userEvent.type(vendor, 'Shop brand');
+    expect(fieldOf(vendor)).toHaveAttribute('data-origin', FieldOrigin.Store);
+    expect(within(fieldOf(vendor)).getByText(/Northfield/)).toBeInTheDocument();
+    await save();
+    expect(patch).toHaveBeenLastCalledWith({ vendor: 'Shop brand' });
+
+    await userEvent.click(screen.getByRole('button', { name: 'Use product value for vendor' }));
+    await save();
+    expect(patch).toHaveBeenLastCalledWith({ vendor: null });
+  });
+
+  it('names a missing product vendor beside the store’s own', () => {
+    renderEditor(
+      listingEditorFixture({
+        vendor: {
+          product: null,
+          override: 'Shop brand',
+          effective: 'Shop brand',
+          overridden: true,
+        },
+      }),
+    );
+
+    expect(screen.getByLabelText('Vendor')).toHaveValue('Shop brand');
+    expect(screen.getByText(LISTING_EDITOR_COPY.noVendor, { exact: false })).toBeInTheDocument();
   });
 
   it('brings every field back to the product at once', async () => {

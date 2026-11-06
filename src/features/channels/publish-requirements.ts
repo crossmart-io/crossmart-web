@@ -89,6 +89,24 @@ export const PUBLISH_REQUIREMENT_FIXES: Record<PublishRequirement, RequirementFi
     target: FixTarget.StoreSettings,
     section: PageSection.StoreListingSetup,
   },
+  [PublishRequirement.item_details]: {
+    missing: 'Say who made the items, when, and whether they are supplies',
+    action: LISTING_DEFAULTS_ACTION,
+    target: FixTarget.StoreSettings,
+    section: PageSection.StoreListingDefaults,
+  },
+  [PublishRequirement.shipping_profile]: {
+    missing: 'Choose a shipping profile',
+    action: LISTING_DEFAULTS_ACTION,
+    target: FixTarget.StoreSettings,
+    section: PageSection.StoreListingDefaults,
+  },
+  [PublishRequirement.processing_profile]: {
+    missing: 'Choose a processing profile',
+    action: LISTING_DEFAULTS_ACTION,
+    target: FixTarget.StoreSettings,
+    section: PageSection.StoreListingDefaults,
+  },
   [PublishRequirement.images]: {
     missing: 'Add a product photo',
     action: 'Add a photo',
