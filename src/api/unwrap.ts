@@ -20,7 +20,7 @@ export async function unwrap<Result extends ApiResult>(
 ): Promise<SuccessData<Result>> {
   const { data, error, response } = await request;
   if (error !== undefined || !response.ok) {
-    throw ApiRequestError.from(error ?? { statusCode: response.status });
+    throw ApiRequestError.from(error, response.status);
   }
   // A successful response always carries the success branch's body.
   return data as SuccessData<Result>;
