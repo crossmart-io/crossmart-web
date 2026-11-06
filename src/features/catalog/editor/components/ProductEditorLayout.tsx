@@ -55,7 +55,7 @@ export function ProductEditorLayout({
       </div>
       <div className="flex min-w-0 flex-col gap-6">
         {isDesktop && <StatusCard />}
-        {channels ?? <ChannelsCard />}
+        {channels ?? <ChannelsCard workspaceId={workspaceId} />}
         <OrganizationCard />
         {aside}
       </div>
