@@ -79,11 +79,21 @@ export function isNotFoundError(error: unknown): boolean {
   return statusCodeOf(error) === HttpStatus.NotFound;
 }
 
-/** A failed API call, with the message to show and the HTTP status the API reported. */
+/** The machine-readable `code` an API error body or an `ApiRequestError` carries, if any. */
+export function errorCodeOf(error: unknown): string | undefined {
+  if (typeof error !== 'object' || error === null || !('code' in error)) return undefined;
+  return typeof error.code === 'string' ? error.code : undefined;
+}
+
+/**
+ * A failed API call, with the message to show, the HTTP status the API reported, and the
+ * error's `code` when the API names one, so a caller can tell two errors of a status apart.
+ */
 export class ApiRequestError extends Error {
   constructor(
     message: string,
     readonly statusCode?: number,
+    readonly code?: string,
   ) {
     super(message);
     this.name = 'ApiRequestError';
@@ -95,6 +105,6 @@ export class ApiRequestError extends Error {
     const message = toApiErrorMessage(
       typeof body === 'object' && body !== null ? { statusCode, ...body } : { statusCode },
     );
-    return new ApiRequestError(message, statusCode);
+    return new ApiRequestError(message, statusCode, errorCodeOf(body));
   }
 }

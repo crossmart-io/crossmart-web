@@ -5,7 +5,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { ROUTE_QUERY, ROUTES } from '@/config/routes';
 import { useProductChannels } from '../hooks/useProductChannels';
 import { useEditorSearchParam } from '../hooks/useEditorSearchParam';
-import { useStoreMissing } from '../hooks/useStoreMissing';
 import { OverrideSheetMode } from '../listings.constants';
 import type { ProductChannel } from '../listings.types';
 import { ListingEditorSheet } from './ListingEditorSheet';
@@ -51,7 +50,6 @@ export function ProductChannelsCard({
   canEdit,
 }: ProductChannelsCardProps) {
   const { data: channels, isPending } = useProductChannels(workspaceId, productId);
-  const storeMissing = useStoreMissing(workspaceId);
   const editor = useEditorSearchParam(ROUTE_QUERY.overrideStore);
   const openChannel = channels?.find(({ connection }) => connection.id === editor.openId);
   return (
@@ -73,7 +71,6 @@ export function ProductChannelsCard({
                 productId={productId}
                 channel={channel}
                 canEdit={canEdit}
-                storeMissing={storeMissing?.get(channel.connection.id)}
                 onOpen={() => editor.open(channel.connection.id)}
               />
             ))}

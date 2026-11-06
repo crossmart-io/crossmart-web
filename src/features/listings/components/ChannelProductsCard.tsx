@@ -30,7 +30,6 @@ function listingStoreOf(workspaceId: string, connection: ChannelConnection): Lis
   return {
     workspaceId,
     connectionId: connection.id,
-    missing: connection.publishReadiness.missing,
     connected: !needsReconnect(connection.status),
   };
 }

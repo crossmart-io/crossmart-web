@@ -6,6 +6,7 @@ import { ApiRequestError } from '@/api/api-error';
 import {
   ChannelProductState,
   ListingDisplayState,
+  ListingRetryErrorCode,
   ListingSource,
   ListingStatus,
   ProductStatus,
@@ -26,11 +27,11 @@ vi.mock('../hooks/useProductChannels', async (importOriginal) => ({
 const STORE: ListingStore = {
   workspaceId: 'ws-1',
   connectionId: 'c-1',
-  missing: [],
   connected: true,
 };
 
 interface RowOptions {
+  displayRequirement?: PublishRequirement | null;
   displayState?: ListingDisplayState;
   displayReason?: string | null;
   missingRequirement?: PublishRequirement | null;
@@ -57,6 +58,7 @@ function row(state: ChannelProductState, options: RowOptions = {}): ChannelProdu
     state,
     displayState: options.displayState ?? ListingDisplayState.published,
     displayReason: options.displayReason ?? null,
+    displayRequirement: options.displayRequirement ?? null,
     listing: inStore
       ? {
           id: 'l-1',
@@ -67,6 +69,7 @@ function row(state: ChannelProductState, options: RowOptions = {}): ChannelProdu
           lastError: options.displayReason ?? null,
           missingRequirement: options.missingRequirement ?? null,
           lastSyncedAt: null,
+          syncRequestedAt: null,
           category: null,
         }
       : null,
@@ -176,6 +179,45 @@ describe('ChannelProductRow', () => {
     expect(screen.getByRole('alert')).toHaveTextContent(RETRY_COPY.failures[failure]);
   });
 
+  it('links a retry refused for a disconnected store to reconnecting it', () => {
+    mockRetry({
+      error: new ApiRequestError('Conflict', 409, ListingRetryErrorCode.store_not_connected),
+    });
+    renderRow(failedRow());
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      RETRY_COPY.failures[RetryFailure.StoreNotConnected],
+    );
+    expect(screen.getByRole('link', { name: RETRY_COPY.reconnectLink })).toHaveAttribute(
+      'href',
+      '/channels/c-1',
+    );
+  });
+
+  it('says a product refused by the store is no longer in it', () => {
+    mockRetry({
+      error: new ApiRequestError('Conflict', 409, ListingRetryErrorCode.product_not_in_store),
+    });
+    renderRow(failedRow());
+
+    expect(screen.getByRole('alert')).toHaveTextContent(
+      RETRY_COPY.failures[RetryFailure.NotInStore],
+    );
+  });
+
+  it('says when a listing being published was queued', () => {
+    const queued = row(ChannelProductState.pending, {
+      displayState: ListingDisplayState.publishing,
+    });
+    renderRow({
+      ...queued,
+      listing: queued.listing && { ...queued.listing, syncRequestedAt: '2026-11-06T09:00:00Z' },
+    });
+
+    expect(screen.getByText(/Queued/)).toBeInTheDocument();
+    expect(screen.getByRole('time')).toHaveAttribute('datetime', '2026-11-06T09:00:00Z');
+  });
+
   it('offers no retry to members who may not edit listings, or while the store is disconnected', () => {
     renderRow(failedRow(), { canEdit: false });
     renderRow(failedRow(), { store: { ...STORE, connected: false } });
@@ -188,8 +230,8 @@ describe('ChannelProductRow', () => {
       row(ChannelProductState.pending, {
         displayState: ListingDisplayState.needs_details,
         displayReason: 'Choose a shipping policy in this eBay connection’s listing defaults.',
+        displayRequirement: PublishRequirement.shipping_policy,
       }),
-      { store: { ...STORE, missing: [PublishRequirement.shipping_policy] } },
     );
 
     expect(screen.getByText('Needs details')).toBeInTheDocument();

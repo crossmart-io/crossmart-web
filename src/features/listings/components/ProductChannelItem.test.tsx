@@ -39,7 +39,6 @@ const NOT_IN_STORE = productChannelFixture({
 
 interface RenderOptions {
   canEdit?: boolean;
-  storeMissing?: PublishRequirement[];
 }
 
 function renderItem(channel: ProductChannel, options: RenderOptions = {}) {
@@ -64,7 +63,6 @@ function renderItem(channel: ProductChannel, options: RenderOptions = {}) {
             productId="p-1"
             channel={channel}
             canEdit={options.canEdit ?? true}
-            storeMissing={options.storeMissing}
             onOpen={onOpen}
           />
         </ul>
@@ -150,8 +148,8 @@ describe('ProductChannelItem', () => {
       productChannelFixture({
         displayState: ListingDisplayState.needs_details,
         displayReason: 'Choose the country and the product page address.',
+        displayRequirement: PublishRequirement.listing_setup,
       }),
-      { storeMissing: [PublishRequirement.listing_setup] },
     );
 
     expect(screen.getByRole('link', { name: 'Open listing setup' })).toHaveAttribute(

@@ -4,59 +4,17 @@ import {
   ListingDisplayState,
   ListingSource,
   ListingStatus,
-  OutOfStockPolicy,
+  ListingVisibility,
   PriceSource,
-  ProductStatus,
 } from '@/api/schema';
 import type {
   ChannelVariant,
-  ListingOverrideView,
-  Product,
+  ListingEditor,
+  ListingEditorVariant,
   ProductChannel,
 } from '../listings.types';
 
 type ListingSummary = NonNullable<ProductChannel['listing']>;
-type ProductVariant = Product['variants'][number];
-
-export function productVariantFixture(overrides: Partial<ProductVariant> = {}): ProductVariant {
-  return {
-    id: 'v-1',
-    position: 0,
-    sku: null,
-    barcode: null,
-    optionValues: ['Blue'],
-    price: '64.00',
-    compareAtPrice: '80.00',
-    cost: null,
-    weightGrams: null,
-    requiresShipping: true,
-    taxable: true,
-    outOfStockPolicy: OutOfStockPolicy.STOP_SELLING,
-    tracked: true,
-    available: 4,
-    ...overrides,
-  };
-}
-
-export function productFixture(overrides: Partial<Product> = {}): Product {
-  return {
-    id: 'p-1',
-    handle: 'linen-shirt',
-    title: 'Linen shirt',
-    descriptionHtml: '<p>Soft washed linen.</p>',
-    vendor: null,
-    productType: null,
-    tags: ['linen', 'summer'],
-    status: ProductStatus.ACTIVE,
-    optionNames: ['Color'],
-    variants: [productVariantFixture()],
-    media: [{ id: 'm-1', url: 'https://cdn.example.com/a.jpg', altText: null, position: 0 }],
-    createdAt: '2026-11-01T09:00:00Z',
-    updatedAt: '2026-11-01T09:00:00Z',
-    ...overrides,
-  };
-}
-
 export function channelVariantFixture(overrides: Partial<ChannelVariant> = {}): ChannelVariant {
   return {
     variantId: 'v-1',
@@ -85,22 +43,8 @@ export function listingFixture(overrides: Partial<ListingSummary> = {}): Listing
     lastError: null,
     missingRequirement: null,
     lastSyncedAt: null,
+    syncRequestedAt: null,
     category: null,
-    ...overrides,
-  };
-}
-
-export function overrideFixture(overrides: Partial<ListingOverrideView> = {}): ListingOverrideView {
-  return {
-    title: null,
-    descriptionHtml: null,
-    tags: null,
-    mediaUrls: null,
-    visibility: null,
-    inventoryBuffer: null,
-    maxQuantity: null,
-    variantPrices: [],
-    updatedAt: '2026-11-03T09:00:00Z',
     ...overrides,
   };
 }
@@ -117,9 +61,60 @@ export function productChannelFixture(overrides: Partial<ProductChannel> = {}): 
     selected: true,
     displayState: ListingDisplayState.published,
     displayReason: null,
+    displayRequirement: null,
     listing: listingFixture(),
     override: null,
     variants: [channelVariantFixture()],
+    ...overrides,
+  };
+}
+
+/** A field that follows the product: no override, the product's value is the result. */
+function inherited<TValue>(product: TValue) {
+  return { product, override: null, effective: product, overridden: false };
+}
+
+/** A field the store changes: the override is the result. */
+export function overridden<TValue>(product: TValue, override: TValue) {
+  return { product, override, effective: override, overridden: true };
+}
+
+export function listingEditorVariantFixture(
+  overrides: Partial<ListingEditorVariant> = {},
+): ListingEditorVariant {
+  return {
+    variantId: 'v-1',
+    title: 'Blue',
+    sku: null,
+    price: { product: '64.00', override: null, effective: '64.00', overridden: false },
+    compareAtPrice: { product: '80.00', override: null, effective: '80.00', overridden: false },
+    resolvedPrice: channelVariantFixture().price,
+    quantity: 4,
+    ...overrides,
+  };
+}
+
+/** Linen shirt in crossmartstore, following the product everywhere, with `overrides` applied. */
+export function listingEditorFixture(overrides: Partial<ListingEditor> = {}): ListingEditor {
+  const channel = productChannelFixture();
+  return {
+    productId: 'p-1',
+    connection: channel.connection,
+    selected: true,
+    displayState: ListingDisplayState.published,
+    displayReason: null,
+    displayRequirement: null,
+    listing: listingFixture(),
+    title: inherited('Linen shirt'),
+    descriptionHtml: inherited('<p>Soft washed linen.</p>'),
+    tags: inherited(['linen', 'summer']),
+    images: inherited(['https://cdn.example.com/a.jpg']),
+    visibility: inherited(ListingVisibility.VISIBLE),
+    stock: { inventoryBuffer: null, maxQuantity: null },
+    variants: [listingEditorVariantFixture()],
+    category: { supported: false, value: null },
+    itemSpecifics: { supported: false, count: 0, names: [] },
+    overrideUpdatedAt: null,
     ...overrides,
   };
 }

@@ -2,7 +2,7 @@ import { RefreshCw, Send } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { useRequestSync } from '../hooks/useChannelListings';
-import { describeSyncOutcome, useSyncProgress } from '../hooks/useSyncProgress';
+import { describeSyncProgress, useSyncProgress } from '../hooks/useSyncProgress';
 import { SYNC_COPY } from '../listings.constants';
 
 interface SyncNowButtonProps {
@@ -46,7 +46,7 @@ export function SyncNowButton({
       </Button>
       <p className="text-xs text-muted-foreground" aria-live="polite">
         {progress.watching
-          ? `${SYNC_COPY.inProgress} ${progress.counts ? describeSyncOutcome(progress.counts) : ''}`
+          ? `${SYNC_COPY.inProgress} ${progress.progress ? describeSyncProgress(progress.progress) : ''}`
           : SYNC_COPY.description(channelName)}
       </p>
     </div>

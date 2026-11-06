@@ -5,6 +5,7 @@ import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
   CHANNEL_LISTINGS_ENDPOINT,
   ITEM_SPECIFICS_ENDPOINT,
+  LISTING_EDITOR_ENDPOINT,
   LISTINGS_FEEDBACK,
   PRODUCT_CHANNELS_ENDPOINT,
 } from '../listings.constants';
@@ -15,6 +16,7 @@ const ITEM_SPECIFICS_ENDPOINTS = [
   ITEM_SPECIFICS_ENDPOINT,
   PRODUCT_CHANNELS_ENDPOINT,
   CHANNEL_LISTINGS_ENDPOINT,
+  LISTING_EDITOR_ENDPOINT,
 ] as const;
 
 /** The listing category's item specifics and the values set on the listing. */

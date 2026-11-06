@@ -28,6 +28,9 @@ export const PRODUCT_CHANNEL_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}';
 export const ADD_STORE_PRODUCTS_ENDPOINT = `${CONNECTION_ENDPOINT}/products/add` as const;
 export const REMOVE_STORE_PRODUCTS_ENDPOINT = `${CONNECTION_ENDPOINT}/products/remove` as const;
+/** One product in one store, field by field: the product's value, the override, the result. */
+export const LISTING_EDITOR_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/listing';
 export const LISTING_OVERRIDE_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/products/{productId}/channels/{connectionId}/override';
 export const CATEGORY_SUGGESTIONS_ENDPOINT =
@@ -167,8 +170,12 @@ export const LISTING_STATUS_LABELS: Record<ListingStatus, string> = {
 
 /** Why "Try again" did not go through, as the API answered. */
 export enum RetryFailure {
-  /** 409: the store needs reconnecting, or no longer has the product. */
+  /** 409 without a known code: something in the store is in the way. */
   Blocked = 'blocked',
+  /** 409 `store_not_connected`: the store needs reconnecting. */
+  StoreNotConnected = 'store_not_connected',
+  /** 409 `product_not_in_store`: the store no longer has the product. */
+  NotInStore = 'not_in_store',
   /** 402: the plan has no room for another listing. */
   PlanFull = 'plan_full',
   /** 403: the member's role may not edit listings. */
@@ -182,14 +189,16 @@ export const RETRY_COPY = {
   failures: {
     [RetryFailure.Blocked]:
       'This store cannot take it now. Reconnect the store, or add the product to it again.',
+    [RetryFailure.StoreNotConnected]:
+      'This store needs reconnecting before it can take the product.',
+    [RetryFailure.NotInStore]:
+      'This product is no longer in this store. Add it to the store again.',
     [RetryFailure.PlanFull]: 'Your plan has no room for another listing.',
     [RetryFailure.NotAllowed]: 'Your role cannot publish listings. Ask a workspace admin.',
   },
   planLink: 'See your plan',
+  reconnectLink: 'Reconnect the store',
 } as const;
-
-/** How long a sync is watched before "nothing left to send" is believed: its jobs need to start. */
-export const SYNC_MIN_WATCH_MS = 6_000;
 
 /** "Send all products again": what it does, in place of a vague "Resync". */
 export const SYNC_COPY = {
@@ -199,6 +208,8 @@ export const SYNC_COPY = {
     `Sends every product in this store again and takes off the ones it no longer has. Use it after an outage or a change made on ${channel}.`,
   inProgress: 'Sending…',
   waiting: (count: number) => `${count} still to send`,
+  failed: (count: number) => `${count} failed`,
+  allSent: 'Every product was sent.',
   finished: (channel: string) => `Finished sending to ${channel}`,
   stillWorking: (channel: string) =>
     `Still sending to ${channel}. The Listings tab shows each product as it lands.`,
@@ -282,6 +293,12 @@ export const CHANNEL_PRODUCT_FILTERS: readonly { value: ChannelProductFilter; la
     label: CHANNEL_PRODUCT_STATE_LABELS[ChannelProductState.removed_by_hand],
   },
 ];
+
+/** What a store's listing row says beside its state. */
+export const LISTINGS_ROW_COPY = {
+  /** Before when a sync or retry queued the listing's update: "Queued 2 minutes ago". */
+  queued: 'Queued',
+} as const;
 
 /** How a product joined a store, as its listing row says it. */
 export const LISTING_SOURCE_LABELS: Record<ListingSource, string> = {
@@ -368,6 +385,7 @@ export const LISTING_EDITOR_COPY = {
   priceHint: 'Empty prices follow the store’s pricing rule.',
   price: 'Price',
   singleVariantPrice: 'Price and compare-at price',
+  rulePrice: (price: string) => `Pricing rule: ${price}`,
   compareAtPrice: 'Compare-at price',
 } as const;
 

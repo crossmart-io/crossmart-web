@@ -14,19 +14,20 @@ const TITLE_INPUT_ID = 'listing-title';
 
 /** The title in this store: empty shows, and follows, the product's title. */
 export function TitleField() {
-  const { product, readOnly } = useListingEditorContext();
+  const { listing, productDefaults, readOnly } = useListingEditorContext();
+  const productTitle = listing.title.product;
   const { register } = useFormContext<OverrideFormValues>();
-  const { origin, useProductValue } = useListingField(ListingField.Title, product);
+  const { origin, useProductValue } = useListingField(ListingField.Title, productDefaults);
   return (
     <InheritedField
       name={LISTING_FIELD_LABELS.title}
       label={<FieldLabel htmlFor={TITLE_INPUT_ID}>{LISTING_FIELD_LABELS.title}</FieldLabel>}
       origin={origin}
-      productValue={product.title}
+      productValue={productTitle}
       onUseProductValue={readOnly ? undefined : useProductValue}
       action={<ContentRewriteButton field={ContentField.title} />}
     >
-      <Input id={TITLE_INPUT_ID} dir="auto" placeholder={product.title} {...register('title')} />
+      <Input id={TITLE_INPUT_ID} dir="auto" placeholder={productTitle} {...register('title')} />
     </InheritedField>
   );
 }

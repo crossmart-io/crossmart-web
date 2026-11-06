@@ -9,8 +9,8 @@ describe('listingFixOf', () => {
     expect(
       listingFixOf({
         displayState: ListingDisplayState.published,
+        displayRequirement: null,
         missingRequirement: null,
-        storeMissing: [PublishRequirement.shipping_policy],
       }),
     ).toBeNull();
   });
@@ -19,38 +19,56 @@ describe('listingFixOf', () => {
     expect(
       listingFixOf({
         displayState: ListingDisplayState.failed,
+        displayRequirement: null,
         missingRequirement: null,
-        storeMissing: [],
       }),
     ).toBeNull();
   });
 
-  it('fixes what the channel refused the product for first', () => {
+  it('fixes what the channel refused a failed publish for', () => {
     const fix = listingFixOf({
       displayState: ListingDisplayState.failed,
+      displayRequirement: null,
       missingRequirement: PublishRequirement.category,
-      storeMissing: [PublishRequirement.shipping_policy],
     });
 
     expect(fix?.target).toBe(FixTarget.StoreOverride);
   });
 
-  it('points a product waiting on the store to the store’s first missing setting', () => {
+  it('fixes what the server says to fix first, ahead of an older refusal', () => {
     const fix = listingFixOf({
       displayState: ListingDisplayState.needs_details,
-      missingRequirement: null,
-      storeMissing: [PublishRequirement.payment_policy, PublishRequirement.return_policy],
+      displayRequirement: PublishRequirement.payment_policy,
+      missingRequirement: PublishRequirement.category,
     });
 
     expect(fix?.missing).toBe('Choose a payment policy');
   });
 
-  it('falls back to the product when the store lacks nothing', () => {
+  it.each([
+    [PublishRequirement.images, 'Add a photo'],
+    [PublishRequirement.active_product, 'Change status'],
+    [PublishRequirement.option_names, 'Name the options'],
+  ])(
+    'sends a product blocked on %s to the exact fix, not the generic one',
+    (requirement, action) => {
+      const fix = listingFixOf({
+        displayState: ListingDisplayState.needs_details,
+        displayRequirement: requirement,
+        missingRequirement: null,
+      });
+
+      expect(fix?.action).toBe(action);
+      expect(fix).not.toBe(GENERIC_PRODUCT_FIX);
+    },
+  );
+
+  it('falls back to the product editor when the server names nothing', () => {
     expect(
       listingFixOf({
         displayState: ListingDisplayState.needs_details,
+        displayRequirement: null,
         missingRequirement: null,
-        storeMissing: [],
       }),
     ).toBe(GENERIC_PRODUCT_FIX);
   });
@@ -73,8 +91,8 @@ describe('listingFixRoute', () => {
   ])('sends %s to %s', (requirement, route) => {
     const fix = listingFixOf({
       displayState: ListingDisplayState.needs_details,
-      missingRequirement: requirement,
-      storeMissing: [],
+      displayRequirement: requirement,
+      missingRequirement: null,
     });
 
     expect(fix && listingFixRoute(fix, REF)).toBe(route);

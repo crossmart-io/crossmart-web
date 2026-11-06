@@ -1,7 +1,7 @@
 import { ChevronDown, PencilLine, Plus } from 'lucide-react';
 import { useId } from 'react';
 import { Link } from 'react-router';
-import { ListingDisplayState, PriceSource, type PublishRequirement } from '@/api/schema';
+import { ListingDisplayState, PriceSource } from '@/api/schema';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Spinner } from '@/components/ui/spinner';
@@ -31,8 +31,6 @@ interface ProductChannelItemProps {
   productId: string;
   channel: ProductChannel;
   canEdit: boolean;
-  /** What the store's setup lacks, so a fix can point there; unknown while it loads. */
-  storeMissing?: readonly PublishRequirement[];
   /** Opens this store's listing editor. */
   onOpen: () => void;
 }
@@ -155,11 +153,11 @@ interface ItemActionProps extends Omit<ProductChannelItemProps, 'workspaceId' | 
 }
 
 /** The card's one action: add, fix, try again, or edit the listing. */
-function ItemAction({ listingRef, channel, canEdit, storeMissing, onOpen }: ItemActionProps) {
+function ItemAction({ listingRef, channel, canEdit, onOpen }: ItemActionProps) {
   const fix = listingFixOf({
     displayState: channel.displayState,
+    displayRequirement: channel.displayRequirement,
     missingRequirement: channel.listing?.missingRequirement,
-    storeMissing,
   });
   const action = channelItemAction({
     canEdit,
