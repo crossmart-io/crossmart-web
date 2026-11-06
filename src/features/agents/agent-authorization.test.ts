@@ -2,6 +2,7 @@ import { AgentScope } from '@/api/schema';
 import {
   acceptedScope,
   agentClientId,
+  agentSite,
   asksToWrite,
   requestedAgentScopes,
 } from './agent-authorization';
@@ -29,5 +30,23 @@ describe('agent authorization query', () => {
   it('offers read-only only when the agent asks to write', () => {
     expect(asksToWrite([AgentScope.catalog_read, AgentScope.orders_read])).toBe(false);
     expect(asksToWrite([AgentScope.stores_write])).toBe(true);
+  });
+});
+
+describe('agent site', () => {
+  it('trusts the host of a metadata document client id', () => {
+    expect(agentSite('https://claude.ai/oauth/client.json', 'https://evil.example')).toEqual({
+      host: 'claude.ai',
+      verified: true,
+    });
+  });
+
+  it('marks the site a registered client claims as unverified', () => {
+    expect(agentSite('aBcD1234', 'https://claude.ai')).toEqual({
+      host: 'claude.ai',
+      verified: false,
+    });
+    expect(agentSite('aBcD1234', 'http://claude.ai')).toBeNull();
+    expect(agentSite('aBcD1234', null)).toBeNull();
   });
 });

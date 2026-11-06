@@ -44,3 +44,33 @@ export function acceptedScope(search: string, level: AgentAccessLevel): string {
 export function asksToWrite(scopes: readonly AgentScope[]): boolean {
   return scopes.some((scope) => !AGENT_READ_SCOPES.includes(scope));
 }
+
+/** The site an agent belongs to, and whether Crossmart checked it. */
+export interface AgentSite {
+  host: string;
+  verified: boolean;
+}
+
+const HTTPS_PROTOCOL = 'https:';
+
+function httpsHostOf(address: string | null | undefined): string | undefined {
+  if (!address) return undefined;
+  try {
+    const url = new URL(address);
+    return url.protocol === HTTPS_PROTOCOL ? url.host : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+/**
+ * Where the agent comes from. A client id that is an HTTPS URL is a metadata document Crossmart
+ * fetched from that site, so its host is verified (and its `client_uri` must share it). A client
+ * that registered itself only claims its `client_uri`, so that one is shown as unverified.
+ */
+export function agentSite(clientId: string | null, clientUri?: string | null): AgentSite | null {
+  const documentHost = httpsHostOf(clientId);
+  if (documentHost) return { host: documentHost, verified: true };
+  const claimedHost = httpsHostOf(clientUri);
+  return claimedHost ? { host: claimedHost, verified: false } : null;
+}

@@ -65,5 +65,8 @@ export const AGENT_ACCESS_LEVELS: readonly AgentAccessLevel[] = Object.values(Ag
 export const ACCESS_LEVEL_INPUT_ID_PREFIX = 'agent-access-';
 export const WORKSPACE_INPUT_ID_PREFIX = 'agent-workspace-';
 
+/** Next to a site a self-registered agent claims, which Crossmart could not check. */
+export const UNVERIFIED_SITE_NOTE = 'not verified';
+
 /** Shown until the agent's details load, or when it gives no name. */
 export const UNNAMED_AGENT = 'An AI agent';
