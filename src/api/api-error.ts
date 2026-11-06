@@ -17,6 +17,7 @@ export enum HttpStatus {
   NotFound = 404,
   Conflict = 409,
   TooManyRequests = 429,
+  ServiceUnavailable = 503,
 }
 
 /**
