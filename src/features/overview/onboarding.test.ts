@@ -10,9 +10,7 @@ const DONE: OnboardingState = {
 describe('onboardingSteps', () => {
   it('names every connectable channel, not only Shopify', () => {
     const steps = onboardingSteps({ ...DONE, channelSetup: ChannelSetup.NotConnected });
-    expect(steps[1]?.description).toBe(
-      'Connect Shopify, eBay or Google Merchant Center to sync products and stock.',
-    );
+    expect(steps[1]?.description).toBe('Connect Shopify or eBay to sync products and stock.');
   });
 
   it('asks a connected store to import its products', () => {

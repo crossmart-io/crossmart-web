@@ -36,9 +36,7 @@ describe('CatalogStatsGrid', () => {
   it('names every connectable channel when no store is connected', () => {
     renderWithConnections([]);
     expect(
-      screen.getByText(
-        'Connect Shopify, eBay or Google Merchant Center to sync products and stock',
-      ),
+      screen.getByText('Connect Shopify or eBay to sync products and stock'),
     ).toBeInTheDocument();
   });
 

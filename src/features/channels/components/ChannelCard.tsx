@@ -3,12 +3,17 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { EXTERNAL_LINKS } from '@/config/links';
-import { CHANNEL_STATUS_LABELS, ChannelStatus, type ChannelInfo } from '../channels.constants';
+import {
+  CHANNEL_ROADMAP_ACTION_LABELS,
+  CHANNEL_STATUS_LABELS,
+  ChannelStatus,
+  type RoadmapChannelInfo,
+} from '../channels.constants';
 import { ChannelCardHeader } from './ChannelCardHeader';
 
 /** A channel on the roadmap, not connectable yet. */
-export function ChannelCard({ channel }: { channel: ChannelInfo }) {
-  const inDevelopment = channel.status === ChannelStatus.InDevelopment;
+export function ChannelCard({ channel }: { channel: RoadmapChannelInfo }) {
+  const comingSoon = channel.status === ChannelStatus.ComingSoon;
 
   return (
     <Card>
@@ -16,7 +21,7 @@ export function ChannelCard({ channel }: { channel: ChannelInfo }) {
         <ChannelCardHeader
           channel={channel}
           badge={
-            <Badge variant={inDevelopment ? 'default' : 'outline'}>
+            <Badge variant={comingSoon ? 'default' : 'outline'}>
               {CHANNEL_STATUS_LABELS[channel.status]}
             </Badge>
           }
@@ -25,7 +30,7 @@ export function ChannelCard({ channel }: { channel: ChannelInfo }) {
       <CardFooter className="mt-auto">
         <Button variant="ghost" size="sm" className="-ml-2" asChild>
           <a href={EXTERNAL_LINKS.issues} target="_blank" rel="noreferrer">
-            {inDevelopment ? 'Follow on GitHub' : 'Request on GitHub'}
+            {CHANNEL_ROADMAP_ACTION_LABELS[channel.status]}
             <ArrowUpRight data-icon="inline-end" />
           </a>
         </Button>

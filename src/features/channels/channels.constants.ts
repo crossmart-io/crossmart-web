@@ -8,12 +8,16 @@ import {
   GoogleTargetCountry,
 } from '@/api/schema';
 import amazonLogo from './assets/logos/amazon.svg';
+import bigcommerceLogo from './assets/logos/bigcommerce.svg';
 import ebayLogo from './assets/logos/ebay.svg';
 import etsyLogo from './assets/logos/etsy.svg';
 import googleLogo from './assets/logos/google.svg';
+import metaLogo from './assets/logos/meta.svg';
+import pinterestLogo from './assets/logos/pinterest.svg';
 import shopifyLogo from './assets/logos/shopify.svg';
 import tiktokLogo from './assets/logos/tiktok.svg';
 import walmartLogo from './assets/logos/walmart.svg';
+import woocommerceLogo from './assets/logos/woocommerce.svg';
 
 export const CHANNEL_CONNECTIONS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/channel-connections';
 export const CHANNEL_CONNECTION_DETAIL_ENDPOINT =
@@ -36,17 +40,32 @@ export const EBAY_DEFAULT_POLICIES_ENDPOINT =
 export const GOOGLE_LISTING_SETUP_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/google-merchant/listing-setup';
 
+/** Where a channel stands on the roadmap, with the same labels as crossmart.io. */
 export enum ChannelStatus {
-  /** Its connector has shipped: it can be connected. */
-  Available = 'available',
-  InDevelopment = 'in_development',
+  /** Its connector is live: merchants can connect it. */
+  Live = 'live',
+  /** Its connector is built but not open to merchants yet. */
+  ComingSoon = 'coming_soon',
   Planned = 'planned',
+  /** Open for a community-built connector. */
+  Community = 'community',
 }
 
 export const CHANNEL_STATUS_LABELS: Record<ChannelStatus, string> = {
-  [ChannelStatus.Available]: 'Available',
-  [ChannelStatus.InDevelopment]: 'In development',
+  [ChannelStatus.Live]: 'Live',
+  [ChannelStatus.ComingSoon]: 'Coming soon',
   [ChannelStatus.Planned]: 'Planned',
+  [ChannelStatus.Community]: 'Community',
+};
+
+/** The status of a channel merchants cannot connect yet. */
+export type RoadmapStatus = Exclude<ChannelStatus, ChannelStatus.Live>;
+
+/** The link under a channel that cannot be connected yet, by its status. */
+export const CHANNEL_ROADMAP_ACTION_LABELS: Record<RoadmapStatus, string> = {
+  [ChannelStatus.ComingSoon]: 'Follow on GitHub',
+  [ChannelStatus.Planned]: 'Request on GitHub',
+  [ChannelStatus.Community]: 'Build it on GitHub',
 };
 
 export const CONNECTION_STATUS_LABELS: Record<ChannelConnectionStatus, string> = {
@@ -290,21 +309,33 @@ export const GOOGLE_SETUP_COPY = {
   saved: 'Google listing setup saved',
 } as const;
 
-export interface ChannelInfo {
+interface ChannelInfoBase {
   name: string;
   description: string;
-  status: ChannelStatus;
   logo: ChannelLogo;
-  /** Set once the channel's connector has shipped. */
+  /** How to connect a store, set once the channel's connector is built. */
   connect?: ConnectableChannel;
 }
 
-/** The roadmap as it really stands. Update a channel's status when its connector ships. */
+/** A channel merchants can connect stores to today. */
+export interface LiveChannelInfo extends ChannelInfoBase {
+  status: ChannelStatus.Live;
+  connect: ConnectableChannel;
+}
+
+/** A channel on the roadmap. One that is coming soon may already know how to connect a store. */
+export interface RoadmapChannelInfo extends ChannelInfoBase {
+  status: RoadmapStatus;
+}
+
+export type ChannelInfo = LiveChannelInfo | RoadmapChannelInfo;
+
+/** The roadmap as it really stands, in crossmart.io's order. Update a status when it changes. */
 export const CHANNELS: readonly ChannelInfo[] = [
   {
     name: 'Shopify',
     description: 'Sync products, stock and orders with your Shopify store.',
-    status: ChannelStatus.Available,
+    status: ChannelStatus.Live,
     logo: { src: shopifyLogo, tint: '#5e8e3e' },
     connect: {
       type: ChannelType.shopify,
@@ -322,7 +353,7 @@ export const CHANNELS: readonly ChannelInfo[] = [
   {
     name: 'eBay',
     description: 'List with eBay categories, item specifics and business policies.',
-    status: ChannelStatus.InDevelopment,
+    status: ChannelStatus.Live,
     logo: { src: ebayLogo, tint: '#e53238' },
     connect: {
       type: ChannelType.ebay,
@@ -340,7 +371,7 @@ export const CHANNELS: readonly ChannelInfo[] = [
   {
     name: 'Google Merchant Center',
     description: 'Show your products in Google Shopping and free listings.',
-    status: ChannelStatus.Available,
+    status: ChannelStatus.ComingSoon,
     logo: { src: googleLogo, tint: '#4285f4' },
     connect: {
       type: ChannelType.google_merchant,
@@ -357,8 +388,19 @@ export const CHANNELS: readonly ChannelInfo[] = [
   {
     name: 'Etsy',
     description: 'Publish handmade and vintage listings with Etsy attributes.',
-    status: ChannelStatus.Planned,
+    status: ChannelStatus.ComingSoon,
     logo: { src: etsyLogo, tint: '#f1641e' },
+    connect: {
+      type: ChannelType.etsy,
+      importsCatalog: false,
+      account: {
+        kind: AccountPromptKind.Text,
+        label: 'Shop name',
+        placeholder: 'YourShopName',
+        description:
+          'The name in your shop’s address, etsy.com/shop/YourShopName. Sign in with the Etsy account that owns it.',
+      },
+    },
   },
   {
     name: 'Amazon',
@@ -378,7 +420,35 @@ export const CHANNELS: readonly ChannelInfo[] = [
     status: ChannelStatus.Planned,
     logo: { src: tiktokLogo, tint: FOREGROUND_TINT },
   },
+  {
+    name: 'WooCommerce',
+    description: 'Sync with a WordPress store.',
+    status: ChannelStatus.Community,
+    logo: { src: woocommerceLogo, tint: '#96588a' },
+  },
+  {
+    name: 'BigCommerce',
+    description: 'Sync with a BigCommerce store.',
+    status: ChannelStatus.Community,
+    logo: { src: bigcommerceLogo, tint: FOREGROUND_TINT },
+  },
+  {
+    name: 'Meta Shops',
+    description: 'Sell on Facebook and Instagram.',
+    status: ChannelStatus.Community,
+    logo: { src: metaLogo, tint: '#0467df' },
+  },
+  {
+    name: 'Pinterest',
+    description: 'Make your products shoppable on Pinterest.',
+    status: ChannelStatus.Community,
+    logo: { src: pinterestLogo, tint: '#bd081c' },
+  },
 ];
+
+export function isLiveChannel(channel: ChannelInfo): channel is LiveChannelInfo {
+  return channel.status === ChannelStatus.Live;
+}
 
 /** The channel a connection belongs to, for its name, logo and how to reconnect it. */
 export function channelInfoFor(type: ChannelType): ChannelInfo | undefined {

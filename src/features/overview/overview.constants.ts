@@ -1,12 +1,10 @@
-import { CHANNELS } from '@/features/channels';
+import { CHANNELS, isLiveChannel } from '@/features/channels';
 import { formatAlternatives } from '@/lib/format';
 
 /** Every channel a store can be connected to today, by name. */
-const CONNECTABLE_CHANNEL_NAMES = CHANNELS.filter((channel) => channel.connect).map(
-  (channel) => channel.name,
-);
+const CONNECTABLE_CHANNEL_NAMES = CHANNELS.filter(isLiveChannel).map((channel) => channel.name);
 
-/** "Connect Shopify, eBay or Google Merchant Center to sync products and stock" */
+/** "Connect Shopify or eBay to sync products and stock" */
 export const CONNECT_CHANNEL_PROMPT = `Connect ${formatAlternatives(CONNECTABLE_CHANNEL_NAMES)} to sync products and stock`;
 
 export const SALES_EMPTY_COPY = {
