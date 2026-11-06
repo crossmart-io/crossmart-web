@@ -18,6 +18,8 @@ interface TablePaginationProps {
   pageCount: number;
   /** What the rows are, as "312 products" says it. */
   noun: string;
+  /** The plural, when adding an s does not make it ("deliveries"). */
+  pluralNoun?: string;
   /** A new page is loading while the current rows stay. */
   isFetching?: boolean;
 }
@@ -88,6 +90,7 @@ export function TablePagination({
   total,
   pageCount,
   noun,
+  pluralNoun,
   isFetching = false,
 }: TablePaginationProps) {
   const { page, pageSize, setPage } = pagination;
@@ -101,7 +104,9 @@ export function TablePagination({
         className="flex items-center gap-2 text-sm text-muted-foreground tabular-nums"
         aria-live="polite"
       >
-        {total > 0 ? `${first}–${last} of ${pluralize(total, noun)}` : pluralize(0, noun)}
+        {total > 0
+          ? `${first}–${last} of ${pluralize(total, noun, pluralNoun)}`
+          : pluralize(0, noun, pluralNoun)}
         {isFetching && <Spinner aria-label="Loading" />}
       </p>
       <div className="flex items-center gap-4">

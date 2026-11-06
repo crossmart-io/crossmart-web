@@ -1,6 +1,7 @@
 import { Plus } from 'lucide-react';
 import { type FormEvent, useState } from 'react';
 import { FormError } from '@/components/feedback/FormError';
+import { SecretReveal } from '@/components/forms/SecretReveal';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import {
@@ -13,10 +14,9 @@ import {
   DialogTrigger,
 } from '@/components/ui/dialog';
 import { roleLabel, useRolePicker, type Workspace } from '@/features/workspaces';
-import { DEFAULT_KEY_ROLE, KEY_EXCLUDED_ROLES } from '../api-keys.constants';
+import { API_KEY_FEEDBACK, DEFAULT_KEY_ROLE, KEY_EXCLUDED_ROLES } from '../api-keys.constants';
 import { type IssuedApiKey, useCreateApiKey } from '../hooks/useApiKeys';
 import { ApiKeyFields } from './ApiKeyFields';
-import { SecretReveal } from './SecretReveal';
 
 const FORM_ID = 'create-api-key-form';
 const INTRO = 'For Claude, ChatGPT, your own agent or scripts. Send it in the x-api-key header.';
@@ -68,7 +68,7 @@ export function CreateApiKeyDialog({ workspace }: { workspace: Workspace }) {
         </DialogHeader>
         <FormError error={createKey.error} />
         {issued ? (
-          <SecretReveal secret={issued.secret} />
+          <IssuedKeySecret secret={issued.secret} />
         ) : (
           <form id={FORM_ID} onSubmit={handleSubmit}>
             <ApiKeyFields name={name} onNameChange={setName} picker={picker} />
@@ -92,5 +92,14 @@ function SubmitKeyButton({ disabled, isPending }: { disabled: boolean; isPending
       {isPending && <Spinner data-icon="inline-start" />}
       {isPending ? 'Creating…' : 'Create key'}
     </Button>
+  );
+}
+
+/** The key, shown once, with a copy button. */
+function IssuedKeySecret({ secret }: { secret: string }) {
+  return (
+    <SecretReveal secret={secret} copyLabel="Copy key" copiedMessage={API_KEY_FEEDBACK.copied}>
+      <p>Copy it now. For your security it is stored only as a hash and cannot be shown again.</p>
+    </SecretReveal>
   );
 }

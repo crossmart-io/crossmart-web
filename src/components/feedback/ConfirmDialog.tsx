@@ -11,26 +11,43 @@ import {
   AlertDialogTrigger,
 } from '@/components/ui/alert-dialog';
 import { Spinner } from '@/components/ui/spinner';
+import { ConfirmTone } from './confirm-tone';
 
 interface ConfirmDialogProps {
-  /** The button that opens the dialog. */
-  trigger: ReactNode;
+  /** The button that opens the dialog. Omit it to open the dialog with `open`. */
+  trigger?: ReactNode;
+  /** Opens the dialog from elsewhere, such as a menu item; pair it with `onOpenChange`. */
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   title: string;
   description: string;
   confirmLabel: string;
+  tone?: ConfirmTone;
   /** Resolves when the action is done. A rejection keeps the dialog open so the user can retry. */
   onConfirm: () => Promise<unknown>;
 }
 
-/** Confirms a destructive action and stays open, busy, until the action finishes. */
+/** The dialog's open state: its own, or the caller's when it passes `open`. */
+function useOpenState({ open, onOpenChange }: Pick<ConfirmDialogProps, 'open' | 'onOpenChange'>) {
+  const [ownOpen, setOwnOpen] = useState(false);
+  const setOpen = (next: boolean) => {
+    setOwnOpen(next);
+    onOpenChange?.(next);
+  };
+  return [open ?? ownOpen, setOpen] as const;
+}
+
+/** Confirms an action and stays open, busy, until the action finishes. */
 export function ConfirmDialog({
   trigger,
   title,
   description,
   confirmLabel,
+  tone = ConfirmTone.Destructive,
   onConfirm,
+  ...openState
 }: ConfirmDialogProps) {
-  const [open, setOpen] = useState(false);
+  const [open, setOpen] = useOpenState(openState);
   const [isPending, setIsPending] = useState(false);
 
   async function confirm(event: MouseEvent<HTMLButtonElement>) {
@@ -49,7 +66,7 @@ export function ConfirmDialog({
 
   return (
     <AlertDialog open={open} onOpenChange={(next) => !isPending && setOpen(next)}>
-      <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>
+      {trigger && <AlertDialogTrigger asChild>{trigger}</AlertDialogTrigger>}
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>{title}</AlertDialogTitle>
@@ -58,7 +75,7 @@ export function ConfirmDialog({
         <AlertDialogFooter>
           <AlertDialogCancel disabled={isPending}>Cancel</AlertDialogCancel>
           <AlertDialogAction
-            variant="destructive"
+            variant={tone}
             onClick={(event) => void confirm(event)}
             disabled={isPending}
           >
