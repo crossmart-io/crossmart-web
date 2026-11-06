@@ -1,5 +1,11 @@
 import { CatalogImportMode } from '@/api/schema';
-import { describeActor, describeCounts, describeResult, processedCount } from './import-summary';
+import {
+  changedAnything,
+  describeActor,
+  describeCounts,
+  describeResult,
+  processedCount,
+} from './import-summary';
 
 const NO_COUNTS = { created: 0, linked: 0, updated: 0, skipped: 0, failed: 0 };
 
@@ -48,5 +54,13 @@ describe('import summaries', () => {
     expect(
       describeResult({ ...EMPTY_RESULT, mode: CatalogImportMode.inventory, updatedVariants: 1 }),
     ).toBe('Set stock for 1 variant');
+  });
+});
+
+describe('describeResult with nothing imported', () => {
+  it('says so instead of "Imported 0 products"', () => {
+    const result = { ...EMPTY_RESULT, mode: CatalogImportMode.create };
+    expect(changedAnything(result)).toBe(false);
+    expect(describeResult(result)).toBe('Nothing imported');
   });
 });

@@ -24,6 +24,12 @@ export const BULK_MONEY_FIELDS: ReadonlySet<BulkVariantField> = new Set([
   BulkVariantField.CompareAtPrice,
 ]);
 
+/** A row that spans the table, kept a full-width block while the rows are stacked on phones. */
+export const GROUP_ROW_CLASSES = {
+  row: 'block sm:table-row',
+  cell: 'block sm:table-cell',
+} as const;
+
 export const VARIANTS_COPY = {
   filterLabel: 'Filter variants',
   filterPlaceholder: 'Filter by option, e.g. Red or XL',

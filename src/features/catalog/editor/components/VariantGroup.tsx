@@ -6,7 +6,7 @@ import { formatPriceRange, pluralize } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import type { ProductFormValues } from '../product-form.schema';
 import type { VariantGroupSummary } from '../variant-groups';
-import { VARIANTS_COPY } from '../variants.constants';
+import { GROUP_ROW_CLASSES, VARIANTS_COPY } from '../variants.constants';
 import { BulkVariantEditor } from './BulkVariantEditor';
 
 const SUMMARY_SEPARATOR = ' · ';
@@ -76,18 +76,24 @@ function GroupToggle({
 
 interface VariantGroupProps extends Omit<GroupToggleProps, 'controls'> {
   columnCount: number;
+  bodyClassName?: string;
   children: ReactNode;
 }
 
 /** A disclosure of the variants that share a first option value, with a summary and bulk edit. */
-export function VariantGroup({ columnCount, children, ...toggle }: VariantGroupProps) {
+export function VariantGroup({
+  columnCount,
+  bodyClassName,
+  children,
+  ...toggle
+}: VariantGroupProps) {
   const rowsId = useId();
 
   return (
     <>
-      <TableBody>
-        <TableRow className="bg-muted/40 hover:bg-muted/60">
-          <TableCell colSpan={columnCount} className="py-1.5">
+      <TableBody className={bodyClassName}>
+        <TableRow className={cn(GROUP_ROW_CLASSES.row, 'bg-muted/40 hover:bg-muted/60')}>
+          <TableCell colSpan={columnCount} className={cn(GROUP_ROW_CLASSES.cell, 'py-1.5')}>
             {/* Below sm the table can scroll sideways, so the bulk edit sits next to the summary. */}
             <div className="flex flex-wrap items-center gap-x-3 gap-y-1 sm:flex-nowrap sm:justify-between">
               <GroupToggle {...toggle} controls={rowsId} />
@@ -101,7 +107,7 @@ export function VariantGroup({ columnCount, children, ...toggle }: VariantGroupP
           </TableCell>
         </TableRow>
       </TableBody>
-      <TableBody id={rowsId} hidden={!toggle.expanded}>
+      <TableBody id={rowsId} hidden={!toggle.expanded} className={bodyClassName}>
         {children}
       </TableBody>
     </>

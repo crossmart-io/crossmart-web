@@ -1,4 +1,5 @@
 import type { SalesInterval } from '@/api/schema';
+import type { SalesReport } from './sales.types';
 import { BUCKET_LABEL_FORMATS, FLAT_CHANGE_PERCENT, PERCENT } from './sales.constants';
 
 export enum ChangeDirection {
@@ -67,4 +68,11 @@ export function formatCompactMoney(amount: number, currency: string): string {
 /** A part's share of a whole, in whole percent; 0 when the whole is 0. */
 export function toSharePercent(part: number, whole: number): number {
   return whole > 0 ? Math.round((part / whole) * PERCENT) : 0;
+}
+
+/** Whether either period sold anything; with nothing to point at, the chart shows no tooltip. */
+export function hasSales(report: Pick<SalesReport, 'buckets'>): boolean {
+  return report.buckets.some(
+    (bucket) => Number(bucket.sales) > 0 || Number(bucket.previousSales) > 0,
+  );
 }

@@ -1,37 +1,58 @@
 import { Plus } from 'lucide-react';
 import { Link } from 'react-router';
+import { ContentLoader } from '@/components/feedback/ContentLoader';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { Page } from '@/components/layout/Page';
 import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/config/routes';
-import { useApiKeys } from '@/features/api-keys';
 import { useSession } from '@/features/auth';
-import { useCatalogStats } from '@/features/catalog';
-import { useChannelSetup } from '@/features/channels';
 import { InventoryOverview } from '@/features/inventory-report';
-import { CatalogHealth, CatalogStatsGrid, GettingStarted } from '@/features/overview';
+import { useHasOrders } from '@/features/orders';
+import {
+  CatalogHealth,
+  CatalogStatsGrid,
+  GettingStarted,
+  type OnboardingState,
+  SalesEmptyState,
+  useOnboarding,
+} from '@/features/overview';
 import { SalesOverview } from '@/features/sales';
-import type { Workspace } from '@/features/workspaces';
 
-function OverviewContent({ workspace }: { workspace: Workspace }) {
-  const { data: stats } = useCatalogStats(workspace.id);
-  const { data: apiKeys } = useApiKeys(workspace.id);
-  const channelSetup = useChannelSetup(workspace.id);
+interface OverviewSectionProps {
+  workspaceId: string;
+}
 
+/** The checklist and the catalog's gaps: first until setup is done, last after. */
+function SetupSection({
+  workspaceId,
+  onboarding,
+}: OverviewSectionProps & { onboarding: OnboardingState }) {
+  return (
+    <div className="grid gap-6 lg:grid-cols-2">
+      <GettingStarted {...onboarding} />
+      <CatalogHealth workspaceId={workspaceId} />
+    </div>
+  );
+}
+
+/**
+ * A new seller sees what to do next first, and one quiet note instead of empty charts. Once orders
+ * come in and setup is done, the page reads as a sales dashboard.
+ */
+function OverviewContent({ workspaceId }: OverviewSectionProps) {
+  const { state: onboarding, isComplete } = useOnboarding(workspaceId);
+  const hasOrders = useHasOrders(workspaceId);
+  if (isComplete === undefined || hasOrders === undefined) return <ContentLoader />;
+
+  const setup = <SetupSection workspaceId={workspaceId} onboarding={onboarding} />;
   return (
     <>
-      <SalesOverview workspaceId={workspace.id} />
-      <InventoryOverview workspaceId={workspace.id} />
+      {!isComplete && setup}
+      {hasOrders ? <SalesOverview workspaceId={workspaceId} /> : <SalesEmptyState />}
+      {onboarding.hasProducts && <InventoryOverview workspaceId={workspaceId} />}
       <h2 className="font-heading text-lg font-semibold">Catalog</h2>
-      <CatalogStatsGrid workspaceId={workspace.id} />
-      <div className="grid gap-6 lg:grid-cols-2">
-        <GettingStarted
-          hasProducts={(stats?.products ?? 0) > 0}
-          hasApiKey={(apiKeys?.length ?? 0) > 0}
-          channelSetup={channelSetup}
-        />
-        <CatalogHealth workspaceId={workspace.id} />
-      </div>
+      <CatalogStatsGrid workspaceId={workspaceId} />
+      {isComplete && setup}
     </>
   );
 }
@@ -54,7 +75,7 @@ export function OverviewPage() {
         </Button>
       }
     >
-      <WorkspaceGate>{(workspace) => <OverviewContent workspace={workspace} />}</WorkspaceGate>
+      <WorkspaceGate>{(workspace) => <OverviewContent workspaceId={workspace.id} />}</WorkspaceGate>
     </Page>
   );
 }

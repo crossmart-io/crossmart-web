@@ -70,6 +70,8 @@ export const CONNECT_FAILURE_MESSAGES: Record<ConnectFailure, string> = {
   [ConnectFailure.channel_unavailable]: 'The channel is not responding. Try again in a moment.',
   [ConnectFailure.plan_limit_reached]:
     'Your plan has no room for another connected channel. See Plan & usage in Settings.',
+  [ConnectFailure.session_required]:
+    'Sign in to Crossmart in this browser, then connect the store again.',
   [ConnectFailure.unexpected]: 'Something went wrong while connecting. Please try again.',
 };
 
@@ -91,6 +93,24 @@ export const MISSING_FEATURES_COPY = {
   approve: 'Approve them once in Shopify and come back; nothing else changes for the store.',
   askAdmin: 'A workspace admin can approve them in Shopify.',
   action: 'Approve in Shopify',
+} as const;
+
+/** The visible action that connects another store of a channel. */
+export const CONNECT_STORE_LABEL = 'Connect a store';
+
+/** The alert on a store that cannot sync until it is connected again. */
+export const RECONNECT_COPY = {
+  action: 'Reconnect',
+  titles: {
+    [ChannelConnectionStatus.NEEDS_REAUTH]: 'Reconnect this store to keep it in sync',
+    [ChannelConnectionStatus.ERROR]: 'This store stopped syncing',
+    [ChannelConnectionStatus.DISCONNECTED]: 'This store is disconnected',
+  },
+  /** When the API stored no reason of its own. */
+  fallbackReason:
+    'Crossmart lost access to the store. Nothing reaches it until you reconnect; your ' +
+    'products and settings are kept.',
+  askAdmin: 'A workspace admin can reconnect it.',
 } as const;
 
 export const CHANNEL_FEEDBACK = {

@@ -3,6 +3,7 @@ import { ChannelConnectionStatus } from '@/api/schema';
 import { ROUTES } from '@/config/routes';
 import { useCatalogStats } from '@/features/catalog';
 import { connectionsSummary, useChannelConnections } from '@/features/channels';
+import { CONNECT_CHANNEL_PROMPT } from '../overview.constants';
 import { StatTile } from './StatTile';
 
 /** Stores that are linked, whatever their state; disconnected ones are gone. */
@@ -15,9 +16,7 @@ function ChannelsTile({ workspaceId }: { workspaceId: string }) {
     <StatTile
       label="Channels"
       value={stores?.length}
-      detail={
-        stores?.length ? connectionsSummary(stores) : 'Connect Shopify to sync products and stock'
-      }
+      detail={stores?.length ? connectionsSummary(stores) : CONNECT_CHANNEL_PROMPT}
       icon={Share2}
       to={ROUTES.channels}
     />

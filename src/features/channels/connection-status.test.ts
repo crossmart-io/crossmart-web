@@ -47,8 +47,10 @@ describe('connectionsSummary', () => {
   it.each([
     [[CONNECTED], '1 store connected'],
     [[CONNECTED, CONNECTED, CONNECTED], '3 stores connected'],
-    [[CONNECTED, NEEDS_REAUTH], '2 stores connected · 1 needs re-auth'],
-    [[NEEDS_REAUTH, NEEDS_REAUTH, ERROR], '3 stores connected · 2 need re-auth · 1 with errors'],
+    [[CONNECTED, NEEDS_REAUTH], '1 of 2 stores needs reconnecting'],
+    [[NEEDS_REAUTH], 'The store needs reconnecting'],
+    [[NEEDS_REAUTH, NEEDS_REAUTH, ERROR], '2 of 3 stores need reconnecting · 1 has errors'],
+    [[CONNECTED, ERROR], '1 of 2 stores has errors'],
   ])('sums up %j in one line', (statuses, expected) => {
     expect(connectionsSummary(statuses.map((status) => withStatus(status)))).toBe(expected);
   });

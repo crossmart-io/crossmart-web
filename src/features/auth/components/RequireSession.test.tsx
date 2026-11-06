@@ -1,4 +1,6 @@
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { OFFLINE_ERROR_MESSAGE } from '@/api/api-error';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { ROUTES } from '@/config/routes';
 import { useSession } from '../hooks/useSession';
@@ -12,8 +14,15 @@ const SIGN_IN_TEXT = 'Sign-in screen';
 type SessionState = ReturnType<typeof useSession>;
 
 function mockSession(state: Partial<SessionState>): void {
-  vi.mocked(useSession).mockReturnValue({ data: null, isPending: false, ...state } as SessionState);
+  vi.mocked(useSession).mockReturnValue({
+    data: null,
+    isPending: false,
+    error: null,
+    ...state,
+  } as SessionState);
 }
+
+type SessionError = NonNullable<SessionState['error']>;
 
 function renderAt(path: string): void {
   const router = createMemoryRouter(
@@ -50,5 +59,22 @@ describe('RequireSession', () => {
     mockSession({ data: {} as SessionState['data'] });
     renderAt(ROUTES.home);
     expect(screen.getByText(PROTECTED_TEXT)).toBeInTheDocument();
+  });
+
+  it('sends a user whose session was refused to sign-in', () => {
+    mockSession({ error: { status: 401 } as SessionError });
+    renderAt(ROUTES.home);
+    expect(screen.getByText(SIGN_IN_TEXT)).toBeInTheDocument();
+  });
+
+  it('offers a retry instead of sign-in when the API cannot be reached', async () => {
+    const refetch = vi.fn<SessionState['refetch']>().mockResolvedValue();
+    mockSession({ error: new TypeError('Failed to fetch') as unknown as SessionError, refetch });
+    renderAt(ROUTES.home);
+
+    expect(screen.queryByText(SIGN_IN_TEXT)).not.toBeInTheDocument();
+    expect(screen.getByText(OFFLINE_ERROR_MESSAGE)).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Try again' }));
+    expect(refetch).toHaveBeenCalled();
   });
 });

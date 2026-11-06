@@ -20,6 +20,8 @@ import type { ComponentType } from 'react';
 import { ROUTES } from '@/config/routes';
 import { WorkspaceSwitcher } from '@/features/workspaces';
 
+const MAIN_NAV_LABEL = 'Main';
+
 const NAV_BADGES: Record<NavBadge, ComponentType> = {
   [NavBadge.ChannelErrors]: ChannelErrorsBadge,
   [NavBadge.PendingSuggestions]: PendingSuggestionsBadge,
@@ -56,30 +58,32 @@ export function AppSidebar() {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        {NAV_GROUPS.map((group) => (
-          <SidebarGroup key={group.label}>
-            <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {group.items.map((item) => (
-                  <SidebarMenuItem key={item.to}>
-                    <SidebarMenuButton
-                      asChild
-                      isActive={isActive(pathname, item)}
-                      tooltip={item.label}
-                    >
-                      <NavLink to={item.to} end={item.end} onClick={closeOnMobile}>
-                        <item.icon />
-                        <span>{item.label}</span>
-                      </NavLink>
-                    </SidebarMenuButton>
-                    <NavItemBadge badge={item.badge} />
-                  </SidebarMenuItem>
-                ))}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        ))}
+        <nav aria-label={MAIN_NAV_LABEL} className="flex flex-col gap-2">
+          {NAV_GROUPS.map((group) => (
+            <SidebarGroup key={group.label}>
+              <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {group.items.map((item) => (
+                    <SidebarMenuItem key={item.to}>
+                      <SidebarMenuButton
+                        asChild
+                        isActive={isActive(pathname, item)}
+                        tooltip={item.label}
+                      >
+                        <NavLink to={item.to} end={item.end} onClick={closeOnMobile}>
+                          <item.icon />
+                          <span>{item.label}</span>
+                        </NavLink>
+                      </SidebarMenuButton>
+                      <NavItemBadge badge={item.badge} />
+                    </SidebarMenuItem>
+                  ))}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          ))}
+        </nav>
       </SidebarContent>
       <SidebarFooter>
         <WorkspaceSwitcher />

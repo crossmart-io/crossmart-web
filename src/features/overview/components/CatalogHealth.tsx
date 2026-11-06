@@ -1,11 +1,21 @@
-import { ChevronRight, CircleCheck, CircleDashed } from 'lucide-react';
+import { ChevronRight, CircleCheck, CircleDashed, PackageOpen, Plus, Upload } from 'lucide-react';
 import { Link } from 'react-router';
 import { CatalogGap } from '@/api/schema';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import {
+  Empty,
+  EmptyContent,
+  EmptyDescription,
+  EmptyHeader,
+  EmptyMedia,
+  EmptyTitle,
+} from '@/components/ui/empty';
 import { Skeleton } from '@/components/ui/skeleton';
-import { toProductsRoute } from '@/config/routes';
+import { ROUTES, toProductsRoute } from '@/config/routes';
 import { CATALOG_GAP_COPY, useCatalogStats } from '@/features/catalog';
 import { pluralize } from '@/lib/format';
+import { CATALOG_HEALTH_EMPTY_COPY } from '../overview.constants';
 
 /** What channels ask for before they accept a listing. Out of stock has its own tile. */
 const HEALTH_GAPS: readonly CatalogGap[] = [
@@ -28,21 +38,56 @@ export function CatalogHealth({ workspaceId }: { workspaceId: string }) {
         <CardDescription>What marketplaces ask for before they accept a listing.</CardDescription>
       </CardHeader>
       <CardContent>
-        {stats ? (
+        {!stats && <HealthSkeleton />}
+        {stats?.products === 0 && <CatalogHealthEmpty />}
+        {stats && stats.products > 0 && (
           <ul className="-mx-2 flex flex-col">
             {HEALTH_GAPS.map((gap) => (
               <HealthRow key={gap} gap={gap} products={counts.get(gap) ?? 0} />
             ))}
           </ul>
-        ) : (
-          <div className="flex flex-col gap-2">
-            {Array.from({ length: SKELETON_ROWS }, (_, index) => (
-              <Skeleton key={index} className="h-9 w-full" />
-            ))}
-          </div>
         )}
       </CardContent>
     </Card>
+  );
+}
+
+function HealthSkeleton() {
+  return (
+    <div className="flex flex-col gap-2">
+      {Array.from({ length: SKELETON_ROWS }, (_, index) => (
+        <Skeleton key={index} className="h-9 w-full" />
+      ))}
+    </div>
+  );
+}
+
+/** An empty catalog has nothing to check, so it asks for products instead of showing passes. */
+function CatalogHealthEmpty() {
+  return (
+    <Empty className="p-0">
+      <EmptyHeader>
+        <EmptyMedia variant="icon">
+          <PackageOpen />
+        </EmptyMedia>
+        <EmptyTitle>{CATALOG_HEALTH_EMPTY_COPY.title}</EmptyTitle>
+        <EmptyDescription>{CATALOG_HEALTH_EMPTY_COPY.description}</EmptyDescription>
+      </EmptyHeader>
+      <EmptyContent className="flex-row justify-center">
+        <Button asChild>
+          <Link to={ROUTES.newProduct}>
+            <Plus data-icon="inline-start" />
+            {CATALOG_HEALTH_EMPTY_COPY.addProduct}
+          </Link>
+        </Button>
+        <Button asChild variant="outline">
+          <Link to={ROUTES.imports}>
+            <Upload data-icon="inline-start" />
+            {CATALOG_HEALTH_EMPTY_COPY.importProducts}
+          </Link>
+        </Button>
+      </EmptyContent>
+    </Empty>
   );
 }
 

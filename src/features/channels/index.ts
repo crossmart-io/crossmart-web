@@ -1,7 +1,7 @@
 export { ChannelGrid } from './components/ChannelGrid';
 export { CHANNELS } from './channels.constants';
 export { useConnectRedirectToast } from './hooks/useConnectRedirectToast';
-export { ChannelSetup, connectionsSummary } from './connection-status';
+export { ChannelSetup, connectionsSummary, needsReconnect } from './connection-status';
 export { useChannelSetup } from './hooks/useChannelSetup';
 export { ConnectionStatusBadge } from './components/ConnectionStatusBadge';
 export { ConnectionSettings } from './components/ConnectionSettings';
@@ -12,3 +12,6 @@ export { useChannelConnections } from './hooks/useChannelConnections';
 export { ChannelErrorsBadge } from './components/ChannelErrorsBadge';
 export { MissingFeaturesAlert } from './components/MissingFeaturesAlert';
 export { connectionCurrency } from './connection-account';
+export { ReconnectAlert } from './components/ReconnectAlert';
+export { ConnectStoreButton } from './components/ConnectStoreButton';
+export { channelInfoFor } from './channels.constants';

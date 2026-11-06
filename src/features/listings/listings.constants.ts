@@ -65,6 +65,12 @@ export const LISTINGS_FEEDBACK = {
   itemSpecificsSaved: 'Item specifics saved',
 } as const;
 
+/** Why a product cannot be added to a store that lost its connection, and the way back. */
+export const STORE_NOT_CONNECTED_COPY = {
+  reason: 'This store needs reconnecting before products can be added to it.',
+  action: 'Reconnect it',
+} as const;
+
 /** What the eBay category field in the override sheet says. */
 export const CATEGORY_COPY = {
   label: 'eBay category',
