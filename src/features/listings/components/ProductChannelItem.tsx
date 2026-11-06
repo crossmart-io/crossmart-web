@@ -1,5 +1,5 @@
 import { ExternalLink, PencilLine, Plus, X } from 'lucide-react';
-import { useState } from 'react';
+import { useId, useState } from 'react';
 import { Link } from 'react-router';
 import { PriceSource } from '@/api/schema';
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
@@ -13,6 +13,7 @@ import {
   CHANNEL_CARD_VARIANT_LIMIT,
   LISTING_SOURCE_LABELS,
   OverrideSheetMode,
+  STORE_NOT_CONNECTED_COPY,
 } from '../listings.constants';
 import type { ChannelVariant, ProductChannel } from '../listings.types';
 import { ChannelOverrideSheet, type OverrideProduct } from './ChannelOverrideSheet';
@@ -20,6 +21,7 @@ import { ListingStatusBadge } from './ListingStatusBadge';
 import { PriceExplanation } from './PriceExplanation';
 import { ChannelLogoSize, channelInfoFor } from '@/features/channels/channels.constants';
 import { ChannelLogo } from '@/features/channels/components/ChannelLogo';
+import { needsReconnect } from '@/features/channels/connection-status';
 
 interface ProductChannelItemProps {
   workspaceId: string;
@@ -106,12 +108,39 @@ function RemoveFromStoreButton({
   );
 }
 
-/** Adding at once, as most products need, or with this store's changes first. */
+/** Why the store cannot take products now, with a link to the page where it is reconnected. */
+function NotConnectedHint({ id, connectionId }: { id: string; connectionId: string }) {
+  return (
+    <p id={id} className="text-xs text-muted-foreground">
+      {STORE_NOT_CONNECTED_COPY.reason}{' '}
+      <Link
+        to={toChannelConnectionRoute(connectionId)}
+        className="font-medium text-foreground underline"
+      >
+        {STORE_NOT_CONNECTED_COPY.action}
+      </Link>
+    </p>
+  );
+}
+
+/**
+ * Adding at once, as most products need, or with this store's changes first. Both wait while
+ * the store needs reconnecting: nothing could be published there.
+ */
 function AddToStoreButtons({ workspaceId, productId, channel, onOpen }: ChannelItemActionsProps) {
   const add = useAddToStore({ workspaceId, productId, connectionId: channel.connection.id });
+  const hintId = useId();
+  const blocked = needsReconnect(channel.connection.status);
   return (
     <div className="flex flex-wrap gap-2">
-      <Button type="button" size="sm" disabled={add.isPending} onClick={() => add.mutate()}>
+      {blocked && <NotConnectedHint id={hintId} connectionId={channel.connection.id} />}
+      <Button
+        type="button"
+        size="sm"
+        disabled={add.isPending || blocked}
+        aria-describedby={blocked ? hintId : undefined}
+        onClick={() => add.mutate()}
+      >
         {add.isPending ? <Spinner data-icon="inline-start" /> : <Plus data-icon="inline-start" />}
         Add to store
       </Button>
@@ -119,7 +148,8 @@ function AddToStoreButtons({ workspaceId, productId, channel, onOpen }: ChannelI
         type="button"
         variant="outline"
         size="sm"
-        disabled={add.isPending}
+        disabled={add.isPending || blocked}
+        aria-describedby={blocked ? hintId : undefined}
         onClick={() => onOpen(OverrideSheetMode.Add)}
       >
         <PencilLine data-icon="inline-start" />

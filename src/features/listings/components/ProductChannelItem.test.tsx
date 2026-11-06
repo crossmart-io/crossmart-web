@@ -5,6 +5,7 @@ import { MemoryRouter } from 'react-router';
 import { ChannelConnectionStatus, ChannelType, ListingSource, ListingStatus } from '@/api/schema';
 import type * as ProductChannelHooks from '../hooks/useProductChannels';
 import { useAddToStore, useRemoveFromStore } from '../hooks/useProductChannels';
+import { STORE_NOT_CONNECTED_COPY } from '../listings.constants';
 import type { ProductChannel } from '../listings.types';
 import { ProductChannelItem } from './ProductChannelItem';
 
@@ -116,5 +117,21 @@ describe('ProductChannelItem', () => {
     renderItem(channel(), false);
 
     expect(screen.queryByRole('button', { name: 'Add to store' })).not.toBeInTheDocument();
+  });
+
+  it('blocks adding to a store that needs reconnecting, and says why', () => {
+    const base = channel();
+    const { addToStore } = renderItem({
+      ...base,
+      connection: { ...base.connection, status: ChannelConnectionStatus.NEEDS_REAUTH },
+    });
+
+    expect(screen.getByRole('button', { name: 'Add to store' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Add with changes…' })).toBeDisabled();
+    expect(screen.getByRole('button', { name: 'Add to store' })).toHaveAccessibleDescription(
+      new RegExp(STORE_NOT_CONNECTED_COPY.reason),
+    );
+    expect(screen.getByRole('link', { name: STORE_NOT_CONNECTED_COPY.action })).toBeInTheDocument();
+    expect(addToStore).not.toHaveBeenCalled();
   });
 });

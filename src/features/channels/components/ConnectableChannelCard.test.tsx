@@ -4,7 +4,12 @@ import userEvent from '@testing-library/user-event';
 import type { ReactElement } from 'react';
 import { MemoryRouter } from 'react-router';
 import { ChannelConnectionStatus, ChannelType } from '@/api/schema';
-import { CHANNELS, type ChannelInfo, type ConnectableChannel } from '../channels.constants';
+import {
+  CHANNELS,
+  CONNECT_STORE_LABEL,
+  type ChannelInfo,
+  type ConnectableChannel,
+} from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
 import { connectionFixture as connection } from '../testing/channel-connection.fixture';
 import { ConnectableChannelCard } from './ConnectableChannelCard';
@@ -55,7 +60,13 @@ describe('ConnectableChannelCard', () => {
     expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-1');
     expect(screen.queryByRole('button', { name: 'Disconnect' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Import products/ })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: /Connect/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Connect' })).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: CONNECT_STORE_LABEL })).toBeInTheDocument();
+  });
+
+  it('offers another store only to members who can manage channels', () => {
+    renderCard([connection()], false);
+    expect(screen.queryByRole('button', { name: CONNECT_STORE_LABEL })).not.toBeInTheDocument();
   });
 
   it('opens the store that needs attention first, and counts it', () => {
@@ -68,7 +79,7 @@ describe('ConnectableChannelCard', () => {
       }),
     ]);
 
-    expect(screen.getByText('2 stores connected · 1 needs re-auth')).toBeInTheDocument();
+    expect(screen.getByText('1 of 2 stores needs reconnecting')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-2');
   });
 
