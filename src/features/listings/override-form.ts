@@ -25,8 +25,7 @@ export const overrideFormSchema = z.object({
     z.object({
       variantId: z.string(),
       price: optionalMoneyAmount,
-      /** Not editable here; carried through so saving keeps one set through the API or MCP. */
-      compareAtPrice: z.string().nullable(),
+      compareAtPrice: optionalMoneyAmount,
     }),
   ),
 });
@@ -51,7 +50,7 @@ function toPriceFields(channel: ProductChannel): OverrideFormValues['prices'] {
     return {
       variantId: variant.variantId,
       price: override?.price ?? '',
-      compareAtPrice: override?.compareAtPrice ?? null,
+      compareAtPrice: override?.compareAtPrice ?? '',
     };
   });
 }
@@ -120,7 +119,7 @@ function toVariantPrices(prices: OverrideFormValues['prices']): ListingOverride[
     .map((entry) => ({
       variantId: entry.variantId,
       price: entry.price.trim() || null,
-      compareAtPrice: entry.compareAtPrice,
+      compareAtPrice: entry.compareAtPrice.trim() || null,
     }))
     .filter((entry) => entry.price !== null || entry.compareAtPrice !== null);
 }

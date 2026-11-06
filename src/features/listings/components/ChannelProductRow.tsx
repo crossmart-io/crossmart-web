@@ -1,12 +1,12 @@
 import { ExternalLink, Undo2, X } from 'lucide-react';
-import { Link } from 'react-router';
+import type { MouseEvent } from 'react';
+import { Link, useSearchParams } from 'react-router';
 import { ChannelProductState } from '@/api/schema';
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
-import { useReturnToState } from '@/components/navigation/return-to';
 import { RelativeTime } from '@/components/time/RelativeTime';
 import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
-import { toProductRoute } from '@/config/routes';
+import { ROUTE_QUERY } from '@/config/routes';
 import { ProductThumbnail } from '@/features/catalog';
 import { listingFixOf } from '../listing-fix';
 import { hasListingReason, LISTING_STATE_PRESENTATION } from '../listing-states';
@@ -20,20 +20,33 @@ interface ChannelProductRowProps {
   store: ListingStore;
   /** Whether the member may edit listings: retry them and fix their overrides. */
   canEdit: boolean;
+  /** Opens the product's listing editor over the list. */
+  onOpenListing: (productId: string) => void;
   /** Removes the product from the store; absent for members who may not. */
   onRemove?: (productId: string) => Promise<unknown>;
   /** Adds a product removed by hand back to the store; absent for members who may not. */
   onAddBack?: (productId: string) => void;
 }
 
+/** Clicks on these inside a row do their own thing instead of opening the listing. */
+const ROW_CONTROLS = 'a, button, input, [role="dialog"], [role="alertdialog"]';
+
+/** This page with the product's listing editor open, keeping the list's filters and page. */
+function useListingSearch(productId: string): string {
+  const [searchParams] = useSearchParams();
+  const next = new URLSearchParams(searchParams);
+  next.set(ROUTE_QUERY.listingProduct, productId);
+  return `?${next}`;
+}
+
 function ProductCell({ row }: { row: ChannelProduct }) {
-  const returnTo = useReturnToState();
+  const listingSearch = useListingSearch(row.product.id);
   return (
     <div className="flex min-w-0 items-center gap-3">
       <ProductThumbnail url={row.product.imageUrl} alt="" className="size-8" />
       <Link
-        to={toProductRoute(row.product.id)}
-        state={returnTo}
+        to={{ search: listingSearch }}
+        replace
         dir="auto"
         title={row.product.title}
         className="line-clamp-2 min-w-0 font-medium break-words hover:underline"
@@ -81,7 +94,8 @@ function StateCell({
   row,
   store,
   canEdit,
-}: Pick<ChannelProductRowProps, 'row' | 'store' | 'canEdit'>) {
+  onOpenListing,
+}: Pick<ChannelProductRowProps, 'row' | 'store' | 'canEdit' | 'onOpenListing'>) {
   const fix = listingFixOf({
     displayState: row.displayState,
     missingRequirement: row.listing?.missingRequirement,
@@ -102,6 +116,7 @@ function StateCell({
           }}
           canEdit={canEdit}
           canRetry={store.connected}
+          onOpenOverride={() => onOpenListing(row.product.id)}
         />
       ) : (
         <StateHint row={row} />
@@ -128,23 +143,31 @@ function RowAction({
   return <RemoveButton row={row} onRemove={onRemove} />;
 }
 
-/** One product of the store: where it stands and what to do about it, the last sync, actions. */
+/**
+ * One product of the store: where it stands and what to do about it, the last sync, actions.
+ * Clicking the row, or its title, opens the product's listing editor over the list.
+ */
 export function ChannelProductRow({
   row,
   store,
   canEdit,
+  onOpenListing,
   onRemove,
   onAddBack,
 }: ChannelProductRowProps) {
   const externalUrl = row.listing?.externalUrl;
+  const openFromRow = (event: MouseEvent<HTMLTableRowElement>) => {
+    if (event.target instanceof Element && event.target.closest(ROW_CONTROLS)) return;
+    onOpenListing(row.product.id);
+  };
   return (
-    <TableRow className="align-top">
+    <TableRow className="cursor-pointer align-top" onClick={openFromRow}>
       {/* Takes the width the other columns leave, so a long title wraps instead of widening the table. */}
       <TableCell className="w-full max-w-0 whitespace-normal">
         <ProductCell row={row} />
       </TableCell>
       <TableCell className="whitespace-normal">
-        <StateCell row={row} store={store} canEdit={canEdit} />
+        <StateCell row={row} store={store} canEdit={canEdit} onOpenListing={onOpenListing} />
       </TableCell>
       <TableCell className="hidden text-sm text-muted-foreground sm:table-cell">
         {row.listing?.lastSyncedAt ? <RelativeTime value={row.listing.lastSyncedAt} /> : '—'}

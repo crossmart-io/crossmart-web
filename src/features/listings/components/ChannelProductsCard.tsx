@@ -3,9 +3,10 @@ import { Link } from 'react-router';
 import { ProductStoreFilter } from '@/api/schema';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { toProductsRoute } from '@/config/routes';
+import { ROUTE_QUERY, toProductsRoute } from '@/config/routes';
 import { useChannelProductFilters } from '../hooks/useChannelProductFilters';
 import { useChannelProducts } from '../hooks/useChannelProducts';
+import { useEditorSearchParam } from '../hooks/useEditorSearchParam';
 import { useAddStoreProducts, useRemoveStoreProducts } from '../hooks/useStoreProducts';
 import { ALL_CHANNEL_PRODUCTS } from '../listings.constants';
 import type { ListingStore } from '../listings.types';
@@ -13,10 +14,13 @@ import type { ChannelConnection } from '@/features/channels/channels.types';
 import { needsReconnect } from '@/features/channels/connection-status';
 import { ChannelProductFilters } from './ChannelProductFilters';
 import { ChannelProductsTable } from './ChannelProductsTable';
+import { ListingEditorSheet } from './ListingEditorSheet';
 import { useUrlPagination } from '@/hooks/usePagination';
 
 interface ChannelProductsCardProps {
   workspaceId: string;
+  /** The workspace's currency, which the products' own prices are in. */
+  catalogCurrency: string;
   connection: ChannelConnection;
   canEdit: boolean;
 }
@@ -51,9 +55,11 @@ function AddProductsButton({ connectionId }: { connectionId: string }) {
 /**
  * The store's listings: every product it has or is getting, where each stands on the channel and
  * why it is there, filtered by state, searched and sorted. Products are added from the catalog.
+ * A product opens in the listing editor over the list, named in the URL so it can be shared.
  */
 export function ChannelProductsCard({
   workspaceId,
+  catalogCurrency,
   connection,
   canEdit,
 }: ChannelProductsCardProps) {
@@ -73,6 +79,7 @@ export function ChannelProductsCard({
   );
   const add = useAddStoreProducts();
   const remove = useRemoveStoreProducts();
+  const editor = useEditorSearchParam(ROUTE_QUERY.listingProduct);
 
   return (
     <Card>
@@ -86,6 +93,7 @@ export function ChannelProductsCard({
           pagination={pagination}
           store={listingStoreOf(workspaceId, connection)}
           canEdit={canEdit}
+          onOpenListing={editor.open}
           onRemove={
             canEdit
               ? (productId) => remove.mutateAsync({ ref, productIds: [productId] })
@@ -95,6 +103,15 @@ export function ChannelProductsCard({
             canEdit ? (productId) => add.mutate({ ref, productIds: [productId] }) : undefined
           }
         />
+        {editor.openId && (
+          <ListingEditorSheet
+            listingRef={{ ...ref, productId: editor.openId }}
+            catalogCurrency={catalogCurrency}
+            canEdit={canEdit}
+            showProductLink
+            onClose={editor.close}
+          />
+        )}
       </CardContent>
     </Card>
   );

@@ -39,11 +39,11 @@ function renderSwitcher(connections: ChannelConnection[], canManage = true) {
   >);
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter initialEntries={['/channels/c-1/pricing']}>
+      <MemoryRouter initialEntries={['/channels/c-1/settings']}>
         <ConnectionSwitcher
           workspaceId="ws-1"
           connection={MAIN}
-          tab="pricing"
+          tab="settings"
           canManage={canManage}
         />
         <Routes>
@@ -62,7 +62,7 @@ describe('ConnectionSwitcher', () => {
     expect(screen.queryByRole('menuitem', { name: /Closed store/ })).not.toBeInTheDocument();
     await userEvent.click(screen.getByRole('menuitem', { name: /Outlet/ }));
 
-    expect(screen.getByTestId('path')).toHaveTextContent('/channels/c-2/pricing');
+    expect(screen.getByTestId('path')).toHaveTextContent('/channels/c-2/settings');
   });
 
   it('connects another store from the menu', async () => {

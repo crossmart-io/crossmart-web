@@ -59,8 +59,10 @@ export const ROUTE_QUERY = {
   sort: 'sort',
   storeFilter: 'stores',
   storeId: 'store',
-  /** On a product's page: the store whose overrides panel opens at once. */
+  /** On a product's page: the store whose listing editor opens at once. */
   overrideStore: 'override',
+  /** On a store's page: the product whose listing editor opens over the listings. */
+  listingProduct: 'listing',
 } as const;
 
 /** Parts of a page a link can scroll to, as the ids of their cards (`#media`). */
@@ -70,6 +72,7 @@ export enum PageSection {
   ProductVariants = 'variants',
   StoreListingDefaults = 'listing-defaults',
   StoreListingSetup = 'listing-setup',
+  StorePricing = 'pricing',
 }
 
 /** `route`, scrolled to one of its sections. */
@@ -77,10 +80,16 @@ export function withSection(route: string, section: PageSection): string {
   return `${route}#${section}`;
 }
 
-/** A product's page with its overrides panel for one store open, to fix what the store needs. */
+/** A product's page with its listing editor for one store open, to fix what the store needs. */
 export function toProductStoreOverrideRoute(productId: string, connectionId: string): string {
   const query = new URLSearchParams({ [ROUTE_QUERY.overrideStore]: connectionId });
   return `${toProductRoute(productId)}?${query}`;
+}
+
+/** A store's listings with the listing editor open on one product, so it can be shared. */
+export function toStoreListingRoute(connectionId: string, productId: string): string {
+  const query = new URLSearchParams({ [ROUTE_QUERY.listingProduct]: productId });
+  return `${toChannelConnectionRoute(connectionId)}?${query}`;
 }
 
 /** A table's page and rows per page, kept in the URL with its filters. */

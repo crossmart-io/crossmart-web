@@ -1,4 +1,4 @@
-import { useNavigate, useParams } from 'react-router';
+import { Navigate, useNavigate, useParams } from 'react-router';
 import { ChannelConnectionStatus, WorkspacePermission } from '@/api/schema';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { Page } from '@/components/layout/Page';
@@ -6,7 +6,7 @@ import { type ResourcePageCopy, ResourcePage } from '@/components/layout/Resourc
 import { ReturnToProvider } from '@/components/navigation/ReturnToProvider';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { PAGE_PARENTS } from '@/config/navigation';
-import { ROUTE_PARAMS, ROUTES, toChannelConnectionRoute } from '@/config/routes';
+import { PageSection, ROUTE_PARAMS, ROUTES, toChannelConnectionRoute } from '@/config/routes';
 import {
   type ChannelConnection,
   channelInfoFor,
@@ -28,6 +28,7 @@ import {
   PricingRuleCard,
   ProductSelectionCard,
   PublishReadinessAlert,
+  retiredChannelTabRoute,
   toChannelTab,
   useChannelConnection,
 } from '@/features/listings';
@@ -47,7 +48,10 @@ interface ChannelConnectionTabsProps {
   tab: ChannelTab;
 }
 
-/** The connection's settings, with the listings feature's sync button and automatic rule. */
+/**
+ * The connection's settings, with the listings feature's sync button, pricing rule and automatic
+ * rule. Per-product prices are set in each product's listing editor instead.
+ */
 function SettingsTab({ workspace, connection }: Omit<ChannelConnectionTabsProps, 'tab'>) {
   const navigate = useNavigate();
   const canManage = hasPermission(workspace, WorkspacePermission.channels_manage);
@@ -67,6 +71,16 @@ function SettingsTab({ workspace, connection }: Omit<ChannelConnectionTabsProps,
           disabled={connection.status !== ChannelConnectionStatus.CONNECTED}
         />
       }
+      pricing={
+        <PricingRuleCard
+          {...ref}
+          id={PageSection.StorePricing}
+          currency={connectionCurrency(connection) ?? workspace.currency}
+          catalogCurrency={workspace.currency}
+          rule={connection.pricing}
+          canManage={canManage}
+        />
+      }
       automaticRule={
         <ProductSelectionCard {...ref} rule={connection.productSelection} canManage={canManage} />
       }
@@ -77,10 +91,7 @@ function SettingsTab({ workspace, connection }: Omit<ChannelConnectionTabsProps,
 /** One tab per part of the connection; each tab has its own URL so it can be linked to. */
 function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnectionTabsProps) {
   const navigate = useNavigate();
-  const canManage = hasPermission(workspace, WorkspacePermission.channels_manage);
   const canEditListings = hasPermission(workspace, WorkspacePermission.listings_edit);
-  const currency = connectionCurrency(connection) ?? workspace.currency;
-  const ref = { workspaceId: workspace.id, connectionId: connection.id };
   return (
     <Tabs
       value={tab}
@@ -98,17 +109,9 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
       <TabsContent value={ChannelTab.Listings}>
         <ChannelProductsCard
           workspaceId={workspace.id}
+          catalogCurrency={workspace.currency}
           connection={connection}
           canEdit={canEditListings}
-        />
-      </TabsContent>
-      <TabsContent value={ChannelTab.Pricing}>
-        <PricingRuleCard
-          {...ref}
-          currency={currency}
-          catalogCurrency={workspace.currency}
-          rule={connection.pricing}
-          canManage={canManage}
         />
       </TabsContent>
       <TabsContent value={ChannelTab.Settings}>
@@ -204,7 +207,11 @@ function ChannelConnectionDetails({ workspace, connectionId, tab }: ChannelConne
 export function ChannelConnectionPage() {
   const params = useParams();
   const connectionId = params[ROUTE_PARAMS.connectionId] ?? '';
-  const tab = toChannelTab(params[ROUTE_PARAMS.tab]);
+  const segment = params[ROUTE_PARAMS.tab];
+  const retiredTabRoute = retiredChannelTabRoute(connectionId, segment);
+  // An old link to a tab that moved, such as Pricing, lands on the section that replaced it.
+  if (retiredTabRoute) return <Navigate to={retiredTabRoute} replace />;
+  const tab = toChannelTab(segment);
   return (
     <WorkspaceGate>
       {(workspace) => (

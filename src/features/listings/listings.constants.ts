@@ -51,8 +51,12 @@ export const PRICING_MIN_PERCENT = -90;
 export const PRICING_MAX_PERCENT = 500;
 export const PRICING_MAX_MARGIN_PERCENT = 1000;
 export const OVERRIDE_TITLE_MAX_LENGTH = 255;
-/** Variants shown on a channel card before "and N more". */
-export const CHANNEL_CARD_VARIANT_LIMIT = 3;
+/** Variants a store card's details list before "and N more". */
+export const CHANNEL_CARD_VARIANT_LIMIT = 5;
+/** Variants the pricing rule's live example shows: enough to see the rule, not a whole catalog. */
+export const PRICING_EXAMPLE_VARIANT_LIMIT = 3;
+/** Decimals a conversion rate shows in a price explanation: "× 0.8875", not "× 0.887548". */
+export const EXCHANGE_RATE_DISPLAY_DECIMALS = 4;
 /** Store icons a products table row shows before "+N". */
 export const PRODUCT_STORE_ICONS_SHOWN = 4;
 /** Beside a products table row's store icons when some refused the product. */
@@ -62,13 +66,37 @@ export const PRODUCT_STORE_FAILED_LABEL = (count: number) =>
 export const LISTINGS_FEEDBACK = {
   pricingSaved: 'Pricing saved; sending the new prices to the store',
   selectionSaved: 'Automatic rule saved and applied',
-  overrideSaved: 'Store overrides saved',
-  overrideCleared: 'Store overrides removed',
+  overrideSaved: 'Changes for this store saved',
   removedFromStore: 'Removed from the store',
   addedToStore: 'Added to the store; publishing now',
   retryQueued: 'Publishing again',
   categorySaved: 'Category saved',
   itemSpecificsSaved: 'Item specifics saved',
+} as const;
+
+/** A store's card on the product page. */
+export const CHANNEL_CARD_COPY = {
+  add: 'Add to store',
+  edit: 'Edit listing',
+  details: 'Details',
+  openListing: 'Open the listing in',
+  setForStore: 'set for this store',
+} as const;
+
+/** The control that reveals how a store price was worked out. */
+export const PRICE_EXPLANATION_COPY = {
+  toggle: 'How is this worked out?',
+} as const;
+
+/** The store-wide pricing rule, a section of the store's settings. */
+export const PRICING_RULE_COPY = {
+  title: 'Pricing',
+  description:
+    'Every product in this store is priced by this rule. To set one product’s price here, open it ' +
+    'from the Listings tab. Saving sends the new prices to the store at once.',
+  save: 'Save and apply',
+  exampleLabel: 'Example:',
+  noExample: 'Add products to this store to see the rule applied to one.',
 } as const;
 
 /** Why a product cannot be added to a store that lost its connection, and the way back. */
@@ -197,7 +225,7 @@ export const PRICE_WARNING_MESSAGES: Record<PriceWarning, string> = {
     'The compare-at price is not above the price, so none is sent.',
   [PriceWarning.clamped_to_zero]: 'The rule would make the price negative; it is sent as zero.',
   [PriceWarning.no_exchange_rate]:
-    'No exchange rate is known for this store’s currency, so this price is not converted and is not sent. Set a fixed rate in the store’s pricing.',
+    'No exchange rate is known for this store’s currency, so this price is not converted and is not sent. Set a fixed rate in the pricing section of the store’s settings.',
 };
 
 /** How the override sheet offers visibility: follow the product, or decide for this channel. */
@@ -306,3 +334,64 @@ export const STORE_FILTER_LABELS: Partial<Record<ProductStoreFilter, string>> = 
   [ProductStoreFilter.in_no_store]: 'In no store',
   [ProductStoreFilter.with_errors]: 'With listing errors',
 };
+
+/** What the listing editor says: one product in one store, field by field. */
+export const LISTING_EDITOR_COPY = {
+  addingTo: (store: string) =>
+    `Adding to ${store}. Change anything this store should show differently.`,
+  editingIn: (store: string) => `How this product shows in ${store}.`,
+  fromProduct: 'From product',
+  changedForStore: 'Changed for this store',
+  useProductValue: 'Use product value',
+  changeForStore: 'Change for this store',
+  productValue: 'Product:',
+  noChanges: 'Everything follows the product.',
+  changesLabel: 'Changed for this store:',
+  pricedVariants: (count: number) =>
+    count === 1 ? 'price of 1 variant' : `prices of ${count} variants`,
+  resetAll: 'Use product values everywhere',
+  save: 'Save',
+  add: 'Add to store',
+  openProduct: 'Open product',
+  viewInStore: 'View in store',
+  removeFromStore: 'Remove from store',
+  loadFailed: 'This listing could not be loaded',
+  loading: 'Listing',
+  notFound: 'This store is no longer connected to the product.',
+  storeOnly: 'Only in this store',
+  storeOnlyDescription: 'eBay asks for these; the product has no value for them.',
+  noTags: 'No tags',
+  noDescription: 'No description',
+  firstImageNote: 'The first one chosen is the main image.',
+  allImages: (count: number) => `all ${count} images`,
+  priceLegend: 'Price in this store',
+  priceHint: 'Empty prices follow the store’s pricing rule.',
+  price: 'Price',
+  singleVariantPrice: 'Price and compare-at price',
+  compareAtPrice: 'Compare-at price',
+} as const;
+
+/** The stock fields of the listing editor. */
+export const STOCK_FIELD_COPY = {
+  productValue: 'all of its stock',
+  holdBack: 'Hold back',
+  noneHeld: '0',
+  holdBackHint: 'Units this store never sees.',
+  max: 'Show at most',
+  noLimit: 'No limit',
+} as const;
+
+/** Labels of the listing's fields, as the editor and its summary name them. */
+export const LISTING_FIELD_LABELS = {
+  title: 'Title',
+  description: 'Description',
+  tags: 'Tags',
+  images: 'Images',
+  visibility: 'Visibility',
+  stock: 'Stock shown',
+} as const;
+
+/** Parts of the listing editor a fix can scroll to. */
+export enum ListingEditorSection {
+  StoreOnly = 'listing-store-only',
+}

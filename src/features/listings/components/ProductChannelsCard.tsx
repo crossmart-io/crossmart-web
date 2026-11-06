@@ -1,19 +1,21 @@
 import { Share2 } from 'lucide-react';
-import { useCallback } from 'react';
-import { Link, useSearchParams } from 'react-router';
-import type { PublishRequirement } from '@/api/schema';
+import { Link } from 'react-router';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROUTE_QUERY, ROUTES } from '@/config/routes';
-import { useChannelConnections } from '@/features/channels/hooks/useChannelConnections';
-import { useSearchParamsUpdater } from '@/hooks/useSearchParamsUpdater';
 import { useProductChannels } from '../hooks/useProductChannels';
-import type { OverrideProduct } from './ChannelOverrideSheet';
+import { useEditorSearchParam } from '../hooks/useEditorSearchParam';
+import { useStoreMissing } from '../hooks/useStoreMissing';
+import { OverrideSheetMode } from '../listings.constants';
+import type { ProductChannel } from '../listings.types';
+import { ListingEditorSheet } from './ListingEditorSheet';
 import { ProductChannelItem } from './ProductChannelItem';
 
 interface ProductChannelsCardProps {
   workspaceId: string;
-  product: OverrideProduct;
+  productId: string;
+  /** The workspace's currency, which the product's own prices are in. */
+  catalogCurrency: string;
   canEdit: boolean;
 }
 
@@ -32,31 +34,26 @@ function NoChannels() {
   );
 }
 
-/** What each store's setup still lacks, by store, so a product's fix can point there. */
-function useStoreMissing(
-  workspaceId: string,
-): ReadonlyMap<string, readonly PublishRequirement[]> | undefined {
-  const { data } = useChannelConnections(workspaceId);
-  if (!data) return undefined;
-  return new Map(data.map((connection) => [connection.id, connection.publishReadiness.missing]));
+/** The editor opens on a store the product is in to edit it, and on one it is not in to add it. */
+function modeFor(channel: ProductChannel | undefined): OverrideSheetMode {
+  return channel && !channel.selected ? OverrideSheetMode.Add : OverrideSheetMode.Edit;
 }
 
-/** The store whose overrides panel a "fix" link asked to open, and forgetting it once closed. */
-function useOverrideRequest() {
-  const [searchParams] = useSearchParams();
-  const update = useSearchParamsUpdater();
-  const clear = useCallback(
-    () => update((params) => params.delete(ROUTE_QUERY.overrideStore)),
-    [update],
-  );
-  return { connectionId: searchParams.get(ROUTE_QUERY.overrideStore), clear };
-}
-
-/** Where the product is listed, at which price, and what each channel shows differently. */
-export function ProductChannelsCard({ workspaceId, product, canEdit }: ProductChannelsCardProps) {
-  const { data: channels, isPending } = useProductChannels(workspaceId, product.id);
+/**
+ * Where the product is listed: a compact card per store with its state, price and next action.
+ * A store opens the listing editor in a side panel, the same one the store's listings open,
+ * named in the URL (`?override=<store>`) so fix links and shared links open it too.
+ */
+export function ProductChannelsCard({
+  workspaceId,
+  productId,
+  catalogCurrency,
+  canEdit,
+}: ProductChannelsCardProps) {
+  const { data: channels, isPending } = useProductChannels(workspaceId, productId);
   const storeMissing = useStoreMissing(workspaceId);
-  const overrideRequest = useOverrideRequest();
+  const editor = useEditorSearchParam(ROUTE_QUERY.overrideStore);
+  const openChannel = channels?.find(({ connection }) => connection.id === editor.openId);
   return (
     <Card>
       <CardHeader>
@@ -68,20 +65,28 @@ export function ProductChannelsCard({ workspaceId, product, canEdit }: ProductCh
         {isPending && <Skeleton className="h-24 w-full" />}
         {channels?.length === 0 && <NoChannels />}
         {channels && channels.length > 0 && (
-          <ul className="flex flex-col gap-3">
+          <ul className="flex flex-col gap-2">
             {channels.map((channel) => (
               <ProductChannelItem
                 key={channel.connection.id}
                 workspaceId={workspaceId}
-                product={product}
+                productId={productId}
                 channel={channel}
                 canEdit={canEdit}
                 storeMissing={storeMissing?.get(channel.connection.id)}
-                openOverride={overrideRequest.connectionId === channel.connection.id}
-                onOverrideClosed={overrideRequest.clear}
+                onOpen={() => editor.open(channel.connection.id)}
               />
             ))}
           </ul>
+        )}
+        {editor.openId && (
+          <ListingEditorSheet
+            listingRef={{ workspaceId, productId, connectionId: editor.openId }}
+            catalogCurrency={catalogCurrency}
+            canEdit={canEdit}
+            mode={modeFor(openChannel)}
+            onClose={editor.close}
+          />
         )}
       </CardContent>
     </Card>
