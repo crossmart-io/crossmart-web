@@ -4,19 +4,17 @@ import { useFieldArray, useFormContext } from 'react-hook-form';
 import { MoneyInput } from '@/components/forms/MoneyInput';
 import { FieldError } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { cn } from '@/lib/utils';
 import { COST_HELP } from '../../catalog.constants';
 import type { ProductFormValues } from '../product-form.schema';
+import { useVariantGroups } from '../useVariantGroups';
+import { variantLabel } from '../variant-groups';
+import { VariantRows } from './VariantRows';
+import { VariantsToolbar } from './VariantsToolbar';
 
 const COST_HELP_ID = 'variants-cost-help';
+const COLUMN_COUNT = 5;
 
 type VariantColumn = 'price' | 'cost' | 'sku' | 'quantity';
 
@@ -52,9 +50,11 @@ function CellError({ id, error }: { id: string; error: FormFieldError | undefine
 export function VariantsGrid({ currency }: { currency: string }) {
   const { control } = useFormContext<ProductFormValues>();
   const variants = useFieldArray({ control, name: 'variants', keyName: 'rowKey' });
+  const layout = useVariantGroups();
 
   return (
     <div className="flex flex-col gap-2">
+      {variants.fields.length > 1 && <VariantsToolbar layout={layout} currency={currency} />}
       <div className="rounded-lg border">
         <Table className={STACKED.table}>
           <TableHeader className="hidden sm:table-header-group">
@@ -68,16 +68,20 @@ export function VariantsGrid({ currency }: { currency: string }) {
               <TableHead className="w-28 text-right">{COLUMN_LABELS.quantity}</TableHead>
             </TableRow>
           </TableHeader>
-          <TableBody className={STACKED.body}>
-            {variants.fields.map((variant, index) => (
+          <VariantRows
+            layout={layout}
+            currency={currency}
+            columnCount={COLUMN_COUNT}
+            bodyClassName={STACKED.body}
+            renderRow={(index) => (
               <VariantRow
-                key={variant.rowKey}
+                key={variants.fields[index]?.rowKey ?? index}
                 index={index}
-                label={variant.optionValues.join(' / ')}
+                label={variantLabel(variants.fields[index]?.optionValues ?? [])}
                 currency={currency}
               />
-            ))}
-          </TableBody>
+            )}
+          />
         </Table>
       </div>
       <p id={COST_HELP_ID} className="text-xs text-muted-foreground">
