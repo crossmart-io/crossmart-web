@@ -1,5 +1,6 @@
 # Static build of the web app served by nginx.
-#   docker build --build-arg VITE_API_URL=https://api.example.com -t crossmart-web .
+#   docker build --build-arg VITE_API_URL=https://api.example.com \
+#     --build-arg VITE_MCP_URL=https://mcp.example.com/mcp -t crossmart-web .
 
 ARG NODE_VERSION=24
 
@@ -11,7 +12,8 @@ COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
 ARG VITE_API_URL=http://localhost:3000
-ENV VITE_API_URL=${VITE_API_URL}
+ARG VITE_MCP_URL=http://localhost:3100/mcp
+ENV VITE_API_URL=${VITE_API_URL} VITE_MCP_URL=${VITE_MCP_URL}
 RUN pnpm build
 
 FROM nginx:1.27-alpine AS runtime
