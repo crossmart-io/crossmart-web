@@ -1,4 +1,5 @@
 import { ShieldPlus } from 'lucide-react';
+import { ActionsTableHead } from '@/components/lists/ActionsTableHead';
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
 import { Button } from '@/components/ui/button';
 import {
@@ -51,7 +52,7 @@ export function CustomRolesTable({ workspace, roles, canManage }: CustomRolesTab
             <TableHead>Role</TableHead>
             <TableHead className="text-right">Members</TableHead>
             <TableHead className="hidden text-right sm:table-cell">Permissions</TableHead>
-            {canManage && <TableHead className="w-40" />}
+            {canManage && <ActionsTableHead className="w-40" />}
           </TableRow>
         </TableHeader>
         <TableBody>
