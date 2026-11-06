@@ -12,6 +12,7 @@ import {
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { Pagination } from '@/hooks/usePagination';
 import type { useChannelProducts } from '../hooks/useChannelProducts';
+import type { ListingStore } from '../listings.types';
 import { ChannelProductRow } from './ChannelProductRow';
 
 const SKELETON_ROWS = 5;
@@ -19,6 +20,10 @@ const SKELETON_ROWS = 5;
 interface ChannelProductsTableProps {
   products: ReturnType<typeof useChannelProducts>;
   pagination: Pagination;
+  store: ListingStore;
+  canEdit: boolean;
+  /** Opens the product's listing editor over the list. */
+  onOpenListing: (productId: string) => void;
   onRemove?: (productId: string) => Promise<unknown>;
   onAddBack?: (productId: string) => void;
 }
@@ -43,6 +48,9 @@ function NoProducts() {
 export function ChannelProductsTable({
   products,
   pagination,
+  store,
+  canEdit,
+  onOpenListing,
   onRemove,
   onAddBack,
 }: ChannelProductsTableProps) {
@@ -64,7 +72,7 @@ export function ChannelProductsTable({
           <TableHeader>
             <TableRow>
               <TableHead>Product</TableHead>
-              <TableHead className="w-48">In this store</TableHead>
+              <TableHead className="w-48 sm:w-64">In this store</TableHead>
               <TableHead className="hidden w-36 sm:table-cell">Last synced</TableHead>
               <TableHead className="w-28">
                 <span className="sr-only">Actions</span>
@@ -76,6 +84,9 @@ export function ChannelProductsTable({
               <ChannelProductRow
                 key={row.product.id}
                 row={row}
+                store={store}
+                canEdit={canEdit}
+                onOpenListing={onOpenListing}
                 onRemove={onRemove}
                 onAddBack={onAddBack}
               />

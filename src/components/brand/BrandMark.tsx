@@ -1,4 +1,4 @@
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 
 /** Ink follows the text colour, so the mark works on light, dark and brand backgrounds. */
 const MARK_INK = 'currentColor';

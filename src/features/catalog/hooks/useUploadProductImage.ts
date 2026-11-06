@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { PRODUCT_IMAGES_ENDPOINT, UPLOAD_FILE_FIELD } from '../catalog.constants';
 
@@ -14,13 +14,14 @@ export function useUploadProductImage(workspaceId: string) {
   return useMutation<string, Error, File>({
     meta: { inlineError: true },
     mutationFn: async (file) => {
-      const { data, error } = await fetchClient.POST(PRODUCT_IMAGES_ENDPOINT, {
-        params: { path: { workspaceId } },
-        // The generated type describes the form; the browser sends it as multipart.
-        body: { file: file.name },
-        bodySerializer: () => toUploadForm(file),
-      });
-      if (error) throw ApiRequestError.from(error);
+      const data = await unwrap(
+        fetchClient.POST(PRODUCT_IMAGES_ENDPOINT, {
+          params: { path: { workspaceId } },
+          // The generated type describes the form; the browser sends it as multipart.
+          body: { file: file.name },
+          bodySerializer: () => toUploadForm(file),
+        }),
+      );
       return data.url;
     },
   });

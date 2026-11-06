@@ -1,11 +1,8 @@
-import { zodResolver } from '@hookform/resolvers/zod';
-import { useForm } from 'react-hook-form';
+import { useSaveableForm } from '@/hooks/useSaveableForm';
 import type { ChannelConnection, EbayListingDefaults } from '../channels.types';
 import {
   EBAY_POLICY_FIELDS,
   ebayDefaultsFormSchema,
-  type EbayDefaultsFormOutput,
-  type EbayDefaultsFormValues,
   toEbayDefaultsBody,
   toEbayDefaultsForm,
   toEbayPolicyFormValues,
@@ -22,14 +19,12 @@ interface ConnectionRef {
  * default policies (unsaved condition or address edits are kept).
  */
 export function useEbayDefaultsForm(ref: ConnectionRef, defaults: EbayListingDefaults) {
-  const form = useForm<EbayDefaultsFormValues, unknown, EbayDefaultsFormOutput>({
-    resolver: zodResolver(ebayDefaultsFormSchema),
-    defaultValues: toEbayDefaultsForm(defaults),
-  });
   const save = useSaveEbayDefaults(ref);
-  const submit = form.handleSubmit(async (values) => {
-    const saved = await save.mutateAsync(toEbayDefaultsBody(values));
-    if (saved.ebay) form.reset(toEbayDefaultsForm(saved.ebay.listingDefaults));
+  const { form, submit } = useSaveableForm({
+    schema: ebayDefaultsFormSchema,
+    defaults: toEbayDefaultsForm(defaults),
+    save: (values) => save.mutateAsync(toEbayDefaultsBody(values)),
+    toForm: (saved) => (saved.ebay ? toEbayDefaultsForm(saved.ebay.listingDefaults) : null),
   });
   const choosePolicies = (connection: ChannelConnection): void => {
     if (!connection.ebay) return;

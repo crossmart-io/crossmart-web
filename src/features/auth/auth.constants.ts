@@ -48,3 +48,6 @@ export const LEGAL_LINKS = {
   terms: 'https://crossmart.io/terms',
   privacy: 'https://crossmart.io/privacy',
 } as const;
+
+/** Shown when the session could not be checked, such as while offline or the API is down. */
+export const SESSION_UNAVAILABLE_TITLE = 'Crossmart could not check your sign-in';

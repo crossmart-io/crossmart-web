@@ -1,3 +1,4 @@
+import { PageSection } from '@/config/routes';
 import { Controller, useFormContext } from 'react-hook-form';
 import { ProductStatus } from '@/api/schema';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
@@ -9,6 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { isEnumValue } from '@/lib/enum';
 import { PRODUCT_STATUS_LABELS } from '../../product-status';
 import type { ProductFormValues } from '../product-form.schema';
 import { EditorCard } from './EditorCard';
@@ -21,15 +23,11 @@ const STATUS_HINTS: Record<ProductStatus, string> = {
   [ProductStatus.ARCHIVED]: 'Kept for your records and removed from your stores.',
 };
 
-function isProductStatus(value: string): value is ProductStatus {
-  return Object.values<string>(ProductStatus).includes(value);
-}
-
 export function StatusCard() {
   const { control } = useFormContext<ProductFormValues>();
 
   return (
-    <EditorCard title="Status">
+    <EditorCard title="Status" id={PageSection.ProductStatus}>
       <Controller
         control={control}
         name="status"
@@ -40,7 +38,7 @@ export function StatusCard() {
             </FieldLabel>
             <Select
               value={field.value}
-              onValueChange={(value) => isProductStatus(value) && field.onChange(value)}
+              onValueChange={(value) => isEnumValue(ProductStatus, value) && field.onChange(value)}
             >
               <SelectTrigger id={STATUS_FIELD_ID} className="w-full">
                 <SelectValue />

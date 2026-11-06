@@ -1,16 +1,24 @@
 import { render, screen } from '@testing-library/react';
-import { ChannelType, ListingSource, ListingStatus } from '@/api/schema';
+import { ChannelType, ListingDisplayState, ListingSource, ListingStatus } from '@/api/schema';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { ProductStore } from '../listings.types';
 import { ProductStoreIcons } from './ProductStoreIcons';
 
-function store(index: number, status = ListingStatus.ACTIVE): ProductStore {
+function store(
+  index: number,
+  displayState = ListingDisplayState.published,
+  displayReason: string | null = null,
+): ProductStore {
   return {
     connectionId: `c-${index}`,
     channel: ChannelType.shopify,
     storeName: `Store ${index}`,
-    status,
+    // The listing status is left as it may be, to show the badge reads the server's state.
+    status: ListingStatus.PENDING,
     source: ListingSource.MANUAL,
+    displayState,
+    displayReason,
+    displayRequirement: null,
   };
 }
 
@@ -23,11 +31,39 @@ function renderIcons(stores: ProductStore[]) {
 }
 
 describe('ProductStoreIcons', () => {
-  it('names each store and its status', () => {
-    renderIcons([store(1), store(2, ListingStatus.ERROR)]);
+  it('names each store and the state the server gives it there', () => {
+    renderIcons([store(1), store(2, ListingDisplayState.failed)]);
 
-    expect(screen.getByRole('button', { name: 'Store 1 · Active' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Store 2 · Error' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Store 1 · Published' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Store 2 · Failed' })).toBeInTheDocument();
+  });
+
+  it('tells a pending listing that needs details from one being published, with the reason', () => {
+    renderIcons([
+      store(1, ListingDisplayState.needs_details, 'Choose a shipping policy'),
+      store(2, ListingDisplayState.publishing),
+    ]);
+
+    expect(
+      screen.getByRole('button', { name: 'Store 1 · Needs details: Choose a shipping policy' }),
+    ).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Store 2 · Publishing' })).toBeInTheDocument();
+  });
+
+  it('says in words when a store refused the product', () => {
+    renderIcons([
+      store(1),
+      store(2, ListingDisplayState.failed),
+      store(3, ListingDisplayState.failed),
+    ]);
+
+    expect(screen.getByText('Failed in 2')).toBeInTheDocument();
+  });
+
+  it('adds no failure text when every store took the product', () => {
+    renderIcons([store(1), store(2, ListingDisplayState.publishing)]);
+
+    expect(screen.queryByText(/Failed/)).not.toBeInTheDocument();
   });
 
   it('shows four icons and counts the rest', () => {

@@ -1,6 +1,6 @@
 import { ImagePlus } from 'lucide-react';
 import { type DragEvent, useRef, useState } from 'react';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { IMAGE_FILE_ACCEPT, MAX_IMAGE_MEGABYTES } from '../../catalog.constants';
 
 interface ImageDropzoneProps {

@@ -10,6 +10,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { ALL_STATUSES, CATALOG_GAP_COPY, ProductFilters, toStatusQuery } from '@/features/catalog';
+import { parseEnum } from '@/lib/enum';
 import type { SelectionDraft } from '../selection-draft';
 
 const ANY_GAP = 'any';
@@ -53,9 +54,7 @@ export function SelectionFilters({ draft, onChange, disabled }: SelectionFilters
           <FieldLabel htmlFor="selection-gap">Missing</FieldLabel>
           <Select
             value={draft.gap ?? ANY_GAP}
-            onValueChange={(value) =>
-              onChange({ ...draft, gap: value === ANY_GAP ? undefined : (value as CatalogGap) })
-            }
+            onValueChange={(value) => onChange({ ...draft, gap: parseEnum(CatalogGap, value) })}
           >
             <SelectTrigger id="selection-gap" className="w-full">
               <SelectValue />

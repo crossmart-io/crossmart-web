@@ -36,6 +36,17 @@ export const EDITOR_FEEDBACK = {
   unsaved: 'Unsaved changes',
   optionRemoved: 'Option removed. Its variants were merged.',
   undo: 'Undo',
+  readOnlyTitle: 'View only',
+  readOnly:
+    'Your role can view products but not change them. Ask a workspace owner or admin for access.',
+} as const;
+
+/** The channels card of a product that is not saved yet. */
+export const NEW_PRODUCT_CHANNELS_COPY = {
+  saveFirst: 'Save the product first, then choose which stores to list it in.',
+  noStores: 'Not listed on any channel yet.',
+  connect: 'Connect a channel',
+  connectReason: 'to publish it with content written for each marketplace.',
 } as const;
 
 /** Mirrors the API's limits, so the form can say so before a round trip. */

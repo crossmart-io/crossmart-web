@@ -5,7 +5,7 @@ import { TablePagination } from '@/components/lists/TablePagination';
 import { useState } from 'react';
 import type { InventoryMovementReason } from '@/api/schema';
 import { FilterSelect } from '@/components/lists/FilterSelect';
-import { toFilterOptions } from '@/components/lists/filter-options';
+import { toEnumOptions } from '@/lib/enum';
 import { SortSelect } from '@/components/lists/SortSelect';
 import { TIME_SORTS, toSortOption } from '@/components/lists/sort-options';
 import { useLocalPagination } from '@/hooks/usePagination';
@@ -32,17 +32,24 @@ import { MovementList } from './MovementList';
 import { StockSummary } from './StockSummary';
 
 const HISTORY_SKELETON_ROWS = 4;
-const REASON_OPTIONS = toFilterOptions<InventoryMovementReason>(MOVEMENT_REASON_LABELS);
+const REASON_OPTIONS = toEnumOptions<InventoryMovementReason>(MOVEMENT_REASON_LABELS);
 
 interface StockHistorySheetProps {
   workspaceId: string;
   /** The row whose history is open; null when the sheet is closed. */
   item: InventoryItem | null;
   onClose: () => void;
+  /** Whether the member may adjust stock; without it the history is read-only. */
+  canAdjust: boolean;
 }
 
 /** Every change to one variant’s stock, filtered by reason, newest or oldest first. */
-export function StockHistorySheet({ workspaceId, item, onClose }: StockHistorySheetProps) {
+export function StockHistorySheet({
+  workspaceId,
+  item,
+  onClose,
+  canAdjust,
+}: StockHistorySheetProps) {
   const details = item && [variantLabel(item), item.sku].filter(Boolean).join(' · ');
 
   return (
@@ -55,7 +62,7 @@ export function StockHistorySheet({ workspaceId, item, onClose }: StockHistorySh
         {item && (
           <div className="flex min-h-0 flex-1 flex-col gap-4 overflow-y-auto px-4 pb-4">
             <StockSummary item={item} />
-            {item.tracked && (
+            {item.tracked && canAdjust && (
               <div className="flex justify-end">
                 <AdjustStockPopover workspaceId={workspaceId} item={item} />
               </div>

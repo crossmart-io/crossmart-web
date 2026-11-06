@@ -34,7 +34,10 @@ const OWNER_MEMBER: WorkspaceMember = {
   joinedAt: '2026-11-01T00:00:00Z',
 };
 
-function renderActions(role: WorkspaceRole, { isYou = false, manageable = false } = {}) {
+function renderActions(
+  role: WorkspaceRole,
+  { isYou = false, manageable = false, canLeave = true } = {},
+) {
   render(
     <MemoryRouter>
       <MemberActions
@@ -42,6 +45,7 @@ function renderActions(role: WorkspaceRole, { isYou = false, manageable = false 
         member={OWNER_MEMBER}
         isYou={isYou}
         manageable={manageable}
+        canLeave={canLeave}
       />
     </MemoryRouter>,
   );
@@ -61,5 +65,10 @@ describe('MemberActions', () => {
   it('offers to leave on your own row', () => {
     renderActions(WorkspaceRole.VIEWER, { isYou: true });
     expect(screen.getByRole('button', { name: 'Leave' })).toBeInTheDocument();
+  });
+
+  it('gives the only owner no way to leave', () => {
+    renderActions(WorkspaceRole.OWNER, { isYou: true, canLeave: false });
+    expect(screen.queryByRole('button', { name: 'Leave' })).not.toBeInTheDocument();
   });
 });

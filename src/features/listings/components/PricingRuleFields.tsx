@@ -1,5 +1,5 @@
 import { Controller, useFormContext, useWatch } from 'react-hook-form';
-import type { CompareAtMode, PriceRounding } from '@/api/schema';
+import { EnumSelectField } from '@/components/forms/EnumSelectField';
 import { MoneyInput } from '@/components/forms/MoneyInput';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import {
@@ -8,15 +8,9 @@ import {
   InputGroupInput,
   InputGroupText,
 } from '@/components/ui/input-group';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { findOptionValue } from '@/lib/enum';
 import {
   COMPARE_AT_OPTIONS,
   RATE_MODE_OPTIONS,
@@ -92,7 +86,10 @@ export function RoundingField() {
             type="single"
             variant="outline"
             value={field.value}
-            onValueChange={(value) => value && field.onChange(value as PriceRounding)}
+            onValueChange={(next) => {
+              const value = findOptionValue(ROUNDING_OPTIONS, next);
+              if (value) field.onChange(value);
+            }}
             aria-labelledby="rounding-label"
             className="flex-wrap"
           >
@@ -142,26 +139,11 @@ export function CompareAtField() {
   return (
     <Field className="sm:max-w-80">
       <FieldLabel htmlFor="compareAt">Compare-at prices</FieldLabel>
-      <Controller
+      <EnumSelectField
         control={control}
         name="compareAt"
-        render={({ field }) => (
-          <Select
-            value={field.value}
-            onValueChange={(value) => field.onChange(value as CompareAtMode)}
-          >
-            <SelectTrigger id="compareAt" className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {COMPARE_AT_OPTIONS.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        id="compareAt"
+        options={COMPARE_AT_OPTIONS}
       />
     </Field>
   );
@@ -194,7 +176,10 @@ export function ConversionField({ from, to }: ConversionFieldProps) {
             variant="outline"
             aria-labelledby="rate-mode-label"
             value={field.value}
-            onValueChange={(value) => value && field.onChange(value)}
+            onValueChange={(next) => {
+              const value = findOptionValue(RATE_MODE_OPTIONS, next);
+              if (value) field.onChange(value);
+            }}
           >
             {RATE_MODE_OPTIONS.map((option) => (
               <ToggleGroupItem key={option.value} value={option.value}>

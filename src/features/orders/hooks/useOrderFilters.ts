@@ -1,5 +1,5 @@
 import { useSearchParams } from 'react-router';
-import type { OrderStatus } from '@/api/schema';
+import { OrderStatus } from '@/api/schema';
 import {
   type ByTime,
   type SortOption,
@@ -9,8 +9,9 @@ import {
 import { ROUTE_QUERY } from '@/config/routes';
 import { useDebouncedSearchParam } from '@/hooks/useDebouncedSearchParam';
 import { useSearchParamsUpdater } from '@/hooks/useSearchParamsUpdater';
+import { parseEnum } from '@/lib/enum';
 import { setOrDeleteParam } from '@/lib/search-params';
-import { ORDER_SEARCH_DEBOUNCE_MS, ORDER_STATUS_LABELS } from '../orders.constants';
+import { ORDER_SEARCH_DEBOUNCE_MS } from '../orders.constants';
 
 export interface OrderFilters {
   search: string;
@@ -26,16 +27,12 @@ export interface OrderFilters {
   clearAll: () => void;
 }
 
-function toStatus(value: string | null): OrderStatus | undefined {
-  return (Object.keys(ORDER_STATUS_LABELS) as OrderStatus[]).find((status) => status === value);
-}
-
 /** The orders table's filters, in the URL so a filtered list can be linked to. */
 export function useOrderFilters(): OrderFilters {
   const [searchParams] = useSearchParams();
   const updateParams = useSearchParamsUpdater();
   const search = useDebouncedSearchParam(ROUTE_QUERY.search, ORDER_SEARCH_DEBOUNCE_MS);
-  const status = toStatus(searchParams.get(ROUTE_QUERY.status));
+  const status = parseEnum(OrderStatus, searchParams.get(ROUTE_QUERY.status));
   const storeId = searchParams.get(ROUTE_QUERY.storeId) ?? undefined;
   const sort = toSortOption(TIME_SORTS, searchParams.get(ROUTE_QUERY.sort));
   const set = (key: string, value: string | undefined) =>

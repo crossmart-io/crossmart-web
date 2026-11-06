@@ -2,8 +2,8 @@ import { useSyncExternalStore } from 'react';
 
 /** Tailwind's `lg` breakpoint, where the product editor gets its side column. */
 export const DESKTOP_MEDIA_QUERY = '(min-width: 64rem)';
-/** Phones and tablets, where hover-only controls would be unreachable. */
-export const COARSE_POINTER_QUERY = '(pointer: coarse)';
+/** Below Tailwind's `md` breakpoint, where the sidebar becomes a sheet. */
+const MOBILE_MEDIA_QUERY = '(max-width: 767px)';
 
 export function useMediaQuery(query: string): boolean {
   return useSyncExternalStore(
@@ -14,4 +14,9 @@ export function useMediaQuery(query: string): boolean {
     },
     () => window.matchMedia(query).matches,
   );
+}
+
+/** Phone-sized screens, where the sidebar opens as a sheet. */
+export function useIsMobile(): boolean {
+  return useMediaQuery(MOBILE_MEDIA_QUERY);
 }

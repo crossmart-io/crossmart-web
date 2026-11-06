@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { ListSkeleton } from '@/components/lists/ListSkeleton';
 import { TablePagination } from '@/components/lists/TablePagination';
 import { useUrlPagination } from '@/hooks/usePagination';
@@ -15,16 +16,18 @@ import {
   useInventory,
   useInventoryListFilters,
 } from '@/features/inventory';
-import { type Workspace, useCurrentWorkspace } from '@/features/workspaces';
+import { WorkspacePermission } from '@/api/schema';
+import { hasPermission, type Workspace } from '@/features/workspaces';
 
 export function InventoryPage() {
-  const { workspace } = useCurrentWorkspace();
   const filters = useInventoryListFilters();
 
   return (
     <Page name="Inventory" description="Stock of every variant, and every change to it.">
       <InventoryFilters filters={filters} />
-      {workspace && <InventoryResults workspace={workspace} filters={filters} />}
+      <WorkspaceGate>
+        {(workspace) => <InventoryResults workspace={workspace} filters={filters} />}
+      </WorkspaceGate>
     </Page>
   );
 }
@@ -35,6 +38,7 @@ interface InventoryResultsProps {
 }
 
 function InventoryResults({ workspace, filters }: InventoryResultsProps) {
+  const canAdjust = hasPermission(workspace, WorkspacePermission.inventory_edit);
   const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null);
   const pagination = useUrlPagination();
   const inventory = useInventory(
@@ -74,6 +78,7 @@ function InventoryResults({ workspace, filters }: InventoryResultsProps) {
         items={inventory.items}
         isRefreshing={inventory.isPlaceholderData}
         onOpenHistory={setHistoryItem}
+        canAdjust={canAdjust}
       />
       <TablePagination
         pagination={pagination}
@@ -86,6 +91,7 @@ function InventoryResults({ workspace, filters }: InventoryResultsProps) {
         workspaceId={workspace.id}
         item={openItem}
         onClose={() => setHistoryItem(null)}
+        canAdjust={canAdjust}
       />
     </>
   );

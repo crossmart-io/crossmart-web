@@ -1,4 +1,4 @@
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import type { CSSProperties } from 'react';
 import { type ChannelLogo as ChannelLogoInfo, ChannelLogoSize } from '../channels.constants';
 

@@ -2,7 +2,7 @@ import { type DraggableAttributes, type DraggableSyntheticListeners } from '@dnd
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { GripVertical, Star, Trash2 } from 'lucide-react';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { AltTextPopover } from './AltTextPopover';
 

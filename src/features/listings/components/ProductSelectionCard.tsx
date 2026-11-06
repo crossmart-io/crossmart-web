@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
+import { parseEnum } from '@/lib/enum';
 import { pluralize } from '@/lib/format';
 import { useSelectionEditor } from '../hooks/useSelectionEditor';
 import { SELECTION_MODE_LABELS, SelectionMode } from '../listings.constants';
@@ -30,7 +31,10 @@ function ModePicker({ draft, onChange, disabled }: DraftProps) {
       variant="outline"
       value={draft.mode}
       disabled={disabled}
-      onValueChange={(mode) => mode && onChange({ ...draft, mode: mode as SelectionMode })}
+      onValueChange={(next) => {
+        const mode = parseEnum(SelectionMode, next);
+        if (mode) onChange({ ...draft, mode });
+      }}
       aria-label="What the store adds automatically"
       className="flex-wrap"
     >
@@ -108,7 +112,7 @@ export function ProductSelectionCard({
           error={editor.save.error}
           isSaving={editor.save.isPending}
           disabled={!editor.isDirty}
-          onSave={() => void editor.submit()}
+          onSave={editor.submit}
         />
       )}
     </Card>

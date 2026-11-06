@@ -1,7 +1,8 @@
-import { CircleAlert } from 'lucide-react';
 import type { ReactNode } from 'react';
 import { FormProvider } from 'react-hook-form';
-import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Eye } from 'lucide-react';
+import { FormError } from '@/components/feedback/FormError';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import type { Workspace } from '@/features/workspaces';
 import { EDITOR_FEEDBACK } from '../../catalog.constants';
 import type { Product } from '../../catalog.types';
@@ -11,7 +12,7 @@ import { ProductEditorLayout } from './ProductEditorLayout';
 import { SaveBar } from './SaveBar';
 import { UnsavedChangesGuard } from './UnsavedChangesGuard';
 
-export const PRODUCT_FORM_ID = 'product-form';
+const PRODUCT_FORM_ID = 'product-form';
 
 interface ProductEditorProps {
   workspace: Workspace;
@@ -21,11 +22,30 @@ interface ProductEditorProps {
   aside?: ReactNode;
   /** Where the product is listed, in place of the placeholder card. */
   channels?: ReactNode;
+  /** For roles that may not edit products: fields disabled, no save or delete. */
+  readOnly?: boolean;
+}
+
+/** Says why the fields cannot be changed, as the Pricing tab does for its own read-only form. */
+function ReadOnlyNotice() {
+  return (
+    <Alert className="mb-6">
+      <Eye />
+      <AlertTitle>{EDITOR_FEEDBACK.readOnlyTitle}</AlertTitle>
+      <AlertDescription>{EDITOR_FEEDBACK.readOnly}</AlertDescription>
+    </Alert>
+  );
 }
 
 /** Create and edit a product, laid out like the store admins sellers already know. */
-export function ProductEditor({ workspace, product, aside, channels }: ProductEditorProps) {
-  const editor = useProductEditorForm(workspace.id, product);
+export function ProductEditor({
+  workspace,
+  product,
+  aside,
+  channels,
+  readOnly = false,
+}: ProductEditorProps) {
+  const editor = useProductEditorForm(workspace.id, product, readOnly);
   const { isDirty, isSubmitting } = editor.form.formState;
 
   return (
@@ -42,12 +62,8 @@ export function ProductEditor({ workspace, product, aside, channels }: ProductEd
             />
           )}
           <UnsavedChangesGuard when={isDirty && !isSubmitting} />
-          {editor.saveError && (
-            <Alert variant="destructive" className="mb-6">
-              <CircleAlert />
-              <AlertDescription>{editor.saveError.message}</AlertDescription>
-            </Alert>
-          )}
+          {readOnly && <ReadOnlyNotice />}
+          <FormError error={editor.saveError} className="mb-6" />
           <ProductEditorLayout
             workspaceId={workspace.id}
             productId={product?.id}
@@ -56,9 +72,10 @@ export function ProductEditor({ workspace, product, aside, channels }: ProductEd
             onPendingUploadsChange={editor.setPendingUploads}
             aside={aside}
             channels={channels}
+            readOnly={readOnly}
           />
         </form>
-        {product && (
+        {product && !readOnly && (
           <div className="mt-6">
             <DeleteProductSection
               workspaceId={workspace.id}

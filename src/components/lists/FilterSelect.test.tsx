@@ -1,8 +1,8 @@
 import { render, screen } from '@testing-library/react';
 import { FilterSelect } from './FilterSelect';
-import { toFilterOptions } from './filter-options';
+import { toEnumOptions } from '@/lib/enum';
 
-const OPTIONS = toFilterOptions({ failed: 'Failed', completed: 'Completed' });
+const OPTIONS = toEnumOptions({ failed: 'Failed', completed: 'Completed' });
 
 describe('FilterSelect', () => {
   it('builds its options from an enum’s labels, in order', () => {

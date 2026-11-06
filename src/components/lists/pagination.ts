@@ -21,7 +21,7 @@ const ONE_PAGE_APART = 2;
 
 /** Where the page links skip pages ("1 … 4 5 6 … 20"). */
 export const PAGE_GAP = 'gap';
-export type PageLink = number | typeof PAGE_GAP;
+type PageLink = number | typeof PAGE_GAP;
 
 export function toPageSize(value: string | null): PageSize {
   return PAGE_SIZE_OPTIONS.find((size) => String(size) === value) ?? DEFAULT_PAGE_SIZE;

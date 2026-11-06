@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { useCursorPages } from '@/hooks/useCursorPages';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
@@ -30,21 +30,20 @@ export function useChannelListings(ref: ConnectionRef) {
   const query = useCursorPages<ChannelListing>({
     endpoint: CHANNEL_LISTINGS_ENDPOINT,
     params: ref,
-    fetchPage: async (cursor, signal) => {
-      const { data, error } = await fetchClient.GET(CHANNEL_LISTINGS_ENDPOINT, {
-        params: { path: ref, query: { cursor, limit: CHANNEL_LISTINGS_PAGE_SIZE } },
-        signal,
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    fetchPage: (cursor, signal) =>
+      unwrap(
+        fetchClient.GET(CHANNEL_LISTINGS_ENDPOINT, {
+          params: { path: ref, query: { cursor, limit: CHANNEL_LISTINGS_PAGE_SIZE } },
+          signal,
+        }),
+      ),
     staleTime: 0,
   });
   return { ...query, listings: query.items };
 }
 
 /** What the merchant reads once a sync is queued. */
-export function describeSyncRequest({ queued, delisting }: SyncRequestResult): string {
+function describeSyncRequest({ queued, delisting }: SyncRequestResult): string {
   const parts = [`${pluralize(queued, 'product')} queued to publish`];
   if (delisting > 0) parts.push(`${pluralize(delisting, 'listing')} to delist`);
   return parts.join(', ');
@@ -54,11 +53,7 @@ export function describeSyncRequest({ queued, delisting }: SyncRequestResult): s
 export function useRequestSync(ref: ConnectionRef) {
   const refresh = useInvalidateEndpoints(SYNC_ENDPOINTS);
   return useMutation<SyncRequestResult, Error>({
-    mutationFn: async () => {
-      const { data, error } = await fetchClient.POST(SYNC_ENDPOINT, { params: { path: ref } });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: () => unwrap(fetchClient.POST(SYNC_ENDPOINT, { params: { path: ref } })),
     onSuccess: async (result) => {
       toast.success(describeSyncRequest(result));
       await refresh();

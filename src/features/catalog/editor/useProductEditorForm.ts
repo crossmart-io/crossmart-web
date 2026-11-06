@@ -18,17 +18,23 @@ function useSaveProduct(workspaceId: string, product: Product | undefined) {
 }
 
 /** The product form, how it saves, and what the save bar needs to know. */
-export function useProductEditorForm(workspaceId: string, product: Product | undefined) {
+export function useProductEditorForm(
+  workspaceId: string,
+  product: Product | undefined,
+  readOnly = false,
+) {
   const navigate = useNavigate();
   const save = useSaveProduct(workspaceId, product);
   const form = useForm<ProductFormValues>({
     resolver: zodResolver(productFormSchema),
     defaultValues: product ? toProductForm(product) : emptyProductForm(),
+    // Disables every registered field, including those drawn by controllers.
+    disabled: readOnly,
   });
   const options = useWatch({ control: form.control, name: 'options' });
   const [pendingUploads, setPendingUploads] = useState(0);
   const { isDirty, isSubmitting } = form.formState;
-  const hasChanges = isDirty || !product;
+  const hasChanges = !readOnly && (isDirty || !product);
 
   async function onSubmit(values: ProductFormValues) {
     try {

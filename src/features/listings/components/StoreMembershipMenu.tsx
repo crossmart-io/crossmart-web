@@ -33,7 +33,7 @@ export function StoreMembershipMenu({
   if (stores.length === 0) return null;
   const busy = disabled || add.isPending || remove.isPending;
   const change = (mutation: typeof add, connectionId: string) =>
-    void mutation.mutateAsync({ ref: { workspaceId, connectionId }, productIds });
+    mutation.mutate({ ref: { workspaceId, connectionId }, productIds });
 
   return (
     <DropdownMenu>

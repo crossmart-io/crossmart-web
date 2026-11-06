@@ -12,14 +12,14 @@ const REF = { workspaceId: 'ws-1', productId: 'p-1', connectionId: 'c-1' };
 const MUGS = { id: '20625', name: 'Home & Garden > Kitchen > Mugs' };
 
 function setup(suggestions?: { id: string; name: string }[]) {
-  const choose = vi.fn<(category: unknown) => Promise<unknown>>().mockResolvedValue({});
+  const choose = vi.fn<(category: unknown) => void>();
   vi.mocked(useCategorySuggestions).mockReturnValue({
     data: suggestions,
     isFetching: false,
     error: null,
   } as never);
   vi.mocked(useChooseListingCategory).mockReturnValue({
-    mutateAsync: choose,
+    mutate: choose,
     isPending: false,
     error: null,
   } as never);
@@ -58,8 +58,8 @@ describe('ChannelCategoryField', () => {
     await userEvent.click(screen.getByRole('button', { name: MUGS.name }));
     await userEvent.click(screen.getByRole('button', { name: 'Let eBay suggest' }));
 
-    expect(choose).toHaveBeenNthCalledWith(1, MUGS);
-    expect(choose).toHaveBeenNthCalledWith(2, null);
+    expect(choose).toHaveBeenNthCalledWith(1, MUGS, expect.anything());
+    expect(choose).toHaveBeenNthCalledWith(2, null, expect.anything());
   });
 
   it('says when eBay suggests nothing', () => {

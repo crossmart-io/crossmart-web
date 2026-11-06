@@ -18,7 +18,7 @@ export function toSortOption<Field extends string>(
 }
 
 /** Lists that sort only by when things happened; the field is each list's own timestamp. */
-export const BY_TIME = 'time';
+const BY_TIME = 'time';
 export type ByTime = typeof BY_TIME;
 
 export const TIME_SORTS: readonly [SortOption<ByTime>, ...SortOption<ByTime>[]] = [

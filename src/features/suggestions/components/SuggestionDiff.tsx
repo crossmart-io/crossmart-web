@@ -1,5 +1,5 @@
 import { useMemo } from 'react';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import type { SuggestionKind } from '@/api/schema';
 import { htmlToText } from '@/lib/html-text';
 import { DiffPart, type DiffSegment, diffWords } from '@/lib/word-diff';

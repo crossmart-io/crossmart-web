@@ -1,6 +1,6 @@
 import { useMutation } from '@tanstack/react-query';
 import { toast } from 'sonner';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { BULK_ACTION_DONE } from '../bulk-actions';
 import { PRODUCT_BULK_ACTIONS_ENDPOINT } from '../catalog.constants';
@@ -13,11 +13,12 @@ export function useBulkProductAction(workspaceId: string) {
 
   return useMutation<number, Error, BulkProductActionBody>({
     mutationFn: async (body) => {
-      const { data, error } = await fetchClient.POST(PRODUCT_BULK_ACTIONS_ENDPOINT, {
-        params: { path: { workspaceId } },
-        body,
-      });
-      if (error) throw ApiRequestError.from(error);
+      const data = await unwrap(
+        fetchClient.POST(PRODUCT_BULK_ACTIONS_ENDPOINT, {
+          params: { path: { workspaceId } },
+          body,
+        }),
+      );
       return data.affected;
     },
     onSuccess: async (affected, body) => {

@@ -4,7 +4,7 @@ import { ROUTES } from '@/config/routes';
 import { AuthRequestError } from '../auth-error';
 import { toAppUrl } from '../auth.constants';
 
-export interface SignUpDetails {
+interface SignUpDetails {
   name: string;
   email: string;
   password: string;

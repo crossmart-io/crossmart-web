@@ -1,6 +1,5 @@
-import { FormProvider } from 'react-hook-form';
-import { CardSaveFooter } from '@/components/forms/CardSaveFooter';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { PageSection } from '@/config/routes';
+import { SettingsFormCard } from '@/components/forms/SettingsFormCard';
 import { Separator } from '@/components/ui/separator';
 import { EBAY_DEFAULTS_COPY } from '../channels.constants';
 import type { EbaySettings } from '../channels.types';
@@ -28,47 +27,35 @@ export function EbayListingDefaultsCard({
     ebay.listingDefaults,
   );
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <h2>{EBAY_DEFAULTS_COPY.title}</h2>
-        </CardTitle>
-        <CardDescription>
-          {EBAY_DEFAULTS_COPY.description}{' '}
-          {ebay.readyToList ? EBAY_DEFAULTS_COPY.ready : EBAY_DEFAULTS_COPY.notReady}
-        </CardDescription>
-      </CardHeader>
-      <FormProvider {...form}>
-        <form onSubmit={(event) => void submit(event)} noValidate>
-          <CardContent className="flex flex-col gap-6">
-            <fieldset disabled={!canManage} className="flex min-w-0 flex-col gap-5">
-              <EbayPolicyFields policies={ebay.policies} />
-              <EbayConditionField />
-              <EbayShipFromFields />
-            </fieldset>
-            {canManage && (
-              <>
-                <Separator />
-                <EbayPolicyActions
-                  workspaceId={workspaceId}
-                  connectionId={connectionId}
-                  businessPoliciesEnabled={ebay.businessPoliciesEnabled}
-                  missingPolicies={isMissingPolicies(ebay.policies)}
-                  onDefaultsCreated={choosePolicies}
-                />
-              </>
-            )}
-          </CardContent>
-          {canManage && (
-            <CardSaveFooter
-              label={EBAY_DEFAULTS_COPY.save}
-              error={saveError}
-              isSaving={form.formState.isSubmitting}
-              disabled={!form.formState.isDirty}
+    <SettingsFormCard
+      title={EBAY_DEFAULTS_COPY.title}
+      id={PageSection.StoreListingDefaults}
+      description={`${EBAY_DEFAULTS_COPY.description} ${
+        ebay.readyToList ? EBAY_DEFAULTS_COPY.ready : EBAY_DEFAULTS_COPY.notReady
+      }`}
+      form={form}
+      onSubmit={submit}
+      canManage={canManage}
+      saveLabel={EBAY_DEFAULTS_COPY.save}
+      saveError={saveError}
+      after={
+        canManage && (
+          <>
+            <Separator />
+            <EbayPolicyActions
+              workspaceId={workspaceId}
+              connectionId={connectionId}
+              businessPoliciesEnabled={ebay.businessPoliciesEnabled}
+              missingPolicies={isMissingPolicies(ebay.policies)}
+              onDefaultsCreated={choosePolicies}
             />
-          )}
-        </form>
-      </FormProvider>
-    </Card>
+          </>
+        )
+      }
+    >
+      <EbayPolicyFields policies={ebay.policies} />
+      <EbayConditionField />
+      <EbayShipFromFields />
+    </SettingsFormCard>
   );
 }

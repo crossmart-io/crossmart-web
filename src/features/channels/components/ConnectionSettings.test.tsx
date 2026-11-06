@@ -29,6 +29,26 @@ function renderSettings(connection: ChannelConnection, access: Access = {}) {
 }
 
 describe('ConnectionSettings', () => {
+  it('shows the store’s pricing near the top, before its automatic rule', () => {
+    render(
+      <QueryClientProvider client={new QueryClient()}>
+        <ConnectionSettings
+          workspaceId="ws-1"
+          connection={connectionFixture()}
+          canManage
+          canImportProducts
+          onDisconnected={() => undefined}
+          pricing={<section aria-label="Pricing" />}
+          automaticRule={<section aria-label="Automatic rule" />}
+        />
+      </QueryClientProvider>,
+    );
+
+    const pricing = screen.getByRole('region', { name: 'Pricing' });
+    const rule = screen.getByRole('region', { name: 'Automatic rule' });
+    expect(pricing.compareDocumentPosition(rule) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+  });
+
   it('shows the store, its stock location and the permissions it granted', () => {
     renderSettings(
       connectionFixture({

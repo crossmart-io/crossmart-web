@@ -1,10 +1,11 @@
+import { parseEnum } from '@/lib/enum';
 import { THEME_STORAGE_KEY, Theme } from './theme.constants';
 
 /** Storage can throw in private windows or when site data is blocked; the theme then follows the system. */
 export function readStoredTheme(): Theme {
   try {
     const stored = localStorage.getItem(THEME_STORAGE_KEY);
-    return Object.values(Theme).find((theme) => theme === stored) ?? Theme.System;
+    return parseEnum(Theme, stored) ?? Theme.System;
   } catch {
     return Theme.System;
   }

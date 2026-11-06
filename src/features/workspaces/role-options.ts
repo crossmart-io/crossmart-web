@@ -6,7 +6,7 @@ export type CustomRole = components['schemas']['CustomRoleDto'];
 type CustomRoleRef = components['schemas']['CustomRoleRefDto'];
 
 /** A role as a member, invitation or key holds it. */
-export interface HeldRole {
+interface HeldRole {
   role: WorkspaceRole;
   customRole: CustomRoleRef | null;
 }

@@ -4,7 +4,7 @@ import { setOrDeleteParam } from '@/lib/search-params';
 import { useDebouncedValue } from './useDebouncedValue';
 import { useSearchParamsUpdater } from './useSearchParamsUpdater';
 
-export interface DebouncedSearchParam {
+interface DebouncedSearchParam {
   /** What is in the search box right now. */
   value: string;
   setValue: (value: string) => void;

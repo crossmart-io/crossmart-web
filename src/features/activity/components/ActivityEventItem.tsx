@@ -2,10 +2,11 @@ import { ActivityActorType, ActivityOutcome } from '@/api/schema';
 import { Link } from 'react-router';
 import { Badge } from '@/components/ui/badge';
 import { RelativeTime } from '@/components/time/RelativeTime';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import type { ActivityEvent } from '../activity.types';
 import { toActorName, toAgentUserName } from '../activity-actor';
 import { toSubjectRoute } from '../activity-subject';
+import { splitSummary } from '../summary-parts';
 import { ActorAvatar } from './ActorAvatar';
 
 interface ActivityEventItemProps {
@@ -50,11 +51,18 @@ export function ActivityEventItem({
   );
 }
 
+/** The summary with each quoted name isolated, so right-to-left names keep their place. */
+function SummaryText({ summary }: { summary: string }) {
+  return splitSummary(summary).map((part, index) =>
+    part.isUserContent ? <bdi key={index}>{part.text}</bdi> : part.text,
+  );
+}
+
 function EventSummary({ event, route }: { event: ActivityEvent; route: string | undefined }) {
-  if (!route) return event.summary;
+  if (!route) return <SummaryText summary={event.summary} />;
   return (
     <Link to={route} className="underline-offset-4 hover:underline">
-      {event.summary}
+      <SummaryText summary={event.summary} />
     </Link>
   );
 }
@@ -65,19 +73,19 @@ function ActorName({ event }: { event: ActivityEvent }) {
     case ActivityActorType.API_KEY:
       return (
         <span>
-          {name} <span className="text-muted-foreground/80">(API key)</span>
+          <bdi>{name}</bdi> <span className="text-muted-foreground/80">(API key)</span>
         </span>
       );
     case ActivityActorType.AGENT:
       return (
         <span>
-          {name}{' '}
+          <bdi>{name}</bdi>{' '}
           <span className="text-muted-foreground/80">
-            (agent, for {toAgentUserName(event.actor)})
+            (agent, for <bdi>{toAgentUserName(event.actor)}</bdi>)
           </span>
         </span>
       );
     default:
-      return <span>{name}</span>;
+      return <bdi>{name}</bdi>;
   }
 }

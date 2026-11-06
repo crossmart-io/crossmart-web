@@ -1,4 +1,4 @@
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { Progress } from '@/components/ui/progress';
 import { FEATURE_LABELS } from '../plan.constants';
 import type { FeatureUsage } from '../plan.types';

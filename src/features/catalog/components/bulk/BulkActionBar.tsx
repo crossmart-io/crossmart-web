@@ -25,8 +25,8 @@ export function BulkActionBar({ workspaceId, selection, renderActions }: BulkAct
   const busy = bulkAction.isPending;
   const count = pluralize(productIds.length, 'product');
 
-  function run(body: Omit<Parameters<typeof bulkAction.mutateAsync>[0], 'productIds'>) {
-    return bulkAction.mutateAsync({ ...body, productIds });
+  function run(body: Omit<Parameters<typeof bulkAction.mutate>[0], 'productIds'>) {
+    bulkAction.mutate({ ...body, productIds });
   }
 
   return (
@@ -40,16 +40,16 @@ export function BulkActionBar({ workspaceId, selection, renderActions }: BulkAct
       </span>
       <BulkStatusMenu
         disabled={busy}
-        onSelect={(status) => void run({ action: BulkProductAction.set_status, status })}
+        onSelect={(status) => run({ action: BulkProductAction.set_status, status })}
       />
       <BulkTagsPopover
         disabled={busy}
-        onAdd={(tags) => void run({ action: BulkProductAction.add_tags, tags })}
-        onRemove={(tags) => void run({ action: BulkProductAction.remove_tags, tags })}
+        onAdd={(tags) => run({ action: BulkProductAction.add_tags, tags })}
+        onRemove={(tags) => run({ action: BulkProductAction.remove_tags, tags })}
       />
       <BulkPricePopover
         disabled={busy}
-        onApply={(percent) => void run({ action: BulkProductAction.adjust_prices, percent })}
+        onApply={(percent) => run({ action: BulkProductAction.adjust_prices, percent })}
       />
       {renderActions?.(productIds)}
       <ConfirmDialog
@@ -63,7 +63,7 @@ export function BulkActionBar({ workspaceId, selection, renderActions }: BulkAct
         description="Their variants, images and stock history are deleted too, and they are archived in every store that lists them. This cannot be undone."
         confirmLabel={`Delete ${count}`}
         onConfirm={async () => {
-          await run({ action: BulkProductAction.delete });
+          await bulkAction.mutateAsync({ action: BulkProductAction.delete, productIds });
           selection.clear();
         }}
       />

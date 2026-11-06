@@ -9,8 +9,8 @@ export const FEATURE_LABELS: Record<Feature, { label: string; description: strin
     description: 'Listings live on a channel, across all workspaces',
   },
   [Feature.channel_connections]: {
-    label: 'Connected channels',
-    description: 'Stores and marketplaces that are not disconnected',
+    label: 'Stores',
+    description: 'Connected stores and marketplaces, across all workspaces',
   },
   [Feature.workspaces]: { label: 'Workspaces', description: 'One per brand or client' },
   [Feature.members]: { label: 'Members', description: 'People in any workspace, counted once' },
@@ -43,6 +43,9 @@ export const PLAN_COPY = {
   billingSoon: 'Billing coming soon',
   notEnforced: 'Limits are not enforced yet: going past one is shown here but never blocks you.',
   enforced: 'Actions that would go past a limit are refused until the plan is upgraded.',
+  legacy: 'Legacy plan',
+  legacyNote:
+    'This plan is no longer offered. You keep it, with its limits, until you choose one of the current plans.',
   noAccess: 'Only owners and admins can see the plan and its usage.',
   loadError: 'The plan could not be loaded',
 } as const;

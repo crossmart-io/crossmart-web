@@ -27,7 +27,7 @@ export function SuggestionsBulkBar({ workspaceId, selection }: SuggestionsBulkBa
       <Button
         size="sm"
         disabled={busy}
-        onClick={() => void bulkApprove.mutateAsync(ids).then(selection.clear)}
+        onClick={() => bulkApprove.mutate(ids, { onSuccess: selection.clear })}
       >
         <Check data-icon="inline-start" />
         Approve {pluralize(ids.length, 'suggestion')}

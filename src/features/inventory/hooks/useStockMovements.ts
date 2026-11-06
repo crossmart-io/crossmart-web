@@ -1,4 +1,4 @@
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import { usePagedList } from '@/hooks/usePagedList';
 import type { Pagination } from '@/hooks/usePagination';
@@ -19,15 +19,15 @@ async function fetchMovementPage(
   page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
-  const { data, error } = await fetchClient.GET(INVENTORY_MOVEMENTS_ENDPOINT, {
-    params: {
-      path: { workspaceId, inventoryItemId: inventoryItemId ?? '' },
-      query: { ...filters, ...page },
-    },
-    signal,
-  });
-  if (error) throw ApiRequestError.from(error);
-  return data;
+  return unwrap(
+    fetchClient.GET(INVENTORY_MOVEMENTS_ENDPOINT, {
+      params: {
+        path: { workspaceId, inventoryItemId: inventoryItemId ?? '' },
+        query: { ...filters, ...page },
+      },
+      signal,
+    }),
+  );
 }
 
 /** The stock history of one variant, newest first. */

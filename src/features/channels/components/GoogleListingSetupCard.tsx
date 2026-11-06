@@ -1,18 +1,12 @@
+import { PageSection } from '@/config/routes';
 import { TriangleAlert } from 'lucide-react';
-import { Controller, FormProvider, useFormContext } from 'react-hook-form';
-import { GoogleTargetCountry } from '@/api/schema';
-import { CardSaveFooter } from '@/components/forms/CardSaveFooter';
+import { useFormContext } from 'react-hook-form';
+import { EnumSelectField } from '@/components/forms/EnumSelectField';
+import { SettingsFormCard } from '@/components/forms/SettingsFormCard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { toEnumOptions } from '@/lib/enum';
 import { GOOGLE_COUNTRY_LABELS, GOOGLE_SETUP_COPY } from '../channels.constants';
 import type { GoogleMerchantSettings } from '../channels.types';
 import type { GoogleSetupFormValues } from '../google-setup-form';
@@ -20,6 +14,7 @@ import { useGoogleSetupForm } from '../hooks/useGoogleSetup';
 
 const COUNTRY_FIELD_ID = 'google-country';
 const PRODUCT_URL_FIELD_ID = 'google-product-url';
+const COUNTRY_OPTIONS = toEnumOptions(GOOGLE_COUNTRY_LABELS);
 
 interface GoogleListingSetupCardProps {
   workspaceId: string;
@@ -33,26 +28,11 @@ function CountryField() {
   return (
     <Field>
       <FieldLabel htmlFor={COUNTRY_FIELD_ID}>{GOOGLE_SETUP_COPY.country}</FieldLabel>
-      <Controller
+      <EnumSelectField
         control={control}
         name="country"
-        render={({ field }) => (
-          <Select
-            value={field.value}
-            onValueChange={(value) => field.onChange(value as GoogleTargetCountry)}
-          >
-            <SelectTrigger id={COUNTRY_FIELD_ID} className="w-full">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {Object.values(GoogleTargetCountry).map((country) => (
-                <SelectItem key={country} value={country}>
-                  {GOOGLE_COUNTRY_LABELS[country]}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        )}
+        id={COUNTRY_FIELD_ID}
+        options={COUNTRY_OPTIONS}
       />
       <FieldDescription>{GOOGLE_SETUP_COPY.countryNote}</FieldDescription>
     </Field>
@@ -90,40 +70,30 @@ export function GoogleListingSetupCard({
     googleMerchant,
   );
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>
-          <h2>{GOOGLE_SETUP_COPY.title}</h2>
-        </CardTitle>
-        <CardDescription>
-          {GOOGLE_SETUP_COPY.description}{' '}
-          {googleMerchant.readyToList ? GOOGLE_SETUP_COPY.ready : GOOGLE_SETUP_COPY.notReady}
-        </CardDescription>
-      </CardHeader>
-      <FormProvider {...form}>
-        <form onSubmit={(event) => void submit(event)} noValidate>
-          <CardContent className="flex flex-col gap-5">
-            {!googleMerchant.homepageClaimed && (
-              <Alert>
-                <TriangleAlert />
-                <AlertDescription>{GOOGLE_SETUP_COPY.homepageNotClaimed}</AlertDescription>
-              </Alert>
-            )}
-            <fieldset disabled={!canManage} className="flex min-w-0 flex-col gap-5">
-              <CountryField />
-              <ProductUrlField />
-            </fieldset>
-          </CardContent>
-          {canManage && (
-            <CardSaveFooter
-              label={GOOGLE_SETUP_COPY.save}
-              error={saveError}
-              isSaving={form.formState.isSubmitting}
-              disabled={googleMerchant.readyToList && !form.formState.isDirty}
-            />
-          )}
-        </form>
-      </FormProvider>
-    </Card>
+    <SettingsFormCard
+      title={GOOGLE_SETUP_COPY.title}
+      id={PageSection.StoreListingSetup}
+      description={`${GOOGLE_SETUP_COPY.description} ${
+        googleMerchant.readyToList ? GOOGLE_SETUP_COPY.ready : GOOGLE_SETUP_COPY.notReady
+      }`}
+      form={form}
+      onSubmit={submit}
+      canManage={canManage}
+      saveLabel={GOOGLE_SETUP_COPY.save}
+      saveError={saveError}
+      requireChanges={googleMerchant.readyToList}
+      contentClassName="gap-5"
+      before={
+        !googleMerchant.homepageClaimed && (
+          <Alert>
+            <TriangleAlert />
+            <AlertDescription>{GOOGLE_SETUP_COPY.homepageNotClaimed}</AlertDescription>
+          </Alert>
+        )
+      }
+    >
+      <CountryField />
+      <ProductUrlField />
+    </SettingsFormCard>
   );
 }

@@ -1,10 +1,12 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { api, fetchClient } from '@/api/client';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
   CATEGORY_SUGGESTIONS_ENDPOINT,
   CHANNEL_LISTINGS_ENDPOINT,
+  ITEM_SPECIFICS_ENDPOINT,
+  LISTING_EDITOR_ENDPOINT,
   LISTING_CATEGORY_ENDPOINT,
   LISTINGS_FEEDBACK,
   PRODUCT_CHANNELS_ENDPOINT,
@@ -12,7 +14,13 @@ import {
 import type { ChannelCategory, ProductChannel } from '../listings.types';
 import type { ProductChannelRef } from './useProductChannels';
 
-const CATEGORY_ENDPOINTS = [PRODUCT_CHANNELS_ENDPOINT, CHANNEL_LISTINGS_ENDPOINT] as const;
+/** A new category has other item specifics, so they are read again too. */
+const CATEGORY_ENDPOINTS = [
+  PRODUCT_CHANNELS_ENDPOINT,
+  CHANNEL_LISTINGS_ENDPOINT,
+  ITEM_SPECIFICS_ENDPOINT,
+  LISTING_EDITOR_ENDPOINT,
+] as const;
 
 /** The channel's categories for `search` (the title when empty); idle until searched. */
 export function useCategorySuggestions(ref: ProductChannelRef, search: string | null) {
@@ -29,14 +37,13 @@ export function useChooseListingCategory(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(CATEGORY_ENDPOINTS);
   return useMutation<ProductChannel, Error, ChannelCategory | null>({
     meta: { inlineError: true, successMessage: LISTINGS_FEEDBACK.categorySaved },
-    mutationFn: async (category) => {
-      const { data, error } = await fetchClient.PUT(LISTING_CATEGORY_ENDPOINT, {
-        params: { path: ref },
-        body: { category },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (category) =>
+      unwrap(
+        fetchClient.PUT(LISTING_CATEGORY_ENDPOINT, {
+          params: { path: ref },
+          body: { category },
+        }),
+      ),
     onSuccess: refresh,
   });
 }

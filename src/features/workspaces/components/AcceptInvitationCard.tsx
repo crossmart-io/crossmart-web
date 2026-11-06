@@ -1,7 +1,6 @@
-import { CircleAlert } from 'lucide-react';
 import { Link, useLocation, useNavigate } from 'react-router';
+import { FormError } from '@/components/feedback/FormError';
 import { PageLoader } from '@/components/feedback/PageLoader';
-import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { ROUTES } from '@/config/routes';
@@ -82,12 +81,7 @@ function AcceptButton({ token }: { token: string }) {
   const navigate = useNavigate();
   return (
     <div className="flex flex-col gap-3">
-      {accept.error && (
-        <Alert variant="destructive">
-          <CircleAlert />
-          <AlertDescription>{accept.error.message}</AlertDescription>
-        </Alert>
-      )}
+      <FormError error={accept.error} />
       <Button
         disabled={accept.isPending}
         onClick={() => accept.mutate(token, { onSuccess: () => navigate(ROUTES.home) })}

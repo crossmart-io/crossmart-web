@@ -1,5 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import type { ChannelConnection } from '@/features/channels/channels.types';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
@@ -29,14 +29,13 @@ export function useUpdatePricing({ workspaceId, connectionId }: ConnectionRef) {
   const refresh = useInvalidateEndpoints(RULE_ENDPOINTS);
   return useMutation<ChannelConnection, Error, PricingRule | null>({
     meta: { inlineError: true, successMessage: LISTINGS_FEEDBACK.pricingSaved },
-    mutationFn: async (rule) => {
-      const { data, error } = await fetchClient.PUT(PRICING_ENDPOINT, {
-        params: { path: { workspaceId, connectionId } },
-        body: { rule },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (rule) =>
+      unwrap(
+        fetchClient.PUT(PRICING_ENDPOINT, {
+          params: { path: { workspaceId, connectionId } },
+          body: { rule },
+        }),
+      ),
     onSuccess: refresh,
   });
 }
@@ -45,14 +44,13 @@ export function useUpdateSelection({ workspaceId, connectionId }: ConnectionRef)
   const refresh = useInvalidateEndpoints(RULE_ENDPOINTS);
   return useMutation<ChannelConnection, Error, ProductSelectionRule | null>({
     meta: { inlineError: true, successMessage: LISTINGS_FEEDBACK.selectionSaved },
-    mutationFn: async (rule) => {
-      const { data, error } = await fetchClient.PUT(SELECTION_ENDPOINT, {
-        params: { path: { workspaceId, connectionId } },
-        body: { rule },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: (rule) =>
+      unwrap(
+        fetchClient.PUT(SELECTION_ENDPOINT, {
+          params: { path: { workspaceId, connectionId } },
+          body: { rule },
+        }),
+      ),
     onSuccess: refresh,
   });
 }

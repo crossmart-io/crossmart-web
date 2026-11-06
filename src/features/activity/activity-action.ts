@@ -46,6 +46,8 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.channel_policies_opted_in]: 'Business policies opted in',
   [ActivityAction.channel_default_policies_created]: 'Default policies created',
   [ActivityAction.listing_category_changed]: 'Channel category changed',
+  [ActivityAction.listing_item_specifics_changed]: 'Item specifics changed',
+  [ActivityAction.listing_retry_requested]: 'Publish tried again',
   [ActivityAction.stock_oversold]: 'Oversold',
   [ActivityAction.content_generation_requested]: 'AI content requested',
   [ActivityAction.content_generated]: 'AI content suggested',
@@ -53,7 +55,3 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.suggestion_rejected]: 'Suggestion rejected',
   [ActivityAction.suggestions_bulk_approved]: 'Suggestions approved in bulk',
 };
-
-export function toActivityAction(value: string | null): ActivityAction | undefined {
-  return Object.values(ActivityAction).find((action) => action === value);
-}

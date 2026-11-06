@@ -39,14 +39,14 @@ export type FileImportMode = Exclude<CatalogImportMode, CatalogImportMode.create
 
 export const DEFAULT_IMPORT_MODE: FileImportMode = CatalogImportMode.create;
 
-export interface ImportModeCopy {
+interface ImportModeCopy {
   /** Short name, for the mode picker and the history. */
   label: string;
   /** What the history counts for this mode: products, or the rows of a stock sheet. */
   record: string;
 }
 
-export interface FileImportModeCopy extends ImportModeCopy {
+interface FileImportModeCopy extends ImportModeCopy {
   /** One line under the label in the mode picker. */
   summary: string;
   /** How to get the file, shown above the file input. */

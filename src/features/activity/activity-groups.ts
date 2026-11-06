@@ -1,7 +1,7 @@
 import { formatDayHeading, toLocalDayKey } from '@/lib/relative-time';
 import type { ActivityEvent } from './activity.types';
 
-export interface ActivityDay {
+interface ActivityDay {
   key: string;
   heading: string;
   events: ActivityEvent[];

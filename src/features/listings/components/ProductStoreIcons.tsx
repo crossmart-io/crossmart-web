@@ -1,22 +1,32 @@
-import { ListingStatus } from '@/api/schema';
+import { CircleX } from 'lucide-react';
+import { ListingDisplayState } from '@/api/schema';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { ChannelLogoSize, channelInfoFor } from '@/features/channels/channels.constants';
 import { ChannelLogo } from '@/features/channels/components/ChannelLogo';
-import { cn } from 'cn';
-import { LISTING_STATUS_LABELS, PRODUCT_STORE_ICONS_SHOWN } from '../listings.constants';
+import { cn } from '@/lib/utils';
+import { LISTING_STATE_PRESENTATION } from '../listing-states';
+import { PRODUCT_STORE_ICONS_SHOWN, PRODUCT_STORE_FAILED_LABEL } from '../listings.constants';
 import type { ProductStore } from '../listings.types';
 
-/** A dot on the icon for listings that are not simply live; live ones need no mark. */
-const STATUS_DOTS: Partial<Record<ListingStatus, string>> = {
-  [ListingStatus.ERROR]: 'bg-destructive',
-  [ListingStatus.PENDING]: 'bg-muted-foreground',
-  [ListingStatus.INACTIVE]: 'bg-muted-foreground',
+/** A dot on the icon for listings that are not simply published; published ones need no mark. */
+const STATE_DOTS: Partial<Record<ListingDisplayState, string>> = {
+  [ListingDisplayState.failed]: 'bg-destructive',
+  [ListingDisplayState.needs_details]: 'bg-warning',
+  [ListingDisplayState.publishing]: 'bg-muted-foreground',
+  [ListingDisplayState.removing]: 'bg-muted-foreground',
+  [ListingDisplayState.removed]: 'bg-muted-foreground',
 };
+
+/** "Linen & Clay · Needs details: Choose a shipping policy", the server's state and reason. */
+function storeLabel(store: ProductStore): string {
+  const label = `${store.storeName} · ${LISTING_STATE_PRESENTATION[store.displayState].label}`;
+  return store.displayReason ? `${label}: ${store.displayReason}` : label;
+}
 
 function StoreIcon({ store }: { store: ProductStore }) {
   const channel = channelInfoFor(store.channel);
-  const dot = STATUS_DOTS[store.status];
-  const label = `${store.storeName} · ${LISTING_STATUS_LABELS[store.status]}`;
+  const dot = STATE_DOTS[store.displayState];
+  const label = storeLabel(store);
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -48,17 +58,33 @@ function StoreIcon({ store }: { store: ProductStore }) {
   );
 }
 
-/** The channel icon of each store a product is in, with how many more when they do not fit. */
+/** Says in words that publishing failed somewhere, so it never rests on a red dot alone. */
+function FailedCue({ stores }: { stores: readonly ProductStore[] }) {
+  const failed = stores.filter((store) => store.displayState === ListingDisplayState.failed).length;
+  if (failed === 0) return null;
+  return (
+    <span className="inline-flex items-center gap-1 text-xs font-medium whitespace-nowrap text-destructive">
+      <CircleX className="size-3.5" aria-hidden="true" />
+      {PRODUCT_STORE_FAILED_LABEL(failed)}
+    </span>
+  );
+}
+
+/**
+ * The channel icon of each store a product is in, with how many more when they do not fit, and
+ * how many stores refused it.
+ */
 export function ProductStoreIcons({ stores }: { stores: readonly ProductStore[] }) {
   if (stores.length === 0) return <span className="text-muted-foreground">—</span>;
   const shown = stores.slice(0, PRODUCT_STORE_ICONS_SHOWN);
   const hidden = stores.length - shown.length;
   return (
-    <span className="flex items-center gap-1.5">
+    <span className="flex flex-wrap items-center gap-1.5">
       {shown.map((store) => (
         <StoreIcon key={store.connectionId} store={store} />
       ))}
       {hidden > 0 && <span className="text-xs text-muted-foreground tabular-nums">+{hidden}</span>}
+      <FailedCue stores={stores} />
     </span>
   );
 }

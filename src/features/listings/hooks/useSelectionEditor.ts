@@ -22,15 +22,18 @@ export function useSelectionEditor(ref: ConnectionRef, rule: ProductSelectionRul
   const preview = useSelectionPreview(ref, toSelectionRule(draft));
   const save = useUpdateSelection(ref);
 
-  async function submit(): Promise<void> {
-    const connection = await save.mutateAsync(toSelectionRule(draft));
-    // Keep the mode the merchant chose: "all" and "filtered" can store the same rule.
-    const next: SelectionDraft = {
-      ...toSelectionDraft(connection.productSelection),
-      mode: draft.mode,
-    };
-    setSaved(next);
-    setDraft(next);
+  function submit(): void {
+    save.mutate(toSelectionRule(draft), {
+      onSuccess: (connection) => {
+        // Keep the mode the merchant chose: "all" and "filtered" can store the same rule.
+        const next: SelectionDraft = {
+          ...toSelectionDraft(connection.productSelection),
+          mode: draft.mode,
+        };
+        setSaved(next);
+        setDraft(next);
+      },
+    });
   }
 
   return {

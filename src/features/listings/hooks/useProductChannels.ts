@@ -1,16 +1,25 @@
 import { useMutation } from '@tanstack/react-query';
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { api, fetchClient } from '@/api/client';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
   CHANNEL_LISTINGS_ENDPOINT,
   CHANNEL_PRODUCTS_ENDPOINT,
+  LISTING_EDITOR_ENDPOINT,
   LISTING_OVERRIDE_ENDPOINT,
   LISTINGS_FEEDBACK,
   PRODUCT_CHANNEL_ENDPOINT,
   PRODUCT_CHANNELS_ENDPOINT,
+  RETRY_LISTING_ENDPOINT,
 } from '../listings.constants';
-import type { ListingOverride, ProductChannel } from '../listings.types';
+import { isListingInFlight } from '../listing-states';
+import { PRODUCTS_ENDPOINT } from '@/features/catalog/catalog.constants';
+import {
+  CHANNEL_CONNECTION_DETAIL_ENDPOINT,
+  CHANNEL_CONNECTIONS_ENDPOINT,
+} from '@/features/channels/channels.constants';
+import { useInFlightPolling } from '@/hooks/useInFlightPolling';
+import type { ListingOverridePatch, ProductChannel } from '../listings.types';
 
 export interface ProductChannelRef {
   workspaceId: string;
@@ -18,47 +27,72 @@ export interface ProductChannelRef {
   connectionId: string;
 }
 
-const OVERRIDE_ENDPOINTS = [PRODUCT_CHANNELS_ENDPOINT, CHANNEL_LISTINGS_ENDPOINT] as const;
+const OVERRIDE_ENDPOINTS = [
+  PRODUCT_CHANNELS_ENDPOINT,
+  CHANNEL_LISTINGS_ENDPOINT,
+  LISTING_EDITOR_ENDPOINT,
+] as const;
 const MEMBERSHIP_ENDPOINTS = [
   PRODUCT_CHANNELS_ENDPOINT,
   CHANNEL_LISTINGS_ENDPOINT,
   CHANNEL_PRODUCTS_ENDPOINT,
+  LISTING_EDITOR_ENDPOINT,
 ] as const;
 
-/** The product on each connected channel: listing, channel prices and shown stock. */
-export function useProductChannels(workspaceId: string, productId: string) {
-  return api.useQuery('get', PRODUCT_CHANNELS_ENDPOINT, {
-    params: { path: { workspaceId, productId } },
-  });
+/** A retry also changes the product's store badges and the stores' failure counts. */
+const RETRY_ENDPOINTS = [
+  ...MEMBERSHIP_ENDPOINTS,
+  PRODUCTS_ENDPOINT,
+  CHANNEL_CONNECTIONS_ENDPOINT,
+  CHANNEL_CONNECTION_DETAIL_ENDPOINT,
+] as const;
+
+function hasChannelInFlight(channels: readonly ProductChannel[]): boolean {
+  return channels.some((channel) => isListingInFlight(channel.displayState));
 }
 
-export function useSaveListingOverride(ref: ProductChannelRef) {
-  const refresh = useInvalidateEndpoints(OVERRIDE_ENDPOINTS);
-  return useMutation<ProductChannel, Error, ListingOverride>({
-    meta: { inlineError: true, successMessage: LISTINGS_FEEDBACK.overrideSaved },
-    mutationFn: async (body) => {
-      const { data, error } = await fetchClient.PUT(LISTING_OVERRIDE_ENDPOINT, {
-        params: { path: ref },
-        body,
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+/**
+ * The product on each connected channel: listing, channel prices and shown stock. Refetches
+ * while a listing is publishing or being removed, so its result shows without a reload.
+ */
+export function useProductChannels(workspaceId: string, productId: string) {
+  const refetchInterval = useInFlightPolling(hasChannelInFlight);
+  return api.useQuery(
+    'get',
+    PRODUCT_CHANNELS_ENDPOINT,
+    { params: { path: { workspaceId, productId } } },
+    { refetchInterval },
+  );
+}
+
+/**
+ * "Try again" on one product in one store: publishes it there again. The answer already shows
+ * it publishing; the lists refetch and keep checking until it lands. Errors show beside it.
+ */
+export function useRetryListing(ref: ProductChannelRef) {
+  const refresh = useInvalidateEndpoints(RETRY_ENDPOINTS);
+  return useMutation<ProductChannel, Error>({
+    meta: { inlineError: true, successMessage: LISTINGS_FEEDBACK.retryQueued },
+    mutationFn: () => unwrap(fetchClient.POST(RETRY_LISTING_ENDPOINT, { params: { path: ref } })),
     onSuccess: refresh,
   });
 }
 
-export function useClearListingOverride(ref: ProductChannelRef) {
+/**
+ * Changes some of the store's overrides and leaves the rest: an absent field keeps its override,
+ * null makes it follow the product again, and variant prices merge per variant.
+ */
+export function usePatchListingOverride(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(OVERRIDE_ENDPOINTS);
-  return useMutation<ProductChannel, Error>({
-    meta: { successMessage: LISTINGS_FEEDBACK.overrideCleared },
-    mutationFn: async () => {
-      const { data, error } = await fetchClient.DELETE(LISTING_OVERRIDE_ENDPOINT, {
-        params: { path: ref },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+  return useMutation<ProductChannel, Error, ListingOverridePatch>({
+    meta: { inlineError: true, successMessage: LISTINGS_FEEDBACK.overrideSaved },
+    mutationFn: (body) =>
+      unwrap(
+        fetchClient.PATCH(LISTING_OVERRIDE_ENDPOINT, {
+          params: { path: ref },
+          body,
+        }),
+      ),
     onSuccess: refresh,
   });
 }
@@ -68,13 +102,12 @@ export function useAddToStore(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(MEMBERSHIP_ENDPOINTS);
   return useMutation<ProductChannel, Error>({
     meta: { successMessage: LISTINGS_FEEDBACK.addedToStore },
-    mutationFn: async () => {
-      const { data, error } = await fetchClient.POST(PRODUCT_CHANNEL_ENDPOINT, {
-        params: { path: ref },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: () =>
+      unwrap(
+        fetchClient.POST(PRODUCT_CHANNEL_ENDPOINT, {
+          params: { path: ref },
+        }),
+      ),
     onSuccess: refresh,
   });
 }
@@ -84,13 +117,12 @@ export function useRemoveFromStore(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(MEMBERSHIP_ENDPOINTS);
   return useMutation<ProductChannel, Error>({
     meta: { successMessage: LISTINGS_FEEDBACK.removedFromStore },
-    mutationFn: async () => {
-      const { data, error } = await fetchClient.DELETE(PRODUCT_CHANNEL_ENDPOINT, {
-        params: { path: ref },
-      });
-      if (error) throw ApiRequestError.from(error);
-      return data;
-    },
+    mutationFn: () =>
+      unwrap(
+        fetchClient.DELETE(PRODUCT_CHANNEL_ENDPOINT, {
+          params: { path: ref },
+        }),
+      ),
     onSuccess: refresh,
   });
 }

@@ -34,7 +34,7 @@ export enum NavBadge {
   PendingSuggestions = 'pending_suggestions',
 }
 
-export interface NavGroup {
+interface NavGroup {
   label: string;
   items: readonly NavItem[];
 }

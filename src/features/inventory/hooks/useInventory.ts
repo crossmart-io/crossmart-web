@@ -1,4 +1,4 @@
-import { ApiRequestError } from '@/api/api-error';
+import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import type { InventorySort, SortDirection, StockLevel } from '@/api/schema';
 import { usePagedList } from '@/hooks/usePagedList';
@@ -19,15 +19,15 @@ async function fetchInventoryPage(
   page: { page: number; limit: number },
   signal: AbortSignal,
 ) {
-  const { data, error } = await fetchClient.GET(INVENTORY_ITEMS_ENDPOINT, {
-    params: {
-      path: { workspaceId: workspaceId ?? '' },
-      query: { search: search || undefined, ...filters, ...page },
-    },
-    signal,
-  });
-  if (error) throw ApiRequestError.from(error);
-  return data;
+  return unwrap(
+    fetchClient.GET(INVENTORY_ITEMS_ENDPOINT, {
+      params: {
+        path: { workspaceId: workspaceId ?? '' },
+        query: { search: search || undefined, ...filters, ...page },
+      },
+      signal,
+    }),
+  );
 }
 
 /** One numbered page of stock rows, by product title. */

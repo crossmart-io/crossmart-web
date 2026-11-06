@@ -34,7 +34,7 @@ export function usagePercent({ usage, limit }: Pick<FeatureUsage, 'usage' | 'lim
   return Math.min(PERCENT, Math.round((usage / limit) * PERCENT));
 }
 
-export function formatLimit(limit: number | null): string {
+function formatLimit(limit: number | null): string {
   return limit === null ? UNLIMITED_LABEL : limit.toLocaleString();
 }
 

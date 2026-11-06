@@ -1,5 +1,5 @@
 import { X } from 'lucide-react';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { matchesFilters, type ProductListFilters } from '../../hooks/useProductListFilters';
 import { useDeleteProductView, useProductViews } from '../../hooks/useProductViews';
@@ -50,7 +50,7 @@ function ViewChip({ label, isActive, onOpen, onDelete }: ViewChipProps) {
       className={cn(
         'group/chip inline-flex shrink-0 items-center rounded-md text-sm transition-colors',
         isActive
-          ? 'bg-primary/10 text-primary'
+          ? 'bg-primary/10 text-brand'
           : 'text-muted-foreground hover:bg-muted hover:text-foreground',
       )}
     >

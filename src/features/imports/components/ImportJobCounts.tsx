@@ -1,4 +1,4 @@
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import type { CatalogImportMode } from '@/api/schema';
 import { Card, CardContent } from '@/components/ui/card';
 import { importCountsOf } from '../import-summary';

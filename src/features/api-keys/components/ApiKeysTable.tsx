@@ -20,6 +20,7 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { roleLabel } from '@/features/workspaces';
+import { ActionsTableHead } from '@/components/lists/ActionsTableHead';
 import { formatDate } from '@/lib/format';
 import { type ApiKey, useApiKeys, useRevokeApiKey } from '../hooks/useApiKeys';
 
@@ -55,7 +56,7 @@ export function ApiKeysTable({ workspaceId }: { workspaceId: string }) {
             <TableHead>Key</TableHead>
             <TableHead>Access</TableHead>
             <TableHead className="hidden md:table-cell">Last used</TableHead>
-            <TableHead className="w-24" />
+            <ActionsTableHead className="w-24" />
           </TableRow>
         </TableHeader>
         <TableBody>

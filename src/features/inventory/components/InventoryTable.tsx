@@ -1,6 +1,6 @@
 import { History } from 'lucide-react';
 import { Link } from 'react-router';
-import { cn } from 'cn';
+import { cn } from '@/lib/utils';
 import { StockLevel } from '@/api/schema';
 import { Button } from '@/components/ui/button';
 import {
@@ -29,6 +29,8 @@ interface InventoryTableProps {
   /** A new filter is loading; the current rows stay, dimmed. */
   isRefreshing?: boolean;
   onOpenHistory: (item: InventoryItem) => void;
+  /** Whether the member may adjust stock; without it rows only open their history. */
+  canAdjust: boolean;
 }
 
 export function InventoryTable({
@@ -36,6 +38,7 @@ export function InventoryTable({
   items,
   isRefreshing = false,
   onOpenHistory,
+  canAdjust,
 }: InventoryTableProps) {
   return (
     <div
@@ -63,6 +66,7 @@ export function InventoryTable({
               workspaceId={workspaceId}
               item={item}
               onOpenHistory={onOpenHistory}
+              canAdjust={canAdjust}
             />
           ))}
         </TableBody>
@@ -75,9 +79,10 @@ interface InventoryRowProps {
   workspaceId: string;
   item: InventoryItem;
   onOpenHistory: (item: InventoryItem) => void;
+  canAdjust: boolean;
 }
 
-function InventoryRow({ workspaceId, item, onOpenHistory }: InventoryRowProps) {
+function InventoryRow({ workspaceId, item, onOpenHistory, canAdjust }: InventoryRowProps) {
   const quantity = (value: number) => (item.tracked ? value.toLocaleString() : NO_VALUE);
   const isOut = item.stockLevel === StockLevel.out_of_stock;
 
@@ -103,7 +108,9 @@ function InventoryRow({ workspaceId, item, onOpenHistory }: InventoryRowProps) {
       </TableCell>
       <TableCell className={FIT_CELL}>
         <div className="flex items-center justify-end gap-1">
-          {item.tracked && <AdjustStockPopover workspaceId={workspaceId} item={item} compact />}
+          {item.tracked && canAdjust && (
+            <AdjustStockPopover workspaceId={workspaceId} item={item} compact />
+          )}
           <Button
             variant="ghost"
             size="icon-sm"
