@@ -10,3 +10,5 @@ export {
 } from './hooks/useInventoryListFilters';
 export type { InventoryItem } from './inventory.types';
 export { STOCK_LEVEL_COPY, toStockLevelQuery } from './stock-level';
+export { StockLevelBadge } from './components/StockLevelBadge';
+export { variantLabel } from './stock-adjustment';

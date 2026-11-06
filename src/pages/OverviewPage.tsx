@@ -7,6 +7,7 @@ import { Button } from '@/components/ui/button';
 import { ROUTES } from '@/config/routes';
 import { useSession } from '@/features/auth';
 import { InventoryOverview } from '@/features/inventory-report';
+import { ListingHealthOverview } from '@/features/listing-health';
 import { useHasOrders } from '@/features/orders';
 import {
   CatalogHealth,
@@ -17,6 +18,7 @@ import {
   useOnboarding,
 } from '@/features/overview';
 import { SalesOverview } from '@/features/sales';
+import type { Workspace } from '@/features/workspaces';
 
 interface OverviewSectionProps {
   workspaceId: string;
@@ -39,7 +41,8 @@ function SetupSection({
  * A new seller sees what to do next first, and one quiet note instead of empty charts. Once orders
  * come in and setup is done, the page reads as a sales dashboard.
  */
-function OverviewContent({ workspaceId }: OverviewSectionProps) {
+function OverviewContent({ workspace }: { workspace: Workspace }) {
+  const workspaceId = workspace.id;
   const { state: onboarding, isComplete } = useOnboarding(workspaceId);
   const hasOrders = useHasOrders(workspaceId);
   if (isComplete === undefined || hasOrders === undefined) return <ContentLoader />;
@@ -50,6 +53,7 @@ function OverviewContent({ workspaceId }: OverviewSectionProps) {
       {!isComplete && setup}
       {hasOrders ? <SalesOverview workspaceId={workspaceId} /> : <SalesEmptyState />}
       {onboarding.hasProducts && <InventoryOverview workspaceId={workspaceId} />}
+      {onboarding.hasProducts && <ListingHealthOverview workspace={workspace} />}
       <h2 className="font-heading text-lg font-semibold">Catalog</h2>
       <CatalogStatsGrid workspaceId={workspaceId} />
       {isComplete && setup}
@@ -65,7 +69,7 @@ export function OverviewPage() {
     <Page
       name="Overview"
       title={firstName ? `Welcome, ${firstName}` : 'Overview'}
-      description="Your sales, stock and catalog at a glance, and what to do next."
+      description="Your sales, stock, listings and catalog at a glance, and what to do next."
       actions={
         <Button asChild>
           <Link to={ROUTES.newProduct}>
@@ -75,7 +79,7 @@ export function OverviewPage() {
         </Button>
       }
     >
-      <WorkspaceGate>{(workspace) => <OverviewContent workspaceId={workspace.id} />}</WorkspaceGate>
+      <WorkspaceGate>{(workspace) => <OverviewContent workspace={workspace} />}</WorkspaceGate>
     </Page>
   );
 }
