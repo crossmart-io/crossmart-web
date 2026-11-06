@@ -1,4 +1,4 @@
-import { createBrowserRouter, type RouteObject } from 'react-router';
+import { createBrowserRouter, Outlet, type RouteObject } from 'react-router';
 import { AppShell } from '@/components/layout/AppShell';
 import { ROUTES } from '@/config/routes';
 import { AuthLayout, RequireSession } from '@/features/auth';
@@ -110,6 +110,31 @@ const appRoutes: RouteObject[] = [
     lazy: () =>
       import('@/pages/ApiKeysPage').then(({ ApiKeysPage }) => ({ Component: ApiKeysPage })),
   },
+  {
+    path: ROUTES.agentConnections,
+    lazy: () =>
+      import('@/pages/AgentConnectionsPage').then(({ AgentConnectionsPage }) => ({
+        Component: AgentConnectionsPage,
+      })),
+  },
+];
+
+/** An AI agent's sign-in steps (ADR 0019): signed in, but outside the app's shell. */
+const agentAuthorizationRoutes: RouteObject[] = [
+  {
+    path: ROUTES.agentWorkspace,
+    lazy: () =>
+      import('@/pages/AgentWorkspacePage').then(({ AgentWorkspacePage }) => ({
+        Component: AgentWorkspacePage,
+      })),
+  },
+  {
+    path: ROUTES.agentConsent,
+    lazy: () =>
+      import('@/pages/AgentConsentPage').then(({ AgentConsentPage }) => ({
+        Component: AgentConsentPage,
+      })),
+  },
 ];
 
 export const router = createBrowserRouter([
@@ -128,6 +153,14 @@ export const router = createBrowserRouter([
       import('@/pages/AcceptInvitationPage').then(({ AcceptInvitationPage }) => ({
         Component: AcceptInvitationPage,
       })),
+  },
+  {
+    element: (
+      <RequireSession>
+        <Outlet />
+      </RequireSession>
+    ),
+    children: agentAuthorizationRoutes,
   },
   {
     element: (

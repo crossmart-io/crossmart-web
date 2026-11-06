@@ -33,6 +33,10 @@ export const ROUTES = {
   members: '/settings/members',
   roles: '/settings/roles',
   account: '/settings/account',
+  agentConnections: '/settings/agents',
+  /** Steps of an AI agent's sign-in (ADR 0019): Better Auth sends the browser here. */
+  agentWorkspace: '/oauth/workspace',
+  agentConsent: '/oauth/consent',
 } as const;
 
 export function toProductRoute(productId: string): string {
