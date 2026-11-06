@@ -1,10 +1,13 @@
-import { AgentScope } from '@/api/schema';
+import { AgentClientRegistration, AgentScope, type components } from '@/api/schema';
 import {
   AGENT_READ_SCOPES,
   AgentAccessLevel,
   OAUTH_QUERY,
   OAUTH_SCOPE_SEPARATOR,
 } from './agents.constants';
+
+/** The agent asking for access, and how far Crossmart could check who it is. */
+export type AgentClient = components['schemas']['AgentClientDto'];
 
 const AGENT_SCOPE_VALUES = new Set<string>(Object.values(AgentScope));
 
@@ -45,32 +48,12 @@ export function asksToWrite(scopes: readonly AgentScope[]): boolean {
   return scopes.some((scope) => !AGENT_READ_SCOPES.includes(scope));
 }
 
-/** The site an agent belongs to, and whether Crossmart checked it. */
-export interface AgentSite {
-  host: string;
-  verified: boolean;
+/** True when the agent's name comes from a host Crossmart verified, not only from the agent. */
+export function hasVerifiedName(client: Pick<AgentClient, 'registration'>): boolean {
+  return client.registration === AgentClientRegistration.metadata_document;
 }
 
-const HTTPS_PROTOCOL = 'https:';
-
-function httpsHostOf(address: string | null | undefined): string | undefined {
-  if (!address) return undefined;
-  try {
-    const url = new URL(address);
-    return url.protocol === HTTPS_PROTOCOL ? url.host : undefined;
-  } catch {
-    return undefined;
-  }
-}
-
-/**
- * Where the agent comes from. A client id that is an HTTPS URL is a metadata document Crossmart
- * fetched from that site, so its host is verified (and its `client_uri` must share it). A client
- * that registered itself only claims its `client_uri`, so that one is shown as unverified.
- */
-export function agentSite(clientId: string | null, clientUri?: string | null): AgentSite | null {
-  const documentHost = httpsHostOf(clientId);
-  if (documentHost) return { host: documentHost, verified: true };
-  const claimedHost = httpsHostOf(clientUri);
-  return claimedHost ? { host: claimedHost, verified: false } : null;
+/** The agent's name for headings: quoted when it is only what the agent calls itself. */
+export function agentHeadingName(client: Pick<AgentClient, 'name' | 'registration'>): string {
+  return hasVerifiedName(client) ? client.name : `“${client.name}”`;
 }

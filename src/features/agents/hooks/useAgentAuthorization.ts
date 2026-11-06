@@ -1,30 +1,29 @@
-import { useMutation, useQuery } from '@tanstack/react-query';
+import { useMutation } from '@tanstack/react-query';
 import { ApiRequestError } from '@/api/api-error';
 import { authClient } from '@/api/auth-client';
-import { fetchClient } from '@/api/client';
+import { api, fetchClient } from '@/api/client';
 import { AuthRequestError } from '@/features/auth';
-import { AGENT_WORKSPACE_ENDPOINT, UNNAMED_AGENT } from '../agents.constants';
+import { agentHeadingName } from '../agent-authorization';
+import {
+  AGENT_CLIENT_ENDPOINT,
+  AGENT_WORKSPACE_ENDPOINT,
+  UNNAMED_AGENT,
+} from '../agents.constants';
 
-const AGENT_CLIENT_QUERY_KEY = 'agent-client';
-
-/** The agent's public details (name, home page, logo) as its metadata gives them. */
+/** The agent asking for access: its name, and whether Crossmart could verify it. */
 export function useAgentClient(clientId: string | null) {
-  return useQuery({
-    queryKey: [AGENT_CLIENT_QUERY_KEY, clientId],
-    enabled: clientId !== null,
-    queryFn: async () => {
-      const { data, error } = await authClient.oauth2.publicClient({
-        query: { client_id: clientId ?? '' },
-      });
-      if (error) throw AuthRequestError.from(error);
-      return data;
-    },
-  });
+  return api.useQuery(
+    'get',
+    AGENT_CLIENT_ENDPOINT,
+    { params: { query: { clientId: clientId ?? '' } } },
+    { enabled: clientId !== null },
+  );
 }
 
-/** The agent's name for headings, once known. */
-export function useAgentName(clientId: string | null): string {
-  return useAgentClient(clientId).data?.client_name ?? UNNAMED_AGENT;
+/** The agent's name for headings, once known; quoted when it is unverified. */
+export function useAgentHeadingName(clientId: string | null): string {
+  const { data: client } = useAgentClient(clientId);
+  return client ? agentHeadingName(client) : UNNAMED_AGENT;
 }
 
 /**

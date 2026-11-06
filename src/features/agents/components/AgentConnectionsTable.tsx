@@ -20,12 +20,13 @@ import {
   TableRow,
 } from '@/components/ui/table';
 import { formatDate } from '@/lib/format';
-import { asksToWrite } from '../agent-authorization';
+import { asksToWrite, hasVerifiedName } from '../agent-authorization';
 import {
   type AgentConnection,
   useAgentConnections,
   useDisconnectAgent,
 } from '../hooks/useAgentConnections';
+import { UnverifiedNameBadge } from './UnverifiedNameBadge';
 
 export function AgentConnectionsTable({ workspaceId }: { workspaceId: string }) {
   const { data: connections, isPending, error, refetch } = useAgentConnections(workspaceId);
@@ -53,7 +54,9 @@ export function AgentConnectionsTable({ workspaceId }: { workspaceId: string }) 
         <TableBody>
           {connections.map((connection) => (
             <TableRow key={connection.id}>
-              <TableCell className="font-medium">{connection.clientName}</TableCell>
+              <TableCell className="font-medium">
+                <AgentName connection={connection} />
+              </TableCell>
               <TableCell>
                 <Badge variant="secondary">
                   {asksToWrite(connection.scopes) ? 'Read and change' : 'Read only'}
@@ -73,6 +76,16 @@ export function AgentConnectionsTable({ workspaceId }: { workspaceId: string }) 
         </TableBody>
       </Table>
     </div>
+  );
+}
+
+/** The agent's name, marked when it is only what the agent calls itself. */
+function AgentName({ connection }: { connection: AgentConnection }) {
+  return (
+    <span className="flex flex-wrap items-center gap-2">
+      <bdi>{connection.clientName}</bdi>
+      {!hasVerifiedName({ registration: connection.clientRegistration }) && <UnverifiedNameBadge />}
+    </span>
   );
 }
 
