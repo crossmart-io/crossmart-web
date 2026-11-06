@@ -30,7 +30,9 @@ function ProductCell({ row }: { row: ChannelProduct }) {
         <Link
           to={toProductRoute(row.product.id)}
           state={returnTo}
-          className="truncate font-medium hover:underline"
+          dir="auto"
+          title={row.product.title}
+          className="line-clamp-2 font-medium break-words hover:underline"
         >
           {row.product.title}
         </Link>
@@ -95,7 +97,8 @@ export function ChannelProductRow({ row, onRemove, onAddBack }: ChannelProductRo
   const externalUrl = row.listing?.externalUrl;
   return (
     <TableRow className="align-top">
-      <TableCell>
+      {/* Takes the width the other columns leave, so a long title wraps instead of widening the table. */}
+      <TableCell className="w-full max-w-0 whitespace-normal">
         <ProductCell row={row} />
       </TableCell>
       <TableCell>

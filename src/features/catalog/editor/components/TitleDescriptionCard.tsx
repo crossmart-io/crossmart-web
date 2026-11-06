@@ -10,7 +10,7 @@ import {
   AiRewriteButton,
   type ContentDraftTarget,
 } from '@/features/ai-writer';
-import type { ProductFormValues } from '../product-form.schema';
+import { MAX_TITLE_LENGTH, type ProductFormValues } from '../product-form.schema';
 import { useProductAiWriter } from '../useProductAiWriter';
 import { TextField } from './FormFields';
 
@@ -48,6 +48,7 @@ export function TitleDescriptionCard({ aiTarget }: TitleDescriptionCardProps) {
           name="title"
           label="Title"
           placeholder="Short-sleeve linen shirt"
+          maxLength={MAX_TITLE_LENGTH}
           labelAction={rewrite([ContentField.title])}
         />
         <Field>

@@ -15,6 +15,7 @@ interface TextFieldProps {
   description?: ReactNode;
   placeholder?: string;
   inputMode?: 'text' | 'numeric';
+  maxLength?: number;
   /** Codes like SKUs and barcodes: no spell check, autocorrect or translation. */
   isCode?: boolean;
   /** A small action beside the label. */
@@ -48,6 +49,7 @@ export function TextField({
   description,
   placeholder,
   inputMode,
+  maxLength,
   isCode = false,
   labelAction,
 }: TextFieldProps) {
@@ -63,6 +65,7 @@ export function TextField({
         id={name}
         placeholder={placeholder}
         inputMode={inputMode}
+        maxLength={maxLength}
         aria-invalid={Boolean(error)}
         aria-describedby={describedByIds(name, Boolean(description), Boolean(error))}
         {...(isCode ? CODE_INPUT_PROPS : {})}
