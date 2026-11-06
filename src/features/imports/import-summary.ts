@@ -50,8 +50,14 @@ export function describeActor(actor: ImportJobActor): string {
   return actor.userName ?? DELETED_USER;
 }
 
+/** Whether the import changed anything: created, replaced or restocked a record. */
+export function changedAnything(result: CatalogImportResult): boolean {
+  return result.createdProducts + result.updatedProducts + result.updatedVariants > 0;
+}
+
 /** The headline of an import's result, in the words of its mode. */
 export function describeResult(result: CatalogImportResult): string {
+  if (!changedAnything(result)) return NOTHING_IMPORTED;
   switch (result.mode) {
     case CatalogImportMode.create:
     case CatalogImportMode.create_or_link:

@@ -20,6 +20,22 @@ export function formatMoney(amount: string, currency: string): string {
   return moneyFormat(currency).format(Number(amount));
 }
 
+/** Part types that are not the number itself: the symbol and the spaces around it. */
+const CURRENCY_PART_TYPES = new Set<Intl.NumberFormatPartTypes>(['currency', 'literal']);
+
+/**
+ * The amount with the currency's decimals and grouping but no symbol, for inputs that show the
+ * currency themselves: "47.93" for EUR, "1,200" for JPY.
+ */
+export function formatAmount(amount: string, currency: string): string {
+  return moneyFormat(currency)
+    .formatToParts(Number(amount))
+    .filter((part) => !CURRENCY_PART_TYPES.has(part.type))
+    .map((part) => part.value)
+    .join('')
+    .trim();
+}
+
 export function formatPriceRange(range: { min: string; max: string }, currency: string): string {
   const min = formatMoney(range.min, currency);
   return range.min === range.max ? min : `${min} – ${formatMoney(range.max, currency)}`;
