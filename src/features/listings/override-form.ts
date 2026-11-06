@@ -2,6 +2,7 @@ import { z } from 'zod';
 import {
   FOLLOW_PRODUCT,
   OVERRIDE_TITLE_MAX_LENGTH,
+  OVERRIDE_VENDOR_MAX_LENGTH,
   type VisibilityChoice,
 } from './listings.constants';
 import type { ListingEditor, ListingOverridePatch } from './listings.types';
@@ -10,6 +11,7 @@ import { optionalCount, optionalMoneyAmount } from '@/lib/form-schemas';
 
 export const overrideFormSchema = z.object({
   title: z.string().trim().max(OVERRIDE_TITLE_MAX_LENGTH),
+  vendor: z.string().trim().max(OVERRIDE_VENDOR_MAX_LENGTH),
   customDescription: z.boolean(),
   descriptionHtml: z.string(),
   customTags: z.boolean(),
@@ -56,6 +58,7 @@ function countText(value: number | null): string {
 export function toOverrideForm(listing: ListingEditor): OverrideFormValues {
   return {
     title: listing.title.override ?? '',
+    vendor: listing.vendor.override ?? '',
     customDescription: listing.descriptionHtml.overridden,
     descriptionHtml: listing.descriptionHtml.effective,
     customTags: listing.tags.overridden,
@@ -78,6 +81,7 @@ type VariantPrice = NonNullable<ListingOverridePatch['variantPrices']>[number];
 
 const OVERRIDE_FIELDS = [
   'title',
+  'vendor',
   'descriptionHtml',
   'tags',
   'mediaUrls',
@@ -94,6 +98,7 @@ function toCount(value: string): number | null {
 function toOverrideFields(values: OverrideFormValues): OverrideFields {
   return {
     title: values.title.trim() || null,
+    vendor: values.vendor.trim() || null,
     descriptionHtml: values.customDescription ? values.descriptionHtml : null,
     tags: values.customTags ? values.tags : null,
     mediaUrls: values.customMedia ? values.mediaUrls : null,
