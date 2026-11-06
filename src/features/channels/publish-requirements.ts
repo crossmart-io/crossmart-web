@@ -28,6 +28,7 @@ export type RequirementFix = FixCopy &
   );
 
 const LISTING_DEFAULTS_ACTION = 'Open listing defaults';
+const LISTING_SETUP_ACTION = 'Open listing setup';
 
 export const PUBLISH_REQUIREMENT_FIXES: Record<PublishRequirement, RequirementFix> = {
   [PublishRequirement.reconnect]: {
@@ -66,7 +67,25 @@ export const PUBLISH_REQUIREMENT_FIXES: Record<PublishRequirement, RequirementFi
   },
   [PublishRequirement.listing_setup]: {
     missing: 'Choose the country and the product page address',
-    action: 'Open listing setup',
+    action: LISTING_SETUP_ACTION,
+    target: FixTarget.StoreSettings,
+    section: PageSection.StoreListingSetup,
+  },
+  [PublishRequirement.item_details]: {
+    missing: 'Say who made the items, and when',
+    action: LISTING_SETUP_ACTION,
+    target: FixTarget.StoreSettings,
+    section: PageSection.StoreListingSetup,
+  },
+  [PublishRequirement.shipping_profile]: {
+    missing: 'Choose a shipping profile',
+    action: LISTING_SETUP_ACTION,
+    target: FixTarget.StoreSettings,
+    section: PageSection.StoreListingSetup,
+  },
+  [PublishRequirement.processing_profile]: {
+    missing: 'Choose a processing profile',
+    action: LISTING_SETUP_ACTION,
     target: FixTarget.StoreSettings,
     section: PageSection.StoreListingSetup,
   },
