@@ -7,6 +7,7 @@ function variant(price: string): ChannelVariant {
     variantId: price,
     title: price,
     quantity: null,
+    rulePrice: price,
     price: {
       price,
       compareAtPrice: null,
