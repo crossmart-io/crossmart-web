@@ -36,6 +36,9 @@ export const EDITOR_FEEDBACK = {
   unsaved: 'Unsaved changes',
   optionRemoved: 'Option removed. Its variants were merged.',
   undo: 'Undo',
+  readOnlyTitle: 'View only',
+  readOnly:
+    'Your role can view products but not change them. Ask a workspace owner or admin for access.',
 } as const;
 
 /** The channels card of a product that is not saved yet. */

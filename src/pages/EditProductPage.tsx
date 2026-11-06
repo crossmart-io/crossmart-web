@@ -21,6 +21,7 @@ const PRODUCT_PAGE_COPY: ResourcePageCopy = {
 
 function EditProduct({ workspace, productId }: { workspace: Workspace; productId: string }) {
   const query = useProduct(workspace.id, productId);
+  const canEdit = hasPermission(workspace, WorkspacePermission.products_edit);
   const parents = useParentsOrReturnTo(PAGE_PARENTS.products);
   return (
     <ResourcePage query={query} copy={PRODUCT_PAGE_COPY} parents={parents}>
@@ -40,13 +41,10 @@ function EditProduct({ workspace, productId }: { workspace: Workspace; productId
             key={product.id}
             workspace={workspace}
             product={product}
+            readOnly={!canEdit}
             aside={<RecentActivityCard workspaceId={workspace.id} productId={product.id} />}
             channels={
-              <ProductChannelsCard
-                workspaceId={workspace.id}
-                product={product}
-                canEdit={hasPermission(workspace, WorkspacePermission.products_edit)}
-              />
+              <ProductChannelsCard workspaceId={workspace.id} product={product} canEdit={canEdit} />
             }
           />
         </Page>

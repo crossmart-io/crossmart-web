@@ -27,7 +27,8 @@ import {
 import { useUrlPagination } from '@/hooks/usePagination';
 import type { Selection } from '@/hooks/useSelection';
 import { ImportProductsDialog } from '@/features/imports';
-import type { Workspace } from '@/features/workspaces';
+import { WorkspacePermission } from '@/api/schema';
+import { hasPermission, type Workspace } from '@/features/workspaces';
 import { ProductStoreFilterSelect, StoreMembershipMenu } from '@/features/listings';
 import { BulkGenerateMenu } from '@/features/suggestions';
 import { SortSelect } from '@/components/lists/SortSelect';
@@ -43,7 +44,10 @@ function AddProductButton() {
   );
 }
 
-function AddProductActions({ workspaceId }: { workspaceId: string }) {
+/** Importing and adding products, for members who may edit the catalog. */
+function AddProductActions({ workspace }: { workspace: Workspace }) {
+  if (!hasPermission(workspace, WorkspacePermission.products_edit)) return null;
+  const workspaceId = workspace.id;
   return (
     <>
       <ImportProductsDialog workspaceId={workspaceId} />
@@ -65,7 +69,7 @@ function Products({ workspace }: { workspace: Workspace }) {
     <Page
       name="Products"
       description="One catalog for every channel you sell on."
-      actions={<AddProductActions workspaceId={workspace.id} />}
+      actions={<AddProductActions workspace={workspace} />}
     >
       <ProductViewsBar workspaceId={workspace.id} filters={filters} />
       <ProductFilters
@@ -133,7 +137,7 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
       <ProductsEmptyState
         isFiltered={filters.isFiltered}
         onClearFilters={filters.clearAll}
-        actions={<AddProductActions workspaceId={workspace.id} />}
+        actions={<AddProductActions workspace={workspace} />}
       />
     );
   }

@@ -61,6 +61,8 @@ interface RichTextEditorProps {
   labelledBy: string;
   value: string;
   onChange: (html: string) => void;
+  /** Read-only: the text shows, without the toolbar, and cannot be changed. */
+  disabled?: boolean;
 }
 
 /** The form stores an empty description as '', the editor as an empty paragraph. */
@@ -72,8 +74,14 @@ function sameDocument(editorHtml: string, value: string): boolean {
  * Product descriptions. TipTap only keeps the nodes its schema knows, so pasted scripts or
  * styles never reach the form; the API sanitizes again on save.
  */
-export function RichTextEditor({ labelledBy, value, onChange }: RichTextEditorProps) {
+export function RichTextEditor({
+  labelledBy,
+  value,
+  onChange,
+  disabled = false,
+}: RichTextEditorProps) {
   const editor = useEditor({
+    editable: !disabled,
     extensions: [
       StarterKit.configure({ heading: { levels: [SECTION_HEADING, SUBSECTION_HEADING] } }),
     ],
@@ -99,9 +107,17 @@ export function RichTextEditor({ labelledBy, value, onChange }: RichTextEditorPr
     }
   }, [editor, value]);
 
+  // Without an update event, so locking the editor never marks the form as changed.
+  useEffect(() => {
+    editor?.setEditable(!disabled, false);
+  }, [editor, disabled]);
+
   return (
-    <div className="rounded-md border border-input shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50">
-      {editor && <Toolbar editor={editor} />}
+    <div
+      aria-disabled={disabled || undefined}
+      className="rounded-md border border-input shadow-xs focus-within:border-ring focus-within:ring-[3px] focus-within:ring-ring/50 aria-disabled:bg-input/50 aria-disabled:opacity-50"
+    >
+      {editor && !disabled && <Toolbar editor={editor} />}
       <EditorContent editor={editor} />
     </div>
   );

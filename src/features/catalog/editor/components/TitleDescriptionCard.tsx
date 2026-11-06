@@ -63,6 +63,7 @@ export function TitleDescriptionCard({ aiTarget }: TitleDescriptionCardProps) {
                 labelledBy={DESCRIPTION_LABEL_ID}
                 value={field.value}
                 onChange={field.onChange}
+                disabled={field.disabled}
               />
             )}
           />
