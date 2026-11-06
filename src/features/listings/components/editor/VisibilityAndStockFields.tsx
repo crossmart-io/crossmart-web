@@ -17,9 +17,9 @@ const VISIBILITY_INPUT_ID = 'listing-visibility';
 
 /** Whether the store shows the product: as its status says, or shown or hidden here. */
 export function VisibilityField() {
-  const { product, readOnly } = useListingEditorContext();
+  const { productDefaults, readOnly } = useListingEditorContext();
   const { control } = useFormContext<OverrideFormValues>();
-  const { origin, useProductValue } = useListingField(ListingField.Visibility, product);
+  const { origin, useProductValue } = useListingField(ListingField.Visibility, productDefaults);
   return (
     <InheritedField
       name={LISTING_FIELD_LABELS.visibility}
@@ -67,8 +67,8 @@ function CountInput({
 
 /** How much of the product's stock this store sees: all of it unless units are held back. */
 export function StockField() {
-  const { product, readOnly } = useListingEditorContext();
-  const { origin, useProductValue } = useListingField(ListingField.Stock, product);
+  const { productDefaults, readOnly } = useListingEditorContext();
+  const { origin, useProductValue } = useListingField(ListingField.Stock, productDefaults);
   return (
     <InheritedField
       name={LISTING_FIELD_LABELS.stock}

@@ -1,12 +1,15 @@
 import { createContext, useContext } from 'react';
 import type { ProductChannelRef } from '../../hooks/useProductChannels';
-import type { Product, ProductChannel } from '../../listings.types';
+import type { ListingEditor } from '../../listings.types';
+import type { ProductDefaults } from '../../override-form';
 
-/** What every field of the listing editor reads: the product, the store's listing, and access. */
+/** What every field of the listing editor reads: the listing, the product's values, and access. */
 export interface ListingEditorContextValue {
   listingRef: ProductChannelRef;
-  product: Product;
-  channel: ProductChannel;
+  /** The listing as the API reads it: per field, the product's value, the override, the result. */
+  listing: ListingEditor;
+  /** The product's values, which a field goes back to. */
+  productDefaults: ProductDefaults;
   /** The workspace's currency, which the product's prices are in. */
   catalogCurrency: string;
   /** Without the permission to edit listings, fields show but cannot change. */

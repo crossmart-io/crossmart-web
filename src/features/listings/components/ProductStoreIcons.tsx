@@ -4,22 +4,29 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { ChannelLogoSize, channelInfoFor } from '@/features/channels/channels.constants';
 import { ChannelLogo } from '@/features/channels/components/ChannelLogo';
 import { cn } from '@/lib/utils';
-import { LISTING_STATE_PRESENTATION, LISTING_STATUS_STATES } from '../listing-states';
+import { LISTING_STATE_PRESENTATION } from '../listing-states';
 import { PRODUCT_STORE_ICONS_SHOWN, PRODUCT_STORE_FAILED_LABEL } from '../listings.constants';
 import type { ProductStore } from '../listings.types';
 
 /** A dot on the icon for listings that are not simply published; published ones need no mark. */
 const STATE_DOTS: Partial<Record<ListingDisplayState, string>> = {
   [ListingDisplayState.failed]: 'bg-destructive',
+  [ListingDisplayState.needs_details]: 'bg-warning',
   [ListingDisplayState.publishing]: 'bg-muted-foreground',
+  [ListingDisplayState.removing]: 'bg-muted-foreground',
   [ListingDisplayState.removed]: 'bg-muted-foreground',
 };
 
+/** "Linen & Clay · Needs details: Choose a shipping policy", the server's state and reason. */
+function storeLabel(store: ProductStore): string {
+  const label = `${store.storeName} · ${LISTING_STATE_PRESENTATION[store.displayState].label}`;
+  return store.displayReason ? `${label}: ${store.displayReason}` : label;
+}
+
 function StoreIcon({ store }: { store: ProductStore }) {
   const channel = channelInfoFor(store.channel);
-  const state = LISTING_STATUS_STATES[store.status];
-  const dot = STATE_DOTS[state];
-  const label = `${store.storeName} · ${LISTING_STATE_PRESENTATION[state].label}`;
+  const dot = STATE_DOTS[store.displayState];
+  const label = storeLabel(store);
   return (
     <Tooltip>
       <TooltipTrigger asChild>
@@ -53,9 +60,7 @@ function StoreIcon({ store }: { store: ProductStore }) {
 
 /** Says in words that publishing failed somewhere, so it never rests on a red dot alone. */
 function FailedCue({ stores }: { stores: readonly ProductStore[] }) {
-  const failed = stores.filter(
-    (store) => LISTING_STATUS_STATES[store.status] === ListingDisplayState.failed,
-  ).length;
+  const failed = stores.filter((store) => store.displayState === ListingDisplayState.failed).length;
   if (failed === 0) return null;
   return (
     <span className="inline-flex items-center gap-1 text-xs font-medium whitespace-nowrap text-destructive">

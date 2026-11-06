@@ -12,13 +12,13 @@ import {
 } from '@/components/ui/sheet';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Spinner } from '@/components/ui/spinner';
-import { type ListingEditorData, useListingEditor } from '../hooks/useListingEditor';
+import { useListingEditor } from '../hooks/useListingEditor';
 import { useListingEditorForm } from '../hooks/useListingEditorForm';
 import type { ProductChannelRef } from '../hooks/useProductChannels';
-import { useStoreMissing } from '../hooks/useStoreMissing';
 import { hasListingChanges, listingChanges } from '../listing-editor';
 import { LISTING_EDITOR_COPY, OverrideSheetMode } from '../listings.constants';
-import type { OverrideFormValues } from '../override-form';
+import { type OverrideFormValues, productDefaultsOf } from '../override-form';
+import type { ListingEditor } from '../listings.types';
 import { ListingEditorFields } from './editor/ListingEditorFields';
 import { ListingEditorHeader } from './editor/ListingEditorHeader';
 import { ListingEditorContext } from './editor/listing-editor-context';
@@ -67,26 +67,27 @@ function ListingEditorFooter({ isAdding, onUseProductValues }: FooterProps) {
 
 type LoadedEditorProps = Omit<ListingEditorSheetProps, 'catalogCurrency'> & {
   catalogCurrency: string;
-  data: ListingEditorData;
+  data: ListingEditor;
 };
 
 /** The editor once the product and its listing have loaded: header, fields and footer. */
 function LoadedListingEditor({ data, ...props }: LoadedEditorProps) {
   const { listingRef, catalogCurrency, canEdit, showProductLink = false, onClose } = props;
   const isAdding = props.mode === OverrideSheetMode.Add;
-  const storeMissing = useStoreMissing(listingRef.workspaceId)?.get(listingRef.connectionId);
-  const editor = useListingEditorForm({ listingRef, data, isAdding, onAdded: onClose });
-  const context = { listingRef, ...data, catalogCurrency, readOnly: !canEdit };
+  const editor = useListingEditorForm({ listingRef, listing: data, isAdding, onAdded: onClose });
+  const context = {
+    listingRef,
+    listing: data,
+    productDefaults: productDefaultsOf(data),
+    catalogCurrency,
+    readOnly: !canEdit,
+  };
   return (
     <ListingEditorContext.Provider value={context}>
       <FormProvider {...editor.form}>
         <form onSubmit={editor.submit} noValidate className="flex min-h-0 flex-1 flex-col">
           <div className="min-h-0 flex-1 overflow-y-auto">
-            <ListingEditorHeader
-              isAdding={isAdding}
-              showProductLink={showProductLink}
-              storeMissing={storeMissing}
-            />
+            <ListingEditorHeader isAdding={isAdding} showProductLink={showProductLink} />
             <ListingEditorFields error={editor.error} />
           </div>
           {canEdit && (
@@ -111,7 +112,7 @@ function EditorPlaceholder({ query }: { query: ReturnType<typeof useListingEdito
       </SheetHeader>
       <div className="px-4">
         {query.isPending && <Skeleton className="h-64 w-full" />}
-        {query.error && (
+        {query.error !== null && (
           <ErrorState
             title={LISTING_EDITOR_COPY.loadFailed}
             error={query.error}
@@ -140,7 +141,7 @@ export function ListingEditorSheet(props: ListingEditorSheetProps) {
         {data ? (
           <LoadedListingEditor
             // A different product or store starts the form over from its values.
-            key={`${data.product.id}:${data.channel.connection.id}`}
+            key={`${data.productId}:${data.connection.id}`}
             {...props}
             data={data}
           />

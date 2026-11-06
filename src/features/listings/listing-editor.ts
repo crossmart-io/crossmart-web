@@ -75,7 +75,7 @@ export function productValuePatch(
     case ListingField.Tags:
       return { customTags: false, tags: product.tags };
     case ListingField.Images:
-      return { customMedia: false, mediaUrls: product.media.map(({ url }) => url) };
+      return { customMedia: false, mediaUrls: product.mediaUrls };
     case ListingField.Visibility:
       return { visibility: FOLLOW_PRODUCT };
     case ListingField.Stock:

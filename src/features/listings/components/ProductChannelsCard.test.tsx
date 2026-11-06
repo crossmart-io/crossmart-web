@@ -15,7 +15,6 @@ vi.mock('../hooks/useProductChannels', async (importOriginal) => ({
   ...(await importOriginal<typeof ProductChannelHooks>()),
   useProductChannels: vi.fn<typeof useProductChannels>(),
 }));
-vi.mock('../hooks/useStoreMissing', () => ({ useStoreMissing: () => undefined }));
 vi.mock('./ListingEditorSheet', () => ({
   ListingEditorSheet: ({ listingRef, mode, onClose }: ListingEditorSheetProps) => (
     <dialog open aria-label={`Editor ${listingRef.connectionId} ${mode}`}>

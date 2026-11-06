@@ -8,7 +8,7 @@ import {
   LoaderCircle,
   type LucideIcon,
 } from 'lucide-react';
-import { ListingDisplayState, ListingStatus } from '@/api/schema';
+import { ListingDisplayState } from '@/api/schema';
 
 /** Badge looks a listing state can take; each also has its own icon and words. */
 export type ListingStateTone = 'outline' | 'warning' | 'secondary' | 'success' | 'destructive';
@@ -96,15 +96,3 @@ const STATES_WITH_REASON: readonly ListingDisplayState[] = [
 export function hasListingReason(state: ListingDisplayState): boolean {
   return STATES_WITH_REASON.includes(state);
 }
-
-/**
- * The state a store badge on the products table shows. Those badges carry only the listing's
- * status, so this is the closest state: it cannot tell "needs details" from "publishing".
- */
-export const LISTING_STATUS_STATES: Record<ListingStatus, ListingDisplayState> = {
-  [ListingStatus.PENDING]: ListingDisplayState.publishing,
-  [ListingStatus.ACTIVE]: ListingDisplayState.published,
-  [ListingStatus.INACTIVE]: ListingDisplayState.published,
-  [ListingStatus.ERROR]: ListingDisplayState.failed,
-  [ListingStatus.DELISTED]: ListingDisplayState.removed,
-};

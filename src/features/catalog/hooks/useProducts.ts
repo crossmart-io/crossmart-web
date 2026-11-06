@@ -1,13 +1,13 @@
 import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
 import {
-  ListingStatus,
   type CatalogGap,
   type ProductSort,
   type ProductStatus,
   type ProductStoreFilter,
   type SortDirection,
 } from '@/api/schema';
+import { isListingInFlight } from '@/features/listings/listing-states';
 import { useInFlightPolling } from '@/hooks/useInFlightPolling';
 import { usePagedList } from '@/hooks/usePagedList';
 import type { Pagination } from '@/hooks/usePagination';
@@ -41,10 +41,13 @@ async function fetchProductPage(
   );
 }
 
-/** A store badge still publishing: the table checks again until it lands. */
-function hasStorePublishing(page: { items: ProductSummary[] }): boolean {
+/**
+ * A store badge being published or taken off: the table checks again until it lands. One that
+ * waits on details or setup stays as it is until the merchant acts, so it is not polled.
+ */
+export function hasStorePublishing(page: { items: ProductSummary[] }): boolean {
   return page.items.some((product) =>
-    product.stores.some((store) => store.status === ListingStatus.PENDING),
+    product.stores.some((store) => isListingInFlight(store.displayState)),
   );
 }
 

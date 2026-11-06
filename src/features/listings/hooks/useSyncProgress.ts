@@ -5,94 +5,77 @@ import { endpointQueryKey } from '@/api/query-keys';
 import { fetchClient } from '@/api/client';
 import { unwrap } from '@/api/unwrap';
 import { LIVE_POLLING } from '@/lib/in-flight-polling';
-import { pluralize } from '@/lib/format';
-import { CHANNEL_PRODUCTS_ENDPOINT, SYNC_COPY, SYNC_MIN_WATCH_MS } from '../listings.constants';
-import type { ChannelProductCounts } from '../listings.types';
+import { SYNC_COPY, SYNC_ENDPOINT } from '../listings.constants';
+import type { SyncProgress } from '../listings.types';
 
 interface ConnectionRef {
   workspaceId: string;
   connectionId: string;
 }
 
-/** Only the counts are read, so one row is enough. */
-const COUNTS_QUERY = { page: 1, limit: 1 } as const;
-
-/** Products the store is still publishing or taking off. */
-export function inFlightCount(counts: ChannelProductCounts): number {
-  return counts.pending + counts.removing;
+/** "2 failed, 3 still to send": what is left of a sync, or that every product went. */
+export function describeSyncProgress(progress: SyncProgress): string {
+  const parts: string[] = [];
+  if (progress.pending > 0) parts.push(SYNC_COPY.waiting(progress.pending));
+  if (progress.failed > 0) parts.push(SYNC_COPY.failed(progress.failed));
+  return parts.length > 0 ? parts.join(', ') : SYNC_COPY.allSent;
 }
 
-/** "38 published, 2 failed, 1 still to send": where the store stands once the sync settles. */
-export function describeSyncOutcome(counts: ChannelProductCounts): string {
-  const parts = [`${pluralize(counts.listed, 'product')} published`];
-  if (counts.failed > 0) parts.push(`${counts.failed} failed`);
-  const waiting = inFlightCount(counts);
-  if (waiting > 0) parts.push(SYNC_COPY.waiting(waiting));
-  return parts.join(', ');
+/** Whether to stop watching: the server says nothing it queued is pending, or it took too long. */
+export function isSettled(progress: SyncProgress, elapsedMs: number): boolean {
+  return progress.done || elapsedMs >= LIVE_POLLING.maxDurationMs;
 }
 
-/** Whether to stop watching: nothing left in flight once the jobs had time to start, or too long. */
-function isSettled(counts: ChannelProductCounts, elapsedMs: number): boolean {
-  if (elapsedMs >= LIVE_POLLING.maxDurationMs) return true;
-  return elapsedMs >= SYNC_MIN_WATCH_MS && inFlightCount(counts) === 0;
-}
-
-/** Whether counts fetched after the sync started say it has settled. */
+/** Whether progress fetched after the sync started says it has settled. */
 function settledSince(
   startedAt: number,
-  counts: ChannelProductCounts | undefined,
+  progress: SyncProgress | undefined,
   dataUpdatedAt: number,
 ): boolean {
-  if (!counts || dataUpdatedAt < startedAt) return false;
-  return isSettled(counts, dataUpdatedAt - startedAt);
+  if (!progress || dataUpdatedAt < startedAt) return false;
+  return isSettled(progress, dataUpdatedAt - startedAt);
 }
 
-/** Toasts the outcome once per sync, however often the component renders after it. */
-function useAnnounceOnce(
-  startedAt: number | null,
-  counts: ChannelProductCounts | undefined,
-  channelName: string,
-) {
-  const announcedFor = useRef<number | null>(null);
-  useEffect(() => {
-    if (startedAt === null || !counts || announcedFor.current === startedAt) return;
-    announcedFor.current = startedAt;
-    announce(counts, channelName);
-  }, [startedAt, counts, channelName]);
-}
-
-function announce(counts: ChannelProductCounts, channelName: string): void {
-  const description = describeSyncOutcome(counts);
-  if (inFlightCount(counts) > 0) {
+function announce(progress: SyncProgress, channelName: string): void {
+  const description = describeSyncProgress(progress);
+  if (!progress.done) {
     toast.info(SYNC_COPY.stillWorking(channelName), { description });
-  } else if (counts.failed > 0) {
+  } else if (progress.failed > 0) {
     toast.warning(SYNC_COPY.finished(channelName), { description });
   } else {
     toast.success(SYNC_COPY.finished(channelName), { description });
   }
 }
 
+/** Toasts the outcome once per sync, however often the component renders after it. */
+function useAnnounceOnce(
+  startedAt: number | null,
+  progress: SyncProgress | undefined,
+  channelName: string,
+) {
+  const announcedFor = useRef<number | null>(null);
+  useEffect(() => {
+    if (startedAt === null || !progress || announcedFor.current === startedAt) return;
+    announcedFor.current = startedAt;
+    announce(progress, channelName);
+  }, [startedAt, progress, channelName]);
+}
+
 /**
- * After "Send all products again": the store's counts, checked every few seconds until nothing
- * is left to send, then a toast that sums up where the store stands.
+ * After "Send all products again": the store's sync progress, checked every few seconds until
+ * the server says nothing it queued is pending, then a toast that sums it up. "Finished" means
+ * every queued job finished, not that the store merely looks quiet.
  */
 export function useSyncProgress(ref: ConnectionRef, channelName: string) {
   const [startedAt, setStartedAt] = useState<number | null>(null);
   const query = useQuery({
-    queryKey: [...endpointQueryKey(CHANNEL_PRODUCTS_ENDPOINT), ref, COUNTS_QUERY],
+    queryKey: [...endpointQueryKey(SYNC_ENDPOINT), ref],
     queryFn: ({ signal }) =>
-      unwrap(
-        fetchClient.GET(CHANNEL_PRODUCTS_ENDPOINT, {
-          params: { path: ref, query: COUNTS_QUERY },
-          signal,
-        }),
-      ),
-    select: (page) => page.counts,
+      unwrap(fetchClient.GET(SYNC_ENDPOINT, { params: { path: ref }, signal })),
     enabled: startedAt !== null,
     staleTime: 0,
     refetchInterval: (polled) =>
-      startedAt !== null &&
-      settledSince(startedAt, polled.state.data?.counts, polled.state.dataUpdatedAt)
+      startedAt !== null && settledSince(startedAt, polled.state.data, polled.state.dataUpdatedAt)
         ? false
         : LIVE_POLLING.intervalMs,
   });
@@ -101,5 +84,5 @@ export function useSyncProgress(ref: ConnectionRef, channelName: string) {
   const watching = startedAt !== null && !settled;
   useAnnounceOnce(settled ? startedAt : null, fresh, channelName);
   const start = useCallback(() => setStartedAt(Date.now()), []);
-  return { watching, counts: fresh, start };
+  return { watching, progress: fresh, start };
 }

@@ -1,7 +1,7 @@
 import { ExternalLink, Undo2, X } from 'lucide-react';
 import type { MouseEvent } from 'react';
 import { Link, useSearchParams } from 'react-router';
-import { ChannelProductState } from '@/api/schema';
+import { ChannelProductState, ListingDisplayState } from '@/api/schema';
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
 import { RelativeTime } from '@/components/time/RelativeTime';
 import { Button } from '@/components/ui/button';
@@ -10,7 +10,7 @@ import { ROUTE_QUERY } from '@/config/routes';
 import { ProductThumbnail } from '@/features/catalog';
 import { listingFixOf } from '../listing-fix';
 import { hasListingReason, LISTING_STATE_PRESENTATION } from '../listing-states';
-import { LISTING_SOURCE_LABELS } from '../listings.constants';
+import { LISTING_SOURCE_LABELS, LISTINGS_ROW_COPY } from '../listings.constants';
 import type { ChannelProduct, ListingStore } from '../listings.types';
 import { ListingIssue } from './ListingIssue';
 import { ListingStateBadge } from './ListingStateBadge';
@@ -79,6 +79,14 @@ function RemoveButton({
 
 /** Under a state with nothing to fix: why the product is in the store, or what the state means. */
 function StateHint({ row }: { row: ChannelProduct }) {
+  const queuedAt = row.listing?.syncRequestedAt;
+  if (row.displayState === ListingDisplayState.publishing && queuedAt) {
+    return (
+      <span className="text-xs text-muted-foreground">
+        {LISTINGS_ROW_COPY.queued} <RelativeTime value={queuedAt} />
+      </span>
+    );
+  }
   const inStore = row.listing && row.state !== ChannelProductState.removed_by_hand;
   return (
     <span className="text-xs text-muted-foreground">
@@ -98,8 +106,8 @@ function StateCell({
 }: Pick<ChannelProductRowProps, 'row' | 'store' | 'canEdit' | 'onOpenListing'>) {
   const fix = listingFixOf({
     displayState: row.displayState,
+    displayRequirement: row.displayRequirement,
     missingRequirement: row.listing?.missingRequirement,
-    storeMissing: store.missing,
   });
   return (
     <div className="flex flex-col items-start gap-1.5 sm:w-60">

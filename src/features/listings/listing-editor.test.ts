@@ -10,13 +10,14 @@ import {
   variantPriceOrigin,
 } from './listing-editor';
 import { FOLLOW_PRODUCT } from './listings.constants';
-import { type OverrideFormValues, toOverrideForm } from './override-form';
-import { overrideFixture, productChannelFixture, productFixture } from './testing/listing.fixture';
+import { type OverrideFormValues, productDefaultsOf, toOverrideForm } from './override-form';
+import { listingEditorFixture } from './testing/listing.fixture';
 
-const PRODUCT = productFixture();
+const LISTING = listingEditorFixture();
+const PRODUCT = productDefaultsOf(LISTING);
 
-function formFor(override = overrideFixture()): OverrideFormValues {
-  return toOverrideForm(productChannelFixture({ override }), PRODUCT);
+function formFor(changes: Partial<OverrideFormValues> = {}): OverrideFormValues {
+  return { ...toOverrideForm(LISTING), ...changes };
 }
 
 describe('listing editor fields', () => {
@@ -30,16 +31,14 @@ describe('listing editor fields', () => {
   });
 
   it('marks each field the store changes', () => {
-    const values = formFor(
-      overrideFixture({
-        title: 'Shop title',
-        descriptionHtml: '<p>Shop</p>',
-        tags: [],
-        mediaUrls: ['https://cdn.example.com/a.jpg'],
-        visibility: ListingVisibility.HIDDEN,
-        maxQuantity: 3,
-      }),
-    );
+    const values = formFor({
+      title: 'Shop title',
+      customDescription: true,
+      customTags: true,
+      customMedia: true,
+      visibility: ListingVisibility.HIDDEN,
+      maxQuantity: '3',
+    });
 
     for (const field of Object.values(ListingField)) {
       expect(fieldOrigin(values, field)).toBe(FieldOrigin.Store);
@@ -83,12 +82,10 @@ describe('listing editor fields', () => {
   });
 
   it('sums up the changed fields and how many variants have their own prices', () => {
-    const values = formFor(
-      overrideFixture({
-        title: 'Shop title',
-        variantPrices: [{ variantId: 'v-1', price: '59.00', compareAtPrice: null }],
-      }),
-    );
+    const values = formFor({
+      title: 'Shop title',
+      prices: [{ variantId: 'v-1', price: '59.00', compareAtPrice: '' }],
+    });
 
     expect(listingChanges(values)).toEqual({ fields: [ListingField.Title], pricedVariants: 1 });
   });

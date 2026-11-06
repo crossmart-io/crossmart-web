@@ -45,6 +45,7 @@ const ROW: ChannelProduct = {
   state: ChannelProductState.excluded,
   displayState: ListingDisplayState.draft,
   displayReason: null,
+  displayRequirement: null,
   listing: null,
 };
 

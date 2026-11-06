@@ -68,10 +68,10 @@ function ImagePicker({ urls, value, onChange }: ImagePickerProps) {
 
 /** The images in this store: all of the product's, or the ones chosen for this store. */
 export function ImagesField() {
-  const { product, readOnly } = useListingEditorContext();
+  const { productDefaults, readOnly } = useListingEditorContext();
   const { control, setValue } = useFormContext<OverrideFormValues>();
-  const { origin, useProductValue } = useListingField(ListingField.Images, product);
-  const urls = product.media.map(({ url }) => url);
+  const { origin, useProductValue } = useListingField(ListingField.Images, productDefaults);
+  const urls = productDefaults.mediaUrls;
   if (urls.length === 0) return null;
   const changed = origin === FieldOrigin.Store;
   return (

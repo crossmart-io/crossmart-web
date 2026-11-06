@@ -16,26 +16,25 @@ import { ChannelTab } from './channel-tabs';
 /** What decides how a product's problem on a store is fixed. */
 export interface ListingFixInput {
   displayState: ListingDisplayState;
+  /** For `needs_details`: what the server says to fix first, store setup before the product. */
+  displayRequirement: PublishRequirement | null | undefined;
   /** What the channel refused the last publish for lacking, when it said. */
   missingRequirement: PublishRequirement | null | undefined;
-  /** What the store's setup lacks, in order; unknown while the store is loading. */
-  storeMissing: readonly PublishRequirement[] | undefined;
 }
 
 /**
  * What the merchant should fix, or null when there is nothing to fix there (a failure the
- * channel gave no reason for is retried instead). The listing's own requirement wins; a product
- * that needs details otherwise waits on the store's setup, or else on the product itself.
+ * channel gave no reason for is retried instead). The server names the requirement; a product
+ * that needs details without one is sent to its editor.
  */
 export function listingFixOf({
   displayState,
+  displayRequirement,
   missingRequirement,
-  storeMissing,
 }: ListingFixInput): RequirementFix | null {
-  if (missingRequirement) return PUBLISH_REQUIREMENT_FIXES[missingRequirement];
-  if (displayState !== ListingDisplayState.needs_details) return null;
-  const [storeRequirement] = storeMissing ?? [];
-  return storeRequirement ? PUBLISH_REQUIREMENT_FIXES[storeRequirement] : GENERIC_PRODUCT_FIX;
+  const requirement = displayRequirement ?? missingRequirement;
+  if (requirement) return PUBLISH_REQUIREMENT_FIXES[requirement];
+  return displayState === ListingDisplayState.needs_details ? GENERIC_PRODUCT_FIX : null;
 }
 
 export interface ListingRef {

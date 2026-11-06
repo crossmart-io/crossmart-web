@@ -5,6 +5,7 @@ import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
   CHANNEL_LISTINGS_ENDPOINT,
   CHANNEL_PRODUCTS_ENDPOINT,
+  LISTING_EDITOR_ENDPOINT,
   LISTING_OVERRIDE_ENDPOINT,
   LISTINGS_FEEDBACK,
   PRODUCT_CHANNEL_ENDPOINT,
@@ -18,7 +19,7 @@ import {
   CHANNEL_CONNECTIONS_ENDPOINT,
 } from '@/features/channels/channels.constants';
 import { useInFlightPolling } from '@/hooks/useInFlightPolling';
-import type { ListingOverride, ProductChannel } from '../listings.types';
+import type { ListingOverridePatch, ProductChannel } from '../listings.types';
 
 export interface ProductChannelRef {
   workspaceId: string;
@@ -26,11 +27,16 @@ export interface ProductChannelRef {
   connectionId: string;
 }
 
-const OVERRIDE_ENDPOINTS = [PRODUCT_CHANNELS_ENDPOINT, CHANNEL_LISTINGS_ENDPOINT] as const;
+const OVERRIDE_ENDPOINTS = [
+  PRODUCT_CHANNELS_ENDPOINT,
+  CHANNEL_LISTINGS_ENDPOINT,
+  LISTING_EDITOR_ENDPOINT,
+] as const;
 const MEMBERSHIP_ENDPOINTS = [
   PRODUCT_CHANNELS_ENDPOINT,
   CHANNEL_LISTINGS_ENDPOINT,
   CHANNEL_PRODUCTS_ENDPOINT,
+  LISTING_EDITOR_ENDPOINT,
 ] as const;
 
 /** A retry also changes the product's store badges and the stores' failure counts. */
@@ -72,13 +78,17 @@ export function useRetryListing(ref: ProductChannelRef) {
   });
 }
 
-export function useSaveListingOverride(ref: ProductChannelRef) {
+/**
+ * Changes some of the store's overrides and leaves the rest: an absent field keeps its override,
+ * null makes it follow the product again, and variant prices merge per variant.
+ */
+export function usePatchListingOverride(ref: ProductChannelRef) {
   const refresh = useInvalidateEndpoints(OVERRIDE_ENDPOINTS);
-  return useMutation<ProductChannel, Error, ListingOverride>({
+  return useMutation<ProductChannel, Error, ListingOverridePatch>({
     meta: { inlineError: true, successMessage: LISTINGS_FEEDBACK.overrideSaved },
     mutationFn: (body) =>
       unwrap(
-        fetchClient.PUT(LISTING_OVERRIDE_ENDPOINT, {
+        fetchClient.PATCH(LISTING_OVERRIDE_ENDPOINT, {
           params: { path: ref },
           body,
         }),

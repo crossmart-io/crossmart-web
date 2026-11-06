@@ -29,9 +29,9 @@ function TagList({ tags }: { tags: readonly string[] }) {
 
 /** Tags in this store: the product's, or the store's own, which may be none at all. */
 export function TagsField() {
-  const { product, readOnly } = useListingEditorContext();
+  const { productDefaults, readOnly } = useListingEditorContext();
   const { control, setValue } = useFormContext<OverrideFormValues>();
-  const { origin, useProductValue } = useListingField(ListingField.Tags, product);
+  const { origin, useProductValue } = useListingField(ListingField.Tags, productDefaults);
   const changed = origin === FieldOrigin.Store;
   return (
     <InheritedField
@@ -44,7 +44,7 @@ export function TagsField() {
         )
       }
       origin={origin}
-      productValue={product.tags.join(', ') || LISTING_EDITOR_COPY.noTags}
+      productValue={productDefaults.tags.join(', ') || LISTING_EDITOR_COPY.noTags}
       onUseProductValue={readOnly ? undefined : useProductValue}
     >
       {changed ? (
@@ -57,7 +57,7 @@ export function TagsField() {
         />
       ) : (
         <>
-          <TagList tags={product.tags} />
+          <TagList tags={productDefaults.tags} />
           {!readOnly && (
             <ChangeForStoreButton
               name={LISTING_FIELD_LABELS.tags}

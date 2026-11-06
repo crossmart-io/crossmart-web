@@ -1,4 +1,5 @@
 import {
+  errorCodeOf,
   ApiRequestError,
   FORBIDDEN_ERROR_MESSAGE,
   isNetworkError,
@@ -67,5 +68,17 @@ describe('ApiRequestError', () => {
   it('recognises a raw 404 body', () => {
     expect(isNotFoundError({ statusCode: 404, message: 'Product not found' })).toBe(true);
     expect(statusCodeOf(new TypeError('Failed to fetch'))).toBeUndefined();
+  });
+
+  it('keeps the error code the API names, and none when it names none', () => {
+    const coded = ApiRequestError.from({
+      statusCode: 409,
+      code: 'store_not_connected',
+      message: 'Reconnect the store',
+    });
+
+    expect(coded.code).toBe('store_not_connected');
+    expect(errorCodeOf(coded)).toBe('store_not_connected');
+    expect(ApiRequestError.from({ statusCode: 409, message: 'Conflict' }).code).toBeUndefined();
   });
 });

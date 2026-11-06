@@ -1,26 +1,36 @@
-import { describeSyncOutcome, inFlightCount } from './useSyncProgress';
+import { LIVE_POLLING } from '@/lib/in-flight-polling';
+import { describeSyncProgress, isSettled } from './useSyncProgress';
 
-const COUNTS = {
-  listed: 38,
-  pending: 0,
-  failed: 0,
-  removing: 0,
-  removed_by_hand: 1,
-  excluded: 4,
-};
-
-describe('sync outcome', () => {
-  it('counts what is still being published or taken off', () => {
-    expect(inFlightCount({ ...COUNTS, pending: 3, removing: 2 })).toBe(5);
+describe('describeSyncProgress', () => {
+  it('says every product went once nothing is pending or failed', () => {
+    expect(describeSyncProgress({ pending: 0, failed: 0, done: true })).toBe(
+      'Every product was sent.',
+    );
   });
 
-  it('sums up a clean sync', () => {
-    expect(describeSyncOutcome(COUNTS)).toBe('38 products published');
+  it('names what is still to send and what failed', () => {
+    expect(describeSyncProgress({ pending: 3, failed: 2, done: false })).toBe(
+      '3 still to send, 2 failed',
+    );
   });
 
-  it('names failures and what is left to send', () => {
-    expect(describeSyncOutcome({ ...COUNTS, failed: 2, pending: 1 })).toBe(
-      '38 products published, 2 failed, 1 still to send',
+  it('names failures alone once the sync is done', () => {
+    expect(describeSyncProgress({ pending: 0, failed: 1, done: true })).toBe('1 failed');
+  });
+});
+
+describe('isSettled', () => {
+  it('keeps watching while the server says something it queued is pending', () => {
+    expect(isSettled({ pending: 2, failed: 0, done: false }, 60_000)).toBe(false);
+  });
+
+  it('settles once the server says the sync is done, however soon', () => {
+    expect(isSettled({ pending: 0, failed: 1, done: true }, 0)).toBe(true);
+  });
+
+  it('gives up watching after the longest live polling', () => {
+    expect(isSettled({ pending: 2, failed: 0, done: false }, LIVE_POLLING.maxDurationMs)).toBe(
+      true,
     );
   });
 });

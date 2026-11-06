@@ -4,11 +4,9 @@ import {
   OVERRIDE_TITLE_MAX_LENGTH,
   type VisibilityChoice,
 } from './listings.constants';
-import type { ListingOverride, ListingOverrideView, ProductChannel } from './listings.types';
-import { type components, ListingVisibility } from '@/api/schema';
+import type { ListingEditor, ListingOverridePatch } from './listings.types';
+import { ListingVisibility } from '@/api/schema';
 import { optionalCount, optionalMoneyAmount } from '@/lib/form-schemas';
-
-type Product = components['schemas']['ProductDto'];
 
 export const overrideFormSchema = z.object({
   title: z.string().trim().max(OVERRIDE_TITLE_MAX_LENGTH),
@@ -32,75 +30,68 @@ export const overrideFormSchema = z.object({
 
 export type OverrideFormValues = z.infer<typeof overrideFormSchema>;
 
-/** What the product says where the listing does not override it; only its images' URLs matter. */
-export type ProductDefaults = Pick<Product, 'descriptionHtml' | 'tags'> & {
-  media: Pick<Product['media'][number], 'url'>[];
-};
-
-function countText(value: number | null | undefined): string {
-  return value === null || value === undefined ? '' : String(value);
+/** The product's own values, which a field goes back to when it follows the product again. */
+export interface ProductDefaults {
+  descriptionHtml: string;
+  tags: string[];
+  mediaUrls: string[];
 }
 
-function toPriceFields(channel: ProductChannel): OverrideFormValues['prices'] {
-  const overrides = new Map(
-    (channel.override?.variantPrices ?? []).map((entry) => [entry.variantId, entry]),
-  );
-  return channel.variants.map((variant) => {
-    const override = overrides.get(variant.variantId);
-    return {
+export function productDefaultsOf(listing: ListingEditor): ProductDefaults {
+  return {
+    descriptionHtml: listing.descriptionHtml.product,
+    tags: listing.tags.product,
+    mediaUrls: listing.images.product,
+  };
+}
+
+function countText(value: number | null): string {
+  return value === null ? '' : String(value);
+}
+
+/**
+ * The form from the listing as the API reads it. Overridden fields hold the store's value;
+ * the others hold the product's, ready to edit once the merchant changes them for the store.
+ */
+export function toOverrideForm(listing: ListingEditor): OverrideFormValues {
+  return {
+    title: listing.title.override ?? '',
+    customDescription: listing.descriptionHtml.overridden,
+    descriptionHtml: listing.descriptionHtml.effective,
+    customTags: listing.tags.overridden,
+    tags: listing.tags.effective,
+    customMedia: listing.images.overridden,
+    mediaUrls: listing.images.effective,
+    visibility: (listing.visibility.override ?? FOLLOW_PRODUCT) as VisibilityChoice,
+    inventoryBuffer: countText(listing.stock.inventoryBuffer),
+    maxQuantity: countText(listing.stock.maxQuantity),
+    prices: listing.variants.map((variant) => ({
       variantId: variant.variantId,
-      price: override?.price ?? '',
-      compareAtPrice: override?.compareAtPrice ?? '',
-    };
-  });
-}
-
-function toDescriptionFields(
-  override: ListingOverrideView | null,
-  product: ProductDefaults,
-): Pick<OverrideFormValues, 'customDescription' | 'descriptionHtml'> {
-  const custom = override?.descriptionHtml ?? null;
-  return {
-    customDescription: custom !== null,
-    descriptionHtml: custom ?? product.descriptionHtml,
+      price: variant.price.override ?? '',
+      compareAtPrice: variant.compareAtPrice.override ?? '',
+    })),
   };
 }
 
-/** Tags and images: the store's own once overridden, the product's to start from otherwise. */
-function toTagAndMediaFields(
-  override: ListingOverrideView | null,
-  product: ProductDefaults,
-): Pick<OverrideFormValues, 'customTags' | 'tags' | 'customMedia' | 'mediaUrls'> {
-  return {
-    customTags: (override?.tags ?? null) !== null,
-    tags: override?.tags ?? product.tags,
-    customMedia: (override?.mediaUrls ?? null) !== null,
-    mediaUrls: override?.mediaUrls ?? product.media.map(({ url }) => url),
-  };
-}
+type OverrideFields = Required<Omit<ListingOverridePatch, 'variantPrices'>>;
+type VariantPrice = NonNullable<ListingOverridePatch['variantPrices']>[number];
 
-export function toOverrideForm(
-  channel: ProductChannel,
-  product: ProductDefaults,
-): OverrideFormValues {
-  const override = channel.override ?? null;
-  return {
-    title: override?.title ?? '',
-    ...toDescriptionFields(override, product),
-    ...toTagAndMediaFields(override, product),
-    visibility: (override?.visibility ?? FOLLOW_PRODUCT) as VisibilityChoice,
-    inventoryBuffer: countText(override?.inventoryBuffer),
-    maxQuantity: countText(override?.maxQuantity),
-    prices: toPriceFields(channel),
-  };
-}
+const OVERRIDE_FIELDS = [
+  'title',
+  'descriptionHtml',
+  'tags',
+  'mediaUrls',
+  'visibility',
+  'inventoryBuffer',
+  'maxQuantity',
+] as const satisfies readonly (keyof OverrideFields)[];
 
 function toCount(value: string): number | null {
   return value.trim() === '' ? null : Number.parseInt(value, 10);
 }
 
-/** The override body. Unticked tags and images follow the product again. */
-export function toOverrideBody(values: OverrideFormValues): ListingOverride {
+/** What the form says the store overrides, field by field; null follows the product. */
+function toOverrideFields(values: OverrideFormValues): OverrideFields {
   return {
     title: values.title.trim() || null,
     descriptionHtml: values.customDescription ? values.descriptionHtml : null,
@@ -109,17 +100,53 @@ export function toOverrideBody(values: OverrideFormValues): ListingOverride {
     visibility: values.visibility === FOLLOW_PRODUCT ? null : values.visibility,
     inventoryBuffer: toCount(values.inventoryBuffer),
     maxQuantity: toCount(values.maxQuantity),
-    variantPrices: toVariantPrices(values.prices),
   };
 }
 
-/** Variants that override their price, their compare-at price, or both. */
-function toVariantPrices(prices: OverrideFormValues['prices']): ListingOverride['variantPrices'] {
-  return prices
-    .map((entry) => ({
-      variantId: entry.variantId,
-      price: entry.price.trim() || null,
-      compareAtPrice: entry.compareAtPrice.trim() || null,
-    }))
-    .filter((entry) => entry.price !== null || entry.compareAtPrice !== null);
+function toVariantPrice(entry: OverrideFormValues['prices'][number]): VariantPrice {
+  return {
+    variantId: entry.variantId,
+    price: entry.price.trim() || null,
+    compareAtPrice: entry.compareAtPrice.trim() || null,
+  };
+}
+
+function sameValue(left: unknown, right: unknown): boolean {
+  return JSON.stringify(left) === JSON.stringify(right);
+}
+
+/** The variants whose prices changed; both null reverts a variant to the pricing rule. */
+function changedVariantPrices(
+  saved: OverrideFormValues['prices'],
+  current: OverrideFormValues['prices'],
+): VariantPrice[] {
+  return current.map(toVariantPrice).filter((entry, index) => {
+    const before = saved[index];
+    return !before || !sameValue(toVariantPrice(before), entry);
+  });
+}
+
+/**
+ * Only what changed since the last save, as a PATCH: an absent field keeps its override, null
+ * makes it follow the product again, and variant prices merge per variant. Empty when nothing
+ * changed.
+ */
+export function toOverridePatch(
+  saved: OverrideFormValues,
+  current: OverrideFormValues,
+): ListingOverridePatch {
+  const before = toOverrideFields(saved);
+  const after = toOverrideFields(current);
+  const fields = Object.fromEntries(
+    OVERRIDE_FIELDS.filter((key) => !sameValue(before[key], after[key])).map((key) => [
+      key,
+      after[key],
+    ]),
+  ) as Partial<OverrideFields>;
+  const variantPrices = changedVariantPrices(saved.prices, current.prices);
+  return variantPrices.length > 0 ? { ...fields, variantPrices } : fields;
+}
+
+export function isEmptyPatch(patch: ListingOverridePatch): boolean {
+  return Object.keys(patch).length === 0;
 }

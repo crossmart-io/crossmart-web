@@ -28,34 +28,30 @@ function scrollToStoreOnlyFields(): void {
 }
 
 /** Where the listing stands in the store, live, with why and the fix when it needs one. */
-function ListingState({
-  storeMissing,
-}: {
-  storeMissing: ListingEditorHeaderProps['storeMissing'];
-}) {
-  const { listingRef, channel, readOnly } = useListingEditorContext();
+function ListingState() {
+  const { listingRef, listing, readOnly } = useListingEditorContext();
   const fix = listingFixOf({
-    displayState: channel.displayState,
-    missingRequirement: channel.listing?.missingRequirement,
-    storeMissing,
+    displayState: listing.displayState,
+    displayRequirement: listing.displayRequirement,
+    missingRequirement: listing.listing?.missingRequirement,
   });
   return (
     <div className="flex flex-col items-start gap-1.5">
       <div className="flex flex-wrap items-center gap-2" aria-live="polite">
-        <ListingStateBadge state={channel.displayState} />
-        {channel.selected && channel.listing && (
+        <ListingStateBadge state={listing.displayState} />
+        {listing.selected && listing.listing && (
           <span className="text-xs text-muted-foreground">
-            {LISTING_SOURCE_LABELS[channel.listing.source]}
+            {LISTING_SOURCE_LABELS[listing.listing.source]}
           </span>
         )}
       </div>
       <ListingIssue
-        state={channel.displayState}
-        reason={channel.displayReason}
+        state={listing.displayState}
+        reason={listing.displayReason}
         fix={fix}
         listing={listingRef}
         canEdit={!readOnly}
-        canRetry={!needsReconnect(channel.connection.status)}
+        canRetry={!needsReconnect(listing.connection.status)}
         onOpenOverride={scrollToStoreOnlyFields}
       />
     </div>
@@ -64,9 +60,9 @@ function ListingState({
 
 /** Ways out of the editor: the product's page, the live listing, and taking it off the store. */
 function ListingLinks({ showProductLink }: { showProductLink: boolean }) {
-  const { listingRef, channel, readOnly } = useListingEditorContext();
+  const { listingRef, listing, readOnly } = useListingEditorContext();
   const returnTo = useReturnToState();
-  const externalUrl = channel.listing?.externalUrl;
+  const externalUrl = listing.listing?.externalUrl;
   return (
     <div className="flex flex-wrap items-center gap-1">
       {showProductLink && (
@@ -85,8 +81,8 @@ function ListingLinks({ showProductLink }: { showProductLink: boolean }) {
           </a>
         </Button>
       )}
-      {channel.selected && !readOnly && (
-        <RemoveFromStoreButton listingRef={listingRef} store={channel.connection.displayName} />
+      {listing.selected && !readOnly && (
+        <RemoveFromStoreButton listingRef={listingRef} store={listing.connection.displayName} />
       )}
     </div>
   );
@@ -111,29 +107,24 @@ function WriteAllWithAi() {
 interface ListingEditorHeaderProps {
   isAdding: boolean;
   showProductLink: boolean;
-  storeMissing: Parameters<typeof listingFixOf>[0]['storeMissing'];
 }
 
 /** The product, the store it is in, its state there, and what differs from the product. */
-export function ListingEditorHeader({
-  isAdding,
-  showProductLink,
-  storeMissing,
-}: ListingEditorHeaderProps) {
-  const { product, channel } = useListingEditorContext();
-  const store = channel.connection.displayName;
+export function ListingEditorHeader({ isAdding, showProductLink }: ListingEditorHeaderProps) {
+  const { listing } = useListingEditorContext();
+  const store = listing.connection.displayName;
   return (
     <SheetHeader className="gap-3 border-b pr-12">
-      <StoreName connection={channel.connection} />
+      <StoreName connection={listing.connection} />
       <div className="flex flex-col gap-1">
         <SheetTitle dir="auto" className="line-clamp-2 break-words">
-          {product.title}
+          {listing.title.product}
         </SheetTitle>
         <SheetDescription>
           {isAdding ? LISTING_EDITOR_COPY.addingTo(store) : LISTING_EDITOR_COPY.editingIn(store)}
         </SheetDescription>
       </div>
-      <ListingState storeMissing={storeMissing} />
+      <ListingState />
       <ListingLinks showProductLink={showProductLink} />
       <div className="flex flex-wrap items-center justify-between gap-2">
         <ListingChangesSummary />

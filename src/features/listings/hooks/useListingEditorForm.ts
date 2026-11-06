@@ -1,24 +1,26 @@
 import { zodResolver } from '@hookform/resolvers/zod';
-import type { FormEvent } from 'react';
+import { type FormEvent, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { LISTING_FIELDS, productValuePatch } from '../listing-editor';
-import type { ListingEditorData } from './useListingEditor';
-import { applyFormPatch } from './useListingField';
+import type { ListingEditor } from '../listings.types';
+import {
+  isEmptyPatch,
+  overrideFormSchema,
+  type OverrideFormValues,
+  productDefaultsOf,
+  toOverrideForm,
+  toOverridePatch,
+} from '../override-form';
+import { applyFormPatch, FORM_EDIT } from './useListingField';
 import {
   type ProductChannelRef,
   useAddToStore,
-  useSaveListingOverride,
+  usePatchListingOverride,
 } from './useProductChannels';
-import {
-  overrideFormSchema,
-  type OverrideFormValues,
-  toOverrideBody,
-  toOverrideForm,
-} from '../override-form';
 
 interface ListingEditorFormOptions {
   listingRef: ProductChannelRef;
-  data: ListingEditorData;
+  listing: ListingEditor;
   /** Adding saves the store's changes first, then adds the product, so it is published with them. */
   isAdding: boolean;
   /** Called once the product was added to the store. */
@@ -26,28 +28,32 @@ interface ListingEditorFormOptions {
 }
 
 /**
- * The listing editor's form: the store's changes, saved as the listing's override. Saving keeps
- * the editor open on what was saved, so the listing's state can be watched as it publishes.
+ * The listing editor's form. Saving sends only what changed as a PATCH, so a field brought back
+ * to the product's value is sent as null and every other override stays as it is. The editor
+ * stays open on what was saved, so the listing's state can be watched as it publishes.
  */
 export function useListingEditorForm({
   listingRef,
-  data,
+  listing,
   isAdding,
   onAdded,
 }: ListingEditorFormOptions) {
-  const { product, channel } = data;
+  // What was last saved, which the next save is compared with to send only the changes.
+  const [saved, setSaved] = useState(() => toOverrideForm(listing));
   const form = useForm<OverrideFormValues>({
     resolver: zodResolver(overrideFormSchema),
-    defaultValues: toOverrideForm(channel, product),
+    defaultValues: saved,
   });
-  const save = useSaveListingOverride(listingRef);
+  const patch = usePatchListingOverride(listingRef);
   const add = useAddToStore(listingRef);
 
   const submit = form.handleSubmit(async (values) => {
     try {
-      if (form.formState.isDirty) {
-        const saved = await save.mutateAsync(toOverrideBody(values));
-        form.reset(toOverrideForm(saved, product));
+      const changes = toOverridePatch(saved, values);
+      if (!isEmptyPatch(changes)) {
+        await patch.mutateAsync(changes);
+        setSaved(values);
+        form.reset(values);
       }
       if (isAdding) {
         await add.mutateAsync();
@@ -60,13 +66,14 @@ export function useListingEditorForm({
 
   /** Every field follows the product again; saved with the next save. */
   const useProductValuesEverywhere = () => {
+    const defaults = productDefaultsOf(listing);
     for (const field of LISTING_FIELDS) {
-      applyFormPatch(form.setValue, productValuePatch(field, product));
+      applyFormPatch(form.setValue, productValuePatch(field, defaults));
     }
     form.setValue(
       'prices',
       form.getValues('prices').map((entry) => ({ ...entry, price: '', compareAtPrice: '' })),
-      { shouldDirty: true, shouldValidate: true },
+      FORM_EDIT,
     );
   };
 
@@ -78,7 +85,7 @@ export function useListingEditorForm({
       event.stopPropagation();
       void submit(event);
     },
-    error: save.error ?? add.error,
+    error: patch.error ?? add.error,
     useProductValuesEverywhere,
   };
 }

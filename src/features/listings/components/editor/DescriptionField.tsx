@@ -29,16 +29,16 @@ function DescriptionPreview({ html, compact = false }: { html: string; compact?:
 
 /** The description in this store: the product's, or one written for this store. */
 export function DescriptionField() {
-  const { product, readOnly } = useListingEditorContext();
+  const { productDefaults, readOnly } = useListingEditorContext();
   const { control, setValue } = useFormContext<OverrideFormValues>();
-  const { origin, useProductValue } = useListingField(ListingField.Description, product);
+  const { origin, useProductValue } = useListingField(ListingField.Description, productDefaults);
   const changed = origin === FieldOrigin.Store;
   return (
     <InheritedField
       name={LISTING_FIELD_LABELS.description}
       label={<FieldLabel id={DESCRIPTION_LABEL_ID}>{LISTING_FIELD_LABELS.description}</FieldLabel>}
       origin={origin}
-      productValue={<DescriptionPreview html={product.descriptionHtml} compact />}
+      productValue={<DescriptionPreview html={productDefaults.descriptionHtml} compact />}
       onUseProductValue={readOnly ? undefined : useProductValue}
       action={<ContentRewriteButton field={ContentField.description} />}
     >
@@ -57,7 +57,7 @@ export function DescriptionField() {
       ) : (
         <>
           <p className="rounded-md bg-muted/40 p-2 text-muted-foreground">
-            <DescriptionPreview html={product.descriptionHtml} />
+            <DescriptionPreview html={productDefaults.descriptionHtml} />
           </p>
           {!readOnly && (
             <ChangeForStoreButton

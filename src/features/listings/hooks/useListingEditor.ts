@@ -1,51 +1,44 @@
-import { useProduct } from '@/features/catalog';
-import type { Product, ProductChannel } from '../listings.types';
+import { api } from '@/api/client';
+import { isNotFoundError } from '@/api/api-error';
+import { useInFlightPolling } from '@/hooks/useInFlightPolling';
+import { isListingInFlight } from '../listing-states';
+import { LISTING_EDITOR_ENDPOINT } from '../listings.constants';
+import type { ListingEditor } from '../listings.types';
 import type { ProductChannelRef } from './useProductChannels';
-import { useProductChannels } from './useProductChannels';
-
-/** One product in one store: the product's own values, and the store's listing and changes. */
-export interface ListingEditorData {
-  product: Product;
-  channel: ProductChannel;
-}
 
 export interface ListingEditorQuery {
-  data: ListingEditorData | undefined;
+  data: ListingEditor | undefined;
   isPending: boolean;
-  /** The product or the store's listing could not be loaded. */
-  error: Error | null;
-  /** Both loaded, but the product is not offered to this store. */
+  /** Why the listing could not be loaded, other than not existing; null when it loaded. */
+  error: unknown;
+  /** The product or the store is gone. */
   isMissing: boolean;
   refetch: () => void;
 }
 
-function findChannel(
-  channels: readonly ProductChannel[] | undefined,
-  connectionId: string,
-): ProductChannel | undefined {
-  return channels?.find((channel) => channel.connection.id === connectionId);
+function isInFlight(listing: ListingEditor): boolean {
+  return isListingInFlight(listing.displayState);
 }
 
 /**
- * What the listing editor reads: the product (its values are what the store inherits) and the
- * product's listing in this store (state, store prices, and what the store changes). The listing
- * keeps refetching while it publishes, so the editor shows its state live.
- *
- * Built from today's endpoints; a single per-listing read would replace both queries here
- * without changing the editor.
+ * One product in one store as the editor reads it: per field, the product's value, the store's
+ * override and the result, with the listing's state. Refetches while the listing publishes, so
+ * the editor shows its state live.
  */
 export function useListingEditor(ref: ProductChannelRef): ListingEditorQuery {
-  const product = useProduct(ref.workspaceId, ref.productId);
-  const channels = useProductChannels(ref.workspaceId, ref.productId);
-  const channel = findChannel(channels.data, ref.connectionId);
+  const refetchInterval = useInFlightPolling(isInFlight);
+  const query = api.useQuery(
+    'get',
+    LISTING_EDITOR_ENDPOINT,
+    { params: { path: ref } },
+    { refetchInterval },
+  );
+  const isMissing = isNotFoundError(query.error);
   return {
-    data: product.data && channel ? { product: product.data, channel } : undefined,
-    isPending: product.isPending || channels.isPending,
-    error: product.error ?? channels.error,
-    isMissing: Boolean(product.data && channels.data && !channel),
-    refetch: () => {
-      void product.refetch();
-      void channels.refetch();
-    },
+    data: query.data,
+    isPending: query.isPending,
+    error: isMissing ? null : (query.error ?? null),
+    isMissing,
+    refetch: () => void query.refetch(),
   };
 }

@@ -2,35 +2,39 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
-import { ListingDisplayState, PriceSource, PublishRequirement } from '@/api/schema';
+import { ListingDisplayState, PublishRequirement } from '@/api/schema';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { GenerateAvailability } from '@/features/suggestions';
 import type * as Suggestions from '@/features/suggestions';
 import { useListingEditor } from '../hooks/useListingEditor';
+import type * as Previews from '../hooks/usePreviews';
+import { useRulePrices } from '../hooks/usePreviews';
 import type * as ProductChannelHooks from '../hooks/useProductChannels';
 import {
   useAddToStore,
+  usePatchListingOverride,
   useRemoveFromStore,
-  useSaveListingOverride,
 } from '../hooks/useProductChannels';
 import { LISTING_EDITOR_COPY, OverrideSheetMode } from '../listings.constants';
-import type { ListingOverride, ProductChannel } from '../listings.types';
+import type { ListingEditor, ListingOverridePatch, ProductChannel } from '../listings.types';
 import {
-  channelVariantFixture,
-  listingFixture,
-  overrideFixture,
+  listingEditorFixture,
+  listingEditorVariantFixture,
+  overridden,
   productChannelFixture,
-  productFixture,
 } from '../testing/listing.fixture';
 import { ListingEditorSheet } from './ListingEditorSheet';
 
 vi.mock('../hooks/useListingEditor', () => ({
   useListingEditor: vi.fn<typeof useListingEditor>(),
 }));
-vi.mock('../hooks/useStoreMissing', () => ({ useStoreMissing: () => undefined }));
+vi.mock('../hooks/usePreviews', async (importOriginal) => ({
+  ...(await importOriginal<typeof Previews>()),
+  useRulePrices: vi.fn<typeof useRulePrices>(),
+}));
 vi.mock('../hooks/useProductChannels', async (importOriginal) => ({
   ...(await importOriginal<typeof ProductChannelHooks>()),
-  useSaveListingOverride: vi.fn<typeof useSaveListingOverride>(),
+  usePatchListingOverride: vi.fn<typeof usePatchListingOverride>(),
   useAddToStore: vi.fn<typeof useAddToStore>(),
   useRemoveFromStore: vi.fn<typeof useRemoveFromStore>(),
 }));
@@ -40,7 +44,7 @@ vi.mock('@/features/suggestions', async (importOriginal) => ({
 }));
 
 const REF = { workspaceId: 'ws-1', productId: 'p-1', connectionId: 'c-1' };
-const PRODUCT = productFixture();
+const WITH_TITLE = listingEditorFixture({ title: overridden('Linen shirt', 'Shop title') });
 
 interface RenderOptions {
   canEdit?: boolean;
@@ -49,14 +53,15 @@ interface RenderOptions {
   onOuterSubmit?: () => void;
 }
 
-function mockMutations(channel: ProductChannel) {
-  const save = vi
-    .fn<(body: ListingOverride) => Promise<ProductChannel>>()
+function mockMutations() {
+  const channel = productChannelFixture();
+  const patch = vi
+    .fn<(body: ListingOverridePatch) => Promise<ProductChannel>>()
     .mockResolvedValue(channel);
-  vi.mocked(useSaveListingOverride).mockReturnValue({
-    mutateAsync: save,
+  vi.mocked(usePatchListingOverride).mockReturnValue({
+    mutateAsync: patch,
     error: null,
-  } as unknown as ReturnType<typeof useSaveListingOverride>);
+  } as unknown as ReturnType<typeof usePatchListingOverride>);
   const add = vi.fn<() => Promise<ProductChannel>>().mockResolvedValue(channel);
   vi.mocked(useAddToStore).mockReturnValue({
     mutateAsync: add,
@@ -65,18 +70,19 @@ function mockMutations(channel: ProductChannel) {
   vi.mocked(useRemoveFromStore).mockReturnValue({
     mutateAsync: vi.fn<() => Promise<ProductChannel>>(),
   } as unknown as ReturnType<typeof useRemoveFromStore>);
-  return { save, add };
+  return { patch, add };
 }
 
-function renderEditor(channel: ProductChannel, options: RenderOptions = {}) {
+function renderEditor(listing: ListingEditor, options: RenderOptions = {}) {
   vi.mocked(useListingEditor).mockReturnValue({
-    data: { product: PRODUCT, channel },
+    data: listing,
     isPending: false,
     error: null,
     isMissing: false,
     refetch: vi.fn<() => void>(),
   });
-  const mutations = mockMutations(channel);
+  vi.mocked(useRulePrices).mockReturnValue(new Map([['v-1', '62.00']]));
+  const mutations = mockMutations();
   const onClose = vi.fn<() => void>();
   render(
     <QueryClientProvider client={new QueryClient()}>
@@ -111,13 +117,15 @@ function fieldOf(element: HTMLElement): HTMLElement {
   return block;
 }
 
+const save = () => userEvent.click(screen.getByRole('button', { name: LISTING_EDITOR_COPY.save }));
+
 describe('ListingEditorSheet', () => {
-  it('names the product, the store and where the listing stands', () => {
+  it('names the product, the store and where the listing stands, with its fix', () => {
     renderEditor(
-      productChannelFixture({
+      listingEditorFixture({
         displayState: ListingDisplayState.needs_details,
         displayReason: 'eBay asks for a category',
-        listing: listingFixture({ missingRequirement: PublishRequirement.category }),
+        displayRequirement: PublishRequirement.category,
       }),
     );
 
@@ -128,8 +136,23 @@ describe('ListingEditorSheet', () => {
     expect(within(dialog).getByRole('button', { name: 'Choose a category' })).toBeInTheDocument();
   });
 
+  it('sends a product-level blocker to the exact place it is fixed', () => {
+    renderEditor(
+      listingEditorFixture({
+        displayState: ListingDisplayState.needs_details,
+        displayReason: 'Add a product photo',
+        displayRequirement: PublishRequirement.images,
+      }),
+    );
+
+    expect(screen.getByRole('link', { name: 'Add a photo' })).toHaveAttribute(
+      'href',
+      '/products/p-1#media',
+    );
+  });
+
   it('shows fields the store does not change as coming from the product', () => {
-    renderEditor(productChannelFixture());
+    renderEditor(listingEditorFixture());
 
     const title = screen.getByLabelText('Title');
     expect(title).toHaveValue('');
@@ -141,9 +164,10 @@ describe('ListingEditorSheet', () => {
   });
 
   it('marks what the store changes, beside the product’s value', () => {
-    renderEditor(productChannelFixture({ override: overrideFixture({ title: 'Shop title' }) }));
+    renderEditor(WITH_TITLE);
 
     const field = fieldOf(screen.getByLabelText('Title'));
+    expect(screen.getByLabelText('Title')).toHaveValue('Shop title');
     expect(within(field).getByText(LISTING_EDITOR_COPY.changedForStore)).toBeInTheDocument();
     expect(within(field).getByText(/Linen shirt/)).toBeInTheDocument();
     expect(screen.getByText(LISTING_EDITOR_COPY.changesLabel).parentElement).toHaveTextContent(
@@ -151,60 +175,46 @@ describe('ListingEditorSheet', () => {
     );
   });
 
-  it('goes back to the product’s value and saves it', async () => {
-    const { save } = renderEditor(
-      productChannelFixture({ override: overrideFixture({ title: 'Shop title' }) }),
-    );
+  it('goes back to the product’s value with a patch of that field alone', async () => {
+    const { patch } = renderEditor(WITH_TITLE);
 
     await userEvent.click(screen.getByRole('button', { name: 'Use product value for title' }));
 
     const title = screen.getByLabelText('Title');
     expect(title).toHaveValue('');
     expect(within(fieldOf(title)).getByText(LISTING_EDITOR_COPY.fromProduct)).toBeInTheDocument();
-    await userEvent.click(screen.getByRole('button', { name: LISTING_EDITOR_COPY.save }));
-    expect(save).toHaveBeenCalledWith(expect.objectContaining({ title: null }));
+    await save();
+    expect(patch).toHaveBeenCalledWith({ title: null });
   });
 
   it('saves only the listing when it opens inside the product page’s form', async () => {
     const onOuterSubmit = vi.fn<() => void>();
-    const { save } = renderEditor(
-      productChannelFixture({ override: overrideFixture({ title: 'Shop title' }) }),
-      { onOuterSubmit },
-    );
+    const { patch } = renderEditor(WITH_TITLE, { onOuterSubmit });
 
     await userEvent.click(screen.getByRole('button', { name: 'Use product value for title' }));
-    await userEvent.click(screen.getByRole('button', { name: LISTING_EDITOR_COPY.save }));
+    await save();
 
-    expect(save).toHaveBeenCalled();
+    expect(patch).toHaveBeenCalled();
     expect(onOuterSubmit).not.toHaveBeenCalled();
   });
 
   it('writes a description for this store from the product’s', async () => {
-    const { save } = renderEditor(productChannelFixture());
+    const { patch } = renderEditor(listingEditorFixture());
 
     await userEvent.click(
       screen.getByRole('button', { name: `${LISTING_EDITOR_COPY.changeForStore}: description` }),
     );
-    await userEvent.click(screen.getByRole('button', { name: LISTING_EDITOR_COPY.save }));
+    await save();
 
-    expect(save).toHaveBeenCalledWith(
-      expect.objectContaining({ descriptionHtml: '<p>Soft washed linen.</p>' }),
-    );
+    expect(patch).toHaveBeenCalledWith({ descriptionHtml: '<p>Soft washed linen.</p>' });
   });
 
-  it('sets a variant’s price and compare-at price for this store, and reverts them', async () => {
-    const { save } = renderEditor(
-      productChannelFixture({
-        override: overrideFixture({
-          variantPrices: [{ variantId: 'v-1', price: '59.00', compareAtPrice: null }],
-        }),
+  it('shows what the pricing rule charges beside a variant’s own price, and reverts it', async () => {
+    const { patch } = renderEditor(
+      listingEditorFixture({
         variants: [
-          channelVariantFixture({
-            price: {
-              ...channelVariantFixture().price,
-              price: '59.00',
-              source: PriceSource.override,
-            },
+          listingEditorVariantFixture({
+            price: { product: '64.00', override: '59.00', effective: '59.00', overridden: true },
           }),
         ],
       }),
@@ -212,50 +222,52 @@ describe('ListingEditorSheet', () => {
 
     const price = screen.getByLabelText('Price');
     expect(price).toHaveValue('59.00');
+    expect(price).toHaveAttribute('placeholder', '62.00');
+    expect(within(fieldOf(price)).getByText('Pricing rule: $62.00')).toBeInTheDocument();
     expect(within(fieldOf(price)).getByText(/\$64\.00/)).toBeInTheDocument();
     await userEvent.type(screen.getByLabelText('Compare-at price'), '75');
-    await userEvent.click(screen.getByRole('button', { name: LISTING_EDITOR_COPY.save }));
-    expect(save).toHaveBeenLastCalledWith(
-      expect.objectContaining({
-        variantPrices: [{ variantId: 'v-1', price: '59.00', compareAtPrice: '75' }],
-      }),
-    );
+    await save();
+    expect(patch).toHaveBeenLastCalledWith({
+      variantPrices: [{ variantId: 'v-1', price: '59.00', compareAtPrice: '75' }],
+    });
 
     await userEvent.click(screen.getByRole('button', { name: /Use product value for/ }));
-    expect(screen.getByLabelText('Price')).toHaveValue('');
+    await save();
+    expect(patch).toHaveBeenLastCalledWith({
+      variantPrices: [{ variantId: 'v-1', price: null, compareAtPrice: null }],
+    });
   });
 
   it('brings every field back to the product at once', async () => {
-    renderEditor(
-      productChannelFixture({
-        override: overrideFixture({ title: 'Shop title', tags: ['shop'] }),
+    const { patch } = renderEditor(
+      listingEditorFixture({
+        title: overridden('Linen shirt', 'Shop title'),
+        tags: overridden(['linen'], ['shop']),
       }),
     );
 
     await userEvent.click(screen.getByRole('button', { name: LISTING_EDITOR_COPY.resetAll }));
 
     expect(screen.getByText(LISTING_EDITOR_COPY.noChanges)).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: LISTING_EDITOR_COPY.save })).toBeEnabled();
+    await save();
+    expect(patch).toHaveBeenCalledWith({ title: null, tags: null });
   });
 
   it('adds the product with its changes, then closes', async () => {
-    const { add, onClose } = renderEditor(
-      productChannelFixture({ selected: false, listing: null }),
-      {
-        mode: OverrideSheetMode.Add,
-      },
+    const { add, patch, onClose } = renderEditor(
+      listingEditorFixture({ selected: false, listing: null }),
+      { mode: OverrideSheetMode.Add },
     );
 
     await userEvent.click(screen.getByRole('button', { name: LISTING_EDITOR_COPY.add }));
 
+    expect(patch).not.toHaveBeenCalled();
     expect(add).toHaveBeenCalled();
     expect(onClose).toHaveBeenCalled();
   });
 
   it('only shows the listing to members who may not edit it', () => {
-    renderEditor(productChannelFixture({ override: overrideFixture({ title: 'Shop title' }) }), {
-      canEdit: false,
-    });
+    renderEditor(WITH_TITLE, { canEdit: false });
 
     expect(screen.getByLabelText('Title')).toBeDisabled();
     expect(
