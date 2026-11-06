@@ -5,7 +5,7 @@ import {
   AgentConsentForm,
   AgentIdentity,
   agentClientId,
-  useAgentName,
+  useAgentHeadingName,
 } from '@/features/agents';
 import { AuthCard, refreshSession, useSession } from '@/features/auth';
 import { useMe } from '@/features/workspaces';
@@ -25,7 +25,7 @@ function usePickedWorkspaceName(): string | undefined {
 /** An agent's sign-in, step two: what it may do, and the answer. */
 export function AgentConsentPage() {
   const clientId = agentClientId(useLocation().search);
-  const agentName = useAgentName(clientId);
+  const agentName = useAgentHeadingName(clientId);
   const workspaceName = usePickedWorkspaceName();
   return (
     <AgentAuthorizationShell>

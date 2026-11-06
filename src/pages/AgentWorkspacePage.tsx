@@ -5,13 +5,13 @@ import {
   AgentIdentity,
   AgentWorkspacePicker,
   agentClientId,
-  useAgentName,
+  useAgentHeadingName,
 } from '@/features/agents';
 
 /** An agent's sign-in, step one: the workspace it will work in. */
 export function AgentWorkspacePage() {
   const clientId = agentClientId(useLocation().search);
-  const agentName = useAgentName(clientId);
+  const agentName = useAgentHeadingName(clientId);
   return (
     <AgentAuthorizationShell>
       <AuthCard

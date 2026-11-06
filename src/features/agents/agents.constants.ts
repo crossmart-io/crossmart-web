@@ -4,6 +4,7 @@ export const AGENT_CONNECTIONS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/agen
 export const AGENT_CONNECTION_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/agent-connections/{connectionId}';
 export const AGENT_WORKSPACE_ENDPOINT = '/api/v1/oauth/workspace';
+export const AGENT_CLIENT_ENDPOINT = '/api/v1/oauth/client';
 
 /** Query parameters of an agent's authorization, as Better Auth signs and forwards them. */
 export const OAUTH_QUERY = {
@@ -65,8 +66,17 @@ export const AGENT_ACCESS_LEVELS: readonly AgentAccessLevel[] = Object.values(Ag
 export const ACCESS_LEVEL_INPUT_ID_PREFIX = 'agent-access-';
 export const WORKSPACE_INPUT_ID_PREFIX = 'agent-workspace-';
 
-/** Next to a site a self-registered agent claims, which Crossmart could not check. */
-export const UNVERIFIED_SITE_NOTE = 'not verified';
+/** How the agent's name and site are shown, by how far Crossmart could check them. */
+export const AGENT_IDENTITY_COPY = {
+  /** Before the host a metadata document client's name came from. */
+  verifiedBy: 'Verified by',
+  /** Before the site a self-registered agent claims, which Crossmart could not check. */
+  claims: 'Says it is from',
+  unverifiedSite: 'not verified',
+  unverifiedName: 'Unverified name',
+  unverifiedNameExplanation:
+    'This agent registered itself and chose this name. Any app can call itself Claude or ChatGPT. Continue only if you started connecting this agent just now.',
+} as const;
 
 /** Shown until the agent's details load, or when it gives no name. */
 export const UNNAMED_AGENT = 'An AI agent';

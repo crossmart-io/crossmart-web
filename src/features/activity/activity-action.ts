@@ -16,6 +16,7 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.api_key_created]: 'API key created',
   [ActivityAction.api_key_revoked]: 'API key revoked',
   [ActivityAction.agent_disconnected]: 'Agent disconnected',
+  [ActivityAction.unused_agents_removed]: 'Unused agents removed',
   [ActivityAction.member_invited]: 'Member invited',
   [ActivityAction.invitation_revoked]: 'Invitation revoked',
   [ActivityAction.member_joined]: 'Member joined',

@@ -1,9 +1,10 @@
-import { AgentScope } from '@/api/schema';
+import { AgentClientRegistration, AgentScope } from '@/api/schema';
 import {
   acceptedScope,
   agentClientId,
-  agentSite,
+  agentHeadingName,
   asksToWrite,
+  hasVerifiedName,
   requestedAgentScopes,
 } from './agent-authorization';
 import { AgentAccessLevel } from './agents.constants';
@@ -33,20 +34,18 @@ describe('agent authorization query', () => {
   });
 });
 
-describe('agent site', () => {
-  it('trusts the host of a metadata document client id', () => {
-    expect(agentSite('https://claude.ai/oauth/client.json', 'https://evil.example')).toEqual({
-      host: 'claude.ai',
-      verified: true,
-    });
+describe('agent names', () => {
+  it('quotes a name the agent chose itself in headings, and only that one', () => {
+    expect(
+      agentHeadingName({ name: 'Claude', registration: AgentClientRegistration.dynamic }),
+    ).toBe('“Claude”');
+    expect(
+      agentHeadingName({ name: 'Claude', registration: AgentClientRegistration.metadata_document }),
+    ).toBe('Claude');
   });
 
-  it('marks the site a registered client claims as unverified', () => {
-    expect(agentSite('aBcD1234', 'https://claude.ai')).toEqual({
-      host: 'claude.ai',
-      verified: false,
-    });
-    expect(agentSite('aBcD1234', 'http://claude.ai')).toBeNull();
-    expect(agentSite('aBcD1234', null)).toBeNull();
+  it('trusts only names from a metadata document', () => {
+    expect(hasVerifiedName({ registration: AgentClientRegistration.metadata_document })).toBe(true);
+    expect(hasVerifiedName({ registration: AgentClientRegistration.dynamic })).toBe(false);
   });
 });
