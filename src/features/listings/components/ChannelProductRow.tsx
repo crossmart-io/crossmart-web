@@ -8,12 +8,18 @@ import { Button } from '@/components/ui/button';
 import { TableCell, TableRow } from '@/components/ui/table';
 import { toProductRoute } from '@/config/routes';
 import { ProductThumbnail } from '@/features/catalog';
-import { CHANNEL_PRODUCT_STATE_HINTS, LISTING_SOURCE_LABELS } from '../listings.constants';
-import type { ChannelProduct } from '../listings.types';
-import { ChannelProductStateBadge } from './ChannelProductStateBadge';
+import { listingFixOf } from '../listing-fix';
+import { hasListingReason, LISTING_STATE_PRESENTATION } from '../listing-states';
+import { LISTING_SOURCE_LABELS } from '../listings.constants';
+import type { ChannelProduct, ListingStore } from '../listings.types';
+import { ListingIssue } from './ListingIssue';
+import { ListingStateBadge } from './ListingStateBadge';
 
 interface ChannelProductRowProps {
   row: ChannelProduct;
+  store: ListingStore;
+  /** Whether the member may edit listings: retry them and fix their overrides. */
+  canEdit: boolean;
   /** Removes the product from the store; absent for members who may not. */
   onRemove?: (productId: string) => Promise<unknown>;
   /** Adds a product removed by hand back to the store; absent for members who may not. */
@@ -22,26 +28,18 @@ interface ChannelProductRowProps {
 
 function ProductCell({ row }: { row: ChannelProduct }) {
   const returnTo = useReturnToState();
-  const error = row.state === ChannelProductState.failed ? row.listing?.lastError : null;
   return (
     <div className="flex min-w-0 items-center gap-3">
       <ProductThumbnail url={row.product.imageUrl} alt="" className="size-8" />
-      <div className="flex min-w-0 flex-col">
-        <Link
-          to={toProductRoute(row.product.id)}
-          state={returnTo}
-          dir="auto"
-          title={row.product.title}
-          className="line-clamp-2 font-medium break-words hover:underline"
-        >
-          {row.product.title}
-        </Link>
-        {error && (
-          <span className="line-clamp-2 text-xs text-destructive" title={error}>
-            {error}
-          </span>
-        )}
-      </div>
+      <Link
+        to={toProductRoute(row.product.id)}
+        state={returnTo}
+        dir="auto"
+        title={row.product.title}
+        className="line-clamp-2 min-w-0 font-medium break-words hover:underline"
+      >
+        {row.product.title}
+      </Link>
     </div>
   );
 }
@@ -66,20 +64,58 @@ function RemoveButton({
   );
 }
 
-/** Under the state: why the product is in the store, or what its state means. */
-function StateDetail({ row }: { row: ChannelProduct }) {
+/** Under a state with nothing to fix: why the product is in the store, or what the state means. */
+function StateHint({ row }: { row: ChannelProduct }) {
   const inStore = row.listing && row.state !== ChannelProductState.removed_by_hand;
   return (
     <span className="text-xs text-muted-foreground">
       {inStore && row.listing
         ? LISTING_SOURCE_LABELS[row.listing.source]
-        : CHANNEL_PRODUCT_STATE_HINTS[row.state]}
+        : LISTING_STATE_PRESENTATION[row.displayState].hint}
     </span>
   );
 }
 
+/** The state, and beside it the reason, the fix and a retry, or else a short hint. */
+function StateCell({
+  row,
+  store,
+  canEdit,
+}: Pick<ChannelProductRowProps, 'row' | 'store' | 'canEdit'>) {
+  const fix = listingFixOf({
+    displayState: row.displayState,
+    missingRequirement: row.listing?.missingRequirement,
+    storeMissing: store.missing,
+  });
+  return (
+    <div className="flex flex-col items-start gap-1.5 sm:w-60">
+      <ListingStateBadge state={row.displayState} />
+      {hasListingReason(row.displayState) ? (
+        <ListingIssue
+          state={row.displayState}
+          reason={row.displayReason}
+          fix={fix}
+          listing={{
+            workspaceId: store.workspaceId,
+            connectionId: store.connectionId,
+            productId: row.product.id,
+          }}
+          canEdit={canEdit}
+          canRetry={store.connected}
+        />
+      ) : (
+        <StateHint row={row} />
+      )}
+    </div>
+  );
+}
+
 /** What the row offers: removing a product in the store, or adding back one removed by hand. */
-function RowAction({ row, onRemove, onAddBack }: ChannelProductRowProps) {
+function RowAction({
+  row,
+  onRemove,
+  onAddBack,
+}: Pick<ChannelProductRowProps, 'row' | 'onRemove' | 'onAddBack'>) {
   if (row.state === ChannelProductState.removed_by_hand) {
     return onAddBack ? (
       <Button type="button" variant="outline" size="sm" onClick={() => onAddBack(row.product.id)}>
@@ -92,8 +128,14 @@ function RowAction({ row, onRemove, onAddBack }: ChannelProductRowProps) {
   return <RemoveButton row={row} onRemove={onRemove} />;
 }
 
-/** One product of the store: its state and why it is there, the last sync, and what to do. */
-export function ChannelProductRow({ row, onRemove, onAddBack }: ChannelProductRowProps) {
+/** One product of the store: where it stands and what to do about it, the last sync, actions. */
+export function ChannelProductRow({
+  row,
+  store,
+  canEdit,
+  onRemove,
+  onAddBack,
+}: ChannelProductRowProps) {
   const externalUrl = row.listing?.externalUrl;
   return (
     <TableRow className="align-top">
@@ -101,11 +143,8 @@ export function ChannelProductRow({ row, onRemove, onAddBack }: ChannelProductRo
       <TableCell className="w-full max-w-0 whitespace-normal">
         <ProductCell row={row} />
       </TableCell>
-      <TableCell>
-        <div className="flex flex-col items-start gap-1">
-          <ChannelProductStateBadge state={row.state} />
-          <StateDetail row={row} />
-        </div>
+      <TableCell className="whitespace-normal">
+        <StateCell row={row} store={store} canEdit={canEdit} />
       </TableCell>
       <TableCell className="hidden text-sm text-muted-foreground sm:table-cell">
         {row.listing?.lastSyncedAt ? <RelativeTime value={row.listing.lastSyncedAt} /> : '—'}

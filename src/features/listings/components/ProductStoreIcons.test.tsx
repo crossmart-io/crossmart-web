@@ -26,8 +26,20 @@ describe('ProductStoreIcons', () => {
   it('names each store and its status', () => {
     renderIcons([store(1), store(2, ListingStatus.ERROR)]);
 
-    expect(screen.getByRole('button', { name: 'Store 1 · Active' })).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Store 2 · Error' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Store 1 · Published' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Store 2 · Failed' })).toBeInTheDocument();
+  });
+
+  it('says in words when a store refused the product', () => {
+    renderIcons([store(1), store(2, ListingStatus.ERROR), store(3, ListingStatus.ERROR)]);
+
+    expect(screen.getByText('Failed in 2')).toBeInTheDocument();
+  });
+
+  it('adds no failure text when every store took the product', () => {
+    renderIcons([store(1), store(2, ListingStatus.PENDING)]);
+
+    expect(screen.queryByText(/Failed/)).not.toBeInTheDocument();
   });
 
   it('shows four icons and counts the rest', () => {

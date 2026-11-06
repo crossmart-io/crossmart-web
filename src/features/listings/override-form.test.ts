@@ -1,4 +1,4 @@
-import { ListingVisibility, PriceSource } from '@/api/schema';
+import { ListingDisplayState, ListingVisibility, PriceSource } from '@/api/schema';
 import { FOLLOW_PRODUCT } from './listings.constants';
 import type { ChannelVariant, ProductChannel } from './listings.types';
 import { toOverrideBody, toOverrideForm } from './override-form';
@@ -31,6 +31,8 @@ function channel(overrides: Partial<ProductChannel> = {}): ProductChannel {
       currencyCode: 'USD',
     },
     selected: true,
+    displayState: ListingDisplayState.ready,
+    displayReason: null,
     listing: null,
     override: null,
     variants: [variant()],

@@ -2,7 +2,14 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
-import { ChannelConnectionStatus, ChannelType, ListingSource, ListingStatus } from '@/api/schema';
+import {
+  ChannelConnectionStatus,
+  ChannelType,
+  ListingDisplayState,
+  ListingSource,
+  ListingStatus,
+  PublishRequirement,
+} from '@/api/schema';
 import type * as ProductChannelHooks from '../hooks/useProductChannels';
 import { useAddToStore, useRemoveFromStore } from '../hooks/useProductChannels';
 import { STORE_NOT_CONNECTED_COPY } from '../listings.constants';
@@ -24,6 +31,18 @@ const PRODUCT = {
   media: [],
 };
 
+const LISTING = {
+  id: 'l-1',
+  status: ListingStatus.ACTIVE,
+  source: ListingSource.MANUAL,
+  externalId: 'gid://shopify/Product/1',
+  externalUrl: 'https://demo.example.com/products/linen-shirt',
+  lastError: null,
+  missingRequirement: null,
+  lastSyncedAt: null,
+  category: null,
+};
+
 function channel(overrides: Partial<ProductChannel> = {}): ProductChannel {
   return {
     connection: {
@@ -34,6 +53,8 @@ function channel(overrides: Partial<ProductChannel> = {}): ProductChannel {
       currencyCode: 'USD',
     },
     selected: false,
+    displayState: ListingDisplayState.draft,
+    displayReason: null,
     listing: null,
     override: null,
     variants: [],
@@ -41,7 +62,11 @@ function channel(overrides: Partial<ProductChannel> = {}): ProductChannel {
   };
 }
 
-function renderItem(productChannel: ProductChannel, canEdit = true) {
+function renderItem(
+  productChannel: ProductChannel,
+  canEdit = true,
+  extra: { storeMissing?: PublishRequirement[]; openOverride?: boolean } = {},
+) {
   const removeFromStore = vi.fn<() => Promise<ProductChannel>>().mockResolvedValue(productChannel);
   vi.mocked(useRemoveFromStore).mockReturnValue({
     mutateAsync: removeFromStore,
@@ -61,6 +86,8 @@ function renderItem(productChannel: ProductChannel, canEdit = true) {
             product={PRODUCT}
             channel={productChannel}
             canEdit={canEdit}
+            storeMissing={extra.storeMissing}
+            openOverride={extra.openOverride}
           />
         </ul>
       </MemoryRouter>
@@ -73,7 +100,7 @@ describe('ProductChannelItem', () => {
   it('adds a product that is not in the store in one click', async () => {
     const { addToStore } = renderItem(channel());
 
-    expect(screen.getByText('Not in this store')).toBeInTheDocument();
+    expect(screen.getByText('Draft')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Add to store' }));
 
     expect(addToStore).toHaveBeenCalled();
@@ -92,19 +119,12 @@ describe('ProductChannelItem', () => {
     const { removeFromStore } = renderItem(
       channel({
         selected: true,
-        listing: {
-          id: 'l-1',
-          status: ListingStatus.ACTIVE,
-          source: ListingSource.MANUAL,
-          externalId: 'gid://shopify/Product/1',
-          externalUrl: 'https://demo.example.com/products/linen-shirt',
-          lastError: null,
-          lastSyncedAt: null,
-          category: null,
-        },
+        displayState: ListingDisplayState.published,
+        listing: LISTING,
       }),
     );
 
+    expect(screen.getByText('Published')).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Override for this store' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'View' })).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: 'Remove' }));
@@ -133,5 +153,49 @@ describe('ProductChannelItem', () => {
     );
     expect(screen.getByRole('link', { name: STORE_NOT_CONNECTED_COPY.action })).toBeInTheDocument();
     expect(addToStore).not.toHaveBeenCalled();
+  });
+
+  it('opens the overrides panel to fill in what the store refused the product for', async () => {
+    renderItem(
+      channel({
+        selected: true,
+        displayState: ListingDisplayState.needs_details,
+        displayReason: 'Brand is required',
+        listing: {
+          ...LISTING,
+          status: ListingStatus.ERROR,
+          missingRequirement: PublishRequirement.item_specifics,
+        },
+      }),
+    );
+
+    expect(screen.getByText('Needs details')).toBeInTheDocument();
+    expect(screen.getByText('Brand is required')).toBeInTheDocument();
+    await userEvent.click(screen.getByRole('button', { name: 'Fill in item specifics' }));
+
+    expect(screen.getByRole('dialog', { name: /crossmartstore/ })).toBeInTheDocument();
+  });
+
+  it('opens the overrides panel at once when a fix link asked for it', () => {
+    renderItem(channel({ selected: true, listing: LISTING }), true, { openOverride: true });
+
+    expect(screen.getByRole('dialog', { name: /crossmartstore/ })).toBeInTheDocument();
+  });
+
+  it('points a product waiting on the store’s setup to that setup', () => {
+    renderItem(
+      channel({
+        selected: true,
+        displayState: ListingDisplayState.needs_details,
+        displayReason: 'Choose the country and the product page address.',
+      }),
+      true,
+      { storeMissing: [PublishRequirement.listing_setup] },
+    );
+
+    expect(screen.getByRole('link', { name: 'Open listing setup' })).toHaveAttribute(
+      'href',
+      '/channels/c-1/settings#listing-setup',
+    );
   });
 });

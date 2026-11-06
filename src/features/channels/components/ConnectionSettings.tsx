@@ -142,19 +142,21 @@ function ConnectionCard({
         </CardTitle>
         <CardDescription>
           {connection.statusReason ??
-            'Changes reach the store at once. Resync sends everything again, after an outage or a change made in the store. Disconnecting keeps your products in both places.'}
+            'Changes reach the store at once. Disconnecting keeps your products in both places.'}
         </CardDescription>
       </CardHeader>
-      <CardContent className="flex flex-wrap gap-2">
+      <CardContent className="flex flex-col gap-4">
         {resyncAction}
-        <ConnectionActions
-          workspaceId={workspaceId}
-          channel={channel}
-          connect={channel.connect}
-          connection={connection}
-          name={connectionName(connection)}
-          onDisconnected={onDisconnected}
-        />
+        <div className="flex flex-wrap gap-2">
+          <ConnectionActions
+            workspaceId={workspaceId}
+            channel={channel}
+            connect={channel.connect}
+            connection={connection}
+            name={connectionName(connection)}
+            onDisconnected={onDisconnected}
+          />
+        </div>
       </CardContent>
     </Card>
   );

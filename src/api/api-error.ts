@@ -12,8 +12,10 @@ export const RATE_LIMITED_ERROR_MESSAGE = 'Too many requests — try again in a 
 
 export enum HttpStatus {
   Unauthorized = 401,
+  PaymentRequired = 402,
   Forbidden = 403,
   NotFound = 404,
+  Conflict = 409,
   TooManyRequests = 429,
 }
 

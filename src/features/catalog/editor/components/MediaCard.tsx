@@ -1,3 +1,4 @@
+import { PageSection } from '@/config/routes';
 import {
   closestCenter,
   DndContext,
@@ -57,7 +58,7 @@ export function MediaCard({ workspaceId, onPendingChange }: MediaCardProps) {
 
   if (media.fields.length === 0 && uploads.pendingCount === 0) {
     return (
-      <EditorCard title="Media">
+      <EditorCard title="Media" id={PageSection.ProductMedia}>
         {problems}
         <ImageDropzone onFiles={addFiles} />
       </EditorCard>
@@ -65,7 +66,7 @@ export function MediaCard({ workspaceId, onPendingChange }: MediaCardProps) {
   }
 
   return (
-    <EditorCard title="Media">
+    <EditorCard title="Media" id={PageSection.ProductMedia}>
       {problems}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext

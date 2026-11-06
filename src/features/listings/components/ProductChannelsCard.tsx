@@ -1,8 +1,12 @@
 import { Share2 } from 'lucide-react';
-import { Link } from 'react-router';
+import { useCallback } from 'react';
+import { Link, useSearchParams } from 'react-router';
+import type { PublishRequirement } from '@/api/schema';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ROUTES } from '@/config/routes';
+import { ROUTE_QUERY, ROUTES } from '@/config/routes';
+import { useChannelConnections } from '@/features/channels/hooks/useChannelConnections';
+import { useSearchParamsUpdater } from '@/hooks/useSearchParamsUpdater';
 import { useProductChannels } from '../hooks/useProductChannels';
 import type { OverrideProduct } from './ChannelOverrideSheet';
 import { ProductChannelItem } from './ProductChannelItem';
@@ -28,9 +32,31 @@ function NoChannels() {
   );
 }
 
+/** What each store's setup still lacks, by store, so a product's fix can point there. */
+function useStoreMissing(
+  workspaceId: string,
+): ReadonlyMap<string, readonly PublishRequirement[]> | undefined {
+  const { data } = useChannelConnections(workspaceId);
+  if (!data) return undefined;
+  return new Map(data.map((connection) => [connection.id, connection.publishReadiness.missing]));
+}
+
+/** The store whose overrides panel a "fix" link asked to open, and forgetting it once closed. */
+function useOverrideRequest() {
+  const [searchParams] = useSearchParams();
+  const update = useSearchParamsUpdater();
+  const clear = useCallback(
+    () => update((params) => params.delete(ROUTE_QUERY.overrideStore)),
+    [update],
+  );
+  return { connectionId: searchParams.get(ROUTE_QUERY.overrideStore), clear };
+}
+
 /** Where the product is listed, at which price, and what each channel shows differently. */
 export function ProductChannelsCard({ workspaceId, product, canEdit }: ProductChannelsCardProps) {
   const { data: channels, isPending } = useProductChannels(workspaceId, product.id);
+  const storeMissing = useStoreMissing(workspaceId);
+  const overrideRequest = useOverrideRequest();
   return (
     <Card>
       <CardHeader>
@@ -50,6 +76,9 @@ export function ProductChannelsCard({ workspaceId, product, canEdit }: ProductCh
                 product={product}
                 channel={channel}
                 canEdit={canEdit}
+                storeMissing={storeMissing?.get(channel.connection.id)}
+                openOverride={overrideRequest.connectionId === channel.connection.id}
+                onOverrideClosed={overrideRequest.clear}
               />
             ))}
           </ul>

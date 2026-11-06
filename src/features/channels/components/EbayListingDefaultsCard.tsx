@@ -1,3 +1,4 @@
+import { PageSection } from '@/config/routes';
 import { SettingsFormCard } from '@/components/forms/SettingsFormCard';
 import { Separator } from '@/components/ui/separator';
 import { EBAY_DEFAULTS_COPY } from '../channels.constants';
@@ -28,6 +29,7 @@ export function EbayListingDefaultsCard({
   return (
     <SettingsFormCard
       title={EBAY_DEFAULTS_COPY.title}
+      id={PageSection.StoreListingDefaults}
       description={`${EBAY_DEFAULTS_COPY.description} ${
         ebay.readyToList ? EBAY_DEFAULTS_COPY.ready : EBAY_DEFAULTS_COPY.notReady
       }`}

@@ -1,7 +1,7 @@
 import { ExternalLink, PencilLine, Plus, X } from 'lucide-react';
 import { useId, useState } from 'react';
 import { Link } from 'react-router';
-import { PriceSource } from '@/api/schema';
+import { PriceSource, type PublishRequirement } from '@/api/schema';
 import { ConfirmDialog } from '@/components/feedback/ConfirmDialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -17,7 +17,9 @@ import {
 } from '../listings.constants';
 import type { ChannelVariant, ProductChannel } from '../listings.types';
 import { ChannelOverrideSheet, type OverrideProduct } from './ChannelOverrideSheet';
-import { ListingStatusBadge } from './ListingStatusBadge';
+import { ListingIssue } from './ListingIssue';
+import { ListingStateBadge } from './ListingStateBadge';
+import { listingFixOf } from '../listing-fix';
 import { PriceExplanation } from './PriceExplanation';
 import { ChannelLogoSize, channelInfoFor } from '@/features/channels/channels.constants';
 import { ChannelLogo } from '@/features/channels/components/ChannelLogo';
@@ -28,6 +30,12 @@ interface ProductChannelItemProps {
   product: OverrideProduct;
   channel: ProductChannel;
   canEdit: boolean;
+  /** What the store's setup lacks, so a fix can point there; unknown while it loads. */
+  storeMissing?: readonly PublishRequirement[];
+  /** Opens the overrides panel at once, as a "fix" link from elsewhere asks. */
+  openOverride?: boolean;
+  /** Called when that panel closes, so the link's request is not repeated. */
+  onOverrideClosed?: () => void;
 }
 
 function VariantPrice({
@@ -62,10 +70,28 @@ function VariantPrice({
   );
 }
 
-function ListingState({ channel }: { channel: ProductChannel }) {
-  if (!channel.selected) return <Badge variant="outline">Not in this store</Badge>;
-  if (channel.listing) return <ListingStatusBadge status={channel.listing.status} />;
-  return <Badge variant="outline">Waiting to publish</Badge>;
+/** The first variants' prices and stock on the store, and how many more there are. */
+function VariantPrices({ channel }: { channel: ProductChannel }) {
+  const { connection, variants } = channel;
+  const shown = variants.slice(0, CHANNEL_CARD_VARIANT_LIMIT);
+  const hidden = variants.length - shown.length;
+  return (
+    <>
+      <ul className="flex flex-col gap-3">
+        {shown.map((variant) => (
+          <VariantPrice
+            key={variant.variantId}
+            variant={variant}
+            currency={connection.currencyCode}
+            showTitle={variants.length > 1}
+          />
+        ))}
+      </ul>
+      {hidden > 0 && (
+        <p className="text-xs text-muted-foreground">and {pluralize(hidden, 'more variant')}</p>
+      )}
+    </>
+  );
 }
 
 function StoreLogo({ channel }: { channel: ProductChannel['connection']['channel'] }) {
@@ -215,9 +241,39 @@ function ItemHeader({ channel }: { channel: ProductChannel }) {
         {channel.override && (
           <Badge variant="secondary">{channel.selected ? 'Overridden' : 'Saved overrides'}</Badge>
         )}
-        <ListingState channel={channel} />
+        <ListingStateBadge state={channel.displayState} />
       </div>
     </div>
+  );
+}
+
+/** Why the product cannot be published here, how to fix it, and trying again after a failure. */
+function ItemIssue({
+  workspaceId,
+  productId,
+  channel,
+  canEdit,
+  storeMissing,
+  onOpenOverride,
+}: Pick<ProductChannelItemProps, 'workspaceId' | 'channel' | 'canEdit' | 'storeMissing'> & {
+  productId: string;
+  onOpenOverride: () => void;
+}) {
+  const fix = listingFixOf({
+    displayState: channel.displayState,
+    missingRequirement: channel.listing?.missingRequirement,
+    storeMissing,
+  });
+  return (
+    <ListingIssue
+      state={channel.displayState}
+      reason={channel.displayReason}
+      fix={fix}
+      listing={{ workspaceId, productId, connectionId: channel.connection.id }}
+      canEdit={canEdit}
+      canRetry={!needsReconnect(channel.connection.status)}
+      onOpenOverride={onOpenOverride}
+    />
   );
 }
 
@@ -226,28 +282,29 @@ export function ProductChannelItem({
   product,
   channel,
   canEdit,
+  storeMissing,
+  openOverride = false,
+  onOverrideClosed,
 }: ProductChannelItemProps) {
-  const [sheetMode, setSheetMode] = useState<OverrideSheetMode | null>(null);
-  const { connection, listing, variants } = channel;
-  const shown = variants.slice(0, CHANNEL_CARD_VARIANT_LIMIT);
-  const hidden = variants.length - shown.length;
+  const [sheetMode, setSheetMode] = useState<OverrideSheetMode | null>(
+    openOverride && canEdit && channel.selected ? OverrideSheetMode.Edit : null,
+  );
+  const closeSheet = () => {
+    setSheetMode(null);
+    onOverrideClosed?.();
+  };
   return (
     <li className="flex flex-col gap-3 rounded-lg border p-3">
       <ItemHeader channel={channel} />
-      {listing?.lastError && <p className="text-sm text-destructive">{listing.lastError}</p>}
-      <ul className="flex flex-col gap-3">
-        {shown.map((variant) => (
-          <VariantPrice
-            key={variant.variantId}
-            variant={variant}
-            currency={connection.currencyCode}
-            showTitle={variants.length > 1}
-          />
-        ))}
-      </ul>
-      {hidden > 0 && (
-        <p className="text-xs text-muted-foreground">and {pluralize(hidden, 'more variant')}</p>
-      )}
+      <ItemIssue
+        workspaceId={workspaceId}
+        productId={product.id}
+        channel={channel}
+        canEdit={canEdit}
+        storeMissing={storeMissing}
+        onOpenOverride={() => setSheetMode(OverrideSheetMode.Edit)}
+      />
+      <VariantPrices channel={channel} />
       <ChannelItemActions
         workspaceId={workspaceId}
         productId={product.id}
@@ -262,7 +319,7 @@ export function ProductChannelItem({
           channel={channel}
           mode={sheetMode}
           open
-          onOpenChange={(open) => !open && setSheetMode(null)}
+          onOpenChange={(open) => !open && closeSheet()}
         />
       )}
     </li>

@@ -4,11 +4,13 @@ import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/componen
 interface EditorCardProps extends PropsWithChildren {
   title: string;
   action?: ReactNode;
+  /** Lets a link scroll straight to this card (`#id`). */
+  id?: string;
 }
 
-export function EditorCard({ title, action, children }: EditorCardProps) {
+export function EditorCard({ title, action, id, children }: EditorCardProps) {
   return (
-    <Card>
+    <Card id={id}>
       <CardHeader>
         <CardTitle>
           <h2 className="text-sm font-semibold">{title}</h2>

@@ -1,3 +1,4 @@
+import { PageSection } from '@/config/routes';
 import { Controller, useFormContext } from 'react-hook-form';
 import { ProductStatus } from '@/api/schema';
 import { Field, FieldDescription, FieldLabel } from '@/components/ui/field';
@@ -26,7 +27,7 @@ export function StatusCard() {
   const { control } = useFormContext<ProductFormValues>();
 
   return (
-    <EditorCard title="Status">
+    <EditorCard title="Status" id={PageSection.ProductStatus}>
       <Controller
         control={control}
         name="status"
