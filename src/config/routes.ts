@@ -3,6 +3,7 @@ export const ROUTE_PARAMS = {
   jobId: 'jobId',
   connectionId: 'connectionId',
   orderId: 'orderId',
+  endpointId: 'endpointId',
   tab: 'tab',
 } as const;
 
@@ -28,6 +29,9 @@ export const ROUTES = {
   imports: '/imports',
   importJob: `/imports/:${ROUTE_PARAMS.jobId}`,
   apiKeys: '/settings/api-keys',
+  /** The backend's email about an endpoint it turned off links here. */
+  webhooks: '/settings/webhooks',
+  webhookEndpoint: `/settings/webhooks/:${ROUTE_PARAMS.endpointId}`,
   workspaceSettings: '/settings/workspace',
   plan: '/settings/plan',
   members: '/settings/members',
@@ -47,6 +51,11 @@ export function toProductRoute(productId: string): string {
 export function toChannelConnectionRoute(connectionId: string, tab?: string): string {
   const route = ROUTES.channelConnection.replace(`:${ROUTE_PARAMS.connectionId}`, connectionId);
   return tab ? `${route}/${tab}` : route;
+}
+
+/** A webhook endpoint's page, with its delivery log. */
+export function toWebhookEndpointRoute(endpointId: string): string {
+  return ROUTES.webhookEndpoint.replace(`:${ROUTE_PARAMS.endpointId}`, endpointId);
 }
 
 export function toImportJobRoute(jobId: string): string {

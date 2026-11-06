@@ -28,6 +28,7 @@ export const AGENT_SCOPE_DESCRIPTIONS: Readonly<Record<AgentScope, string>> = {
   [AgentScope.stores_write]: 'Add products to stores and take them off',
   [AgentScope.reports_read]: 'See sales and stock reports',
   [AgentScope.suggestions_write]: 'Ask for AI content and approve suggestions',
+  [AgentScope.webhooks_write]: 'Add and change webhook endpoints that receive store events',
 };
 
 /** Scopes a read-only connection keeps. */

@@ -15,6 +15,10 @@ export const FEATURE_LABELS: Record<Feature, { label: string; description: strin
   [Feature.workspaces]: { label: 'Workspaces', description: 'One per brand or client' },
   [Feature.members]: { label: 'Members', description: 'People in any workspace, counted once' },
   [Feature.api_keys]: { label: 'API keys', description: 'Keys that are not revoked or expired' },
+  [Feature.webhook_endpoints]: {
+    label: 'Webhook endpoints',
+    description: 'URLs that receive events, across all workspaces',
+  },
   [Feature.ai_credits]: { label: 'AI credits', description: 'Used this month' },
   [Feature.autonomous_agents]: {
     label: 'Autonomous agents',

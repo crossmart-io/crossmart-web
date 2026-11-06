@@ -14,8 +14,10 @@ import {
   Store,
   Users,
   Warehouse,
+  Webhook,
   type LucideIcon,
 } from 'lucide-react';
+import { WorkspacePermission } from '@/api/schema';
 import { ROUTES } from './routes';
 
 export interface NavItem {
@@ -26,6 +28,8 @@ export interface NavItem {
   end?: boolean;
   /** A count shown on the item, such as listings that need attention. */
   badge?: NavBadge;
+  /** Shown only to members whose role holds this permission. */
+  permission?: WorkspacePermission;
 }
 
 /** Counts the sidebar can show on an item; `AppSidebar` maps each to its component. */
@@ -66,6 +70,12 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { label: 'Members', to: ROUTES.members, icon: Users },
       { label: 'Roles', to: ROUTES.roles, icon: ShieldCheck },
       { label: 'API keys', to: ROUTES.apiKeys, icon: KeyRound },
+      {
+        label: 'Webhooks',
+        to: ROUTES.webhooks,
+        icon: Webhook,
+        permission: WorkspacePermission.webhooks_manage,
+      },
       { label: 'Connected agents', to: ROUTES.agentConnections, icon: Bot },
       { label: 'Account', to: ROUTES.account, icon: CircleUser },
     ],
@@ -86,4 +96,5 @@ export const PAGE_PARENTS = {
   imports: [{ label: 'Imports', to: ROUTES.imports }],
   channels: [{ label: 'Channels', to: ROUTES.channels }],
   orders: [{ label: 'Orders', to: ROUTES.orders }],
+  webhooks: [{ label: 'Settings' }, { label: 'Webhooks', to: ROUTES.webhooks }],
 } as const satisfies Record<string, readonly Crumb[]>;

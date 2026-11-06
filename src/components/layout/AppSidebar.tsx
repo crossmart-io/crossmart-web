@@ -18,7 +18,12 @@ import { ChannelErrorsBadge } from '@/features/channels';
 import { PendingSuggestionsBadge } from '@/features/suggestions';
 import type { ComponentType } from 'react';
 import { ROUTES } from '@/config/routes';
-import { WorkspaceSwitcher } from '@/features/workspaces';
+import {
+  hasPermission,
+  useCurrentWorkspace,
+  type Workspace,
+  WorkspaceSwitcher,
+} from '@/features/workspaces';
 
 const MAIN_NAV_LABEL = 'Main';
 
@@ -37,8 +42,14 @@ function isActive(pathname: string, item: NavItem): boolean {
   return item.end ? pathname === item.to : pathname.startsWith(item.to);
 }
 
+/** Items gated by a permission stay hidden until the workspace says the role holds it. */
+function isVisible(item: NavItem, workspace: Workspace | undefined): boolean {
+  return !item.permission || (workspace !== undefined && hasPermission(workspace, item.permission));
+}
+
 export function AppSidebar() {
   const { pathname } = useLocation();
+  const { workspace } = useCurrentWorkspace();
   const { isMobile, setOpenMobile } = useSidebar();
   // On phones the sidebar is a sheet over the page; picking a page should reveal that page.
   const closeOnMobile = () => isMobile && setOpenMobile(false);
@@ -64,21 +75,23 @@ export function AppSidebar() {
               <SidebarGroupLabel>{group.label}</SidebarGroupLabel>
               <SidebarGroupContent>
                 <SidebarMenu>
-                  {group.items.map((item) => (
-                    <SidebarMenuItem key={item.to}>
-                      <SidebarMenuButton
-                        asChild
-                        isActive={isActive(pathname, item)}
-                        tooltip={item.label}
-                      >
-                        <NavLink to={item.to} end={item.end} onClick={closeOnMobile}>
-                          <item.icon />
-                          <span>{item.label}</span>
-                        </NavLink>
-                      </SidebarMenuButton>
-                      <NavItemBadge badge={item.badge} />
-                    </SidebarMenuItem>
-                  ))}
+                  {group.items
+                    .filter((item) => isVisible(item, workspace))
+                    .map((item) => (
+                      <SidebarMenuItem key={item.to}>
+                        <SidebarMenuButton
+                          asChild
+                          isActive={isActive(pathname, item)}
+                          tooltip={item.label}
+                        >
+                          <NavLink to={item.to} end={item.end} onClick={closeOnMobile}>
+                            <item.icon />
+                            <span>{item.label}</span>
+                          </NavLink>
+                        </SidebarMenuButton>
+                        <NavItemBadge badge={item.badge} />
+                      </SidebarMenuItem>
+                    ))}
                 </SidebarMenu>
               </SidebarGroupContent>
             </SidebarGroup>
