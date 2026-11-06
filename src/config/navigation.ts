@@ -1,4 +1,5 @@
 import {
+  Bot,
   FileUp,
   Gauge,
   History,
@@ -65,6 +66,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { label: 'Members', to: ROUTES.members, icon: Users },
       { label: 'Roles', to: ROUTES.roles, icon: ShieldCheck },
       { label: 'API keys', to: ROUTES.apiKeys, icon: KeyRound },
+      { label: 'Connected agents', to: ROUTES.agentConnections, icon: Bot },
       { label: 'Account', to: ROUTES.account, icon: CircleUser },
     ],
   },

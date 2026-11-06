@@ -6,6 +6,8 @@ export { ResetPasswordForm } from './components/ResetPasswordForm';
 export { SignInForm } from './components/SignInForm';
 export { VerifyEmailBanner } from './components/VerifyEmailBanner';
 export { AUTH_LINK_QUERY } from './auth.constants';
+export { AuthRequestError } from './auth-error';
+export { isAgentAuthorization } from './agent-sign-in';
 export { SignUpForm } from './components/SignUpForm';
 export { UserMenu } from './components/UserMenu';
 export { useSession } from './hooks/useSession';
