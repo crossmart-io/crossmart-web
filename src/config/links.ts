@@ -6,9 +6,8 @@ export const EXTERNAL_LINKS = {
   docs: 'https://docs.crossmart.io',
   repository: 'https://github.com/crossmart-io/crossmart',
   issues: 'https://github.com/crossmart-io/crossmart/issues',
-  webhooksGuide: 'https://github.com/crossmart-io/crossmart/blob/main/docs/developers/webhooks.md',
-  webhookSignatures:
-    'https://github.com/crossmart-io/crossmart/blob/main/docs/developers/webhooks.md#verify-the-signature',
+  webhooksGuide: 'https://docs.crossmart.io/developers/webhooks/',
+  webhookSignatures: 'https://docs.crossmart.io/developers/webhooks/#verify-the-signature',
 } as const;
 
 /** A mail link to Crossmart about a channel, with the channel named in the subject. */
