@@ -56,6 +56,7 @@ export const ASK_CHANNEL_LABELS: Record<AskChannel, string> = {
   [AskChannel.app_widget]: 'App widget',
   [AskChannel.api]: 'API',
   [AskChannel.mcp]: 'MCP',
+  [AskChannel.agent_worker]: 'Agent Worker',
 };
 
 export const ASK_CALLER_TYPE_LABELS: Record<AskCallerType, string> = {
