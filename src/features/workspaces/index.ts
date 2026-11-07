@@ -23,7 +23,12 @@ export {
   type PermissionGroup,
 } from './permission-groups';
 export { RoleSelect } from './components/RoleSelect';
-export { MEMBERS_ENDPOINT, ROLE_ENDPOINT, ROLES_ENDPOINT } from './workspaces.constants';
+export {
+  ME_ENDPOINT,
+  MEMBERS_ENDPOINT,
+  ROLE_ENDPOINT,
+  ROLES_ENDPOINT,
+} from './workspaces.constants';
 export { INVITATION_TOKEN_QUERY } from './workspaces.constants';
 export { selectWorkspace } from './selected-workspace';
 export {
