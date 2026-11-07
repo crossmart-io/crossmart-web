@@ -153,6 +153,20 @@ const appRoutes: RouteObject[] = [
         Component: AgentConnectionsPage,
       })),
   },
+  {
+    path: ROUTES.askInsights,
+    lazy: () =>
+      import('@/pages/AskInsightsPage').then(({ AskInsightsPage }) => ({
+        Component: AskInsightsPage,
+      })),
+  },
+  {
+    path: ROUTES.askConversation,
+    lazy: () =>
+      import('@/pages/AskConversationPage').then(({ AskConversationPage }) => ({
+        Component: AskConversationPage,
+      })),
+  },
 ];
 
 /** An AI agent's sign-in steps (ADR 0019): signed in, but outside the app's shell. */

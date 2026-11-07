@@ -7,7 +7,7 @@ import { AskSuggestions } from './AskSuggestions';
  * The questions and replies so far, newest at the bottom. A polite live region, so a screen
  * reader reads each reply when it arrives without interrupting the person.
  */
-export function AskConversationLog({ exchanges, isAsking, ask }: AskConversation) {
+export function AskConversationLog({ exchanges, isAsking, ask, escalation }: AskConversation) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -25,8 +25,12 @@ export function AskConversationLog({ exchanges, isAsking, ask }: AskConversation
     >
       {exchanges.length ? (
         <ol className="flex flex-col gap-6">
-          {exchanges.map((exchange) => (
-            <AskExchangeItem key={exchange.id} exchange={exchange} />
+          {exchanges.map((exchange, index) => (
+            <AskExchangeItem
+              key={exchange.id}
+              exchange={exchange}
+              escalation={index === exchanges.length - 1 ? escalation : undefined}
+            />
           ))}
         </ol>
       ) : (

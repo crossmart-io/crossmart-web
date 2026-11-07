@@ -2,6 +2,13 @@ import type { components } from '@/api/schema';
 
 export type AskAnswer = components['schemas']['AskAnswerDto'];
 export type AskCitation = components['schemas']['AskCitationDto'];
+export type OpenedAskEscalation = components['schemas']['OpenedAskEscalationDto'];
+
+/** One question for Ask, and the conversation it follows up on, if any. */
+export interface AskRequest {
+  question: string;
+  conversationId?: string;
+}
 
 /** Where one question stands. */
 export enum AskExchangeStatus {

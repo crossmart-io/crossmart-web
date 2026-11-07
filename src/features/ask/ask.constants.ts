@@ -1,6 +1,7 @@
 import { AskFailure } from './ask.types';
 
 export const ASK_ENDPOINT = '/api/v1/ask';
+export const ASK_ESCALATIONS_ENDPOINT = '/api/v1/ask/escalations';
 
 /** The question length the API accepts. */
 export const ASK_QUESTION_MIN_LENGTH = 3;
@@ -33,6 +34,11 @@ export const ASK_COPY = {
   opensInNewTab: '(opens in a new tab)',
   handoff: 'Ask a person',
   browseDocs: 'Browse the docs',
+  startOver: 'Start over',
+  contactPerson: 'Contact a person',
+  contactPersonHint: 'The Crossmart team gets this conversation and replies by email.',
+  contactPersonSent: (email: string) =>
+    `Sent to the Crossmart team. A person will reply to ${email}.`,
 } as const;
 
 /** What each failure is called; the API's own message, when it has one, follows it. */

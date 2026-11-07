@@ -5,6 +5,7 @@ import {
   History,
   Inbox,
   KeyRound,
+  MessageCircleQuestionMark,
   CircleUser,
   LayoutDashboard,
   Package,
@@ -31,6 +32,8 @@ export interface NavItem {
   badge?: NavBadge;
   /** Shown only to members whose role holds this permission. */
   permission?: WorkspacePermission;
+  /** Shown only to the people who run this Crossmart instance (`me.platformAdmin`). */
+  platformAdminOnly?: boolean;
 }
 
 /** Counts the sidebar can show on an item; `AppSidebar` maps each to its component. */
@@ -82,6 +85,17 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { label: 'Account', to: ROUTES.account, icon: CircleUser },
     ],
   },
+  {
+    label: 'Platform',
+    items: [
+      {
+        label: 'Ask insights',
+        to: ROUTES.askInsights,
+        icon: MessageCircleQuestionMark,
+        platformAdminOnly: true,
+      },
+    ],
+  },
 ];
 
 export interface Crumb {
@@ -100,4 +114,6 @@ export const PAGE_PARENTS = {
   channels: [{ label: 'Channels', to: ROUTES.channels }],
   orders: [{ label: 'Orders', to: ROUTES.orders }],
   webhooks: [{ label: 'Settings' }, { label: 'Webhooks', to: ROUTES.webhooks }],
+  platform: [{ label: 'Platform' }],
+  askInsights: [{ label: 'Platform' }, { label: 'Ask insights', to: ROUTES.askInsights }],
 } as const satisfies Record<string, readonly Crumb[]>;
