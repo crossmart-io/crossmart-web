@@ -96,6 +96,10 @@ export const PERMISSION_GROUPS: readonly PermissionGroup[] = [
         permission: WorkspacePermission.suggestions_approve,
         label: 'Approve and reject AI suggestions',
       },
+      {
+        permission: WorkspacePermission.agent_worker_use,
+        label: 'Chat with Agent Worker and approve its changes (uses AI credits)',
+      },
     ],
   },
 ];
