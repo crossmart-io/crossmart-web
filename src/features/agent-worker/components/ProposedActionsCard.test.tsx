@@ -11,7 +11,12 @@ const reprice = actionFixture({
   summary: 'Lower the price of Linen Shirt on Outlet store',
   risks: [AgentWorkerActionRisk.price_change],
   untrustedWarning: true,
-  preview: { target: null, changes: [{ field: 'price', before: '49.00', after: '39.00' }] },
+  preview: {
+    target: null,
+    headline: 'Lower the price',
+    details: [],
+    changes: [{ label: 'Price (M)', before: '$49.00', after: '$39.00' }],
+  },
 });
 
 function renderCard(actions = [retitle, reprice]) {
@@ -23,9 +28,12 @@ function renderCard(actions = [retitle, reprice]) {
 const approveButton = () => screen.getByRole('button', { name: 'Approve selected' });
 
 describe('ProposedActionsCard', () => {
-  it('shows each change with its preview, risks and untrusted-text warning', () => {
+  it('shows each change in plain words, with its preview, risks and untrusted-text warning', () => {
     renderCard();
-    expect(screen.getByText('Change the title of Linen Shirt on Outlet store')).toBeInTheDocument();
+    expect(
+      screen.getByText('Change how this product shows on Outlet store only'),
+    ).toBeInTheDocument();
+    expect(screen.getByText('$39.00')).toBeInTheDocument();
     expect(screen.getByText('Changes prices')).toBeInTheDocument();
     expect(
       screen.getByText('Text read in this turn looked like instructions; review carefully'),
@@ -46,7 +54,7 @@ describe('ProposedActionsCard', () => {
 
   it('approves only the selected changes, without confirmation when none is risky', async () => {
     const onDecide = renderCard();
-    await userEvent.click(screen.getByLabelText('Lower the price of Linen Shirt on Outlet store'));
+    await userEvent.click(screen.getByLabelText('Lower the price'));
     expect(screen.queryByLabelText(/I understand/)).not.toBeInTheDocument();
     await userEvent.click(approveButton());
     expect(onDecide).toHaveBeenCalledWith({ approvedActionIds: ['a-1'], confirmHighRisk: false });
@@ -58,9 +66,16 @@ describe('ProposedActionsCard', () => {
     expect(onDecide).toHaveBeenCalledWith({ approvedActionIds: [], confirmHighRisk: false });
   });
 
+  it('falls back to the summary for a change without a preview', () => {
+    renderCard([actionFixture({ preview: null, summary: 'Do something' })]);
+    expect(screen.getByLabelText('Do something')).toBeInTheDocument();
+  });
+
   it('cannot approve when nothing is selected', async () => {
     renderCard([retitle]);
-    await userEvent.click(screen.getByLabelText('Change the title of Linen Shirt on Outlet store'));
+    await userEvent.click(
+      screen.getByLabelText('Change how this product shows on Outlet store only'),
+    );
     expect(approveButton()).toBeDisabled();
   });
 });

@@ -27,7 +27,9 @@ export function actionFixture(overrides: Partial<AgentWorkerAction> = {}): Agent
     risks: [],
     preview: {
       target: 'Linen Shirt on Outlet store',
-      changes: [{ field: 'title', before: 'Linen Shirt', after: 'Linen Shirt, Relaxed Fit' }],
+      headline: 'Change how this product shows on Outlet store only',
+      details: [],
+      changes: [{ label: 'Title', before: 'Linen Shirt', after: 'Linen Shirt, Relaxed Fit' }],
     },
     outcome: null,
     isError: false,

@@ -26,6 +26,9 @@ export const AGENT_WORKER_MESSAGE_MAX_LENGTH = 4000;
 /** Cmd+J on macOS, Ctrl+J elsewhere, toggles the panel. */
 export const AGENT_WORKER_SHORTCUT_KEY = 'j';
 
+/** Values up to this long, on one line, read as "before → after" instead of a word diff. */
+export const INLINE_CHANGE_MAX_LENGTH = 60;
+
 /** Prompts offered in an empty conversation. */
 export const AGENT_WORKER_EXAMPLE_PROMPTS = [
   'Fix my failed eBay listings',
@@ -78,9 +81,9 @@ export const AGENT_WORKER_COPY = {
   changeTarget: 'On',
   before: 'Now',
   after: 'After',
-  /** Shown for a value the change sets when its current value is not known. */
-  sets: 'Sets',
   empty: '(empty)',
+  /** Between a value before and after, for short values such as prices. */
+  changesTo: 'changes to',
   confirmRisk: (consequences: string) => `I understand this ${consequences}`,
   stoppedNote: 'Stopped.',
 } as const;

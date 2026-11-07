@@ -3,6 +3,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AGENT_WORKER_COPY } from '../agent-worker.constants';
 import type { AgentWorkerAction } from '../agent-worker.types';
 import { ChangePreview } from './ChangePreview';
+import { PreviewDetails } from './PreviewDetails';
 import { RiskBadges } from './RiskBadges';
 import { UntrustedWarning } from './UntrustedWarning';
 
@@ -21,7 +22,8 @@ export function ProposedActionItem({
   onToggle,
 }: ProposedActionItemProps) {
   const checkboxId = useId();
-  const target = action.preview?.target;
+  const preview = action.preview;
+  const target = preview?.target;
   return (
     <li className="flex gap-2.5 rounded-lg border bg-background p-3">
       <Checkbox
@@ -33,7 +35,7 @@ export function ProposedActionItem({
       />
       <div className="flex min-w-0 flex-1 flex-col gap-2">
         <label htmlFor={checkboxId} className="text-sm leading-snug font-medium">
-          {action.summary}
+          {preview?.headline ?? action.summary}
         </label>
         {target && (
           <p className="text-xs text-muted-foreground">
@@ -42,7 +44,8 @@ export function ProposedActionItem({
         )}
         <RiskBadges risks={action.risks} />
         {action.untrustedWarning && <UntrustedWarning />}
-        <ChangePreview changes={action.preview?.changes ?? []} />
+        <ChangePreview changes={preview?.changes ?? []} />
+        <PreviewDetails details={preview?.details ?? []} />
       </div>
     </li>
   );
