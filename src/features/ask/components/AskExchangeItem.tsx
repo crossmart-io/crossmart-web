@@ -1,14 +1,17 @@
 import { Spinner } from '@/components/ui/spinner';
 import { ASK_COPY } from '../ask.constants';
 import { type AskExchange, AskExchangeStatus } from '../ask.types';
+import type { AskEscalation } from '../hooks/useAskEscalation';
 import { AskAnswerView } from './AskAnswerView';
 import { AskFailureNotice } from './AskFailureNotice';
 
 interface AskExchangeItemProps {
   exchange: AskExchange;
+  /** Given for the latest exchange only, whose answer may offer a person. */
+  escalation?: AskEscalation;
 }
 
-function AskReply({ exchange }: AskExchangeItemProps) {
+function AskReply({ exchange, escalation }: AskExchangeItemProps) {
   switch (exchange.status) {
     case AskExchangeStatus.Pending:
       return (
@@ -18,14 +21,14 @@ function AskReply({ exchange }: AskExchangeItemProps) {
         </p>
       );
     case AskExchangeStatus.Answered:
-      return <AskAnswerView answer={exchange.answer} />;
+      return <AskAnswerView answer={exchange.answer} escalation={escalation} />;
     case AskExchangeStatus.Failed:
       return <AskFailureNotice failure={exchange.failure} message={exchange.message} />;
   }
 }
 
 /** One question, on the reading end of the panel, and its reply beneath it. */
-export function AskExchangeItem({ exchange }: AskExchangeItemProps) {
+export function AskExchangeItem({ exchange, escalation }: AskExchangeItemProps) {
   return (
     <li className="flex flex-col gap-3">
       <div className="ms-auto max-w-[85%] rounded-lg bg-muted px-3 py-2">
@@ -36,7 +39,7 @@ export function AskExchangeItem({ exchange }: AskExchangeItemProps) {
       </div>
       <div>
         <span className="sr-only">{ASK_COPY.assistant}: </span>
-        <AskReply exchange={exchange} />
+        <AskReply exchange={exchange} escalation={escalation} />
       </div>
     </li>
   );

@@ -2,14 +2,50 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fetchClient } from '@/api/client';
-import { AskConfidence, AskOutcome } from '@/api/schema';
+import {
+  AskChannel,
+  AskConfidence,
+  AskEscalationReason,
+  AskEscalationStatus,
+  AskOutcome,
+  WorkspaceRole,
+} from '@/api/schema';
 import { TooltipProvider } from '@/components/ui/tooltip';
+import { ASK_ENDPOINT, ASK_ESCALATIONS_ENDPOINT } from '../ask.constants';
 import type { AskAnswer } from '../ask.types';
 import { AskLauncher } from './AskLauncher';
 
-vi.mock('@/api/client', () => ({ fetchClient: { POST: vi.fn<typeof fetchClient.POST>() } }));
+vi.mock('@/api/client', async () =>
+  (await import('@/features/webhooks/testing/mock-api-client')).createMockApiClient(),
+);
 
 const SUPPORT_EMAIL = 'hello@crossmart.io';
+const USER_EMAIL = 'dana@example.com';
+const WORKSPACE_ID = 'ws-1';
+const CONVERSATION_ID = 'conv_first';
+const NO_ESCALATION = { offered: false, reason: null };
+
+const ME = {
+  id: 'user-1',
+  name: 'Dana',
+  email: USER_EMAIL,
+  platformAdmin: false,
+  workspaces: [
+    {
+      id: WORKSPACE_ID,
+      organizationId: 'org',
+      name: 'Main',
+      displayName: 'Main',
+      slug: 'main',
+      currency: 'USD',
+      timeZone: null,
+      sandbox: null,
+      role: WorkspaceRole.OWNER,
+      customRole: null,
+      permissions: [],
+    },
+  ],
+};
 
 const ANSWERED: AskAnswer = {
   outcome: AskOutcome.answered,
@@ -21,6 +57,9 @@ const ANSWERED: AskAnswer = {
   confidence: AskConfidence.high,
   handoff: false,
   supportEmail: SUPPORT_EMAIL,
+  conversationId: CONVERSATION_ID,
+  turnId: 'turn-1',
+  escalation: NO_ESCALATION,
 };
 
 const UNKNOWN: AskAnswer = {
@@ -30,6 +69,14 @@ const UNKNOWN: AskAnswer = {
   confidence: AskConfidence.low,
   handoff: true,
   supportEmail: SUPPORT_EMAIL,
+  conversationId: CONVERSATION_ID,
+  turnId: 'turn-1',
+  escalation: NO_ESCALATION,
+};
+
+const OFFERED: AskAnswer = {
+  ...UNKNOWN,
+  escalation: { offered: true, reason: AskEscalationReason.unanswered },
 };
 
 type PostResult = Awaited<ReturnType<typeof fetchClient.POST>>;
@@ -67,6 +114,7 @@ async function openAndAsk(question = 'How do I connect Shopify?') {
 describe('AskLauncher', () => {
   beforeEach(() => {
     vi.mocked(fetchClient.POST).mockReset();
+    vi.mocked(fetchClient.GET).mockResolvedValue(reply(200, ME) as never);
   });
 
   it('opens a labelled panel with suggested questions', async () => {
@@ -84,9 +132,6 @@ describe('AskLauncher', () => {
     respondWith(reply(200, ANSWERED));
     const log = await openAndAsk();
 
-    expect(fetchClient.POST).toHaveBeenCalledWith('/api/v1/ask', {
-      body: { question: 'How do I connect Shopify?' },
-    });
     expect(await within(log).findByText(ANSWERED.answer)).toBeInTheDocument();
     const [first, ...rest] = within(log).getAllByRole('link');
     expect(rest).toHaveLength(1);
@@ -139,5 +184,70 @@ describe('AskLauncher', () => {
 
     expect(fetchClient.POST).not.toHaveBeenCalled();
     expect(screen.getByRole('button', { name: 'Ask' })).toBeDisabled();
+  });
+
+  it('asks from the app widget, in the current workspace, and follows up in the same conversation', async () => {
+    respondWith(reply(200, ANSWERED));
+    const log = await openAndAsk();
+    await within(log).findByText(ANSWERED.answer);
+
+    await userEvent.type(screen.getByLabelText('Your question'), 'And eBay?{Enter}');
+
+    expect(fetchClient.POST).toHaveBeenNthCalledWith(1, ASK_ENDPOINT, {
+      body: {
+        question: 'How do I connect Shopify?',
+        conversationId: undefined,
+        workspaceId: WORKSPACE_ID,
+        channel: AskChannel.app_widget,
+      },
+    });
+    expect(fetchClient.POST).toHaveBeenNthCalledWith(2, ASK_ENDPOINT, {
+      body: {
+        question: 'And eBay?',
+        conversationId: CONVERSATION_ID,
+        workspaceId: WORKSPACE_ID,
+        channel: AskChannel.app_widget,
+      },
+    });
+  });
+
+  it('starts a new conversation after starting over', async () => {
+    respondWith(reply(200, ANSWERED));
+    const log = await openAndAsk();
+    await within(log).findByText(ANSWERED.answer);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Start over' }));
+    expect(within(screen.getByRole('log')).queryByText(ANSWERED.answer)).not.toBeInTheDocument();
+    await userEvent.type(screen.getByLabelText('Your question'), 'How do plans work?{Enter}');
+
+    expect(fetchClient.POST).toHaveBeenLastCalledWith(ASK_ENDPOINT, {
+      body: expect.objectContaining({ question: 'How do plans work?', conversationId: undefined }),
+    });
+  });
+
+  it('hands the conversation to a person when Ask offers one', async () => {
+    respondWith(reply(200, OFFERED));
+    const log = await openAndAsk();
+
+    vi.mocked(fetchClient.POST).mockResolvedValueOnce(
+      reply(201, {
+        id: 'ticket-1',
+        status: AskEscalationStatus.open,
+        reason: AskEscalationReason.unanswered,
+        reply: null,
+        repliedAt: null,
+        createdAt: '2026-11-07T10:00:00Z',
+        callbackSecret: null,
+      }),
+    );
+    await userEvent.click(await within(log).findByRole('button', { name: 'Contact a person' }));
+
+    expect(fetchClient.POST).toHaveBeenCalledWith(ASK_ESCALATIONS_ENDPOINT, {
+      body: { conversationId: CONVERSATION_ID, contactEmail: USER_EMAIL },
+    });
+    expect(await within(log).findByRole('status')).toHaveTextContent(
+      `A person will reply to ${USER_EMAIL}`,
+    );
+    expect(within(log).queryByRole('link', { name: /Ask a person/ })).not.toBeInTheDocument();
   });
 });
