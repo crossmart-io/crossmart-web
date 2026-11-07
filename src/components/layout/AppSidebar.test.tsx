@@ -6,12 +6,13 @@ import { SidebarProvider } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ROUTES } from '@/config/routes';
 import type * as Workspaces from '@/features/workspaces';
-import { useCurrentWorkspace, type Workspace } from '@/features/workspaces';
+import { useCurrentWorkspace, useMe, type Workspace } from '@/features/workspaces';
 import { AppSidebar } from './AppSidebar';
 
 vi.mock('@/features/workspaces', async (importOriginal) => ({
   ...(await importOriginal<typeof Workspaces>()),
   useCurrentWorkspace: vi.fn<typeof useCurrentWorkspace>(),
+  useMe: vi.fn<typeof useMe>(),
   WorkspaceSwitcher: () => null,
 }));
 vi.mock('@/features/channels', () => ({ ChannelErrorsBadge: () => null }));
@@ -33,7 +34,10 @@ function workspaceWith(permissions: WorkspacePermission[]): Workspace {
   };
 }
 
-function renderSidebar(workspace: Workspace | undefined) {
+function renderSidebar(workspace: Workspace | undefined, platformAdmin = false) {
+  vi.mocked(useMe).mockReturnValue({
+    data: { platformAdmin },
+  } as ReturnType<typeof useMe>);
   vi.mocked(useCurrentWorkspace).mockReturnValue({
     workspace,
     workspaces: workspace ? [workspace] : [],
@@ -89,5 +93,19 @@ describe('AppSidebar', () => {
   it('hides webhooks while the workspace is unknown', () => {
     renderSidebar(undefined);
     expect(screen.queryByRole('link', { name: 'Webhooks' })).not.toBeInTheDocument();
+  });
+
+  it('hides Ask insights and its group from people who do not run the platform', () => {
+    renderSidebar(workspaceWith([]));
+    expect(screen.queryByRole('link', { name: 'Ask insights' })).not.toBeInTheDocument();
+    expect(screen.queryByText('Platform')).not.toBeInTheDocument();
+  });
+
+  it('links platform admins to Ask insights', () => {
+    renderSidebar(workspaceWith([]), true);
+    expect(screen.getByRole('link', { name: 'Ask insights' })).toHaveAttribute(
+      'href',
+      ROUTES.askInsights,
+    );
   });
 });

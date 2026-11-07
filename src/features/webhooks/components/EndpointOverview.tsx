@@ -5,7 +5,7 @@ import { formatDate, formatDateTime } from '@/lib/format';
 import type { WebhookEndpoint } from '../hooks/useWebhookEndpoints';
 import { endpointStateOf } from '../webhook-endpoint-state';
 import { LAST_DELIVERY_COPY, WEBHOOK_COPY, WebhookEndpointState } from '../webhooks.constants';
-import { DetailItem } from './DetailItem';
+import { DetailItem } from '@/components/layout/DetailItem';
 import { EndpointLastDelivery } from './EndpointLastDelivery';
 import { EndpointStatusBadge } from './EndpointStatusBadge';
 import { EventTypeBadges } from './EventTypeBadges';

@@ -4,6 +4,7 @@ export const ROUTE_PARAMS = {
   connectionId: 'connectionId',
   orderId: 'orderId',
   endpointId: 'endpointId',
+  conversationId: 'conversationId',
   tab: 'tab',
 } as const;
 
@@ -51,6 +52,10 @@ export const ROUTES = {
   /** Steps of an AI agent's sign-in (ADR 0019): Better Auth sends the browser here. */
   agentWorkspace: '/oauth/workspace',
   agentConsent: '/oauth/consent',
+  /** Ask Crossmart's conversations and escalations, for platform admins only. */
+  askInsights: '/admin/ask',
+  /** The backend's escalation emails link here, with the conversation's id. */
+  askConversation: `/admin/ask/:${ROUTE_PARAMS.conversationId}`,
 } as const;
 
 export function toProductRoute(productId: string): string {
@@ -66,6 +71,11 @@ export function toChannelConnectionRoute(connectionId: string, tab?: string): st
 /** A webhook endpoint's page, with its delivery log. */
 export function toWebhookEndpointRoute(endpointId: string): string {
   return ROUTES.webhookEndpoint.replace(`:${ROUTE_PARAMS.endpointId}`, endpointId);
+}
+
+/** One Ask Crossmart conversation, with its answers and escalations. */
+export function toAskConversationRoute(conversationId: string): string {
+  return ROUTES.askConversation.replace(`:${ROUTE_PARAMS.conversationId}`, conversationId);
 }
 
 export function toImportJobRoute(jobId: string): string {
@@ -120,6 +130,17 @@ export function toStoreListingRoute(connectionId: string, productId: string): st
 export const PAGINATION_QUERY = {
   page: 'page',
   pageSize: 'per',
+} as const;
+
+/** The Ask insights page's tab and filters, kept in the URL so a filtered view can be shared. */
+export const ASK_INSIGHTS_ROUTE_QUERY = {
+  view: 'view',
+  outcome: 'outcome',
+  channel: 'channel',
+  escalated: 'escalated',
+  from: 'from',
+  to: 'to',
+  status: 'status',
 } as const;
 
 /** Filters of the activity page, kept in the URL so a filtered log can be shared. */

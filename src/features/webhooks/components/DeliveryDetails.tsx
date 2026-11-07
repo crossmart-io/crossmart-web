@@ -1,7 +1,7 @@
 import { formatDateTime } from '@/lib/format';
 import { formatDuration, formatResponseStatus } from '../delivery-format';
 import type { WebhookDeliveryDetail } from '../hooks/useWebhookDeliveries';
-import { DetailItem } from './DetailItem';
+import { DetailItem } from '@/components/layout/DetailItem';
 import { DeliveryPayload } from './DeliveryPayload';
 import { DeliveryStatusCell } from './DeliveryStatusCell';
 
