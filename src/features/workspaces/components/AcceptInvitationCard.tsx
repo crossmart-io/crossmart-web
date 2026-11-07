@@ -4,7 +4,7 @@ import { PageLoader } from '@/components/feedback/PageLoader';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
 import { ROUTES } from '@/config/routes';
-import { AuthCard, type ReturnPathState, useSession, useSignOut } from '@/features/auth';
+import { AuthCard, type ReturnPathState, useSession, WrongAccountNotice } from '@/features/auth';
 import {
   type InvitationPreview,
   useAcceptInvitation,
@@ -45,7 +45,10 @@ export function AcceptInvitationCard({ token }: { token: string }) {
       ) : session.user.email.toLowerCase() === invitation.email ? (
         <AcceptButton token={token} />
       ) : (
-        <WrongAccount signedInAs={session.user.email} invitation={invitation} />
+        <WrongAccountNotice
+          signedInAs={session.user.email}
+          instruction={`Sign out, then sign in or create an account with ${invitation.email}.`}
+        />
       )}
     </AuthCard>
   );
@@ -88,26 +91,6 @@ function AcceptButton({ token }: { token: string }) {
       >
         {accept.isPending && <Spinner data-icon="inline-start" />}
         {accept.isPending ? 'Joining…' : 'Accept invitation'}
-      </Button>
-    </div>
-  );
-}
-
-interface WrongAccountProps {
-  signedInAs: string;
-  invitation: InvitationPreview;
-}
-
-function WrongAccount({ signedInAs, invitation }: WrongAccountProps) {
-  const signOut = useSignOut();
-  return (
-    <div className="flex flex-col gap-3">
-      <p className="text-sm text-muted-foreground">
-        You are signed in as {signedInAs}. Sign out, then sign in or create an account with{' '}
-        {invitation.email}.
-      </p>
-      <Button variant="outline" disabled={signOut.isPending} onClick={() => signOut.mutate()}>
-        Sign out
       </Button>
     </div>
   );

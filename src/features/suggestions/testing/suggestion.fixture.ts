@@ -45,6 +45,7 @@ export function workspaceFixture(permissions: WorkspacePermission[]): Workspace 
     slug: 'acme',
     currency: 'USD',
     timeZone: null,
+    sandbox: null,
     role: WorkspaceRole.CUSTOM,
     customRole: null,
     permissions,

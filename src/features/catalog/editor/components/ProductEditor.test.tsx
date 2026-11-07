@@ -32,6 +32,7 @@ const WORKSPACE: Workspace = {
   slug: 'default',
   currency: 'USD',
   timeZone: null,
+  sandbox: null,
   role: WorkspaceRole.VIEWER,
   customRole: null,
   permissions: [],

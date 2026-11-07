@@ -17,6 +17,7 @@ function workspace(fields: Partial<Workspace>): Workspace {
     slug: 'default',
     currency: 'USD',
     timeZone: null,
+    sandbox: null,
     role: WorkspaceRole.OWNER,
     customRole: null,
     permissions: [WorkspacePermission.workspace_manage],

@@ -26,6 +26,7 @@ function workspaceWith(permissions: WorkspacePermission[]): Workspace {
     slug: 'main',
     currency: 'USD',
     timeZone: null,
+    sandbox: null,
     role: WorkspaceRole.CUSTOM,
     customRole: null,
     permissions,

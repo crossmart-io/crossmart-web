@@ -3,15 +3,16 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { WorkspaceRole } from '@/api/schema';
 import type * as Auth from '@/features/auth';
-import { useSession, useSignOut } from '@/features/auth';
+import { useSession } from '@/features/auth';
+import { useSignOut } from '@/features/auth/hooks/useSignOut';
 import { useAcceptInvitation, useInvitationPreview } from '../hooks/useInvitations';
 import { AcceptInvitationCard } from './AcceptInvitationCard';
 
 vi.mock('@/features/auth', async (importOriginal) => ({
   ...(await importOriginal<typeof Auth>()),
   useSession: vi.fn<typeof useSession>(),
-  useSignOut: vi.fn<typeof useSignOut>(),
 }));
+vi.mock('@/features/auth/hooks/useSignOut', () => ({ useSignOut: vi.fn<typeof useSignOut>() }));
 vi.mock('../hooks/useInvitations', () => ({
   useInvitationPreview: vi.fn<typeof useInvitationPreview>(),
   useAcceptInvitation: vi.fn<typeof useAcceptInvitation>(),

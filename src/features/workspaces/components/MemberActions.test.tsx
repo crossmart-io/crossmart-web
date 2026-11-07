@@ -19,6 +19,7 @@ function workspaceAs(role: WorkspaceRole): Workspace {
     slug: 'default',
     currency: 'USD',
     timeZone: null,
+    sandbox: null,
     role,
     customRole: null,
     permissions: [],

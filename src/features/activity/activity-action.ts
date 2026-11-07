@@ -29,6 +29,8 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.member_removed]: 'Member removed',
   [ActivityAction.member_left]: 'Member left',
   [ActivityAction.workspace_created]: 'Workspace created',
+  [ActivityAction.sandbox_created]: 'Sandbox account opened',
+  [ActivityAction.sandbox_claimed]: 'Sandbox account claimed',
   [ActivityAction.workspace_renamed]: 'Workspace renamed',
   [ActivityAction.workspace_time_zone_changed]: 'Time zone changed',
   [ActivityAction.custom_role_created]: 'Role created',

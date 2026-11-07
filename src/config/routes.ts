@@ -15,6 +15,8 @@ export const ROUTES = {
   resetPassword: '/reset-password',
   /** Where invitation emails link to, with the token in the query. */
   acceptInvitation: '/invitations/accept',
+  /** Where sandbox claim emails link to (ADR 0019), with the token in the query. */
+  claimSandbox: '/claim',
   products: '/products',
   newProduct: '/products/new',
   product: `/products/:${ROUTE_PARAMS.productId}`,

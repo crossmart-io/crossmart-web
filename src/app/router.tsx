@@ -167,6 +167,13 @@ export const router = createBrowserRouter([
       })),
   },
   {
+    path: ROUTES.claimSandbox,
+    lazy: () =>
+      import('@/pages/ClaimSandboxPage').then(({ ClaimSandboxPage }) => ({
+        Component: ClaimSandboxPage,
+      })),
+  },
+  {
     element: (
       <RequireSession>
         <Outlet />
