@@ -28,7 +28,7 @@ function renderAt(path: string) {
         <Route
           path="/channels/:id/:tab"
           element={
-            <ReturnToProvider parents={CHANNELS} label="crossmartstore">
+            <ReturnToProvider parents={CHANNELS} label="demo-store">
               <ProductLink />
             </ReturnToProvider>
           }
@@ -47,7 +47,7 @@ describe('return to', () => {
     await userEvent.click(screen.getByRole('link', { name: 'Linen shirt' }));
 
     expect(
-      screen.getByText('Channels=/channels > crossmartstore=/channels/c-1/products'),
+      screen.getByText('Channels=/channels > demo-store=/channels/c-1/products'),
     ).toBeInTheDocument();
   });
 

@@ -2,7 +2,7 @@
 #   docker build --build-arg VITE_API_URL=https://api.example.com \
 #     --build-arg VITE_MCP_URL=https://mcp.example.com/mcp -t crossmart-web .
 
-ARG NODE_VERSION=24
+ARG NODE_VERSION=22
 
 FROM node:${NODE_VERSION}-alpine AS build
 ENV PNPM_HOME=/pnpm PATH=/pnpm:$PATH HUSKY=0

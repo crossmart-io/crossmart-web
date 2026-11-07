@@ -408,13 +408,13 @@ export const CHANNELS: readonly ChannelInfo[] = [
     name: 'Amazon',
     description: 'Create offers and listings in Seller Central.',
     status: ChannelStatus.Planned,
-    logo: { src: amazonLogo },
+    logo: { src: amazonLogo, tint: FOREGROUND_TINT },
   },
   {
     name: 'Walmart',
     description: 'Sell on Walmart Marketplace.',
     status: ChannelStatus.Planned,
-    logo: { src: walmartLogo },
+    logo: { src: walmartLogo, tint: FOREGROUND_TINT },
   },
   {
     name: 'TikTok Shop',

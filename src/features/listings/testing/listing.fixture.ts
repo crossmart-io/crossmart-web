@@ -55,7 +55,7 @@ export function productChannelFixture(overrides: Partial<ProductChannel> = {}): 
     connection: {
       id: 'c-1',
       channel: ChannelType.shopify,
-      displayName: 'crossmartstore',
+      displayName: 'demo-store',
       status: ChannelConnectionStatus.CONNECTED,
       currencyCode: 'USD',
     },
@@ -96,7 +96,7 @@ export function listingEditorVariantFixture(
   };
 }
 
-/** Linen shirt in crossmartstore, following the product everywhere, with `overrides` applied. */
+/** Linen shirt in demo-store, following the product everywhere, with `overrides` applied. */
 export function listingEditorFixture(overrides: Partial<ListingEditor> = {}): ListingEditor {
   const channel = productChannelFixture();
   return {

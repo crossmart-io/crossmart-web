@@ -13,7 +13,7 @@ const ORDER: OrderSummary = {
   total: '130.00',
   placedAt: '2026-11-04T08:00:00Z',
   connectionId: 'c-1',
-  storeName: 'crossmartstore',
+  storeName: 'demo-store',
   channel: 'shopify',
   itemCount: 3,
   unmatchedLines: 1,
