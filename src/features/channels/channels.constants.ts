@@ -89,6 +89,8 @@ export const CONNECT_FAILURE_MESSAGES: Record<ConnectFailure, string> = {
   [ConnectFailure.channel_unavailable]: 'The channel is not responding. Try again in a moment.',
   [ConnectFailure.plan_limit_reached]:
     'Your plan has no room for another connected channel. See Plan & usage in Settings.',
+  [ConnectFailure.sandbox_claim_required]:
+    'Claim this account first: stores can be connected once it is yours.',
   [ConnectFailure.session_required]:
     'Sign in to Crossmart in this browser, then connect the store again.',
   [ConnectFailure.unexpected]: 'Something went wrong while connecting. Please try again.',

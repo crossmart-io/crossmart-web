@@ -15,6 +15,7 @@ function workspace(id: string): Workspace {
     slug: 'default',
     currency: 'USD',
     timeZone: null,
+    sandbox: null,
     role: WorkspaceRole.OWNER,
     customRole: null,
     permissions: [],

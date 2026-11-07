@@ -20,6 +20,7 @@ function workspace(id: string, role: WorkspaceRole): Workspace {
     slug: id,
     currency: 'USD',
     timeZone: null,
+    sandbox: null,
     role,
     customRole: null,
     permissions: [],
