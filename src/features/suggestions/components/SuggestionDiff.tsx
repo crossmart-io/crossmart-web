@@ -1,50 +1,14 @@
 import { useMemo } from 'react';
-import { cn } from '@/lib/utils';
 import type { SuggestionKind } from '@/api/schema';
 import { htmlToText } from '@/lib/html-text';
-import { DiffPart, type DiffSegment, diffWords } from '@/lib/word-diff';
+import { DiffSide } from '@/components/diff/DiffSide';
+import { DiffPart, diffWords } from '@/lib/word-diff';
 import { HTML_SUGGESTION_KINDS } from '../suggestions.constants';
 
 interface SuggestionDiffProps {
   kind: SuggestionKind;
   currentValue: string;
   proposedValue: string;
-}
-
-const SEGMENT_STYLES: Record<DiffPart, string> = {
-  [DiffPart.Same]: '',
-  [DiffPart.Removed]: 'rounded-sm bg-destructive/10 text-destructive line-through',
-  [DiffPart.Added]: 'rounded-sm bg-success/12 text-success',
-};
-
-/** One side of the diff: the shared words, plus what that side alone has, highlighted. */
-function DiffSide({
-  label,
-  segments,
-  hidden,
-}: {
-  label: string;
-  segments: readonly DiffSegment[];
-  hidden: DiffPart;
-}) {
-  return (
-    <div className="flex min-w-0 flex-col gap-1">
-      <span className="text-xs font-medium text-muted-foreground">{label}</span>
-      <p className="text-sm leading-relaxed break-words whitespace-pre-line">
-        {segments
-          .filter((segment) => segment.part !== hidden)
-          .map((segment, index) =>
-            segment.part === DiffPart.Same ? (
-              <span key={index}>{segment.text}</span>
-            ) : (
-              <mark key={index} className={cn('px-0.5', SEGMENT_STYLES[segment.part])}>
-                {segment.text}
-              </mark>
-            ),
-          )}
-      </p>
-    </div>
-  );
 }
 
 /**
