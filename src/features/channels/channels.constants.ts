@@ -63,9 +63,9 @@ export type RoadmapStatus = Exclude<ChannelStatus, ChannelStatus.Live>;
 
 /** The link under a channel that cannot be connected yet, by its status. */
 export const CHANNEL_ROADMAP_ACTION_LABELS: Record<RoadmapStatus, string> = {
-  [ChannelStatus.ComingSoon]: 'Follow on GitHub',
-  [ChannelStatus.Planned]: 'Request on GitHub',
-  [ChannelStatus.Community]: 'Build it on GitHub',
+  [ChannelStatus.ComingSoon]: 'Get notified',
+  [ChannelStatus.Planned]: 'Request this channel',
+  [ChannelStatus.Community]: 'Offer to build it',
 };
 
 export const CONNECTION_STATUS_LABELS: Record<ChannelConnectionStatus, string> = {

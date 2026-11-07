@@ -1,3 +1,6 @@
+/** The address that takes channel requests while the repositories are private. */
+export const SUPPORT_EMAIL = 'hello@crossmart.io';
+
 /** Public pages outside the app. */
 export const EXTERNAL_LINKS = {
   docs: 'https://docs.crossmart.io',
@@ -7,3 +10,9 @@ export const EXTERNAL_LINKS = {
   webhookSignatures:
     'https://github.com/crossmart-io/crossmart/blob/main/docs/developers/webhooks.md#verify-the-signature',
 } as const;
+
+/** A mail link to Crossmart about a channel, with the channel named in the subject. */
+export function channelRequestMailto(channelName: string): string {
+  const subject = encodeURIComponent(`Channel request: ${channelName}`);
+  return `mailto:${SUPPORT_EMAIL}?subject=${subject}`;
+}

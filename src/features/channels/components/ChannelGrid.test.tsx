@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
 import { ChannelType, WorkspacePermission, WorkspaceRole } from '@/api/schema';
+import { channelRequestMailto } from '@/config/links';
 import type { Workspace } from '@/features/workspaces';
 import {
   CHANNEL_ROADMAP_ACTION_LABELS,
@@ -87,7 +88,7 @@ describe('ChannelGrid', () => {
         expect(roadmapCard.getByText(CHANNEL_STATUS_LABELS[status])).toBeInTheDocument();
         expect(
           roadmapCard.getByRole('link', { name: CHANNEL_ROADMAP_ACTION_LABELS[status] }),
-        ).toBeInTheDocument();
+        ).toHaveAttribute('href', channelRequestMailto(name));
         expect(roadmapCard.queryByRole('button', { name: CONNECT_ACTION })).not.toBeInTheDocument();
       }
     },

@@ -1,8 +1,8 @@
-import { ArrowUpRight } from 'lucide-react';
+import { Mail } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { EXTERNAL_LINKS } from '@/config/links';
+import { channelRequestMailto } from '@/config/links';
 import {
   CHANNEL_ROADMAP_ACTION_LABELS,
   CHANNEL_STATUS_LABELS,
@@ -29,9 +29,9 @@ export function ChannelCard({ channel }: { channel: RoadmapChannelInfo }) {
       </CardContent>
       <CardFooter className="mt-auto">
         <Button variant="ghost" size="sm" className="-ml-2" asChild>
-          <a href={EXTERNAL_LINKS.issues} target="_blank" rel="noreferrer">
+          <a href={channelRequestMailto(channel.name)}>
+            <Mail data-icon="inline-start" />
             {CHANNEL_ROADMAP_ACTION_LABELS[channel.status]}
-            <ArrowUpRight data-icon="inline-end" />
           </a>
         </Button>
       </CardFooter>
