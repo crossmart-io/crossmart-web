@@ -1,25 +1,19 @@
-import { ChevronDown, PencilLine, Plus } from 'lucide-react';
+import { ChevronDown, PencilLine } from 'lucide-react';
 import { useId } from 'react';
-import { Link } from 'react-router';
 import { ListingDisplayState, PriceSource } from '@/api/schema';
 import { Button } from '@/components/ui/button';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Spinner } from '@/components/ui/spinner';
-import { toChannelConnectionRoute } from '@/config/routes';
 import { needsReconnect } from '@/features/channels/connection-status';
 import { formatMoney, formatPriceRange, pluralize } from '@/lib/format';
 import { cn } from '@/lib/utils';
 import { ChannelItemAction, channelItemAction } from '../channel-item-action';
 import { channelPriceRange } from '../channel-price-range';
-import { type ProductChannelRef, useAddToStore } from '../hooks/useProductChannels';
+import type { ProductChannelRef } from '../hooks/useProductChannels';
 import { listingFixOf } from '../listing-fix';
 import { hasListingReason } from '../listing-states';
-import {
-  CHANNEL_CARD_COPY,
-  CHANNEL_CARD_VARIANT_LIMIT,
-  STORE_NOT_CONNECTED_COPY,
-} from '../listings.constants';
+import { CHANNEL_CARD_COPY, CHANNEL_CARD_VARIANT_LIMIT } from '../listings.constants';
 import type { ChannelVariant, ProductChannel } from '../listings.types';
+import { AddToStoreButton } from './AddToStoreButton';
 import { ListingFixAction } from './ListingFixAction';
 import { ListingStateBadge } from './ListingStateBadge';
 import { PriceExplanation } from './PriceExplanation';
@@ -101,50 +95,6 @@ function PriceSummary({ channel, contentId }: { channel: ProductChannel; content
         </Button>
       </CollapsibleTrigger>
     </div>
-  );
-}
-
-/** Why the store cannot take products now, with a link to the page where it is reconnected. */
-function NotConnectedHint({ id, connectionId }: { id: string; connectionId: string }) {
-  return (
-    <p id={id} className="text-xs text-muted-foreground">
-      {STORE_NOT_CONNECTED_COPY.reason}{' '}
-      <Link
-        to={toChannelConnectionRoute(connectionId)}
-        className="font-medium text-foreground underline"
-      >
-        {STORE_NOT_CONNECTED_COPY.action}
-      </Link>
-    </p>
-  );
-}
-
-/** Adds the product in one click; blocked while the store needs reconnecting, and says why. */
-function AddToStoreButton({
-  listingRef,
-  channel,
-}: {
-  listingRef: ProductChannelRef;
-  channel: ProductChannel;
-}) {
-  const add = useAddToStore(listingRef);
-  const hintId = useId();
-  const blocked = needsReconnect(channel.connection.status);
-  return (
-    <>
-      <Button
-        type="button"
-        variant="outline"
-        size="xs"
-        disabled={add.isPending || blocked}
-        aria-describedby={blocked ? hintId : undefined}
-        onClick={() => add.mutate()}
-      >
-        {add.isPending ? <Spinner data-icon="inline-start" /> : <Plus data-icon="inline-start" />}
-        {CHANNEL_CARD_COPY.add}
-      </Button>
-      {blocked && <NotConnectedHint id={hintId} connectionId={channel.connection.id} />}
-    </>
   );
 }
 

@@ -1,0 +1,15 @@
+/* Pending edges move to show work in progress, unless motion is reduced. */
+@media (prefers-reduced-motion: reduce) {
+  .channel-map .react-flow__edge.animated path {
+    animation: none;
+  }
+}
+
+/* React Flow's credit, kept, in the app's colours so it sits quietly in both themes. */
+.channel-map .react-flow__attribution {
+  background: transparent;
+}
+
+.channel-map .react-flow__attribution a {
+  color: var(--muted-foreground);
+}

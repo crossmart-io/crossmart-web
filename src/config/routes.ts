@@ -22,6 +22,8 @@ export const ROUTES = {
   product: `/products/:${ROUTE_PARAMS.productId}`,
   inventory: '/inventory',
   channels: '/channels',
+  /** The catalog and every store it feeds, as a graph. */
+  channelMap: '/channel-map',
   channelConnection: `/channels/:${ROUTE_PARAMS.connectionId}`,
   channelConnectionTab: `/channels/:${ROUTE_PARAMS.connectionId}/:${ROUTE_PARAMS.tab}`,
   activity: '/activity',
@@ -91,6 +93,7 @@ export enum PageSection {
   ProductMedia = 'media',
   ProductStatus = 'status',
   ProductVariants = 'variants',
+  ProductChannelMap = 'channel-map',
   StoreListingDefaults = 'listing-defaults',
   StoreListingSetup = 'listing-setup',
   StorePricing = 'pricing',

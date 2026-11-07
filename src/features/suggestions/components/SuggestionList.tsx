@@ -1,9 +1,8 @@
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import type { Selection } from '@/hooks/useSelection';
-import { useSuggestionReview } from '../hooks/useSuggestionReview';
+import { useSuggestionReviewActions } from '../hooks/useSuggestionReview';
 import type { Suggestion } from '../suggestions.types';
-import { SuggestionCard, type SuggestionReviewActions } from './SuggestionCard';
+import { SuggestionCard } from './SuggestionCard';
 
 interface SuggestionListProps {
   workspaceId: string;
@@ -12,19 +11,9 @@ interface SuggestionListProps {
   selection?: Selection;
 }
 
-function useReviewActions(workspaceId: string): SuggestionReviewActions {
-  const { approve, reject } = useSuggestionReview(workspaceId);
-  const [busyId, setBusyId] = useState<string>();
-  const run = (mutation: typeof approve) => (suggestionId: string) => {
-    setBusyId(suggestionId);
-    mutation.mutate(suggestionId, { onSettled: () => setBusyId(undefined) });
-  };
-  return { onApprove: run(approve), onReject: run(reject), busyId };
-}
-
 /** The suggestions of one inbox page, each with its diff and, for reviewers, its actions. */
 export function SuggestionList({ workspaceId, suggestions, selection }: SuggestionListProps) {
-  const review = useReviewActions(workspaceId);
+  const review = useSuggestionReviewActions(workspaceId);
   const ids = suggestions.map((suggestion) => suggestion.id);
   return (
     <div className="flex flex-col gap-3">

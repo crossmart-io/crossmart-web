@@ -8,6 +8,7 @@ import { ROUTE_PARAMS } from '@/config/routes';
 import { RecentActivityCard } from '@/features/activity';
 import { ProductStatusBadge, useProduct } from '@/features/catalog';
 import { ProductEditor } from '@/features/catalog/editor';
+import { ProductChannelMap } from '@/features/channel-map';
 import { ProductChannelsCard } from '@/features/listings';
 import { WorkspacePermission } from '@/api/schema';
 import { useScrollToSection } from '@/hooks/useScrollToSection';
@@ -45,6 +46,14 @@ function EditProduct({ workspace, productId }: { workspace: Workspace; productId
             product={product}
             readOnly={!canEdit}
             aside={<RecentActivityCard workspaceId={workspace.id} productId={product.id} />}
+            channelMap={
+              <ProductChannelMap
+                workspaceId={workspace.id}
+                productId={product.id}
+                product={{ title: product.title, imageUrl: product.media[0]?.url ?? null }}
+                canEdit={canEdit}
+              />
+            }
             channels={
               <ProductChannelsCard
                 workspaceId={workspace.id}

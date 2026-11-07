@@ -62,3 +62,6 @@ export const AI_COPY = {
     'Set ANTHROPIC_API_KEY on the server and restart it to turn on AI content and suggestions.',
   generate: 'Generate with AI',
 } as const;
+
+/** Pending suggestions a product's page loads at once: more than one product ever gathers. */
+export const PRODUCT_SUGGESTIONS_LIMIT = 50;

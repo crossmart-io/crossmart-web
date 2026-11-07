@@ -66,6 +66,13 @@ const appRoutes: RouteObject[] = [
     lazy: () =>
       import('@/pages/ChannelsPage').then(({ ChannelsPage }) => ({ Component: ChannelsPage })),
   },
+  {
+    path: ROUTES.channelMap,
+    lazy: () =>
+      import('@/pages/ChannelMapPage').then(({ ChannelMapPage }) => ({
+        Component: ChannelMapPage,
+      })),
+  },
   ...[ROUTES.channelConnection, ROUTES.channelConnectionTab].map((path) => ({
     path,
     lazy: () =>
