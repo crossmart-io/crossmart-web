@@ -87,7 +87,7 @@ describe('ProductChannelItem', () => {
       }),
     );
 
-    expect(screen.getByText('crossmartstore')).toBeInTheDocument();
+    expect(screen.getByText('demo-store')).toBeInTheDocument();
     expect(screen.getByText('Published')).toBeInTheDocument();
     expect(screen.getByText('$64.00 – $72.00')).toBeInTheDocument();
     expect(screen.queryByText('Blue')).not.toBeInTheDocument();
@@ -108,7 +108,7 @@ describe('ProductChannelItem', () => {
 
     await userEvent.click(screen.getByRole('button', { name: CHANNEL_CARD_COPY.edit }));
     await userEvent.click(
-      screen.getByRole('button', { name: `${CHANNEL_CARD_COPY.openListing} crossmartstore` }),
+      screen.getByRole('button', { name: `${CHANNEL_CARD_COPY.openListing} demo-store` }),
     );
 
     expect(onOpen).toHaveBeenCalledTimes(2);

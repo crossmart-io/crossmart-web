@@ -124,7 +124,7 @@ describe('ListingEditorSheet', () => {
     );
 
     const dialog = screen.getByRole('dialog', { name: 'Linen shirt' });
-    expect(within(dialog).getByText('crossmartstore')).toBeInTheDocument();
+    expect(within(dialog).getByText('demo-store')).toBeInTheDocument();
     expect(within(dialog).getByText('Needs details')).toBeInTheDocument();
     expect(within(dialog).getByText('eBay asks for a category')).toBeInTheDocument();
     expect(within(dialog).getByRole('button', { name: 'Choose a category' })).toBeInTheDocument();
