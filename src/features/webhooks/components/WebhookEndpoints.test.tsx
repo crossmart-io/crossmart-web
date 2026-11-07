@@ -1,3 +1,4 @@
+import { EXTERNAL_LINKS } from '@/config/links';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fetchClient } from '@/api/client';
@@ -81,7 +82,7 @@ describe('WebhookEndpoints', () => {
     expect(screen.getByRole('button', { name: 'Add endpoint' })).toBeInTheDocument();
     expect(screen.getByRole('link', { name: /webhooks guide/ })).toHaveAttribute(
       'href',
-      expect.stringContaining('docs/developers/webhooks.md'),
+      EXTERNAL_LINKS.webhooksGuide,
     );
   });
 
