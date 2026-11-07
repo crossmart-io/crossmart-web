@@ -1,5 +1,5 @@
 import { FeatureKind } from '@/api/schema';
-import { NEAR_LIMIT_RATIO, PERCENT, UNLIMITED_LABEL } from './plan.constants';
+import { GRANT_NOUNS, NEAR_LIMIT_RATIO, PERCENT, UNLIMITED_LABEL } from './plan.constants';
 import type { FeatureUsage } from './plan.types';
 
 /** How close a counted feature is to its limit, which sets the meter's color and wording. */
@@ -11,7 +11,9 @@ export enum UsageLevel {
 }
 
 /** Counted features the plan includes, in the API's order: these get meters. */
-export function meteredFeatures(features: readonly FeatureUsage[]): FeatureUsage[] {
+export function meteredFeatures<Grant extends Pick<FeatureUsage, 'kind'>>(
+  features: readonly Grant[],
+): Grant[] {
   return features.filter((feature) => feature.kind === FeatureKind.limit);
 }
 
@@ -36,6 +38,12 @@ export function usagePercent({ usage, limit }: Pick<FeatureUsage, 'usage' | 'lim
 
 function formatLimit(limit: number | null): string {
   return limit === null ? UNLIMITED_LABEL : limit.toLocaleString();
+}
+
+/** A counted feature as a plan offers it: "1,000 active listings", "1 workspace", "Unlimited stores". */
+export function formatGrant({ feature, limit }: Pick<FeatureUsage, 'feature' | 'limit'>): string {
+  const noun = GRANT_NOUNS[feature];
+  return `${formatLimit(limit)} ${limit === 1 ? noun.one : noun.other}`;
 }
 
 /** "12 of 50", or "12 used" without a limit. */

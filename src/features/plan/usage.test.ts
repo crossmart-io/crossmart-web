@@ -1,6 +1,7 @@
 import { Feature, FeatureKind } from '@/api/schema';
 import {
   flagFeatures,
+  formatGrant,
   formatUsage,
   meteredFeatures,
   UsageLevel,
@@ -55,5 +56,18 @@ describe('meteredFeatures and flagFeatures', () => {
     expect(flagFeatures(features).map((entry) => entry.feature)).toEqual([
       Feature.autonomous_agents,
     ]);
+  });
+});
+
+describe('formatGrant', () => {
+  it('names a plan’s limit in words', () => {
+    expect(formatGrant({ feature: Feature.active_listings, limit: 1000 })).toBe(
+      `${(1000).toLocaleString()} active listings`,
+    );
+    expect(formatGrant({ feature: Feature.channel_connections, limit: null })).toBe(
+      'Unlimited stores',
+    );
+    expect(formatGrant({ feature: Feature.workspaces, limit: 1 })).toBe('1 workspace');
+    expect(formatGrant({ feature: Feature.api_keys, limit: 5 })).toBe('5 API keys');
   });
 });

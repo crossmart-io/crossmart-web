@@ -1,4 +1,4 @@
-import { Feature, SubscriptionStatus } from '@/api/schema';
+import { Feature } from '@/api/schema';
 
 export const SUBSCRIPTION_ENDPOINT = '/api/v1/organizations/{organizationId}/subscription';
 
@@ -30,11 +30,17 @@ export const FEATURE_LABELS: Record<Feature, { label: string; description: strin
   },
 };
 
-export const SUBSCRIPTION_STATUS_LABELS: Record<SubscriptionStatus, string> = {
-  [SubscriptionStatus.ACTIVE]: 'Active',
-  [SubscriptionStatus.TRIALING]: 'Trial',
-  [SubscriptionStatus.PAST_DUE]: 'Payment due',
-  [SubscriptionStatus.CANCELED]: 'Canceled',
+/** How a plan's limit reads in a plan card, for one and for many: "1 workspace", "5 API keys". */
+export const GRANT_NOUNS: Record<Feature, { one: string; other: string }> = {
+  [Feature.active_listings]: { one: 'active listing', other: 'active listings' },
+  [Feature.channel_connections]: { one: 'store', other: 'stores' },
+  [Feature.workspaces]: { one: 'workspace', other: 'workspaces' },
+  [Feature.members]: { one: 'member', other: 'members' },
+  [Feature.api_keys]: { one: 'API key', other: 'API keys' },
+  [Feature.webhook_endpoints]: { one: 'webhook endpoint', other: 'webhook endpoints' },
+  [Feature.ai_credits]: { one: 'AI credit a month', other: 'AI credits a month' },
+  [Feature.autonomous_agents]: { one: 'autonomous agent', other: 'autonomous agents' },
+  [Feature.bring_your_own_key]: { one: 'own AI key', other: 'own AI keys' },
 };
 
 /** From this share of a limit on, a meter warns that it is running out. */
@@ -43,13 +49,5 @@ export const PERCENT = 100;
 export const UNLIMITED_LABEL = 'Unlimited';
 
 export const PLAN_COPY = {
-  upgrade: 'Upgrade',
-  billingSoon: 'Billing coming soon',
-  notEnforced: 'Limits are not enforced yet: going past one is shown here but never blocks you.',
-  enforced: 'Actions that would go past a limit are refused until the plan is upgraded.',
-  legacy: 'Legacy plan',
-  legacyNote:
-    'This plan is no longer offered. You keep it, with its limits, until you choose one of the current plans.',
-  noAccess: 'Only owners and admins can see the plan and its usage.',
   loadError: 'The plan could not be loaded',
 } as const;

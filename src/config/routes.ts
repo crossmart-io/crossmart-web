@@ -35,6 +35,12 @@ export const ROUTES = {
   webhooks: '/settings/webhooks',
   webhookEndpoint: `/settings/webhooks/:${ROUTE_PARAMS.endpointId}`,
   workspaceSettings: '/settings/workspace',
+  /** The plan, its billing and usage. Checkout and the billing portal return here (ADR 0024). */
+  billing: '/settings/billing',
+  /** Where checkout returns after paying, and after backing out; the API names these paths. */
+  checkoutSuccess: '/settings/billing/checkout/success',
+  checkoutCanceled: '/settings/billing/checkout/canceled',
+  /** The former plan page; kept so old links land on billing. */
   plan: '/settings/plan',
   members: '/settings/members',
   roles: '/settings/roles',

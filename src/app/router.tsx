@@ -1,4 +1,4 @@
-import { createBrowserRouter, Outlet, type RouteObject } from 'react-router';
+import { createBrowserRouter, Navigate, Outlet, type RouteObject } from 'react-router';
 import { AppShell } from '@/components/layout/AppShell';
 import { ROUTES } from '@/config/routes';
 import { AuthLayout, RequireSession } from '@/features/auth';
@@ -98,9 +98,25 @@ const appRoutes: RouteObject[] = [
       })),
   },
   {
-    path: ROUTES.plan,
-    lazy: () => import('@/pages/PlanPage').then(({ PlanPage }) => ({ Component: PlanPage })),
+    path: ROUTES.billing,
+    lazy: () =>
+      import('@/pages/BillingPage').then(({ BillingPage }) => ({ Component: BillingPage })),
   },
+  {
+    path: ROUTES.checkoutSuccess,
+    lazy: () =>
+      import('@/pages/CheckoutSuccessPage').then(({ CheckoutSuccessPage }) => ({
+        Component: CheckoutSuccessPage,
+      })),
+  },
+  {
+    path: ROUTES.checkoutCanceled,
+    lazy: () =>
+      import('@/pages/CheckoutCanceledPage').then(({ CheckoutCanceledPage }) => ({
+        Component: CheckoutCanceledPage,
+      })),
+  },
+  { path: ROUTES.plan, element: <Navigate to={ROUTES.billing} replace /> },
   {
     path: ROUTES.roles,
     lazy: () => import('@/pages/RolesPage').then(({ RolesPage }) => ({ Component: RolesPage })),

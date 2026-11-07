@@ -20,6 +20,19 @@ export function formatMoney(amount: string, currency: string): string {
   return moneyFormat(currency).format(Number(amount));
 }
 
+/** Base 10, for turning a currency's minor units (cents) into whole units. */
+const DECIMAL_BASE = 10;
+
+/**
+ * An amount in the currency's minor units, such as Stripe's cents: 2900 USD reads "$29.00".
+ * The currency's own number of decimals decides the scale (none for JPY).
+ */
+export function formatMinorUnits(amount: number, currency: string): string {
+  const format = moneyFormat(currency.toUpperCase());
+  const decimals = format.resolvedOptions().maximumFractionDigits ?? 0;
+  return format.format(amount / DECIMAL_BASE ** decimals);
+}
+
 /** Part types that are not the number itself: the symbol and the spaces around it. */
 const CURRENCY_PART_TYPES = new Set<Intl.NumberFormatPartTypes>(['currency', 'literal']);
 

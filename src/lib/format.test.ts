@@ -1,4 +1,10 @@
-import { formatAlternatives, formatAmount, formatPriceRange, pluralize } from './format';
+import {
+  formatAlternatives,
+  formatAmount,
+  formatMinorUnits,
+  formatPriceRange,
+  pluralize,
+} from './format';
 
 describe('formatPriceRange', () => {
   it('shows one price when min and max match', () => {
@@ -31,5 +37,13 @@ describe('formatAlternatives', () => {
   it('joins choices with "or" and no serial comma', () => {
     expect(formatAlternatives(['Shopify', 'eBay', 'Google'])).toBe('Shopify, eBay or Google');
     expect(formatAlternatives(['Shopify'])).toBe('Shopify');
+  });
+});
+
+describe('formatMinorUnits', () => {
+  it('reads minor units with the currency’s own decimals, whatever its case', () => {
+    expect(formatMinorUnits(2900, 'usd')).toMatch(/29[.,]00/);
+    expect(formatMinorUnits(2300, 'USD')).toMatch(/23[.,]00/);
+    expect(formatMinorUnits(500, 'jpy')).toMatch(/500/);
   });
 });

@@ -1,8 +1,7 @@
 import { render, screen } from '@testing-library/react';
-import { Feature, FeatureKind, SubscriptionStatus } from '@/api/schema';
-import type { FeatureUsage, Subscription } from '../plan.types';
+import { Feature, FeatureKind } from '@/api/schema';
+import type { FeatureUsage } from '../plan.types';
 import { PlanFeatureList } from './PlanFeatureList';
-import { PlanSummaryCard } from './PlanSummaryCard';
 import { UsageMeter } from './UsageMeter';
 import { UsageMeterList } from './UsageMeterList';
 
@@ -14,48 +13,13 @@ function flag(feature: Feature, enabled: boolean): FeatureUsage {
   return { feature, kind: FeatureKind.flag, enabled, limit: enabled ? null : 0, usage: null };
 }
 
-const SUBSCRIPTION: Subscription = {
-  organizationId: 'org-1',
-  plan: { code: 'starter', name: 'Starter', version: 2, offered: true },
-  status: SubscriptionStatus.ACTIVE,
-  currentPeriodEnd: null,
-  enforced: false,
-  features: [
-    limit(Feature.active_listings, 12, 50),
-    limit(Feature.channel_connections, 4, 3),
-    limit(Feature.members, 4, null),
-    flag(Feature.autonomous_agents, false),
-    flag(Feature.bring_your_own_key, true),
-  ],
-};
-
-describe('PlanSummaryCard', () => {
-  it('names the plan and offers an upgrade that is not available yet', () => {
-    render(<PlanSummaryCard subscription={SUBSCRIPTION} />);
-    expect(screen.getByText('Starter')).toBeInTheDocument();
-    expect(screen.queryByText('Legacy plan')).not.toBeInTheDocument();
-    expect(screen.getByText('Active')).toBeInTheDocument();
-    const upgrade = screen.getByRole('button', { name: 'Upgrade' });
-    expect(upgrade).toBeDisabled();
-    expect(upgrade).toHaveAccessibleDescription('Billing coming soon');
-    expect(screen.getByText(/Limits are not enforced yet/)).toBeInTheDocument();
-  });
-
-  it('says when the plan is a legacy one that is no longer offered', () => {
-    const legacy = {
-      ...SUBSCRIPTION,
-      plan: { code: 'free', name: 'Free', version: 1, offered: false },
-    };
-    render(<PlanSummaryCard subscription={legacy} />);
-    expect(screen.getByText('Legacy plan')).toBeInTheDocument();
-    expect(screen.getByText(/no longer offered/)).toBeInTheDocument();
-  });
-
-  it('says when limits block actions', () => {
-    render(<PlanSummaryCard subscription={{ ...SUBSCRIPTION, enforced: true }} />);
-    expect(screen.getByText(/refused until the plan is upgraded/)).toBeInTheDocument();
-  });
-});
+const FEATURES: FeatureUsage[] = [
+  limit(Feature.active_listings, 12, 50),
+  limit(Feature.channel_connections, 4, 3),
+  limit(Feature.members, 4, null),
+  flag(Feature.autonomous_agents, false),
+  flag(Feature.bring_your_own_key, true),
+];
 
 describe('UsageMeter', () => {
   it('shows the usage of the limit as a meter', () => {
@@ -82,10 +46,10 @@ describe('UsageMeter', () => {
 
 describe('UsageMeterList and PlanFeatureList', () => {
   it('meter the limits and list the flags', () => {
-    render(<UsageMeterList features={SUBSCRIPTION.features} />);
+    render(<UsageMeterList features={FEATURES} />);
     expect(screen.getAllByRole('progressbar')).toHaveLength(3);
 
-    render(<PlanFeatureList features={SUBSCRIPTION.features} />);
+    render(<PlanFeatureList features={FEATURES} />);
     expect(screen.getByText('Autonomous agents')).toBeInTheDocument();
     expect(screen.getByText(/^Not included/)).toBeInTheDocument();
     expect(screen.getByText(/^Included/)).toBeInTheDocument();

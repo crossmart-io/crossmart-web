@@ -1,7 +1,7 @@
 import {
   Bot,
   FileUp,
-  Gauge,
+  CreditCard,
   History,
   Inbox,
   KeyRound,
@@ -66,7 +66,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
     label: 'Settings',
     items: [
       { label: 'Workspace', to: ROUTES.workspaceSettings, icon: Store },
-      { label: 'Plan & usage', to: ROUTES.plan, icon: Gauge },
+      { label: 'Billing', to: ROUTES.billing, icon: CreditCard },
       { label: 'Members', to: ROUTES.members, icon: Users },
       { label: 'Roles', to: ROUTES.roles, icon: ShieldCheck },
       { label: 'API keys', to: ROUTES.apiKeys, icon: KeyRound },
@@ -93,6 +93,7 @@ export const PAGE_PARENTS = {
   topLevel: [],
   products: [{ label: 'Products', to: ROUTES.products }],
   settings: [{ label: 'Settings' }],
+  billing: [{ label: 'Settings' }, { label: 'Billing', to: ROUTES.billing }],
   imports: [{ label: 'Imports', to: ROUTES.imports }],
   channels: [{ label: 'Channels', to: ROUTES.channels }],
   orders: [{ label: 'Orders', to: ROUTES.orders }],
