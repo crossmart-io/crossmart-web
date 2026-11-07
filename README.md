@@ -117,7 +117,8 @@ Please read the main project's [CONTRIBUTING.md](https://github.com/crossmart-io
 
 ## Getting help
 
-- Questions and ideas: [GitHub Discussions](https://github.com/crossmart-io/crossmart/discussions).
+- Questions and chat: join the community on [Discord](https://discord.gg/dWPQjnzWhf).
+- Ideas and longer threads: [GitHub Discussions](https://github.com/crossmart-io/crossmart/discussions).
 - Bugs in the web app: [open an issue](https://github.com/crossmart-io/crossmart-web/issues/new/choose) here.
 - Security issues: never in public. See [SECURITY.md](SECURITY.md).
 
