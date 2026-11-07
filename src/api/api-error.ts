@@ -80,7 +80,10 @@ export function isNotFoundError(error: unknown): boolean {
   return statusCodeOf(error) === HttpStatus.NotFound;
 }
 
-/** The organization's plan has no room for this; upgrading the plan resolves it. */
+/**
+ * A 402: the organization's plan has no room for this, or (`subscription_inactive`) its
+ * subscription lapsed and it is read-only. Either way, Billing is where it is fixed.
+ */
 export function isPlanLimitError(error: unknown): boolean {
   return statusCodeOf(error) === HttpStatus.PaymentRequired;
 }

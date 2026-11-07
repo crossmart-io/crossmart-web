@@ -6,6 +6,7 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { MAIN_CONTENT_ID } from '@/config/app';
 import { AskLauncher } from '@/features/ask';
 import { UserMenu, VerifyEmailBanner } from '@/features/auth';
+import { BillingBanner } from '@/features/billing';
 import { SandboxBanner } from '@/features/sandbox';
 import { useCurrentWorkspace, useDefaultTimeZone } from '@/features/workspaces';
 import { AppSidebar } from './AppSidebar';
@@ -46,6 +47,7 @@ export function AppShell() {
               className="mx-auto w-full max-w-6xl px-4 py-6 outline-none sm:px-6 lg:py-8"
             >
               <SandboxBanner />
+              <BillingBanner />
               <VerifyEmailBanner />
               <Outlet />
             </main>
