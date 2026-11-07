@@ -78,6 +78,8 @@ export const AGENT_WORKER_COPY = {
   changeTarget: 'On',
   before: 'Now',
   after: 'After',
+  /** Shown for a value the change sets when its current value is not known. */
+  sets: 'Sets',
   empty: '(empty)',
   confirmRisk: (consequences: string) => `I understand this ${consequences}`,
   stoppedNote: 'Stopped.',

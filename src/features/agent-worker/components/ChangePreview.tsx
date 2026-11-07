@@ -11,6 +11,19 @@ function asText(value: string | null): string {
   return text || AGENT_WORKER_COPY.empty;
 }
 
+/** A value the change sets, when what it replaces is not known: no diff to show. */
+function ChangeValue({ change }: { change: AgentWorkerChange }) {
+  return (
+    <li className="flex flex-col gap-1.5">
+      <span className="text-xs font-semibold">{change.field}</span>
+      <div className="rounded-md border bg-muted/30 p-2 text-sm">
+        <span className="text-xs text-muted-foreground">{AGENT_WORKER_COPY.sets} </span>
+        <span className="break-words">{asText(change.after)}</span>
+      </div>
+    </li>
+  );
+}
+
 /** One field before and after, with the removed words struck and the added ones marked. */
 function ChangeDiff({ change }: { change: AgentWorkerChange }) {
   const segments = useMemo(
@@ -33,9 +46,13 @@ export function ChangePreview({ changes }: { changes: readonly AgentWorkerChange
   if (!changes.length) return null;
   return (
     <ul className="flex flex-col gap-2">
-      {changes.map((change) => (
-        <ChangeDiff key={change.field} change={change} />
-      ))}
+      {changes.map((change) =>
+        change.before === null ? (
+          <ChangeValue key={change.field} change={change} />
+        ) : (
+          <ChangeDiff key={change.field} change={change} />
+        ),
+      )}
     </ul>
   );
 }
