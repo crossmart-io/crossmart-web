@@ -1,4 +1,5 @@
 import { createBrowserRouter, Navigate, Outlet, type RouteObject } from 'react-router';
+import { RouteErrorBoundary } from '@/components/feedback/RouteErrorBoundary';
 import { AppShell } from '@/components/layout/AppShell';
 import { ROUTES } from '@/config/routes';
 import { AuthLayout, RequireSession } from '@/features/auth';
@@ -174,42 +175,47 @@ const agentAuthorizationRoutes: RouteObject[] = [
 
 export const router = createBrowserRouter([
   {
-    element: <AuthLayout />,
+    errorElement: <RouteErrorBoundary />,
     children: [
-      { path: ROUTES.signIn, element: <SignInPage /> },
-      { path: ROUTES.signUp, element: <SignUpPage /> },
-      { path: ROUTES.forgotPassword, element: <ForgotPasswordPage /> },
-      { path: ROUTES.resetPassword, element: <ResetPasswordPage /> },
+      {
+        element: <AuthLayout />,
+        children: [
+          { path: ROUTES.signIn, element: <SignInPage /> },
+          { path: ROUTES.signUp, element: <SignUpPage /> },
+          { path: ROUTES.forgotPassword, element: <ForgotPasswordPage /> },
+          { path: ROUTES.resetPassword, element: <ResetPasswordPage /> },
+        ],
+      },
+      {
+        path: ROUTES.acceptInvitation,
+        lazy: () =>
+          import('@/pages/AcceptInvitationPage').then(({ AcceptInvitationPage }) => ({
+            Component: AcceptInvitationPage,
+          })),
+      },
+      {
+        path: ROUTES.claimSandbox,
+        lazy: () =>
+          import('@/pages/ClaimSandboxPage').then(({ ClaimSandboxPage }) => ({
+            Component: ClaimSandboxPage,
+          })),
+      },
+      {
+        element: (
+          <RequireSession>
+            <Outlet />
+          </RequireSession>
+        ),
+        children: agentAuthorizationRoutes,
+      },
+      {
+        element: (
+          <RequireSession>
+            <AppShell />
+          </RequireSession>
+        ),
+        children: appRoutes,
+      },
     ],
-  },
-  {
-    path: ROUTES.acceptInvitation,
-    lazy: () =>
-      import('@/pages/AcceptInvitationPage').then(({ AcceptInvitationPage }) => ({
-        Component: AcceptInvitationPage,
-      })),
-  },
-  {
-    path: ROUTES.claimSandbox,
-    lazy: () =>
-      import('@/pages/ClaimSandboxPage').then(({ ClaimSandboxPage }) => ({
-        Component: ClaimSandboxPage,
-      })),
-  },
-  {
-    element: (
-      <RequireSession>
-        <Outlet />
-      </RequireSession>
-    ),
-    children: agentAuthorizationRoutes,
-  },
-  {
-    element: (
-      <RequireSession>
-        <AppShell />
-      </RequireSession>
-    ),
-    children: appRoutes,
   },
 ]);
