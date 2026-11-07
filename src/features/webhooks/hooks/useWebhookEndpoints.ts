@@ -7,6 +7,7 @@ import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
 import {
   WEBHOOK_DELIVERIES_ENDPOINT,
   WEBHOOK_ENDPOINT_ENDPOINT,
+  WEBHOOK_ENDPOINT_QUERIES,
   WEBHOOK_ENDPOINTS_ENDPOINT,
   WEBHOOK_FEEDBACK,
   WEBHOOK_ROTATE_SECRET_ENDPOINT,
@@ -14,6 +15,7 @@ import {
 } from '../webhooks.constants';
 
 export type WebhookEndpoint = components['schemas']['WebhookEndpointDto'];
+export type WebhookLastDelivery = components['schemas']['WebhookEndpointLastDeliveryDto'];
 export type WebhookEndpointWithSecret = components['schemas']['WebhookEndpointWithSecretDto'];
 export type NewWebhookEndpoint = components['schemas']['CreateWebhookEndpointDto'];
 export type WebhookEndpointChanges = components['schemas']['UpdateWebhookEndpointDto'];
@@ -26,10 +28,8 @@ export interface WebhookEndpointRef {
 }
 
 const LIST_QUERY = [WEBHOOK_ENDPOINTS_ENDPOINT];
-/** The endpoint list and each endpoint's page: what any change to an endpoint refreshes. */
-const ENDPOINT_QUERIES = [WEBHOOK_ENDPOINTS_ENDPOINT, WEBHOOK_ENDPOINT_ENDPOINT];
-/** A test event adds a delivery and may change the endpoint's failure count. */
-const TEST_QUERIES = [...ENDPOINT_QUERIES, WEBHOOK_DELIVERIES_ENDPOINT];
+/** A test event adds a delivery and changes the endpoint's last delivery and failure count. */
+const TEST_QUERIES = [...WEBHOOK_ENDPOINT_QUERIES, WEBHOOK_DELIVERIES_ENDPOINT];
 
 export function useWebhookEndpoints(workspaceId: string) {
   return api.useQuery('get', WEBHOOK_ENDPOINTS_ENDPOINT, { params: { path: { workspaceId } } });
@@ -41,7 +41,7 @@ export function useWebhookEndpoint(ref: WebhookEndpointRef) {
 
 /** Adds an endpoint. The answer holds its secret, which the API never returns again. */
 export function useCreateWebhookEndpoint(workspaceId: string) {
-  const refresh = useInvalidateEndpoints(ENDPOINT_QUERIES);
+  const refresh = useInvalidateEndpoints(WEBHOOK_ENDPOINT_QUERIES);
   return useMutation<WebhookEndpointWithSecret, Error, NewWebhookEndpoint>({
     meta: { inlineError: true },
     mutationFn: (body) =>
@@ -58,7 +58,7 @@ function patchEndpoint(ref: WebhookEndpointRef, body: WebhookEndpointChanges) {
 
 /** Changes the URL, description or events, from the form that shows its own errors. */
 export function useEditWebhookEndpoint(ref: WebhookEndpointRef) {
-  const refresh = useInvalidateEndpoints(ENDPOINT_QUERIES);
+  const refresh = useInvalidateEndpoints(WEBHOOK_ENDPOINT_QUERIES);
   return useMutation<WebhookEndpoint, Error, WebhookEndpointChanges>({
     meta: { inlineError: true },
     mutationFn: (changes) => patchEndpoint(ref, changes),
@@ -68,7 +68,7 @@ export function useEditWebhookEndpoint(ref: WebhookEndpointRef) {
 
 /** Turns the endpoint on (which clears its failures) or off. */
 export function useSetWebhookEndpointEnabled(ref: WebhookEndpointRef) {
-  const refresh = useInvalidateEndpoints(ENDPOINT_QUERIES);
+  const refresh = useInvalidateEndpoints(WEBHOOK_ENDPOINT_QUERIES);
   return useMutation<WebhookEndpoint, Error, boolean>({
     mutationFn: (enabled) => patchEndpoint(ref, { enabled }),
     onSuccess: async (endpoint) => {
@@ -91,7 +91,7 @@ export function useDeleteWebhookEndpoint(ref: WebhookEndpointRef) {
 
 /** Issues a new secret, returned once; the old one keeps signing for a while. */
 export function useRotateWebhookSecret(ref: WebhookEndpointRef) {
-  const refresh = useInvalidateEndpoints(ENDPOINT_QUERIES);
+  const refresh = useInvalidateEndpoints(WEBHOOK_ENDPOINT_QUERIES);
   return useMutation<WebhookEndpointWithSecret, Error>({
     mutationFn: () =>
       unwrap(fetchClient.POST(WEBHOOK_ROTATE_SECRET_ENDPOINT, { params: { path: ref } })),

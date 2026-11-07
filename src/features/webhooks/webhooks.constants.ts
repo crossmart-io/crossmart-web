@@ -1,4 +1,4 @@
-import { WebhookDeliveryStatus, WebhookEventType } from '@/api/schema';
+import { WebhookAttemptOutcome, WebhookDeliveryStatus, WebhookEventType } from '@/api/schema';
 
 export const WEBHOOK_ENDPOINTS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/webhook-endpoints';
 export const WEBHOOK_ENDPOINT_ENDPOINT =
@@ -13,6 +13,12 @@ export const WEBHOOK_DELIVERY_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/webhook-endpoints/{endpointId}/deliveries/{deliveryId}';
 export const WEBHOOK_REDELIVER_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/webhook-endpoints/{endpointId}/deliveries/{deliveryId}/redeliver';
+
+/** The endpoint list and each endpoint's page: what any change to an endpoint refreshes. */
+export const WEBHOOK_ENDPOINT_QUERIES: readonly string[] = [
+  WEBHOOK_ENDPOINTS_ENDPOINT,
+  WEBHOOK_ENDPOINT_ENDPOINT,
+];
 
 /** Where an endpoint stands, as its status badge says it. */
 export enum WebhookEndpointState {
@@ -124,6 +130,21 @@ export const DELIVERY_STATUS_LABELS: Record<WebhookDeliveryStatus, string> = {
   [WebhookDeliveryStatus.SUCCEEDED]: 'Delivered',
   [WebhookDeliveryStatus.FAILED]: 'Failed',
 };
+
+/** How the endpoint's latest attempt ended, as its last delivery badge says it. */
+export const ATTEMPT_OUTCOME_LABELS: Record<WebhookAttemptOutcome, string> = {
+  [WebhookAttemptOutcome.SUCCEEDED]: 'Delivered',
+  [WebhookAttemptOutcome.FAILED]: 'Failed',
+};
+
+export const LAST_DELIVERY_COPY = {
+  heading: 'Last delivery',
+  none: 'No deliveries yet',
+  /** Shown after the outcome when the endpoint answered with an HTTP status. */
+  responseStatus: (status: number) => `HTTP ${status}`,
+  failuresInARow: 'in a row',
+  failedAttempt: 'failed attempt',
+} as const;
 
 /** Deliveries still in flight: the log refetches until none is. */
 export const IN_FLIGHT_DELIVERY_STATUSES: ReadonlySet<WebhookDeliveryStatus> = new Set([

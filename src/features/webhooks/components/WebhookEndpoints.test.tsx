@@ -1,7 +1,7 @@
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { fetchClient } from '@/api/client';
-import { WebhookDisabledReason, WebhookEventType } from '@/api/schema';
+import { WebhookAttemptOutcome, WebhookDisabledReason, WebhookEventType } from '@/api/schema';
 import { ROUTES } from '@/config/routes';
 import { apiError, apiOk } from '../testing/mock-api-client';
 import { renderWithProviders } from '../testing/render';
@@ -36,16 +36,30 @@ async function openActions(url: string) {
 describe('WebhookEndpoints', () => {
   beforeEach(() => vi.clearAllMocks());
 
-  it('lists endpoints with their events and status', async () => {
+  it('lists endpoints with their events, status and last delivery', async () => {
     listEndpoints([
-      endpointFixture(),
+      endpointFixture({
+        lastDelivery: {
+          attemptedAt: '2026-11-06T10:00:01Z',
+          outcome: WebhookAttemptOutcome.SUCCEEDED,
+          responseStatus: 200,
+          error: null,
+        },
+      }),
       endpointFixture({
         id: 'ep-2',
         url: 'https://example.com/failing',
         enabled: false,
         disabledReason: WebhookDisabledReason.FAILING,
         consecutiveFailures: 30,
+        lastDelivery: {
+          attemptedAt: '2026-11-06T11:00:01Z',
+          outcome: WebhookAttemptOutcome.FAILED,
+          responseStatus: 503,
+          error: 'The endpoint answered with HTTP 503',
+        },
       }),
+      endpointFixture({ id: 'ep-3', url: 'https://example.com/new' }),
     ]);
     renderEndpoints();
 
@@ -54,6 +68,9 @@ describe('WebhookEndpoints', () => {
     expect(screen.getAllByText('Enabled').length).toBeGreaterThan(0);
     expect(screen.getAllByText('Turned off after failures').length).toBeGreaterThan(0);
     expect(screen.getAllByText('30 failed attempts in a row').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('Delivered').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('· HTTP 503').length).toBeGreaterThan(0);
+    expect(screen.getAllByText('No deliveries yet').length).toBeGreaterThan(0);
   });
 
   it('explains webhooks when there are none, with the guide', async () => {

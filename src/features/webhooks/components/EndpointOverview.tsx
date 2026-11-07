@@ -4,8 +4,9 @@ import { Card, CardContent } from '@/components/ui/card';
 import { formatDate, formatDateTime } from '@/lib/format';
 import type { WebhookEndpoint } from '../hooks/useWebhookEndpoints';
 import { endpointStateOf } from '../webhook-endpoint-state';
-import { WEBHOOK_COPY, WebhookEndpointState } from '../webhooks.constants';
+import { LAST_DELIVERY_COPY, WEBHOOK_COPY, WebhookEndpointState } from '../webhooks.constants';
 import { DetailItem } from './DetailItem';
+import { EndpointLastDelivery } from './EndpointLastDelivery';
 import { EndpointStatusBadge } from './EndpointStatusBadge';
 import { EventTypeBadges } from './EventTypeBadges';
 
@@ -41,6 +42,9 @@ export function EndpointOverview({ endpoint }: { endpoint: WebhookEndpoint }) {
           <dl className="grid gap-4 sm:grid-cols-2">
             <DetailItem label="Status">
               <EndpointStatusBadge endpoint={endpoint} />
+            </DetailItem>
+            <DetailItem label={LAST_DELIVERY_COPY.heading}>
+              <EndpointLastDelivery endpoint={endpoint} />
             </DetailItem>
             <DetailItem label="Added">{formatDate(endpoint.createdAt)}</DetailItem>
             <DetailItem label="Description">{endpoint.description ?? '—'}</DetailItem>

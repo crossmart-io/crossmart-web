@@ -16,6 +16,7 @@ export function endpointFixture(overrides: Partial<WebhookEndpoint> = {}): Webho
     disabledReason: null,
     disabledAt: null,
     consecutiveFailures: 0,
+    lastDelivery: null,
     previousSecretExpiresAt: null,
     createdAt: '2026-11-01T10:00:00Z',
     updatedAt: '2026-11-01T10:00:00Z',
