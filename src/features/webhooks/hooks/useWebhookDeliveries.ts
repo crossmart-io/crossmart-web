@@ -13,6 +13,7 @@ import {
   WEBHOOK_FEEDBACK,
   WEBHOOK_REDELIVER_ENDPOINT,
 } from '../webhooks.constants';
+import { useRefreshEndpointOnSettle } from './useRefreshEndpointOnSettle';
 import type { WebhookDelivery, WebhookEndpointRef } from './useWebhookEndpoints';
 
 type DeliveryPage = components['schemas']['WebhookDeliveryPageDto'];
@@ -27,7 +28,7 @@ function hasDeliveriesInFlight(page: DeliveryPage): boolean {
 
 /**
  * One numbered page of the endpoint's delivery log, newest first. It refetches while a delivery
- * is in flight, so a test event's result shows up within seconds.
+ * is in flight, so a test event's result shows up within seconds, on the endpoint too.
  */
 export function useWebhookDeliveries(
   ref: WebhookEndpointRef,
@@ -35,7 +36,7 @@ export function useWebhookDeliveries(
   pagination: Pagination,
 ) {
   const refetchInterval = useInFlightPolling(hasDeliveriesInFlight);
-  return usePagedList<WebhookDelivery, DeliveryPage>({
+  const deliveries = usePagedList<WebhookDelivery, DeliveryPage>({
     endpoint: WEBHOOK_DELIVERIES_ENDPOINT,
     params: { ...ref, status },
     pagination,
@@ -49,6 +50,10 @@ export function useWebhookDeliveries(
     staleTime: 0,
     refetchInterval,
   });
+  useRefreshEndpointOnSettle(
+    deliveries.data !== undefined && hasDeliveriesInFlight(deliveries.data),
+  );
+  return deliveries;
 }
 
 function isDeliveryInFlight(delivery: WebhookDeliveryDetail): boolean {
