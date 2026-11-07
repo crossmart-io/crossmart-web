@@ -14,6 +14,7 @@ import {
   Store,
   Users,
   Warehouse,
+  Waypoints,
   Webhook,
   type LucideIcon,
 } from 'lucide-react';
@@ -53,6 +54,7 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { label: 'Inventory', to: ROUTES.inventory, icon: Warehouse },
       { label: 'Imports', to: ROUTES.imports, icon: FileUp },
       { label: 'Channels', to: ROUTES.channels, icon: Share2, badge: NavBadge.ChannelErrors },
+      { label: 'Channel map', to: ROUTES.channelMap, icon: Waypoints },
       {
         label: 'Suggestions',
         to: ROUTES.suggestions,

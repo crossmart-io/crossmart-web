@@ -22,6 +22,8 @@ interface ProductEditorLayoutProps {
   aside?: ReactNode;
   /** Where the product is listed; a placeholder card until the product exists. */
   channels?: ReactNode;
+  /** The product's stores as a map, below its content; absent until the product exists. */
+  channelMap?: ReactNode;
   /** Disables the product's own fields; the channels and side cards keep their links. */
   readOnly?: boolean;
 }
@@ -44,6 +46,7 @@ export function ProductEditorLayout({
   onPendingUploadsChange,
   aside,
   channels,
+  channelMap,
   readOnly = false,
 }: ProductEditorLayoutProps) {
   // On one column, status comes first: it is what sellers check before anything else.
@@ -65,7 +68,8 @@ export function ProductEditorLayout({
         )}
         <VariantsCard currency={currency} />
       </FieldGroup>
-      <div className="flex min-w-0 flex-col gap-6">
+      {channelMap && <div className="min-w-0 lg:col-start-1">{channelMap}</div>}
+      <div className="flex min-w-0 flex-col gap-6 lg:row-span-2">
         {isDesktop && (
           <FieldGroup readOnly={readOnly}>
             <StatusCard />

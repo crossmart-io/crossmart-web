@@ -1,4 +1,5 @@
 import { useMutation } from '@tanstack/react-query';
+import { useState } from 'react';
 import { toast } from 'sonner';
 import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
@@ -17,6 +18,7 @@ import {
   SUGGESTIONS_FEEDBACK,
 } from '../suggestions.constants';
 import type { BulkReviewResult, Suggestion } from '../suggestions.types';
+import type { SuggestionReviewActions } from '../components/SuggestionCard';
 
 /** Approving changes what a store shows, so the product's channels are refreshed too. */
 const REVIEW_ENDPOINTS = [SUGGESTIONS_ENDPOINT, PRODUCT_CHANNELS_ENDPOINT] as const;
@@ -86,6 +88,17 @@ export function useSuggestionReview(workspaceId: string) {
     onSettled: refresh,
   });
   return { approve, reject };
+}
+
+/** Approve and reject for a list of suggestion cards, with the one being reviewed marked busy. */
+export function useSuggestionReviewActions(workspaceId: string): SuggestionReviewActions {
+  const { approve, reject } = useSuggestionReview(workspaceId);
+  const [busyId, setBusyId] = useState<string>();
+  const run = (mutation: typeof approve) => (suggestionId: string) => {
+    setBusyId(suggestionId);
+    mutation.mutate(suggestionId, { onSettled: () => setBusyId(undefined) });
+  };
+  return { onApprove: run(approve), onReject: run(reject), busyId };
 }
 
 /**

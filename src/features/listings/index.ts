@@ -14,3 +14,4 @@ export { ListingStateBadge } from './components/ListingStateBadge';
 export { StoreName } from './components/StoreName';
 export { listingFixOf } from './listing-fix';
 export { LISTING_STATE_PRESENTATION } from './listing-states';
+export { AddToStoreButton } from './components/AddToStoreButton';

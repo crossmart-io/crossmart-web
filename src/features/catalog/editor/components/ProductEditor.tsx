@@ -22,6 +22,8 @@ interface ProductEditorProps {
   aside?: ReactNode;
   /** Where the product is listed, in place of the placeholder card. */
   channels?: ReactNode;
+  /** The product's stores as a map, below its content. */
+  channelMap?: ReactNode;
   /** For roles that may not edit products: fields disabled, no save or delete. */
   readOnly?: boolean;
 }
@@ -43,6 +45,7 @@ export function ProductEditor({
   product,
   aside,
   channels,
+  channelMap,
   readOnly = false,
 }: ProductEditorProps) {
   const editor = useProductEditorForm(workspace.id, product, readOnly);
@@ -72,6 +75,7 @@ export function ProductEditor({
             onPendingUploadsChange={editor.setPendingUploads}
             aside={aside}
             channels={channels}
+            channelMap={channelMap}
             readOnly={readOnly}
           />
         </form>
