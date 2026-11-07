@@ -6,23 +6,30 @@ import {
   BILLING_COPY,
   GOOD_STANDING_STATUSES,
   INTERVAL_LABELS,
+  LIVE_STATUSES,
   SUBSCRIPTION_STATUS_LABELS,
 } from '../billing.constants';
-import { daysUntil } from '../billing';
+import { cancelledTrialNote, daysUntil } from '../billing';
 import type { BillingStatus } from '../billing.types';
 import { ManageBillingButton } from './ManageBillingButton';
 
-/** When the subscription renews, ends, or leaves its trial, in one line. */
+/** When a scheduled cancellation ends the subscription; null when it renews. */
+function scheduledEnd({ cancelAt, cancelAtPeriodEnd, currentPeriodEnd }: BillingStatus) {
+  return cancelAt ?? (cancelAtPeriodEnd ? currentPeriodEnd : null);
+}
+
+/** When the subscription renews, ends, or leaves its trial, in one line; none once it ended. */
 function periodNote(status: BillingStatus, now: Date): string | null {
-  const { trialEnd, currentPeriodEnd, cancelAtPeriodEnd } = status;
+  if (!LIVE_STATUSES.has(status.status)) return null;
+  const { trialEnd, currentPeriodEnd } = status;
+  const endsAt = scheduledEnd(status);
   if (status.access.state === SubscriptionAccessState.trialing && trialEnd) {
+    if (endsAt) return cancelledTrialNote(endsAt);
     const left = pluralize(daysUntil(trialEnd, now), 'day');
     return `Trial ends in ${left}, on ${formatDate(trialEnd)}. Your card is charged then.`;
   }
-  if (!currentPeriodEnd) return null;
-  return cancelAtPeriodEnd
-    ? `Ends on ${formatDate(currentPeriodEnd)}; it will not renew.`
-    : `Renews on ${formatDate(currentPeriodEnd)}.`;
+  if (endsAt) return `Cancels on ${formatDate(endsAt)}.`;
+  return currentPeriodEnd ? `Renews on ${formatDate(currentPeriodEnd)}.` : null;
 }
 
 /** The plan's name with its status, interval and legacy badges. */

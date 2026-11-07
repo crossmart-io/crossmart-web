@@ -1,10 +1,16 @@
 import { type BillingInterval, type SubscriptionStatus } from '@/api/schema';
+import { formatDate } from '@/lib/format';
 import { LIVE_STATUSES, MS_PER_DAY } from './billing.constants';
 import type { BillingPlan, PlanPrice } from './billing.types';
 
 /** Whole days left until `until`, rounded up, and never below zero. */
 export function daysUntil(until: string, now: Date): number {
   return Math.max(0, Math.ceil((new Date(until).getTime() - now.getTime()) / MS_PER_DAY));
+}
+
+/** A trial whose cancellation is scheduled: it ends on that date, and nothing is charged. */
+export function cancelledTrialNote(cancelAt: string): string {
+  return `Your trial ends on ${formatDate(cancelAt)} and you won't be charged.`;
 }
 
 /** The plan's price for the interval, if it is sold that way. */

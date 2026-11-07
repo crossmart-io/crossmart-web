@@ -1,4 +1,5 @@
 import { SubscriptionAccessState } from '@/api/schema';
+import { formatDate } from '@/lib/format';
 import { BannerTone, billingBanner } from './billing-banner';
 import type { SubscriptionAccess } from './billing.types';
 
@@ -10,6 +11,7 @@ function access(overrides: Partial<SubscriptionAccess>): SubscriptionAccess {
     writable: true,
     enforced: true,
     until: null,
+    cancelAt: null,
     ...overrides,
   };
 }
@@ -36,6 +38,20 @@ describe('billingBanner', () => {
       action: 'Manage billing',
     });
     expect(banner?.body).toContain('4 days');
+    expect(banner?.body).toContain('Your card is charged then');
+  });
+
+  it('says a cancelled trial ends without a charge', () => {
+    const trialEnd = '2026-11-14T00:00:00.000Z';
+    const banner = billingBanner(
+      access({ state: SubscriptionAccessState.trialing, until: trialEnd, cancelAt: trialEnd }),
+      true,
+      NOW,
+    );
+    expect(banner?.body).toBe(
+      `Your trial ends on ${formatDate(trialEnd)} and you won't be charged.`,
+    );
+    expect(banner?.body).not.toContain('charged then');
   });
 
   it('asks for a new card while a payment is past due', () => {
