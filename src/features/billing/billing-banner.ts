@@ -1,7 +1,7 @@
 import { SubscriptionAccessState } from '@/api/schema';
 import { formatDate, pluralize } from '@/lib/format';
 import { READ_ONLY_FALLBACK_REASON, READ_ONLY_REASONS } from './billing.constants';
-import { daysUntil } from './billing';
+import { cancelledTrialNote, daysUntil } from './billing';
 import type { SubscriptionAccess } from './billing.types';
 
 export enum BannerTone {
@@ -21,12 +21,23 @@ export interface BillingBannerModel {
 
 const ASK_ADMIN = 'Ask an owner or admin of the organization to fix billing.';
 
-function trialBanner(until: string, now: Date, canManage: boolean): BillingBannerModel {
+/** What happens when the trial ends: the card is charged, unless a cancellation is scheduled. */
+function trialNote(until: string, cancelAt: string | null, now: Date): string {
+  if (cancelAt) return cancelledTrialNote(cancelAt);
   const days = pluralize(daysUntil(until, now), 'day');
+  return `Your trial ends in ${days}, on ${formatDate(until)}. Your card is charged then.`;
+}
+
+function trialBanner(
+  access: SubscriptionAccess,
+  until: string,
+  now: Date,
+  canManage: boolean,
+): BillingBannerModel {
   return {
     tone: BannerTone.Info,
     title: 'Free trial',
-    body: `Your trial ends in ${days}, on ${formatDate(until)}. Your card is charged then.`,
+    body: trialNote(until, access.cancelAt, now),
     action: canManage ? 'Manage billing' : null,
   };
 }
@@ -80,7 +91,7 @@ export function billingBanner(
 ): BillingBannerModel | null {
   const { state, until } = access;
   if (state === SubscriptionAccessState.trialing && until)
-    return trialBanner(until, now, canManage);
+    return trialBanner(access, until, now, canManage);
   if (state === SubscriptionAccessState.past_due_grace) return pastDueBanner(until, canManage);
   if (state === SubscriptionAccessState.legacy && until) return legacyBanner(until, canManage);
   return access.writable ? null : readOnlyBanner(access, canManage);
