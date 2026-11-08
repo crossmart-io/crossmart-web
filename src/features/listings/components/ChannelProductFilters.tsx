@@ -16,8 +16,11 @@ interface ChannelProductFiltersProps {
   counts?: ChannelProductCounts;
 }
 
-/** Counts per tab: each state in the store, and their sum for "All". */
-function tabCounts(counts: ChannelProductCounts): Record<ChannelProductFilter, number> {
+/**
+ * Counts per tab: each state in the store, and their sum for "All". Needs details is read from
+ * the listings themselves, so its tab has no count.
+ */
+function tabCounts(counts: ChannelProductCounts): Partial<Record<ChannelProductFilter, number>> {
   const total = IN_STORE_STATES.reduce((sum, state) => sum + counts[state], 0);
   return { ...counts, [ALL_CHANNEL_PRODUCTS]: total };
 }

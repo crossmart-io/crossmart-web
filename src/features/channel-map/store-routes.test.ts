@@ -9,6 +9,7 @@ describe('storeListingsRoute', () => {
   it.each([
     [MapStatus.Published, '/channels/c-1/listings?state=listed'],
     [MapStatus.Pending, '/channels/c-1/listings?state=pending'],
+    [MapStatus.NeedsDetails, '/channels/c-1/listings?state=needs_details'],
     [MapStatus.Failed, '/channels/c-1/listings?state=failed'],
   ])('filters the store’s listings to %s', (status, route) => {
     expect(storeListingsRoute('c-1', status)).toBe(route);

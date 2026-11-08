@@ -1,4 +1,5 @@
 import {
+  CircleAlert,
   CircleCheck,
   CircleDashed,
   CircleX,
@@ -10,12 +11,13 @@ import {
 import { ListingDisplayState } from '@/api/schema';
 
 /**
- * Where a product stands on a store, as the map draws it: four groups of the listing states,
+ * Where a product stands on a store, as the map draws it: five groups of the listing states,
  * each with its own edge colour, line, icon and words, so colour is never the only cue.
  */
 export enum MapStatus {
   Published = 'published',
   Pending = 'pending',
+  NeedsDetails = 'needs_details',
   Failed = 'failed',
   NotListed = 'not_listed',
 }
@@ -24,27 +26,35 @@ export enum MapStatus {
 export const MAP_STATUS_ORDER: readonly MapStatus[] = [
   MapStatus.Published,
   MapStatus.Pending,
+  MapStatus.NeedsDetails,
   MapStatus.Failed,
   MapStatus.NotListed,
 ];
 
-/** The worst first: a store's edge shows the most urgent status any of its products has. */
+/**
+ * The worst first: a store's edge shows the most urgent status any of its products has. A
+ * listing that needs details waits for the seller, so it outranks one that is on its way.
+ */
 export const MAP_STATUS_SEVERITY: readonly MapStatus[] = [
   MapStatus.Failed,
+  MapStatus.NeedsDetails,
   MapStatus.Pending,
   MapStatus.Published,
   MapStatus.NotListed,
 ];
 
-/** The listing states each map status groups. `needs_details` waits for the seller: pending. */
+/**
+ * The listing states each map status groups. Pending is what is on its way; needs details is
+ * what waits for the seller to add something the marketplace requires.
+ */
 export const MAP_STATUS_MEMBERS: Record<MapStatus, readonly ListingDisplayState[]> = {
   [MapStatus.Published]: [ListingDisplayState.published],
   [MapStatus.Pending]: [
-    ListingDisplayState.needs_details,
     ListingDisplayState.ready,
     ListingDisplayState.publishing,
     ListingDisplayState.removing,
   ],
+  [MapStatus.NeedsDetails]: [ListingDisplayState.needs_details],
   [MapStatus.Failed]: [ListingDisplayState.failed],
   [MapStatus.NotListed]: [ListingDisplayState.draft, ListingDisplayState.removed],
 };
@@ -73,9 +83,17 @@ export const MAP_STATUS_PRESENTATION: Record<MapStatus, MapStatusPresentation> =
   [MapStatus.Pending]: {
     label: 'Pending',
     icon: LoaderCircle,
-    stroke: 'var(--warning)',
+    stroke: 'var(--brand)',
     dash: '6 4',
     animated: true,
+    iconClass: 'text-brand',
+  },
+  [MapStatus.NeedsDetails]: {
+    label: 'Needs details',
+    icon: CircleAlert,
+    stroke: 'var(--warning)',
+    dash: '10 4 2 4',
+    animated: false,
     iconClass: 'text-warning',
   },
   [MapStatus.Failed]: {
@@ -138,7 +156,10 @@ export const MAP_LAYOUT = {
   columnGap: 140,
   rowGap: 24,
   productLeafHeight: 150,
-  storeLeafHeight: 132,
+  /** A store's card: its name, five counts in two rows, and when it last synced. */
+  storeLeafHeight: 188,
+  /** A store with failures also offers Crossmart Agent, on a row of its own below. */
+  storeFixRowHeight: 20,
   ghostLeafHeight: 56,
   /** Room above and below the graph in the canvas, together. */
   canvasPadding: 48,

@@ -1,15 +1,15 @@
 import { unwrap } from '@/api/unwrap';
 import { fetchClient } from '@/api/client';
-import type { ChannelProductSort, ChannelProductState, SortDirection } from '@/api/schema';
+import type { ChannelProductSort, SortDirection } from '@/api/schema';
 import { useInFlightPolling } from '@/hooks/useInFlightPolling';
 import { usePagedList } from '@/hooks/usePagedList';
+import type { ChannelProductFilterQuery } from '../channel-product-filter';
 import { isListingInFlight } from '../listing-states';
 import type { Pagination } from '@/hooks/usePagination';
 import { CHANNEL_PRODUCTS_ENDPOINT } from '../listings.constants';
 import type { ChannelProduct, ChannelProductCounts, ChannelProductPage } from '../listings.types';
 
-interface ChannelProductsQuery {
-  state?: ChannelProductState;
+interface ChannelProductsQuery extends ChannelProductFilterQuery {
   search?: string;
   sort: ChannelProductSort;
   direction: SortDirection;

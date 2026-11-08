@@ -7,7 +7,7 @@ describe('mapStatusOf', () => {
     [ListingDisplayState.published, MapStatus.Published],
     [ListingDisplayState.publishing, MapStatus.Pending],
     [ListingDisplayState.ready, MapStatus.Pending],
-    [ListingDisplayState.needs_details, MapStatus.Pending],
+    [ListingDisplayState.needs_details, MapStatus.NeedsDetails],
     [ListingDisplayState.removing, MapStatus.Pending],
     [ListingDisplayState.failed, MapStatus.Failed],
     [ListingDisplayState.draft, MapStatus.NotListed],
@@ -30,7 +30,8 @@ describe('mapStatusCounts', () => {
       ]),
     ).toEqual({
       [MapStatus.Published]: 4,
-      [MapStatus.Pending]: 3,
+      [MapStatus.Pending]: 1,
+      [MapStatus.NeedsDetails]: 2,
       [MapStatus.Failed]: 3,
       [MapStatus.NotListed]: 10,
     });
@@ -38,21 +39,29 @@ describe('mapStatusCounts', () => {
 });
 
 describe('storeMapStatus', () => {
-  const counts = (published: number, pending: number, failed: number, notListed: number) => ({
+  const counts = ({ published = 0, pending = 0, needsDetails = 0, failed = 0, notListed = 0 }) => ({
     [MapStatus.Published]: published,
     [MapStatus.Pending]: pending,
+    [MapStatus.NeedsDetails]: needsDetails,
     [MapStatus.Failed]: failed,
     [MapStatus.NotListed]: notListed,
   });
 
   it('shows the most urgent status the store has', () => {
-    expect(storeMapStatus(counts(10, 2, 1, 5))).toBe(MapStatus.Failed);
-    expect(storeMapStatus(counts(10, 2, 0, 5))).toBe(MapStatus.Pending);
-    expect(storeMapStatus(counts(10, 0, 0, 5))).toBe(MapStatus.Published);
+    expect(storeMapStatus(counts({ published: 10, needsDetails: 2, failed: 1 }))).toBe(
+      MapStatus.Failed,
+    );
+    expect(storeMapStatus(counts({ published: 10, pending: 3, needsDetails: 2 }))).toBe(
+      MapStatus.NeedsDetails,
+    );
+    expect(storeMapStatus(counts({ published: 10, pending: 2, notListed: 5 }))).toBe(
+      MapStatus.Pending,
+    );
+    expect(storeMapStatus(counts({ published: 10, notListed: 5 }))).toBe(MapStatus.Published);
   });
 
   it('calls a store with no product in it not listed', () => {
-    expect(storeMapStatus(counts(0, 0, 0, 23))).toBe(MapStatus.NotListed);
+    expect(storeMapStatus(counts({ notListed: 23 }))).toBe(MapStatus.NotListed);
   });
 });
 

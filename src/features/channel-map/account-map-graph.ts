@@ -30,6 +30,12 @@ export function comingSoonChannels(channels: readonly ChannelInfo[]): ChannelInf
   return channels.filter((channel) => channel.status === ChannelStatus.ComingSoon);
 }
 
+/** The room a store's card takes: a row more when it offers to fix failed listings. */
+function storeLeafHeight(store: StoreListingHealth): number {
+  const hasFailures = mapStatusCounts(store.states)[MapStatus.Failed] > 0;
+  return MAP_LAYOUT.storeLeafHeight + (hasFailures ? MAP_LAYOUT.storeFixRowHeight : 0);
+}
+
 /** A store's edge, pulsing while a change syncs to it. */
 function storeEdge(store: StoreListingHealth, overlay: MapOverlay | undefined): Edge {
   const edge = statusEdge(
@@ -54,7 +60,7 @@ export function buildAccountMap({
 }: AccountMapInput): AccountMapGraph {
   const ghosts = comingSoonChannels(channels);
   const layout = columnLayout(CATALOG_HUB_HEIGHT, [
-    ...stores.map(() => MAP_LAYOUT.storeLeafHeight),
+    ...stores.map(storeLeafHeight),
     ...ghosts.map(() => MAP_LAYOUT.ghostLeafHeight),
   ]);
   const position = (index: number) => layout.leaves[index] ?? ORIGIN;

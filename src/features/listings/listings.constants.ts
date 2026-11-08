@@ -1,8 +1,10 @@
 import type { SortOption } from '@/components/lists/sort-options';
+import { LISTING_STATE_PRESENTATION } from './listing-states';
 import {
   ChannelProductSort,
   ChannelProductState,
   CompareAtMode,
+  ListingDisplayState,
   ListingSource,
   ListingStatus,
   SortDirection,
@@ -272,9 +274,20 @@ export const IN_STORE_STATES = [
   ChannelProductState.removing,
 ] as const;
 type InStoreState = (typeof IN_STORE_STATES)[number];
-/** The tab's filters: the store's states, and products removed by hand, to add them back. */
+/**
+ * The one display state the tab filters by: products that wait for the seller to add what the
+ * marketplace requires. It shares the `state` parameter, as no product state has its name.
+ */
+export const NEEDS_DETAILS_FILTER = ListingDisplayState.needs_details;
+/**
+ * The tab's filters: the store's states, the products that need details, and products removed
+ * by hand, to add them back.
+ */
 export type ChannelProductFilter =
-  InStoreState | ChannelProductState.removed_by_hand | typeof ALL_CHANNEL_PRODUCTS;
+  | InStoreState
+  | typeof NEEDS_DETAILS_FILTER
+  | ChannelProductState.removed_by_hand
+  | typeof ALL_CHANNEL_PRODUCTS;
 
 /** The listings tab's filters, in the words of the listing states they group. */
 export const CHANNEL_PRODUCT_STATE_LABELS: Record<ChannelProductState, string> = {
@@ -286,9 +299,18 @@ export const CHANNEL_PRODUCT_STATE_LABELS: Record<ChannelProductState, string> =
   [ChannelProductState.excluded]: 'Not in this store',
 };
 
+const inStoreFilter = (state: InStoreState) => ({
+  value: state,
+  label: CHANNEL_PRODUCT_STATE_LABELS[state],
+});
+
 export const CHANNEL_PRODUCT_FILTERS: readonly { value: ChannelProductFilter; label: string }[] = [
   { value: ALL_CHANNEL_PRODUCTS, label: 'All' },
-  ...IN_STORE_STATES.map((state) => ({ value: state, label: CHANNEL_PRODUCT_STATE_LABELS[state] })),
+  inStoreFilter(ChannelProductState.listed),
+  inStoreFilter(ChannelProductState.pending),
+  { value: NEEDS_DETAILS_FILTER, label: LISTING_STATE_PRESENTATION[NEEDS_DETAILS_FILTER].label },
+  inStoreFilter(ChannelProductState.failed),
+  inStoreFilter(ChannelProductState.removing),
   {
     value: ChannelProductState.removed_by_hand,
     label: CHANNEL_PRODUCT_STATE_LABELS[ChannelProductState.removed_by_hand],

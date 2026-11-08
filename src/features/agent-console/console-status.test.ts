@@ -31,7 +31,11 @@ describe('console status', () => {
       { [ListingDisplayState.published]: 10 },
       { lastSyncedAt: '2026-11-08T09:00:00Z' },
     ),
-    store('ebay', { [ListingDisplayState.published]: 4, [ListingDisplayState.failed]: 2 }),
+    store('ebay', {
+      [ListingDisplayState.published]: 4,
+      [ListingDisplayState.failed]: 2,
+      [ListingDisplayState.needs_details]: 3,
+    }),
     store(
       'etsy',
       { [ListingDisplayState.publishing]: 1 },
@@ -39,17 +43,18 @@ describe('console status', () => {
     ),
   ];
 
-  it('counts healthy stores, live and failed listings, and the latest sync', () => {
+  it('counts healthy stores, live, failed and needs-details listings, and the latest sync', () => {
     expect(storesStatus(stores)).toEqual({
       total: 3,
       healthy: 1,
       liveListings: 14,
       failedListings: 2,
+      needsDetailsListings: 3,
       lastSyncedAt: '2026-11-08T10:00:00Z',
     });
   });
 
-  it('knows which stores still have listings on their way', () => {
+  it('knows which stores still have listings on their way, not those waiting for details', () => {
     expect([...syncingStoreIds(stores)]).toEqual(['etsy']);
   });
 

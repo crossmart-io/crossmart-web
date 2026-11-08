@@ -10,12 +10,14 @@ import {
   type AgentWorkerContextValue,
 } from '@/features/agent-worker/agent-worker-context';
 import type { OpenAgentWorkerOptions } from '@/features/agent-worker/agent-worker.types';
+import { MapStatus } from '../channel-map.constants';
 import { mapStatusCounts } from '../map-status';
 import { StoreCard } from './StoreCard';
 
 const FAILING_COUNTS = {
   [ListingDisplayState.published]: 7,
   [ListingDisplayState.publishing]: 1,
+  [ListingDisplayState.needs_details]: 3,
   [ListingDisplayState.failed]: 2,
   [ListingDisplayState.draft]: 40,
 };
@@ -77,6 +79,20 @@ describe('StoreCard', () => {
     ).not.toBeInTheDocument();
   });
 
+  it('counts each of the five statuses, needs details apart from pending, in order', () => {
+    renderStore();
+    const statuses = screen
+      .getAllByRole('link', { name: /Show them$/ })
+      .map((link) => link.getAttribute('data-status'));
+    expect(statuses).toEqual([
+      MapStatus.Published,
+      MapStatus.Pending,
+      MapStatus.NeedsDetails,
+      MapStatus.Failed,
+      MapStatus.NotListed,
+    ]);
+  });
+
   it('opens the store’s listings from its name', async () => {
     renderStore();
     await userEvent.click(screen.getByRole('link', { name: 'Open North shop’s listings' }));
@@ -86,6 +102,7 @@ describe('StoreCard', () => {
   it.each([
     ['7 published', '/channels/c-1/listings?state=listed'],
     ['1 pending', '/channels/c-1/listings?state=pending'],
+    ['3 needs details', '/channels/c-1/listings?state=needs_details'],
     ['2 failed', '/channels/c-1/listings?state=failed'],
     ['40 not listed', '/products?stores=not_in_store&store=c-1'],
   ])('opens the products behind "%s"', async (count, route) => {
