@@ -57,6 +57,8 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.listing_item_specifics_changed]: 'Item specifics changed',
   [ActivityAction.listing_retry_requested]: 'Publish tried again',
   [ActivityAction.stock_oversold]: 'Oversold',
+  [ActivityAction.stock_reconciled]: 'Stock reconciled',
+  [ActivityAction.stock_sync_failed]: 'Stock sync failed',
   [ActivityAction.content_generation_requested]: 'AI content requested',
   [ActivityAction.content_generated]: 'AI content suggested',
   [ActivityAction.suggestion_approved]: 'Suggestion approved',

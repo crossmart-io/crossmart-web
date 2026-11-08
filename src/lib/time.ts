@@ -1,0 +1,4 @@
+/** Durations in milliseconds, for timers and windows. */
+export const MS_PER_SECOND = 1000;
+const SECONDS_PER_MINUTE = 60;
+export const MS_PER_MINUTE = SECONDS_PER_MINUTE * MS_PER_SECOND;

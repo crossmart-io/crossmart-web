@@ -6,9 +6,18 @@ import { ROUTES } from '@/config/routes';
 import { CHANNEL_MAP_COPY, MapHandleSide } from '../channel-map.constants';
 import type { CatalogNode, CatalogNodeData } from '../channel-map.types';
 import { MapHandle } from './MapHandle';
+import { NodeOverlayFrame } from './NodeOverlayFrame';
 
 /** The catalog every store is fed from, with how many products it holds. Opens the products. */
-export function CatalogHubCard({ productCount }: CatalogNodeData) {
+export function CatalogHubCard({ productCount, overlay }: CatalogNodeData) {
+  return (
+    <NodeOverlayFrame overlay={overlay}>
+      <CatalogLink productCount={productCount} />
+    </NodeOverlayFrame>
+  );
+}
+
+function CatalogLink({ productCount }: CatalogNodeData) {
   return (
     <Link
       to={ROUTES.products}

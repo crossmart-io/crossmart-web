@@ -8,7 +8,7 @@ interface ExamplePromptsProps {
   onPick: (prompt: string) => void;
 }
 
-/** A new conversation: what Agent Worker can do, as prompts to send with one click. */
+/** A new conversation: what Crossmart Agent can do, as prompts to send with one click. */
 export function ExamplePrompts({ disabled, onPick }: ExamplePromptsProps) {
   const headingId = useId();
   return (

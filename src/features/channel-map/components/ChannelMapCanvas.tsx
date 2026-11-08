@@ -7,10 +7,12 @@ import {
   type NodeTypes,
   ReactFlow,
   useNodesInitialized,
+  useNodesState,
   useReactFlow,
   useStore,
 } from '@xyflow/react';
 import { useTheme } from '@/components/theme/useTheme';
+import { cn } from '@/lib/utils';
 import { MAP_LAYOUT } from '../channel-map.constants';
 import { canvasHeight } from '../map-layout';
 
@@ -21,6 +23,8 @@ interface ChannelMapCanvasProps<TNode extends Node> {
   /** The graph's height at zoom 1, which sizes the canvas. */
   graphHeight: number;
   label: string;
+  /** Fill the parent's height instead of sizing the canvas to the graph. */
+  fill?: boolean;
 }
 
 const FIT_VIEW_OPTIONS = {
@@ -42,6 +46,21 @@ function FitOnResize() {
 }
 
 /**
+ * The nodes as React Flow keeps them: new data (a live overlay, fresh counts) replaces the old,
+ * but each node keeps the size React Flow measured, so it is not hidden to be measured again.
+ */
+function useMeasuredNodes<TNode extends Node>(nodes: TNode[]) {
+  const [flowNodes, setFlowNodes, onNodesChange] = useNodesState<TNode>(nodes);
+  useEffect(() => {
+    setFlowNodes((previous) => {
+      const measured = new Map(previous.map((node) => [node.id, node.measured]));
+      return nodes.map((node) => ({ ...node, measured: measured.get(node.id) ?? node.measured }));
+    });
+  }, [nodes, setFlowNodes]);
+  return { flowNodes, onNodesChange };
+}
+
+/**
  * A read-only React Flow canvas fitted to its graph: no dragging, connecting, selecting, panning
  * or zooming, so the page scrolls over it as over any card. The nodes' own buttons and links
  * are what a keyboard reaches.
@@ -52,16 +71,22 @@ export function ChannelMapCanvas<TNode extends Node>({
   nodeTypes,
   graphHeight,
   label,
+  fill = false,
 }: ChannelMapCanvasProps<TNode>) {
   const { resolvedTheme } = useTheme();
+  const { flowNodes, onNodesChange } = useMeasuredNodes(nodes);
   return (
     <section
       aria-label={label}
-      className="channel-map w-full overflow-hidden rounded-lg border bg-muted/30"
-      style={{ height: canvasHeight(graphHeight) }}
+      className={cn(
+        'channel-map w-full overflow-hidden rounded-lg border bg-muted/30',
+        fill && 'h-full min-h-80',
+      )}
+      style={fill ? undefined : { height: canvasHeight(graphHeight) }}
     >
       <ReactFlow
-        nodes={nodes}
+        nodes={flowNodes}
+        onNodesChange={onNodesChange}
         edges={edges}
         nodeTypes={nodeTypes}
         colorMode={resolvedTheme}

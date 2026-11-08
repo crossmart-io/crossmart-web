@@ -27,6 +27,7 @@ const BASE_EVENT: ActivityEvent = {
   subject: { type: ActivitySubjectType.product, id: 'p-1', label: 'Mug' },
   itemCount: null,
   failureReason: null,
+  connectionId: null,
   createdAt: new Date().toISOString(),
 };
 

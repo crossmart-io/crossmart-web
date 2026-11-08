@@ -12,7 +12,7 @@ import {
 
 const SHORTCUT_KEY_LABEL = AGENT_WORKER_SHORTCUT_KEY.toUpperCase();
 
-/** The Agent Worker button in the app header, for a role that may use it. */
+/** The Crossmart Agent button in the app header, for a role that may use it: opens its page. */
 export function AgentWorkerLauncher() {
   const { canUse, openAgentWorker } = useAgentWorker();
   if (!canUse) return null;

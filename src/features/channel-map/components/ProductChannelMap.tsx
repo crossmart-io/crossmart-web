@@ -10,7 +10,11 @@ import {
 import { Skeleton } from '@/components/ui/skeleton';
 import { AgentWorkerContextView } from '@/api/schema';
 import { PageSection, ROUTES } from '@/config/routes';
-import { AGENT_WORKER_TEST_IDS, AskAgentWorkerButton } from '@/features/agent-worker';
+import {
+  AGENT_WORKER_COPY,
+  AGENT_WORKER_TEST_IDS,
+  AskAgentWorkerButton,
+} from '@/features/agent-worker';
 import { CHANNEL_MAP_COPY, ChannelMapView, MapNodeType } from '../channel-map.constants';
 import type { ProductHub } from '../channel-map.types';
 import { useChannelMapView } from '../hooks/useChannelMapView';
@@ -124,6 +128,7 @@ export function ProductChannelMap({ product, ...props }: ProductChannelMapProps)
         <CardDescription>{CHANNEL_MAP_COPY.productDescription}</CardDescription>
         <CardAction className="flex flex-wrap items-center justify-end gap-2">
           <AskAgentWorkerButton
+            label={AGENT_WORKER_COPY.openInAgent}
             context={{ view: AgentWorkerContextView.product_map, productId: props.productId }}
             testId={AGENT_WORKER_TEST_IDS.productMapButton}
           />

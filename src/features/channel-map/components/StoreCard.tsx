@@ -18,6 +18,7 @@ import {
 import type { StoreNodeData } from '../channel-map.types';
 import { storeListingsRoute } from '../store-routes';
 import { LastSynced } from './LastSynced';
+import { NodeOverlayFrame } from './NodeOverlayFrame';
 
 const FOCUS_RING =
   'rounded-md focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none';
@@ -57,7 +58,7 @@ function StatusCountLink({
   );
 }
 
-/** For a store with failed listings: Agent Worker, ready to fix them (the person presses send). */
+/** For a store with failed listings: Crossmart Agent, ready to fix them (the person presses send). */
 function FixWithAgentWorker({ store }: { store: StoreListingHealth }) {
   return (
     <AskAgentWorkerButton
@@ -75,9 +76,18 @@ function FixWithAgentWorker({ store }: { store: StoreListingHealth }) {
 /**
  * A store on the account's map: its name (opening its listings), its connection when it is not
  * connected, how many products are in each status (each opening those products), and when it
- * last synced; with failed listings, a way to have Agent Worker fix them.
+ * last synced; with failed listings, a way to have Crossmart Agent fix them. A live view lays the
+ * agent's work over it.
  */
-export function StoreCard({ store, counts }: StoreNodeData) {
+export function StoreCard({ store, counts, overlay }: StoreNodeData) {
+  return (
+    <NodeOverlayFrame overlay={overlay}>
+      <StoreCardBody store={store} counts={counts} />
+    </NodeOverlayFrame>
+  );
+}
+
+function StoreCardBody({ store, counts }: StoreNodeData) {
   return (
     <div className="flex flex-col gap-2.5 rounded-xl border bg-card p-3 text-card-foreground shadow-sm">
       <div className="flex items-center justify-between gap-2 text-sm">

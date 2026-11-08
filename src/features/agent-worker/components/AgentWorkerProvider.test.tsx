@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import { MemoryRouter } from 'react-router';
+import { MemoryRouter, Route, Routes } from 'react-router';
 import {
   AgentWorkerActionStatus,
   AgentWorkerEventType,
@@ -15,6 +15,7 @@ import { fetchClient } from '@/api/client';
 import type * as Workspaces from '@/features/workspaces';
 import { useCurrentWorkspace, type Workspace } from '@/features/workspaces';
 import { apiOk } from '@/features/webhooks/testing/mock-api-client';
+import { ROUTES } from '@/config/routes';
 import { useAgentWorker } from '../agent-worker-context';
 import {
   actionFixture,
@@ -22,6 +23,7 @@ import {
   messageFixture,
   turnFixture,
 } from '../testing/agent-worker.fixture';
+import { AgentChat } from './AgentChat';
 import { AgentWorkerLauncher } from './AgentWorkerLauncher';
 import { AgentWorkerProvider } from './AgentWorkerProvider';
 
@@ -49,6 +51,12 @@ function workspaceWith(permissions: WorkspacePermission[]): Workspace {
   };
 }
 
+/** The Crossmart Agent page, as far as the chat goes. */
+function AgentPage() {
+  const { session } = useAgentWorker();
+  return session ? <AgentChat session={session} /> : null;
+}
+
 function FixButton() {
   const { openAgentWorker } = useAgentWorker();
   return (
@@ -74,7 +82,10 @@ function renderProvider(permissions = [WorkspacePermission.agent_worker_use]) {
         <TooltipProvider>
           <AgentWorkerProvider>
             <AgentWorkerLauncher />
-            <FixButton />
+            <Routes>
+              <Route path={ROUTES.home} element={<FixButton />} />
+              <Route path={ROUTES.agent} element={<AgentPage />} />
+            </Routes>
           </AgentWorkerProvider>
         </TooltipProvider>
       </MemoryRouter>
@@ -102,10 +113,10 @@ describe('AgentWorkerProvider', () => {
 
   it('is not offered to a role without agent_worker:use', () => {
     renderProvider([]);
-    expect(screen.queryByRole('button', { name: 'Agent Worker' })).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Crossmart Agent' })).not.toBeInTheDocument();
   });
 
-  it('opens prefilled, sends on Enter, and shows the changes to review', async () => {
+  it('opens its page prefilled, sends on Enter, and shows the changes to review', async () => {
     vi.mocked(fetchClient.POST).mockResolvedValue(apiOk(conversation, 201));
     vi.mocked(fetchClient.GET).mockResolvedValue(
       apiOk({
@@ -126,7 +137,7 @@ describe('AgentWorkerProvider', () => {
     renderProvider();
 
     await userEvent.click(screen.getByRole('button', { name: 'Fix' }));
-    const composer = await screen.findByLabelText('Message Agent Worker');
+    const composer = await screen.findByLabelText('Message Crossmart Agent');
     expect(composer).toHaveValue('Fix North shop');
     expect(composer).toHaveFocus();
 
@@ -134,5 +145,19 @@ describe('AgentWorkerProvider', () => {
     expect(await screen.findByText('Review the changes')).toBeInTheDocument();
     expect(screen.getByText('I can retitle it.')).toBeInTheDocument();
     await waitFor(() => expect(composer).toHaveValue(''));
+  });
+
+  it('goes to its page from the header button', async () => {
+    renderProvider();
+
+    await userEvent.click(screen.getByRole('button', { name: 'Crossmart Agent' }));
+    expect(await screen.findByLabelText('Message Crossmart Agent')).toBeInTheDocument();
+  });
+
+  it('goes to its page with Cmd or Ctrl+J, from anywhere', async () => {
+    renderProvider();
+
+    await userEvent.keyboard('{Control>}j{/Control}');
+    expect(await screen.findByLabelText('Message Crossmart Agent')).toBeInTheDocument();
   });
 });

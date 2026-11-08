@@ -42,7 +42,7 @@ function StopButton({ onStop }: { onStop: () => void }) {
   );
 }
 
-/** Where the message is typed, with Send, or Stop while Agent Worker is working. */
+/** Where the message is typed, with Send, or Stop while Crossmart Agent is working. */
 export function Composer({ value, onChange, onSend, onStop, isBusy, inputRef }: ComposerProps) {
   const inputId = useId();
   const hintId = useId();

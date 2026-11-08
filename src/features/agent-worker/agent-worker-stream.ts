@@ -1,5 +1,4 @@
 import { ApiRequestError } from '@/api/api-error';
-import { env } from '@/config/env';
 import { readServerSentEvents } from '@/lib/sse';
 import type { AgentWorkerStreamEvent } from './agent-worker.types';
 
@@ -7,18 +6,6 @@ const JSON_CONTENT_TYPE = 'application/json';
 const EVENT_STREAM_CONTENT_TYPE = 'text/event-stream';
 const HTTP_POST = 'POST';
 const ABORT_ERROR_NAME = 'AbortError';
-
-/** Values for the `{name}` placeholders of an OpenAPI path. */
-type PathParams = Record<string, string>;
-
-/** `/api/v1/workspaces/{workspaceId}/…` with each placeholder filled in, on the API's origin. */
-export function toApiUrl(path: string, params: PathParams): string {
-  const filled = Object.entries(params).reduce(
-    (url, [name, value]) => url.replace(`{${name}}`, encodeURIComponent(value)),
-    path,
-  );
-  return `${env.apiUrl}${filled}`;
-}
 
 interface StreamRequest {
   url: string;
@@ -38,7 +25,7 @@ export function isAbortError(error: unknown): boolean {
 }
 
 /**
- * POSTs to an Agent Worker endpoint that answers with a turn's event stream, with the session
+ * POSTs to a Crossmart Agent endpoint (`agent-worker` in the API) that answers with a turn's event stream, with the session
  * cookie like the rest of the API client, and reports each event as it arrives. Resolves when
  * the stream ends, also when `signal` stopped it; throws an `ApiRequestError` when the API
  * refused the request before streaming.

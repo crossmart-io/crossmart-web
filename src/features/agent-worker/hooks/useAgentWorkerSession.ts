@@ -30,7 +30,7 @@ export interface AgentWorkerSession {
   decide: (decision: AgentWorkerDecision) => void;
   stop: () => void;
   selectConversation: (conversationId: string | null) => void;
-  /** Applies how a page opened the panel: its context, and text for the composer. */
+  /** Applies how a page opened Crossmart Agent: its context, and text for the composer. */
   prepare: (options: OpenAgentWorkerOptions) => void;
 }
 
@@ -77,9 +77,9 @@ function useSessionState(reset: () => void) {
 }
 
 /**
- * Everything the Agent Worker panel does for one workspace: the open conversation, merged with
+ * Everything Crossmart Agent’s chat does for one workspace: the open conversation, merged with
  * the turn streaming into it, and the ways to send, decide and stop. A first message starts a
- * conversation, and a page that opens the panel with text starts a new one.
+ * conversation, and a page that opens Crossmart Agent with text starts a new one.
  */
 export function useAgentWorkerSession(workspaceId: string): AgentWorkerSession {
   const turn = useAgentWorkerTurn(workspaceId);

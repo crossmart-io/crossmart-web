@@ -153,6 +153,32 @@ export const MAP_LAYOUT = {
 } as const;
 
 export const MAP_EDGE_WIDTH = 2;
+/** An edge carrying a change to its store is drawn thicker, and pulses unless motion is reduced. */
+export const PULSING_EDGE_WIDTH = 3;
+export const PULSING_EDGE_CLASS = 'agent-sync';
+
+/** How an agent's work on a node reads: each tone has its own ring, colour and words. */
+export enum NodeActivityTone {
+  Reading = 'reading',
+  Waiting = 'waiting',
+  Writing = 'writing',
+  Done = 'done',
+  Failed = 'failed',
+}
+
+export const NODE_ACTIVITY_CLASSES: Record<NodeActivityTone, { ring: string; pill: string }> = {
+  [NodeActivityTone.Reading]: { ring: 'ring-2 ring-brand/60', pill: 'bg-brand text-white' },
+  [NodeActivityTone.Waiting]: {
+    ring: 'ring-2 ring-warning/70',
+    pill: 'bg-warning text-white dark:text-black',
+  },
+  [NodeActivityTone.Writing]: { ring: 'ring-2 ring-brand', pill: 'bg-brand text-white' },
+  [NodeActivityTone.Done]: { ring: 'ring-2 ring-success/60', pill: 'bg-success text-white' },
+  [NodeActivityTone.Failed]: {
+    ring: 'ring-2 ring-destructive/70',
+    pill: 'bg-destructive text-white',
+  },
+};
 /** Edges to channels that cannot be connected yet are drawn faintly. */
 export const GHOST_EDGE_OPACITY = 0.35;
 
@@ -179,6 +205,10 @@ export const CHANNEL_MAP_COPY = {
   statusCount: (store: string, status: string, count: number) =>
     `${store}: ${count.toLocaleString()} ${status.toLowerCase()}. Show them`,
   comingSoon: 'Coming soon',
+  proposals: (count: number) =>
+    count === 1
+      ? '1 change waiting for you. Show it'
+      : `${count} changes waiting for you. Show them`,
   loadError: 'The channel map could not be loaded.',
 } as const;
 

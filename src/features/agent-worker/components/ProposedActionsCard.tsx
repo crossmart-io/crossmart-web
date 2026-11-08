@@ -1,7 +1,11 @@
 import { Check, X } from 'lucide-react';
 import { useId } from 'react';
 import { Button } from '@/components/ui/button';
-import { AGENT_WORKER_COPY, AGENT_WORKER_TEST_IDS } from '../agent-worker.constants';
+import {
+  AGENT_WORKER_COPY,
+  AGENT_WORKER_ELEMENT_IDS,
+  AGENT_WORKER_TEST_IDS,
+} from '../agent-worker.constants';
 import type { AgentWorkerAction, AgentWorkerDecision } from '../agent-worker.types';
 import { useProposedSelection } from '../hooks/useProposedSelection';
 import { ProposedActionItem } from './ProposedActionItem';
@@ -17,7 +21,7 @@ interface ProposedActionsCardProps {
 }
 
 /**
- * Every change Agent Worker waits to make, in one card: each can be left out, risky ones need
+ * Every change Crossmart Agent waits to make, in one card: each can be left out, risky ones need
  * an explicit confirmation, and one decision approves the selected and rejects the rest.
  */
 export function ProposedActionsCard({ actions, disabled, onDecide }: ProposedActionsCardProps) {
@@ -25,9 +29,11 @@ export function ProposedActionsCard({ actions, disabled, onDecide }: ProposedAct
   const titleId = useId();
   return (
     <section
+      id={AGENT_WORKER_ELEMENT_IDS.proposedCard}
+      tabIndex={-1}
       aria-labelledby={titleId}
       data-testid={AGENT_WORKER_TEST_IDS.proposedCard}
-      className="flex flex-col gap-3 rounded-xl border bg-card p-3 shadow-sm"
+      className="flex scroll-mt-3 flex-col gap-3 rounded-xl border bg-card p-3 shadow-sm outline-none focus-visible:ring-[3px] focus-visible:ring-ring/50"
     >
       <header className="flex flex-col gap-0.5">
         <h3 id={titleId} className="text-sm font-semibold">

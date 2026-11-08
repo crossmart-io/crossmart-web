@@ -14,8 +14,8 @@ interface AskAgentWorkerButtonProps extends OpenAgentWorkerOptions {
 }
 
 /**
- * Opens Agent Worker about what is on screen: the page's context, and maybe text to start from.
- * Renders nothing for a role that may not use Agent Worker.
+ * Opens Crossmart Agent about what is on screen: the page's context, and maybe text to start from.
+ * Renders nothing for a role that may not use Crossmart Agent.
  */
 export function AskAgentWorkerButton({
   context,

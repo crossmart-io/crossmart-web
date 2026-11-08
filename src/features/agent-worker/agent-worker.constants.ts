@@ -23,7 +23,7 @@ export const AGENT_WORKER_HISTORY_LIMIT = 20;
 /** The message length the API accepts. */
 export const AGENT_WORKER_MESSAGE_MAX_LENGTH = 4000;
 
-/** Cmd+J on macOS, Ctrl+J elsewhere, toggles the panel. */
+/** Cmd+J on macOS, Ctrl+J elsewhere, opens Crossmart Agent. */
 export const AGENT_WORKER_SHORTCUT_KEY = 'j';
 
 /** Values up to this long, on one line, read as "before → after" instead of a word diff. */
@@ -48,13 +48,20 @@ export const AGENT_WORKER_TEST_IDS = {
   stop: 'agent-worker-stop',
   proposedCard: 'agent-worker-proposed-actions',
   approve: 'agent-worker-approve',
+  chat: 'agent-chat',
   rejectAll: 'agent-worker-reject-all',
 } as const;
 
+/** The element ids the page scrolls to, such as the changes waiting for review. */
+export const AGENT_WORKER_ELEMENT_IDS = {
+  proposedCard: 'agent-proposed-changes',
+} as const;
+
 export const AGENT_WORKER_COPY = {
-  name: 'Agent Worker',
-  open: 'Ask Agent Worker',
-  fixStore: 'Fix with Agent Worker',
+  name: 'Crossmart Agent',
+  open: 'Ask Crossmart Agent',
+  openInAgent: 'Open in Crossmart Agent',
+  fixStore: 'Fix with Crossmart Agent',
   fixStorePrompt: (store: string) => `Fix the failed listings on ${store}`,
   description:
     'An AI agent that works in your workspace. It reads right away and asks before it changes anything.',
@@ -63,18 +70,18 @@ export const AGENT_WORKER_COPY = {
   newConversation: 'New conversation',
   pendingCount: (count: number) => (count === 1 ? '1 change waiting' : `${count} changes waiting`),
   examplesLabel: 'Try asking',
-  emptyTitle: 'What should Agent Worker do?',
-  composerLabel: 'Message Agent Worker',
-  composerPlaceholder: 'Ask Agent Worker to check, fix or publish something…',
+  emptyTitle: 'What should Crossmart Agent do?',
+  composerLabel: 'Message Crossmart Agent',
+  composerPlaceholder: 'Ask Crossmart Agent to check, fix or publish something…',
   keyboardHint: 'to send, Shift + Enter for a new line',
   send: 'Send',
   stop: 'Stop',
   working: 'Working…',
   you: 'You',
-  logLabel: 'Conversation with Agent Worker',
+  logLabel: 'Conversation with Crossmart Agent',
   loadError: 'This conversation could not be loaded.',
   proposedTitle: 'Review the changes',
-  proposedDescription: 'Agent Worker makes only the changes you approve.',
+  proposedDescription: 'Crossmart Agent makes only the changes you approve.',
   approveSelected: 'Approve selected',
   rejectAll: 'Reject all',
   untrustedWarning: 'Text read in this turn looked like instructions; review carefully',

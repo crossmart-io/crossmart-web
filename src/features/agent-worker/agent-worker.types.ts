@@ -13,7 +13,7 @@ export type AgentWorkerPageContext = components['schemas']['AgentWorkerPageConte
 export type SendAgentWorkerMessage = components['schemas']['SendAgentWorkerMessageDto'];
 export type AgentWorkerDecision = components['schemas']['DecideAgentWorkerActionsDto'];
 
-/** How a page opens the panel: where the person is, and text to start the composer with. */
+/** How a page opens Crossmart Agent: where the person is, and text to start the composer with. */
 export interface OpenAgentWorkerOptions {
   context?: AgentWorkerPageContext;
   /** Put in the composer, not sent: the person reads it and presses send. */

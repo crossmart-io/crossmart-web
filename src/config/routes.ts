@@ -23,7 +23,9 @@ export const ROUTES = {
   product: `/products/:${ROUTE_PARAMS.productId}`,
   inventory: '/inventory',
   channels: '/channels',
-  /** The catalog and every store it feeds, as a graph. */
+  /** Crossmart Agent: the chat, the live map of the catalog and its stores, and the event stream. */
+  agent: '/agent',
+  /** The former channel map page; kept so old links land on Crossmart Agent. */
   channelMap: '/channel-map',
   channelConnection: `/channels/:${ROUTE_PARAMS.connectionId}`,
   channelConnectionTab: `/channels/:${ROUTE_PARAMS.connectionId}/:${ROUTE_PARAMS.tab}`,

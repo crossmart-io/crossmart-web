@@ -16,7 +16,7 @@ const ROLE_NAMES: Record<AgentWorkerRole, string> = {
 
 /**
  * One message as plain text, line breaks kept, so an answer never renders markup. The person's
- * messages sit on the right, Agent Worker's on the left; the role is named for screen readers.
+ * messages sit on the right, Crossmart Agent's on the left; the role is named for screen readers.
  */
 export function MessageBubble({ role, text, streaming = false }: MessageBubbleProps) {
   const isUser = role === AgentWorkerRole.user;

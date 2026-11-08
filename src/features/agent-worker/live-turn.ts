@@ -8,7 +8,7 @@ import type {
 } from './agent-worker.types';
 
 /**
- * What the open stream has told the panel so far, on top of the stored conversation: the turn,
+ * What the open stream has told the chat so far, on top of the stored conversation: the turn,
  * the answer being written, the messages and actions it reported, and an error if one came.
  */
 export interface LiveTurnState {

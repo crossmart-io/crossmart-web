@@ -89,12 +89,13 @@ export function ConversationSwitcher({
       </DropdownMenu>
       <Button
         variant="ghost"
-        size="sm"
+        size="icon-sm"
+        aria-label={AGENT_WORKER_COPY.newConversation}
+        title={AGENT_WORKER_COPY.newConversation}
         disabled={disabled || conversationId === null}
         onClick={() => onSelect(null)}
       >
-        <SquarePen data-icon="inline-start" />
-        {AGENT_WORKER_COPY.newConversation}
+        <SquarePen />
       </Button>
     </div>
   );

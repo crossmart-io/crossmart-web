@@ -13,10 +13,19 @@ import { useCurrentWorkspace, useDefaultTimeZone } from '@/features/workspaces';
 import { AppSidebar } from './AppSidebar';
 import { BreadcrumbsProvider } from './BreadcrumbsProvider';
 import { HeaderBreadcrumbs } from './HeaderBreadcrumbs';
+import { PageLayout, usePageLayout } from './page-layout';
 import { useFocusOnNavigation } from './useFocusOnNavigation';
+
+/** The reading column, or the whole space under the header with the page's own scrolling. */
+const MAIN_CLASSES: Record<PageLayout, string> = {
+  [PageLayout.Column]: 'mx-auto w-full max-w-6xl px-4 py-6 outline-none sm:px-6 lg:py-8',
+  [PageLayout.Full]:
+    'flex h-[calc(100svh-var(--app-header-height))] w-full flex-col gap-3 overflow-hidden p-3 outline-none',
+};
 
 export function AppShell() {
   const mainRef = useRef<HTMLElement>(null);
+  const layout = usePageLayout();
   useFocusOnNavigation(mainRef);
   useDefaultTimeZone(useCurrentWorkspace().workspace);
 
@@ -50,7 +59,7 @@ export function AppShell() {
                 ref={mainRef}
                 id={MAIN_CONTENT_ID}
                 tabIndex={-1}
-                className="mx-auto w-full max-w-6xl px-4 py-6 outline-none sm:px-6 lg:py-8"
+                className={MAIN_CLASSES[layout]}
               >
                 <SandboxBanner />
                 <BillingBanner />
