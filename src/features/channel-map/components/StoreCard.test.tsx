@@ -4,16 +4,24 @@ import { MemoryRouter, Route, Routes } from 'react-router';
 import { ListingDisplayState } from '@/api/schema';
 import { storeHealthFixture } from '@/features/listing-health/testing/listing-health.fixture';
 import { LocationDisplay } from '@/features/listings/testing/LocationDisplay';
+import { AgentWorkerContextView } from '@/api/schema';
+import {
+  AgentWorkerContext,
+  type AgentWorkerContextValue,
+} from '@/features/agent-worker/agent-worker-context';
+import type { OpenAgentWorkerOptions } from '@/features/agent-worker/agent-worker.types';
 import { mapStatusCounts } from '../map-status';
 import { StoreCard } from './StoreCard';
 
-function renderStore() {
-  const store = storeHealthFixture({
-    [ListingDisplayState.published]: 7,
-    [ListingDisplayState.publishing]: 1,
-    [ListingDisplayState.failed]: 2,
-    [ListingDisplayState.draft]: 40,
-  });
+const FAILING_COUNTS = {
+  [ListingDisplayState.published]: 7,
+  [ListingDisplayState.publishing]: 1,
+  [ListingDisplayState.failed]: 2,
+  [ListingDisplayState.draft]: 40,
+};
+
+function renderStore(counts: Partial<Record<ListingDisplayState, number>> = FAILING_COUNTS) {
+  const store = storeHealthFixture(counts);
   render(
     <MemoryRouter>
       <Routes>
@@ -27,7 +35,45 @@ function renderStore() {
   );
 }
 
+function renderWithAgentWorker(counts?: Partial<Record<ListingDisplayState, number>>) {
+  const openAgentWorker = vi.fn<(options?: OpenAgentWorkerOptions) => void>();
+  const agentWorker: AgentWorkerContextValue = {
+    canUse: true,
+    isOpen: false,
+    openAgentWorker,
+    setOpen: vi.fn<(open: boolean) => void>(),
+  };
+  const store = storeHealthFixture(counts);
+  render(
+    <MemoryRouter>
+      <AgentWorkerContext value={agentWorker}>
+        <StoreCard store={store} counts={mapStatusCounts(store.states)} />
+      </AgentWorkerContext>
+    </MemoryRouter>,
+  );
+  return openAgentWorker;
+}
+
 describe('StoreCard', () => {
+  it('offers Agent Worker, prefilled for the store, when listings failed', async () => {
+    const openAgentWorker = renderWithAgentWorker(FAILING_COUNTS);
+    await userEvent.click(screen.getByRole('button', { name: 'Fix with Agent Worker' }));
+    expect(openAgentWorker).toHaveBeenCalledWith({
+      context: { view: AgentWorkerContextView.channel_map, connectionId: 'c-1' },
+      prefill: 'Fix the failed listings on North shop',
+    });
+  });
+
+  it('does not offer the fix for a store without failures', () => {
+    renderWithAgentWorker({ [ListingDisplayState.published]: 7 });
+    expect(screen.queryByRole('button', { name: 'Fix with Agent Worker' })).not.toBeInTheDocument();
+  });
+
+  it('does not offer the fix to a role without Agent Worker', () => {
+    renderStore();
+    expect(screen.queryByRole('button', { name: 'Fix with Agent Worker' })).not.toBeInTheDocument();
+  });
+
   it('opens the store’s listings from its name', async () => {
     renderStore();
     await userEvent.click(screen.getByRole('link', { name: 'Open North shop’s listings' }));

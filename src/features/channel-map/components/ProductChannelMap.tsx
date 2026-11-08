@@ -8,7 +8,9 @@ import {
   CardTitle,
 } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { AgentWorkerContextView } from '@/api/schema';
 import { PageSection, ROUTES } from '@/config/routes';
+import { AGENT_WORKER_TEST_IDS, AskAgentWorkerButton } from '@/features/agent-worker';
 import { CHANNEL_MAP_COPY, ChannelMapView, MapNodeType } from '../channel-map.constants';
 import type { ProductHub } from '../channel-map.types';
 import { useChannelMapView } from '../hooks/useChannelMapView';
@@ -120,11 +122,15 @@ export function ProductChannelMap({ product, ...props }: ProductChannelMapProps)
           <h2 className="text-sm font-semibold">{CHANNEL_MAP_COPY.productTitle}</h2>
         </CardTitle>
         <CardDescription>{CHANNEL_MAP_COPY.productDescription}</CardDescription>
-        {canShowGraph && Boolean(channels?.length) && (
-          <CardAction>
+        <CardAction className="flex flex-wrap items-center justify-end gap-2">
+          <AskAgentWorkerButton
+            context={{ view: AgentWorkerContextView.product_map, productId: props.productId }}
+            testId={AGENT_WORKER_TEST_IDS.productMapButton}
+          />
+          {canShowGraph && Boolean(channels?.length) && (
             <MapViewToggle value={view} onChange={setView} />
-          </CardAction>
-        )}
+          )}
+        </CardAction>
       </CardHeader>
       <CardContent>
         <ProductMapBody input={input} isPending={map.channels.isPending} view={view} />

@@ -1,5 +1,10 @@
 import { Link } from 'react-router';
-import { ChannelConnectionStatus } from '@/api/schema';
+import { AgentWorkerContextView, ChannelConnectionStatus } from '@/api/schema';
+import {
+  AGENT_WORKER_COPY,
+  AGENT_WORKER_TEST_IDS,
+  AskAgentWorkerButton,
+} from '@/features/agent-worker';
 import { ConnectionStatusBadge } from '@/features/channels';
 import { StoreName } from '@/features/listings';
 import type { StoreListingHealth } from '@/features/listing-health/listing-health.types';
@@ -8,7 +13,7 @@ import {
   CHANNEL_MAP_COPY,
   MAP_STATUS_ORDER,
   MAP_STATUS_PRESENTATION,
-  type MapStatus,
+  MapStatus,
 } from '../channel-map.constants';
 import type { StoreNodeData } from '../channel-map.types';
 import { storeListingsRoute } from '../store-routes';
@@ -52,10 +57,25 @@ function StatusCountLink({
   );
 }
 
+/** For a store with failed listings: Agent Worker, ready to fix them (the person presses send). */
+function FixWithAgentWorker({ store }: { store: StoreListingHealth }) {
+  return (
+    <AskAgentWorkerButton
+      label={AGENT_WORKER_COPY.fixStore}
+      context={{ view: AgentWorkerContextView.channel_map, connectionId: store.connectionId }}
+      prefill={AGENT_WORKER_COPY.fixStorePrompt(store.displayName)}
+      variant="ghost"
+      size="xs"
+      className="-me-1.5"
+      testId={AGENT_WORKER_TEST_IDS.storeFixButton}
+    />
+  );
+}
+
 /**
  * A store on the account's map: its name (opening its listings), its connection when it is not
  * connected, how many products are in each status (each opening those products), and when it
- * last synced.
+ * last synced; with failed listings, a way to have Agent Worker fix them.
  */
 export function StoreCard({ store, counts }: StoreNodeData) {
   return (
@@ -77,7 +97,10 @@ export function StoreCard({ store, counts }: StoreNodeData) {
           <StatusCountLink key={status} store={store} status={status} count={counts[status]} />
         ))}
       </ul>
-      <LastSynced value={store.lastSyncedAt} />
+      <div className="flex min-h-6 items-center justify-between gap-2">
+        <LastSynced value={store.lastSyncedAt} />
+        {counts[MapStatus.Failed] > 0 && <FixWithAgentWorker store={store} />}
+      </div>
     </div>
   );
 }
