@@ -16,7 +16,7 @@ ARG VITE_MCP_URL=http://localhost:3100/mcp
 ENV VITE_API_URL=${VITE_API_URL} VITE_MCP_URL=${VITE_MCP_URL}
 RUN pnpm build
 
-FROM nginx:1.27-alpine AS runtime
+FROM nginx:1.29-alpine AS runtime
 ARG VITE_API_URL=http://localhost:3000
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 COPY security-headers.conf /etc/nginx/snippets/security-headers.conf
