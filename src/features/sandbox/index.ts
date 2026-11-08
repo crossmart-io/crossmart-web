@@ -1,3 +1,3 @@
 export { ClaimSandboxCard } from './components/ClaimSandboxCard';
-export { SandboxBanner } from './components/SandboxBanner';
+export { ClaimAccountButton } from './components/ClaimAccountButton';
 export { SANDBOX_CLAIM_TOKEN_QUERY } from './sandbox.constants';
