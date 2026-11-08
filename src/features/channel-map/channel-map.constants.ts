@@ -155,6 +155,8 @@ export const MAP_LAYOUT = {
    * readable; what does not fit is reached by dragging the map.
    */
   fillMinZoom: 0.7,
+  /** It may also grow a little past natural size, so a wide column is not left mostly empty. */
+  fillMaxZoom: 1.25,
   fillPadding: 0.04,
 } as const;
 

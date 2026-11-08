@@ -7,6 +7,7 @@ import { agentState, storesStatus } from '../console-status';
 import { scrollToProposals } from '../scroll-to-proposals';
 import { useAgentMapOverlay } from './useAgentMapOverlay';
 import { useEventRefresh } from './useEventRefresh';
+import { useRefreshOnAgentChanges } from './useRefreshOnAgentChanges';
 import { useWorkspaceEvents } from './useWorkspaceEvents';
 
 const NO_STORES: readonly StoreListingHealth[] = [];
@@ -20,6 +21,7 @@ export function useAgentConsole(workspaceId: string) {
   const { canUse, session } = useAgentWorker();
   const feed = useWorkspaceEvents(workspaceId);
   useEventRefresh(feed.events);
+  useRefreshOnAgentChanges(session);
   const health = useListingHealth(workspaceId);
   const stores = health.data?.stores ?? NO_STORES;
   const [tab, setTab] = useState(ConsoleTab.Chat);

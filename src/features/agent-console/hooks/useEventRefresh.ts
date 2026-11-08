@@ -8,7 +8,7 @@ import { EVENT_FEED } from '../agent-console.constants';
 import type { WorkspaceEvent } from '../agent-console.types';
 
 /** What the map and the status bar read, refetched when the stream says it changed. */
-const REFRESHED_ENDPOINTS = [
+export const REFRESHED_ENDPOINTS = [
   LISTING_HEALTH_ENDPOINT,
   CATALOG_STATS_ENDPOINT,
   CHANNEL_CONNECTIONS_ENDPOINT,

@@ -81,8 +81,10 @@ export function AppSidebar() {
           <SidebarMenuItem>
             <SidebarMenuButton size="lg" asChild>
               <NavLink to={ROUTES.home} onClick={closeOnMobile}>
-                <BrandMark className="size-7" />
-                <span className="font-heading text-lg font-bold tracking-tight">crossmart</span>
+                <BrandMark className="size-7 shrink-0 group-data-[collapsible=icon]:size-5" />
+                <span className="font-heading text-lg font-bold tracking-tight group-data-[collapsible=icon]:hidden">
+                  crossmart
+                </span>
               </NavLink>
             </SidebarMenuButton>
           </SidebarMenuItem>

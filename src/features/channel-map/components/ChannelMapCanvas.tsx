@@ -36,7 +36,7 @@ const FIT_VIEW_OPTIONS = {
 /** A map filling a column: fitted tighter, and never so small that labels blur. */
 const FILL_FIT_VIEW_OPTIONS = {
   padding: MAP_LAYOUT.fillPadding,
-  maxZoom: MAP_LAYOUT.maxZoom,
+  maxZoom: MAP_LAYOUT.fillMaxZoom,
   minZoom: MAP_LAYOUT.fillMinZoom,
 } as const;
 
@@ -104,7 +104,7 @@ export function ChannelMapCanvas<TNode extends Node>({
         fitView
         fitViewOptions={fitOptions}
         minZoom={fitOptions.minZoom}
-        maxZoom={MAP_LAYOUT.maxZoom}
+        maxZoom={fitOptions.maxZoom}
         nodesDraggable={false}
         nodesConnectable={false}
         nodesFocusable={false}
