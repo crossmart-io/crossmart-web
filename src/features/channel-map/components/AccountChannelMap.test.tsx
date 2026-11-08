@@ -1,3 +1,4 @@
+import type { ComponentProps } from 'react';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
@@ -33,11 +34,11 @@ function mockData() {
   } as unknown as ReturnType<typeof useCatalogStats>);
 }
 
-function renderMap() {
+function renderMap(props: Partial<ComponentProps<typeof AccountChannelMap>> = {}) {
   render(
     <ThemeProvider>
       <MemoryRouter>
-        <AccountChannelMap workspaceId="ws-1" />
+        <AccountChannelMap workspaceId="ws-1" {...props} />
       </MemoryRouter>
     </ThemeProvider>,
   );
@@ -69,5 +70,12 @@ describe('AccountChannelMap', () => {
     await userEvent.click(screen.getByRole('radio', { name: 'List' }));
     expect(screen.queryByRole('region', { name: /Channel map/ })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open North shop’s listings' })).toBeVisible();
+  });
+
+  it('leaves out the channels coming soon when asked, as Crossmart Agent’s map does', () => {
+    stubMatchMedia(false);
+    renderMap({ showComingSoon: false, fill: true });
+    expect(screen.getByRole('link', { name: 'Open North shop’s listings' })).toBeVisible();
+    expect(screen.queryByText('Etsy')).not.toBeInTheDocument();
   });
 });

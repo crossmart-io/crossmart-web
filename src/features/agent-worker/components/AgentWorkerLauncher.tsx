@@ -1,4 +1,6 @@
 import { Sparkles } from 'lucide-react';
+import { useMatch } from 'react-router';
+import { ROUTES } from '@/config/routes';
 import { Button } from '@/components/ui/button';
 import { Kbd } from '@/components/ui/kbd';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
@@ -12,16 +14,21 @@ import {
 
 const SHORTCUT_KEY_LABEL = AGENT_WORKER_SHORTCUT_KEY.toUpperCase();
 
-/** The Agent Worker button in the app header, for a role that may use it. */
+/**
+ * The Crossmart Agent button in the app header, for a role that may use it: opens its page, and
+ * shows as the current page there.
+ */
 export function AgentWorkerLauncher() {
   const { canUse, openAgentWorker } = useAgentWorker();
+  const isOnPage = useMatch(ROUTES.agent) !== null;
   if (!canUse) return null;
   return (
     <Tooltip>
       <TooltipTrigger asChild>
         <Button
-          variant="ghost"
+          variant={isOnPage ? 'secondary' : 'ghost'}
           size="sm"
+          aria-current={isOnPage ? 'page' : undefined}
           aria-keyshortcuts={shortcutAria(SHORTCUT_KEY_LABEL)}
           data-testid={AGENT_WORKER_TEST_IDS.launcher}
           onClick={() => openAgentWorker()}

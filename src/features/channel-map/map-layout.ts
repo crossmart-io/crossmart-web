@@ -1,5 +1,7 @@
 import type { Edge, Node, XYPosition } from '@xyflow/react';
 import {
+  PULSING_EDGE_CLASS,
+  PULSING_EDGE_WIDTH,
   MAP_EDGE_WIDTH,
   MAP_LAYOUT,
   MAP_STATUS_PRESENTATION,
@@ -74,5 +76,15 @@ export function statusEdge(source: string, target: string, status: MapStatus): E
     focusable: false,
     data: { status },
     style: { stroke, strokeWidth: MAP_EDGE_WIDTH, strokeDasharray: dash },
+  };
+}
+
+/** The edge carrying a change to its store: thicker, moving, and marked for the pulse. */
+export function pulsingEdge(edge: Edge): Edge {
+  return {
+    ...edge,
+    animated: true,
+    className: PULSING_EDGE_CLASS,
+    style: { ...edge.style, strokeWidth: PULSING_EDGE_WIDTH },
   };
 }

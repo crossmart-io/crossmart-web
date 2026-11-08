@@ -7,6 +7,7 @@ import {
   MAP_STATUS_PRESENTATION,
   MapNodeType,
   MapStatus,
+  PULSING_EDGE_CLASS,
 } from './channel-map.constants';
 
 describe('buildAccountMap', () => {
@@ -38,5 +39,20 @@ describe('buildAccountMap', () => {
   it('stacks the column without overlaps', () => {
     const leaves = graph.nodes.slice(1).map((node) => node.position.y);
     expect((leaves[1] ?? 0) - (leaves[0] ?? 0)).toBeGreaterThanOrEqual(MAP_LAYOUT.storeLeafHeight);
+  });
+
+  it('lays a live overlay over its nodes and pulses the edges of stores a change syncs to', () => {
+    const overlay = {
+      nodes: {
+        'c-2': { activity: null, proposals: 2, highlighted: false },
+        [CATALOG_NODE_ID]: { activity: null, proposals: 0, highlighted: true },
+      },
+      pulsingStoreIds: new Set(['c-2']),
+    };
+    const live = buildAccountMap({ stores, productCount: 8, channels: CHANNELS, overlay });
+    expect(live.nodes[0]?.data).toMatchObject({ overlay: { highlighted: true } });
+    expect(live.nodes[2]?.data).toMatchObject({ overlay: { proposals: 2 } });
+    expect(live.edges[1]).toMatchObject({ animated: true, className: PULSING_EDGE_CLASS });
+    expect(live.edges[0]?.className).toBeUndefined();
   });
 });

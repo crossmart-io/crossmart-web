@@ -26,6 +26,7 @@ function productEvent(action: ActivityAction, id: string | null): ActivityEvent 
     subject: { type: ActivitySubjectType.product, id, label: 'Mug' },
     itemCount: null,
     failureReason: null,
+    connectionId: null,
     createdAt: '2026-11-02T10:00:00Z',
   };
 }

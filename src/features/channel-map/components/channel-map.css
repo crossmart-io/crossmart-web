@@ -13,3 +13,29 @@
 .channel-map .react-flow__attribution a {
   color: var(--muted-foreground);
 }
+
+/* An edge carrying an agent's change to its store glows while it syncs. */
+@media (prefers-reduced-motion: no-preference) {
+  .channel-map .react-flow__edge.agent-sync path {
+    animation:
+      dashdraw 0.5s linear infinite,
+      agent-sync-glow 1.6s ease-in-out infinite;
+  }
+
+  .node-activity[data-tone='reading'],
+  .node-activity[data-tone='writing'] {
+    animation: node-activity-pulse 1.6s ease-in-out infinite;
+  }
+}
+
+@keyframes agent-sync-glow {
+  50% {
+    opacity: 0.45;
+  }
+}
+
+@keyframes node-activity-pulse {
+  50% {
+    box-shadow: 0 0 0 6px color-mix(in oklab, var(--brand) 18%, transparent);
+  }
+}

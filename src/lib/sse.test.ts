@@ -14,7 +14,7 @@ describe('ServerSentEventParser', () => {
   it('reads named events with JSON data', () => {
     const parser = new ServerSentEventParser();
     expect(parser.push('event: text_delta\ndata: {"delta":"Hi"}\n\n')).toEqual([
-      { event: 'text_delta', data: '{"delta":"Hi"}' },
+      { event: 'text_delta', data: '{"delta":"Hi"}', id: '' },
     ]);
   });
 
@@ -23,7 +23,7 @@ describe('ServerSentEventParser', () => {
     expect(parser.push('event: mess')).toEqual([]);
     expect(parser.push('age\ndata: {"a"')).toEqual([]);
     expect(parser.push(':1}\n')).toEqual([]);
-    expect(parser.push('\n')).toEqual([{ event: 'message', data: '{"a":1}' }]);
+    expect(parser.push('\n')).toEqual([{ event: 'message', data: '{"a":1}', id: '' }]);
   });
 
   it('ignores heartbeat comments between events', () => {
@@ -32,27 +32,29 @@ describe('ServerSentEventParser', () => {
       ': ping\n\nevent: one\ndata: 1\n\n: ping\n\nevent: two\ndata: 2\n\n',
     );
     expect(events).toEqual([
-      { event: 'one', data: '1' },
-      { event: 'two', data: '2' },
+      { event: 'one', data: '1', id: '' },
+      { event: 'two', data: '2', id: '' },
     ]);
   });
 
   it('joins several data lines and accepts CRLF line ends', () => {
     const parser = new ServerSentEventParser();
     expect(parser.push('data: first\r\ndata:second\r\n\r\n')).toEqual([
-      { event: 'message', data: 'first\nsecond' },
+      { event: 'message', data: 'first\nsecond', id: '' },
     ]);
   });
 
   it('drops an event without data and names unnamed events "message"', () => {
     const parser = new ServerSentEventParser();
-    expect(parser.push('event: empty\n\ndata: x\n\n')).toEqual([{ event: 'message', data: 'x' }]);
+    expect(parser.push('event: empty\n\ndata: x\n\n')).toEqual([
+      { event: 'message', data: 'x', id: '' },
+    ]);
   });
 
   it('flushes the last event when the stream ends without a blank line', () => {
     const parser = new ServerSentEventParser();
     expect(parser.push('event: done\ndata: {}')).toEqual([]);
-    expect(parser.flush()).toEqual([{ event: 'done', data: '{}' }]);
+    expect(parser.flush()).toEqual([{ event: 'done', data: '{}', id: '' }]);
   });
 });
 
@@ -64,8 +66,16 @@ describe('readServerSentEvents', () => {
       (event) => events.push(event),
     );
     expect(events).toEqual([
-      { event: 'a', data: '1' },
-      { event: 'b', data: '2' },
+      { event: 'a', data: '1', id: '' },
+      { event: 'b', data: '2', id: '' },
+    ]);
+  });
+
+  it('carries the last id the stream set, also to events after it that set none', () => {
+    const parser = new ServerSentEventParser();
+    expect(parser.push('id: c-1\nevent: ready\ndata: {}\n\ndata: x\n\n')).toEqual([
+      { event: 'ready', data: '{}', id: 'c-1' },
+      { event: 'message', data: 'x', id: 'c-1' },
     ]);
   });
 });

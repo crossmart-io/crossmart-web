@@ -22,6 +22,7 @@ function event(id: string, createdAt: Date): ActivityEvent {
     subject: null,
     itemCount: null,
     failureReason: null,
+    connectionId: null,
     createdAt: createdAt.toISOString(),
   };
 }

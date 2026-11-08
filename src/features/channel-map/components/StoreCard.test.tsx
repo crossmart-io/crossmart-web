@@ -39,9 +39,8 @@ function renderWithAgentWorker(counts?: Partial<Record<ListingDisplayState, numb
   const openAgentWorker = vi.fn<(options?: OpenAgentWorkerOptions) => void>();
   const agentWorker: AgentWorkerContextValue = {
     canUse: true,
-    isOpen: false,
+    session: null,
     openAgentWorker,
-    setOpen: vi.fn<(open: boolean) => void>(),
   };
   const store = storeHealthFixture(counts);
   render(
@@ -55,9 +54,9 @@ function renderWithAgentWorker(counts?: Partial<Record<ListingDisplayState, numb
 }
 
 describe('StoreCard', () => {
-  it('offers Agent Worker, prefilled for the store, when listings failed', async () => {
+  it('offers Crossmart Agent, prefilled for the store, when listings failed', async () => {
     const openAgentWorker = renderWithAgentWorker(FAILING_COUNTS);
-    await userEvent.click(screen.getByRole('button', { name: 'Fix with Agent Worker' }));
+    await userEvent.click(screen.getByRole('button', { name: 'Fix with Crossmart Agent' }));
     expect(openAgentWorker).toHaveBeenCalledWith({
       context: { view: AgentWorkerContextView.channel_map, connectionId: 'c-1' },
       prefill: 'Fix the failed listings on North shop',
@@ -66,12 +65,16 @@ describe('StoreCard', () => {
 
   it('does not offer the fix for a store without failures', () => {
     renderWithAgentWorker({ [ListingDisplayState.published]: 7 });
-    expect(screen.queryByRole('button', { name: 'Fix with Agent Worker' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Fix with Crossmart Agent' }),
+    ).not.toBeInTheDocument();
   });
 
-  it('does not offer the fix to a role without Agent Worker', () => {
+  it('does not offer the fix to a role without Crossmart Agent', () => {
     renderStore();
-    expect(screen.queryByRole('button', { name: 'Fix with Agent Worker' })).not.toBeInTheDocument();
+    expect(
+      screen.queryByRole('button', { name: 'Fix with Crossmart Agent' }),
+    ).not.toBeInTheDocument();
   });
 
   it('opens the store’s listings from its name', async () => {

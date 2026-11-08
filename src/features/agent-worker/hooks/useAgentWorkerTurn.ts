@@ -1,7 +1,8 @@
 import { useMutation } from '@tanstack/react-query';
 import { useCallback, useEffect, useReducer, useRef } from 'react';
 import { useInvalidateEndpoints } from '@/hooks/useInvalidateEndpoints';
-import { streamAgentWorkerTurn, toApiUrl } from '../agent-worker-stream';
+import { toApiUrl } from '@/api/api-url';
+import { streamAgentWorkerTurn } from '../agent-worker-stream';
 import {
   AGENT_WORKER_DECISION_ENDPOINT,
   AGENT_WORKER_MESSAGES_ENDPOINT,
@@ -42,9 +43,9 @@ export interface AgentWorkerTurnStream {
 }
 
 /**
- * Runs one Agent Worker turn at a time over its event stream, folding each event into the live
+ * Runs one Crossmart Agent turn at a time over its event stream, folding each event into the live
  * state. When the stream ends, the conversation and the list are refetched, and only then is
- * the live state dropped, so the panel goes from streamed to stored without a flicker. A refusal
+ * the live state dropped, so the chat goes from streamed to stored without a flicker. A refusal
  * before the stream opened (402, 409, 429…) fails the mutation, which the app shows as a toast.
  */
 export function useAgentWorkerTurn(workspaceId: string): AgentWorkerTurnStream {

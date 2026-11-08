@@ -7,7 +7,7 @@ import { AGENT_WORKER_RISK_COPY } from './agent-worker.constants';
 import type { AgentWorkerAction, AgentWorkerMessage, AgentWorkerTurn } from './agent-worker.types';
 import type { LiveTurnState } from './live-turn';
 
-/** The conversation as the panel draws it: stored messages with the stream's news laid over. */
+/** The conversation as the chat draws it: stored messages with the stream's news laid over. */
 export interface ConversationView {
   messages: readonly AgentWorkerMessage[];
   /** Actions the stream reported for a message it has not reported yet. */

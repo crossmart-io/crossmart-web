@@ -14,7 +14,7 @@ import type {
 
 const CREATED_AT = '2026-11-08T10:00:00.000Z';
 
-/** A change Agent Worker waits to make: a new title for the Linen Shirt on the Outlet store. */
+/** A change Crossmart Agent waits to make: a new title for the Linen Shirt on the Outlet store. */
 export function actionFixture(overrides: Partial<AgentWorkerAction> = {}): AgentWorkerAction {
   return {
     id: 'a-1',
@@ -31,6 +31,7 @@ export function actionFixture(overrides: Partial<AgentWorkerAction> = {}): Agent
       details: [],
       changes: [{ label: 'Title', before: 'Linen Shirt', after: 'Linen Shirt, Relaxed Fit' }],
     },
+    targets: { connectionIds: ['c-outlet'], productIds: ['p-linen'] },
     outcome: null,
     isError: false,
     untrustedWarning: false,

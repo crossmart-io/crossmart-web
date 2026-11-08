@@ -1,4 +1,4 @@
-const MS_PER_SECOND = 1000;
+import { MS_PER_SECOND } from './time';
 const SECONDS_PER_MINUTE = 60;
 const MINUTES_PER_HOUR = 60;
 const HOURS_PER_DAY = 24;

@@ -13,6 +13,8 @@ interface PageProps extends PropsWithChildren {
   actions?: ReactNode;
   /** Pages above this one, outermost first. Pass a `PAGE_PARENTS` entry so it stays stable. */
   parents?: readonly Crumb[];
+  /** A full-window page shows its content only; the heading stays for screen readers. */
+  headerHidden?: boolean;
 }
 
 /** Every app page: tab title, breadcrumbs, heading, then its content with even spacing. */
@@ -22,6 +24,7 @@ export function Page({
   description,
   actions,
   parents = PAGE_PARENTS.topLevel,
+  headerHidden = false,
   children,
 }: PageProps) {
   const { setCrumbs } = useBreadcrumbs();
@@ -31,6 +34,16 @@ export function Page({
   }, [name, parents, setCrumbs]);
 
   const back = parents.findLast((crumb) => crumb.to);
+
+  if (headerHidden) {
+    return (
+      <div className="flex min-h-0 flex-1 flex-col">
+        <title>{toDocumentTitle(name)}</title>
+        <h1 className="sr-only">{title ?? name}</h1>
+        {children}
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col gap-6">

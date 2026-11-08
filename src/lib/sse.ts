@@ -1,7 +1,9 @@
-/** One server-sent event: its name (`message` when the server named none) and its data. */
+/** One server-sent event: its name (`message` when the server named none), data and id. */
 export interface ServerSentEvent {
   event: string;
   data: string;
+  /** The last id the stream set, which a client sends back as `Last-Event-ID`; empty for none. */
+  id: string;
 }
 
 /** The name the spec gives an event that has no `event:` field. */
@@ -13,6 +15,7 @@ const LINE_FEED = '\n';
 const CARRIAGE_RETURN = '\r';
 const EVENT_FIELD = 'event';
 const DATA_FIELD = 'data';
+const ID_FIELD = 'id';
 const DATA_LINE_JOINER = '\n';
 
 /**
@@ -24,6 +27,8 @@ export class ServerSentEventParser {
   private buffer = '';
   private eventName = '';
   private dataLines: string[] = [];
+  /** Kept across events, as the format says: an event without an id has the last one. */
+  private lastEventId = '';
 
   /** The events `chunk` completes; an unfinished line or event waits for the next chunk. */
   push(chunk: string): ServerSentEvent[] {
@@ -49,6 +54,7 @@ export class ServerSentEventParser {
     const value = separator === -1 ? '' : stripLeadingSpace(line.slice(separator + 1));
     if (field === EVENT_FIELD) this.eventName = value;
     else if (field === DATA_FIELD) this.dataLines.push(value);
+    else if (field === ID_FIELD) this.lastEventId = value;
     return [];
   }
 
@@ -58,7 +64,8 @@ export class ServerSentEventParser {
     const lines = this.dataLines;
     this.eventName = '';
     this.dataLines = [];
-    return lines.length ? [{ event, data: lines.join(DATA_LINE_JOINER) }] : [];
+    const data = lines.join(DATA_LINE_JOINER);
+    return lines.length ? [{ event, data, id: this.lastEventId }] : [];
   }
 }
 

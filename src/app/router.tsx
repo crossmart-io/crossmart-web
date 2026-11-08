@@ -1,6 +1,7 @@
 import { createBrowserRouter, Navigate, Outlet, type RouteObject } from 'react-router';
 import { RouteErrorBoundary } from '@/components/feedback/RouteErrorBoundary';
 import { AppShell } from '@/components/layout/AppShell';
+import { PageLayout, type RouteHandle } from '@/components/layout/page-layout';
 import { ROUTES } from '@/config/routes';
 import { AuthLayout, RequireSession } from '@/features/auth';
 import { ForgotPasswordPage } from '@/pages/ForgotPasswordPage';
@@ -68,12 +69,14 @@ const appRoutes: RouteObject[] = [
       import('@/pages/ChannelsPage').then(({ ChannelsPage }) => ({ Component: ChannelsPage })),
   },
   {
-    path: ROUTES.channelMap,
+    path: ROUTES.agent,
+    handle: { layout: PageLayout.Full } satisfies RouteHandle,
     lazy: () =>
-      import('@/pages/ChannelMapPage').then(({ ChannelMapPage }) => ({
-        Component: ChannelMapPage,
+      import('@/pages/CrossmartAgentPage').then(({ CrossmartAgentPage }) => ({
+        Component: CrossmartAgentPage,
       })),
   },
+  { path: ROUTES.channelMap, element: <Navigate to={ROUTES.agent} replace /> },
   ...[ROUTES.channelConnection, ROUTES.channelConnectionTab].map((path) => ({
     path,
     lazy: () =>
