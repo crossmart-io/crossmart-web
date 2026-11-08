@@ -51,3 +51,9 @@ export const LEGAL_LINKS = {
 
 /** Shown when the session could not be checked, such as while offline or the API is down. */
 export const SESSION_UNAVAILABLE_TITLE = 'Crossmart could not check your sign-in';
+
+/** The button that emails the confirmation link again, and what it says once sent. */
+export const RESEND_VERIFICATION_COPY = {
+  send: 'Send it again',
+  sent: 'Sent. Check your inbox.',
+} as const;

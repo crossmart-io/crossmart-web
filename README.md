@@ -6,12 +6,14 @@ The web app for **[Crossmart](https://github.com/crossmart-io/crossmart)**, the 
 
 </div>
 
-> [!WARNING]
-> Crossmart is in early development and not ready for production use yet.
+> [!NOTE]
+> Crossmart is young and moving fast. Shopify and eBay are live, and more channels are on the way. Until 1.0, APIs may change; breaking changes are announced and versioned under `/api/v1`.
 
-<!-- screenshots -->
+![The Crossmart overview: sales over time, sales by store and top products](https://raw.githubusercontent.com/crossmart-io/crossmart/main/docs/images/01-dashboard.png)
 
-Shopify and eBay are live. Google Shopping and Etsy are coming soon, and Amazon and Walmart are planned.
+More screenshots are in the [Crossmart README](https://github.com/crossmart-io/crossmart#readme).
+
+Shopify and eBay are live. Google Shopping and Etsy are coming soon, and Amazon, Walmart and TikTok Shop are planned.
 
 ## Stack
 

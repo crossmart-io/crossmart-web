@@ -6,9 +6,8 @@ import { TooltipProvider } from '@/components/ui/tooltip';
 import { MAIN_CONTENT_ID } from '@/config/app';
 import { AgentWorkerLauncher, AgentWorkerProvider } from '@/features/agent-worker';
 import { AskLauncher } from '@/features/ask';
-import { UserMenu, VerifyEmailBanner } from '@/features/auth';
-import { BillingBanner } from '@/features/billing';
-import { SandboxBanner } from '@/features/sandbox';
+import { UserMenu } from '@/features/auth';
+import { AccountNoticeBanners, NotificationBell } from '@/features/notifications';
 import { useCurrentWorkspace, useDefaultTimeZone } from '@/features/workspaces';
 import { AppSidebar } from './AppSidebar';
 import { BreadcrumbsProvider } from './BreadcrumbsProvider';
@@ -52,6 +51,7 @@ export function AppShell() {
                 <div className="ml-auto flex items-center gap-1">
                   <AgentWorkerLauncher />
                   <AskLauncher />
+                  <NotificationBell />
                   <UserMenu />
                 </div>
               </header>
@@ -61,9 +61,7 @@ export function AppShell() {
                 tabIndex={-1}
                 className={MAIN_CLASSES[layout]}
               >
-                <SandboxBanner />
-                <BillingBanner />
-                <VerifyEmailBanner />
+                <AccountNoticeBanners />
                 <Outlet />
               </main>
             </SidebarInset>
