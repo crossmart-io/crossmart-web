@@ -1,5 +1,5 @@
 import { Radio } from 'lucide-react';
-import { useId, useMemo, useState } from 'react';
+import { type ReactNode, useId, useMemo, useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import {
   AGENT_CONSOLE_COPY,
@@ -18,6 +18,8 @@ export interface EventStreamPanelProps {
   status: EventFeedStatus;
   onHighlight: (nodeId: string | null) => void;
   onOpenProposals: () => void;
+  /** A button beside the feed status, such as one that hides the column. */
+  headerAction?: ReactNode;
 }
 
 const FEED_BADGE_VARIANT: Record<EventFeedStatus, 'success' | 'secondary' | 'warning'> = {
@@ -48,7 +50,12 @@ function EmptyEvents({ filtered }: { filtered: boolean }) {
  * What happens in the workspace, newest first, filtered by kind. New events are announced to
  * screen readers together every few seconds, in a polite status region, not one by one.
  */
-export function EventStreamPanel({ events, status, ...itemProps }: EventStreamPanelProps) {
+export function EventStreamPanel({
+  events,
+  status,
+  headerAction,
+  ...itemProps
+}: EventStreamPanelProps) {
   const [filter, setFilter] = useState(EventFilter.All);
   const titleId = useId();
   const shown = useMemo(
@@ -67,7 +74,10 @@ export function EventStreamPanel({ events, status, ...itemProps }: EventStreamPa
           <h2 id={titleId} className="text-sm font-semibold">
             {AGENT_CONSOLE_COPY.eventsTitle}
           </h2>
-          <FeedStatus status={status} />
+          <div className="flex items-center gap-1">
+            <FeedStatus status={status} />
+            {headerAction}
+          </div>
         </div>
         <EventFilterBar value={filter} onChange={setFilter} />
       </header>

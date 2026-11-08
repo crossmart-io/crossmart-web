@@ -150,6 +150,12 @@ export const MAP_LAYOUT = {
   /** Fitting never enlarges the graph past its natural size, nor shrinks it past legibility. */
   maxZoom: 1,
   minZoom: 0.45,
+  /**
+   * A map that fills a page's column never shrinks below this, so a node's labels stay
+   * readable; what does not fit is reached by dragging the map.
+   */
+  fillMinZoom: 0.7,
+  fillPadding: 0.04,
 } as const;
 
 export const MAP_EDGE_WIDTH = 2;

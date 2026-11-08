@@ -4,6 +4,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { cn } from '@/lib/utils';
 import { useCatalogStats } from '@/features/catalog/hooks/useCatalogStats';
 import { CHANNELS } from '@/features/channels';
+import type { ChannelInfo } from '@/features/channels/channels.constants';
 import { useListingHealth } from '@/features/listing-health/hooks/useListingHealth';
 import { type AccountMapInput, buildAccountMap } from '../account-map-graph';
 import { CHANNEL_MAP_COPY, ChannelMapView, MapNodeType } from '../channel-map.constants';
@@ -51,13 +52,22 @@ interface AccountChannelMapProps {
   overlay?: MapOverlay;
   /** Fill the parent's height, as a column of a page, instead of growing with the graph. */
   fill?: boolean;
+  /** Draw the channels that cannot be connected yet, faintly. */
+  showComingSoon?: boolean;
 }
+
+const NO_CHANNELS: readonly ChannelInfo[] = [];
 
 /**
  * The catalog and every store it feeds, from the listings report the overview uses: one request
  * for every store's counts per state, and the catalog's stats for its size.
  */
-export function AccountChannelMap({ workspaceId, overlay, fill = false }: AccountChannelMapProps) {
+export function AccountChannelMap({
+  workspaceId,
+  overlay,
+  fill = false,
+  showComingSoon = true,
+}: AccountChannelMapProps) {
   const health = useListingHealth(workspaceId);
   const stats = useCatalogStats(workspaceId);
   const { view, setView, canShowGraph } = useChannelMapView();
@@ -74,7 +84,7 @@ export function AccountChannelMap({ workspaceId, overlay, fill = false }: Accoun
   const input: AccountMapInput = {
     stores: health.data.stores,
     productCount: stats.data?.products,
-    channels: CHANNELS,
+    channels: showComingSoon ? CHANNELS : NO_CHANNELS,
     overlay,
   };
   return (

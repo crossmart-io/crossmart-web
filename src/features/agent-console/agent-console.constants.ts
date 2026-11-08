@@ -93,7 +93,12 @@ export const AGENT_CONSOLE_TEST_IDS = {
   events: 'agent-console-events',
   eventItem: 'agent-console-event',
   tabs: 'agent-console-tabs',
+  hideEvents: 'agent-console-hide-events',
+  showEvents: 'agent-console-show-events',
 } as const;
+
+/** The Events column, which the buttons that hide and show it control. */
+export const EVENTS_COLUMN_ID = 'agent-console-events-column';
 
 export const AGENT_CONSOLE_COPY = {
   name: 'Crossmart Agent',
@@ -101,6 +106,9 @@ export const AGENT_CONSOLE_COPY = {
   mapTitle: 'Live map',
   mapActive: 'Crossmart Agent is working on the map',
   eventsTitle: 'Events',
+  hideEvents: 'Hide events',
+  showEvents: (unseen: number) =>
+    unseen > 0 ? `Show events, ${unseen === 1 ? '1 new' : `${unseen} new`}` : 'Show events',
   eventsLabel: 'What happens in the workspace, newest first',
   filterLabel: 'Show events',
   noEvents:

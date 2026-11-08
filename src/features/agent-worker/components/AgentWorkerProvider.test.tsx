@@ -150,8 +150,11 @@ describe('AgentWorkerProvider', () => {
   it('goes to its page from the header button', async () => {
     renderProvider();
 
-    await userEvent.click(screen.getByRole('button', { name: 'Crossmart Agent' }));
+    const launcher = screen.getByRole('button', { name: 'Crossmart Agent' });
+    expect(launcher).not.toHaveAttribute('aria-current');
+    await userEvent.click(launcher);
     expect(await screen.findByLabelText('Message Crossmart Agent')).toBeInTheDocument();
+    expect(launcher).toHaveAttribute('aria-current', 'page');
   });
 
   it('goes to its page with Cmd or Ctrl+J, from anywhere', async () => {

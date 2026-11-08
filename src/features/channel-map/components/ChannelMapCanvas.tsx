@@ -33,15 +33,24 @@ const FIT_VIEW_OPTIONS = {
   minZoom: MAP_LAYOUT.minZoom,
 } as const;
 
+/** A map filling a column: fitted tighter, and never so small that labels blur. */
+const FILL_FIT_VIEW_OPTIONS = {
+  padding: MAP_LAYOUT.fillPadding,
+  maxZoom: MAP_LAYOUT.maxZoom,
+  minZoom: MAP_LAYOUT.fillMinZoom,
+} as const;
+
+type FitOptions = typeof FIT_VIEW_OPTIONS | typeof FILL_FIT_VIEW_OPTIONS;
+
 /** Fits the graph again whenever the canvas changes size or the nodes are measured anew. */
-function FitOnResize() {
+function FitOnResize({ options }: { options: FitOptions }) {
   const { fitView } = useReactFlow();
   const width = useStore((state) => state.width);
   const height = useStore((state) => state.height);
   const measured = useNodesInitialized();
   useEffect(() => {
-    if (measured) void fitView(FIT_VIEW_OPTIONS);
-  }, [fitView, width, height, measured]);
+    if (measured) void fitView(options);
+  }, [fitView, options, width, height, measured]);
   return null;
 }
 
@@ -62,7 +71,8 @@ function useMeasuredNodes<TNode extends Node>(nodes: TNode[]) {
 
 /**
  * A read-only React Flow canvas fitted to its graph: no dragging, connecting, selecting, panning
- * or zooming, so the page scrolls over it as over any card. The nodes' own buttons and links
+ * or zooming, so the page scrolls over it as over any card. Filling a column, it may be dragged,
+ * for a graph larger than the column at a readable size. The nodes' own buttons and links
  * are what a keyboard reaches.
  */
 export function ChannelMapCanvas<TNode extends Node>({
@@ -75,6 +85,7 @@ export function ChannelMapCanvas<TNode extends Node>({
 }: ChannelMapCanvasProps<TNode>) {
   const { resolvedTheme } = useTheme();
   const { flowNodes, onNodesChange } = useMeasuredNodes(nodes);
+  const fitOptions = fill ? FILL_FIT_VIEW_OPTIONS : FIT_VIEW_OPTIONS;
   return (
     <section
       aria-label={label}
@@ -91,15 +102,15 @@ export function ChannelMapCanvas<TNode extends Node>({
         nodeTypes={nodeTypes}
         colorMode={resolvedTheme}
         fitView
-        fitViewOptions={FIT_VIEW_OPTIONS}
-        minZoom={MAP_LAYOUT.minZoom}
+        fitViewOptions={fitOptions}
+        minZoom={fitOptions.minZoom}
         maxZoom={MAP_LAYOUT.maxZoom}
         nodesDraggable={false}
         nodesConnectable={false}
         nodesFocusable={false}
         edgesFocusable={false}
         elementsSelectable={false}
-        panOnDrag={false}
+        panOnDrag={fill}
         panOnScroll={false}
         zoomOnScroll={false}
         zoomOnPinch={false}
@@ -107,7 +118,7 @@ export function ChannelMapCanvas<TNode extends Node>({
         preventScrolling={false}
         disableKeyboardA11y
       >
-        <FitOnResize />
+        <FitOnResize options={fitOptions} />
       </ReactFlow>
     </section>
   );
