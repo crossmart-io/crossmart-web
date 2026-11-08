@@ -36,6 +36,11 @@ export interface AccountNotice {
   severity: NoticeSeverity;
   title: string;
   body: string;
+  /**
+   * The facts behind the notice, such as the trial's end date and whether it is cancelled. Seen
+   * state compares it, not the wording, so a daily countdown does not make the notice new again.
+   */
+  revision: string;
   /** Also shown above every page: it stops work, or a deadline is close. */
   banner: boolean;
   /** Null when the person cannot act on it themselves. */

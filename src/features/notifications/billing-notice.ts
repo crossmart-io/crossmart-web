@@ -8,6 +8,7 @@ import {
   type SubscriptionAccess,
 } from '@/features/billing';
 import { formatDate, pluralize } from '@/lib/format';
+import { noticeRevision } from './notice-revision';
 import { BILLING_NOTICE_COPY as COPY, DEADLINE_BANNER_DAYS } from './notifications.constants';
 import {
   type AccountNotice,
@@ -31,9 +32,13 @@ function linkToBilling(label: string, canManage: boolean): NoticeAction | null {
   return canManage ? { kind: NoticeActionKind.Link, label, to: ROUTES.billing } : null;
 }
 
+/** Whether the deadline is close enough to show as a banner too. */
+function isClose(until: string, now: Date): boolean {
+  return daysUntil(until, now) <= DEADLINE_BANNER_DAYS;
+}
+
 /** A deadline is informational until it is close; then it is a banner too. */
-function deadline(until: string, now: Date): Pick<AccountNotice, 'severity' | 'banner'> {
-  const close = daysUntil(until, now) <= DEADLINE_BANNER_DAYS;
+function deadline(close: boolean): Pick<AccountNotice, 'severity' | 'banner'> {
   return { severity: close ? NoticeSeverity.Warning : NoticeSeverity.Info, banner: close };
 }
 
@@ -42,13 +47,14 @@ function trial(access: SubscriptionAccess, until: string, now: Date): BillingNot
   const body = access.cancelAt
     ? cancelledTrialNote(access.cancelAt)
     : COPY.trialCharged(pluralize(daysUntil(until, now), 'day'), formatDate(until));
-  const kind = NoticeKind.Trial;
+  const close = isClose(until, now);
   return {
-    kind,
+    kind: NoticeKind.Trial,
     title: COPY.trialTitle,
     body,
+    revision: noticeRevision(until, access.cancelAt, close),
     actionLabel: COPY.manageBilling,
-    ...deadline(until, now),
+    ...deadline(close),
   };
 }
 
@@ -60,30 +66,37 @@ function paymentFailed(until: string | null, canManage: boolean): BillingNoticeC
     banner: true,
     title: COPY.paymentFailedTitle,
     body: COPY.paymentFailed(by, canManage),
+    revision: noticeRevision(until),
     actionLabel: COPY.updatePaymentMethod,
   };
 }
 
 function legacyEnding(until: string, now: Date): BillingNoticeContent {
+  const close = isClose(until, now);
   return {
     kind: NoticeKind.LegacyAccessEnding,
     title: COPY.choosePlanTitle,
     body: COPY.legacyEnding(formatDate(until)),
+    revision: noticeRevision(until, close),
     actionLabel: COPY.choosePlan,
-    ...deadline(until, now),
+    ...deadline(close),
   };
 }
 
-/** Without a working subscription: read-only once enforced, and an invitation to choose before. */
+/**
+ * Without a working subscription: read-only once enforced, and before that an invitation to choose
+ * a plan, which blocks nothing yet and so stays in the bell.
+ */
 function inactive(access: SubscriptionAccess, canManage: boolean): BillingNoticeContent {
   const reason = READ_ONLY_REASONS[access.state] ?? READ_ONLY_FALLBACK_REASON;
   if (!access.enforced) {
     return {
       kind: NoticeKind.PlanRequired,
-      severity: NoticeSeverity.Warning,
-      banner: true,
+      severity: NoticeSeverity.Info,
+      banner: false,
       title: COPY.choosePlanTitle,
       body: COPY.planRequired(reason),
+      revision: noticeRevision(access.state),
       actionLabel: COPY.choosePlan,
     };
   }
@@ -93,6 +106,7 @@ function inactive(access: SubscriptionAccess, canManage: boolean): BillingNotice
     banner: true,
     title: COPY.readOnlyTitle,
     body: COPY.readOnly(reason, canManage),
+    revision: noticeRevision(access.state),
     actionLabel: COPY.fixBilling,
   };
 }

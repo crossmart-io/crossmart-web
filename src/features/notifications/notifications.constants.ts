@@ -4,8 +4,11 @@ import { NoticeKind, NoticeSeverity } from './notifications.types';
 /** A trial or free access ending within this many days is also shown as a banner. */
 export const DEADLINE_BANNER_DAYS = 3;
 
-/** Per user: the notices they have seen, each with the content they saw. */
+/** Per user: the notices they have seen, each with the revision they saw. */
 export const SEEN_NOTICES_STORAGE_KEY = 'crossmart.seen-notices';
+
+/** Joins a notice's facts into its revision. */
+export const REVISION_SEPARATOR = '|';
 
 /** The bell lists the most urgent notices first. */
 export const SEVERITY_RANK: Record<NoticeSeverity, number> = {

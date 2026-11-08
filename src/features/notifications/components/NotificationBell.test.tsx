@@ -32,6 +32,7 @@ const TRIAL: AccountNotice = {
   key: `${NoticeKind.Trial}:org-1`,
   kind: NoticeKind.Trial,
   severity: NoticeSeverity.Info,
+  revision: '2026-11-20|null|false',
   banner: false,
   title: 'Free trial',
   body: 'Your trial ends in 10 days, on Nov 20, 2026. Your card is charged then.',
@@ -41,6 +42,7 @@ const VERIFY_EMAIL: AccountNotice = {
   key: `${NoticeKind.VerifyEmail}:user`,
   kind: NoticeKind.VerifyEmail,
   severity: NoticeSeverity.Info,
+  revision: EMAIL,
   banner: false,
   title: 'Confirm your email',
   body: `We sent a link to ${EMAIL}.`,
@@ -106,12 +108,22 @@ describe('NotificationBell', () => {
     expect(localStorage.length).toBe(1);
   });
 
-  it('counts a notice whose content changed as new again', async () => {
+  it('keeps a seen notice seen while only its wording changes', async () => {
     const { rerender } = bell([TRIAL]);
     await userEvent.click(bellButton());
     await userEvent.keyboard('{Escape}');
 
-    vi.mocked(useAccountNotices).mockReturnValue([{ ...TRIAL, body: 'Ends in 3 days.' }]);
+    vi.mocked(useAccountNotices).mockReturnValue([{ ...TRIAL, body: 'Ends in 9 days.' }]);
+    rerender();
+    expect(bellButton()).toHaveAccessibleName('Notifications');
+  });
+
+  it('counts a notice whose facts changed as new again', async () => {
+    const { rerender } = bell([TRIAL]);
+    await userEvent.click(bellButton());
+    await userEvent.keyboard('{Escape}');
+
+    vi.mocked(useAccountNotices).mockReturnValue([{ ...TRIAL, revision: '2026-11-20|null|true' }]);
     rerender();
     expect(bellButton()).toHaveAccessibleName('Notifications, 1 new');
   });

@@ -113,10 +113,10 @@ describe('useAccountNotices', () => {
     ]);
   });
 
-  it('asks for a plan while limits are not enforced', () => {
+  it('asks for a plan in the bell only while limits are not enforced', () => {
     const access = { state: SubscriptionAccessState.subscription_required, writable: false };
     expect(notices({ access: { ...access, enforced: false } })).toEqual([
-      expect.objectContaining({ kind: NoticeKind.PlanRequired, banner: true }),
+      expect.objectContaining({ kind: NoticeKind.PlanRequired, banner: false }),
     ]);
   });
 

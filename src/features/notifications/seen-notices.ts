@@ -2,7 +2,7 @@ import { useCallback, useSyncExternalStore } from 'react';
 import { SEEN_NOTICES_STORAGE_KEY } from './notifications.constants';
 import type { AccountNotice } from './notifications.types';
 
-/** Notice key to the content seen under it, so changed content counts as new again. */
+/** Notice key to the revision seen under it, so a notice whose facts change is new again. */
 export type SeenNotices = Readonly<Record<string, string>>;
 
 const NOTHING_SEEN: SeenNotices = {};
@@ -16,7 +16,7 @@ function storageKey(userId: string): string {
 
 function isSeenNotices(value: unknown): value is SeenNotices {
   if (typeof value !== 'object' || value === null || Array.isArray(value)) return false;
-  return Object.values(value).every((fingerprint) => typeof fingerprint === 'string');
+  return Object.values(value).every((revision) => typeof revision === 'string');
 }
 
 /** Storage can throw in private windows or when site data is blocked; nothing is seen then. */
@@ -38,19 +38,14 @@ function seenNoticesOf(userId: string): SeenNotices {
   return seen;
 }
 
-/** What the notice says; a notice whose content changes is new again. */
-export function noticeFingerprint(notice: AccountNotice): string {
-  return `${notice.title}\n${notice.body}`;
-}
-
-/** The notices the user has not seen with their current content. */
+/** The notices the user has not seen with their current facts. */
 export function unseenNotices(notices: AccountNotice[], seen: SeenNotices): AccountNotice[] {
-  return notices.filter((notice) => seen[notice.key] !== noticeFingerprint(notice));
+  return notices.filter((notice) => seen[notice.key] !== notice.revision);
 }
 
 /** Remembers the current notices as seen; notices no longer listed are forgotten. */
 export function markNoticesSeen(userId: string, notices: AccountNotice[]): void {
-  const seen = Object.fromEntries(notices.map((notice) => [notice.key, noticeFingerprint(notice)]));
+  const seen = Object.fromEntries(notices.map((notice) => [notice.key, notice.revision]));
   seenByUser.set(userId, seen);
   try {
     localStorage.setItem(storageKey(userId), JSON.stringify(seen));

@@ -3,6 +3,7 @@ import type { SubscriptionAccess } from '@/features/billing';
 import { hasPermission, type Workspace } from '@/features/workspaces';
 import { formatDate } from '@/lib/format';
 import { billingNotice } from './billing-notice';
+import { noticeRevision } from './notice-revision';
 import {
   SANDBOX_NOTICE_COPY,
   SEVERITY_RANK,
@@ -38,6 +39,7 @@ function sandboxNotice(workspace: Workspace | undefined): AccountNotice | null {
     banner: true,
     title: SANDBOX_NOTICE_COPY.title,
     body: SANDBOX_NOTICE_COPY.body(formatDate(workspace.sandbox.claimExpiresAt)),
+    revision: noticeRevision(workspace.sandbox.claimExpiresAt),
     action: { kind: NoticeActionKind.ClaimSandbox, workspaceId: workspace.id },
   };
 }
@@ -58,6 +60,7 @@ function verifyEmailNotice(user: NoticeUser | undefined): AccountNotice | null {
     banner: false,
     title: VERIFY_EMAIL_NOTICE_COPY.title,
     body: VERIFY_EMAIL_NOTICE_COPY.body(user.email),
+    revision: noticeRevision(user.email),
     action: { kind: NoticeActionKind.ResendVerification, email: user.email },
   };
 }
