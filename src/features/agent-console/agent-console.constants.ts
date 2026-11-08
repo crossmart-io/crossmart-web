@@ -119,6 +119,7 @@ export const AGENT_CONSOLE_COPY = {
     count === 1 ? `New event: ${latest}` : `${count} new events. Latest: ${latest}`,
   system: 'Crossmart',
   onBehalfOf: (agent: string, person: string) => `${agent} for ${person}`,
+  approvedBy: (actor: string, person: string) => `${actor}, approved by ${person}`,
   feed: {
     connecting: 'Connecting',
     live: 'Live',

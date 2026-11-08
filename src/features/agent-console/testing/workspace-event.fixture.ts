@@ -16,7 +16,7 @@ export function workspaceEventFixture(overrides: Partial<WorkspaceEvent> = {}): 
     severity: WorkspaceEventSeverity.error,
     summary: 'Could not sync “Mug” on eBay',
     detail: 'Item specific Brand is missing',
-    actor: { type: ActivityActorType.SYSTEM, name: null, agentName: null },
+    actor: { type: ActivityActorType.SYSTEM, name: null, agentName: null, approvedByName: null },
     refs: {
       connectionId: 'c-ebay',
       productId: 'p-mug',
@@ -24,6 +24,7 @@ export function workspaceEventFixture(overrides: Partial<WorkspaceEvent> = {}): 
       webhookEndpointId: null,
       conversationId: null,
       actionId: null,
+      proposalId: null,
     },
     itemCount: null,
     occurredAt: '2026-11-08T10:00:00.000Z',

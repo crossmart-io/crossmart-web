@@ -2,6 +2,7 @@ import { WorkspacePermission } from '@/api/schema';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { Page } from '@/components/layout/Page';
 import { PAGE_PARENTS } from '@/config/navigation';
+import { OutsideAgentChangesCard } from '@/features/agent-proposals';
 import {
   DeleteWorkspaceCard,
   hasPermission,
@@ -14,7 +15,7 @@ export function WorkspaceSettingsPage() {
     <Page
       name="Workspace"
       parents={PAGE_PARENTS.settings}
-      description="This workspace's name and time zone, and deleting it with all its data."
+      description="This workspace's name and time zone, whether AI agents' changes wait for your approval, and deleting it with all its data."
     >
       <WorkspaceGate>
         {(workspace) => (
@@ -28,6 +29,12 @@ export function WorkspaceSettingsPage() {
             )}
             {hasPermission(workspace, WorkspacePermission.workspace_manage) && (
               <TimeZoneCard key={`${workspace.id}:${workspace.timeZone}`} workspace={workspace} />
+            )}
+            {hasPermission(workspace, WorkspacePermission.workspace_manage) && (
+              <OutsideAgentChangesCard
+                key={`${workspace.id}:${workspace.outsideAgentChanges}`}
+                workspace={workspace}
+              />
             )}
             {hasPermission(workspace, WorkspacePermission.workspace_delete) && (
               <DeleteWorkspaceCard

@@ -11,3 +11,7 @@ export {
 export { isProposed } from './conversation-view';
 export type { AgentWorkerSession } from './hooks/useAgentWorkerSession';
 export type { AgentWorkerAction } from './agent-worker.types';
+export { ChangePreview } from './components/ChangePreview';
+export { PreviewDetails } from './components/PreviewDetails';
+export { RiskBadges } from './components/RiskBadges';
+export { RiskConfirmation } from './components/RiskConfirmation';

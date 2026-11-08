@@ -30,6 +30,7 @@ const SUBJECT_ROUTES: Record<ActivitySubjectType, (subjectId: string) => string 
   [ActivitySubjectType.custom_role]: () => ROUTES.roles,
   [ActivitySubjectType.workspace]: () => ROUTES.workspaceSettings,
   [ActivitySubjectType.product_view]: () => undefined,
+  [ActivitySubjectType.agent_proposal]: () => ROUTES.agentProposals,
 };
 
 /** Where the event's subject can be opened, if anywhere. */

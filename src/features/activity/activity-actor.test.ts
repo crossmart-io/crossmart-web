@@ -11,6 +11,8 @@ function actor(overrides: Partial<ActivityActor>): ActivityActor {
     name: 'Dana',
     email: 'dana@example.com',
     agentName: null,
+    approvedByUserId: null,
+    approvedByName: null,
     ...overrides,
   };
 }

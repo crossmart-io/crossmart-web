@@ -67,6 +67,16 @@ function EventSummary({ event, route }: { event: ActivityEvent; route: string | 
   );
 }
 
+/** ", approved by Lee" for a change an outside agent proposed and a person approved. */
+function ApprovedBy({ name }: { name: string | null }) {
+  if (!name) return null;
+  return (
+    <>
+      , approved by <bdi>{name}</bdi>
+    </>
+  );
+}
+
 function ActorName({ event }: { event: ActivityEvent }) {
   const name = toActorName(event.actor);
   switch (event.actor.type) {
@@ -81,7 +91,8 @@ function ActorName({ event }: { event: ActivityEvent }) {
         <span>
           <bdi>{name}</bdi>{' '}
           <span className="text-muted-foreground/80">
-            (agent, for <bdi>{toAgentUserName(event.actor)}</bdi>)
+            (agent, for <bdi>{toAgentUserName(event.actor)}</bdi>
+            <ApprovedBy name={event.actor.approvedByName} />)
           </span>
         </span>
       );

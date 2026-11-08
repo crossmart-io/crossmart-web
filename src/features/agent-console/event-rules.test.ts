@@ -14,6 +14,7 @@ const NO_REFS = workspaceEventFixture({
     webhookEndpointId: null,
     conversationId: null,
     actionId: null,
+    proposalId: null,
   },
 });
 
@@ -54,9 +55,23 @@ describe('matchesFilter', () => {
 
 describe('event presentation', () => {
   it('names an agent with the person it acted for, an API key, or Crossmart itself', () => {
-    const agent = { type: ActivityActorType.AGENT, name: 'Dana', agentName: 'Claude' };
-    const key = { type: ActivityActorType.API_KEY, name: 'n8n', agentName: null };
+    const agent = {
+      type: ActivityActorType.AGENT,
+      name: 'Dana',
+      agentName: 'Claude',
+      approvedByName: null,
+    };
+    const approved = { ...agent, approvedByName: 'Lee' };
+    const key = {
+      type: ActivityActorType.API_KEY,
+      name: 'n8n',
+      agentName: null,
+      approvedByName: null,
+    };
     expect(actorLabel(workspaceEventFixture({ actor: agent }))).toBe('Claude for Dana');
+    expect(actorLabel(workspaceEventFixture({ actor: approved }))).toBe(
+      'Claude for Dana, approved by Lee',
+    );
     expect(actorLabel(workspaceEventFixture({ actor: key }))).toBe('n8n');
     expect(actorLabel(workspaceEventFixture())).toBe('Crossmart');
   });
@@ -78,5 +93,13 @@ describe('event presentation', () => {
       '/channels/c-1',
     );
     expect(eventRoute(NO_REFS)).toBeNull();
+  });
+
+  it('opens an outside agent’s proposal where it can be decided', () => {
+    const proposal = {
+      ...NO_REFS,
+      refs: { ...NO_REFS.refs, proposalId: 'pr-1', productId: 'p-1' },
+    };
+    expect(eventRoute(proposal)).toBe('/agent-proposals');
   });
 });

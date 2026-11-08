@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { WorkspacePermission, WorkspaceRole } from '@/api/schema';
+import { WorkspacePermission, WorkspaceRole, OutsideAgentChanges } from '@/api/schema';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { ROUTES } from '@/config/routes';
@@ -17,6 +17,7 @@ vi.mock('@/features/workspaces', async (importOriginal) => ({
 }));
 vi.mock('@/features/channels', () => ({ ChannelErrorsBadge: () => null }));
 vi.mock('@/features/suggestions', () => ({ PendingSuggestionsBadge: () => null }));
+vi.mock('@/features/agent-proposals', () => ({ PendingProposalsBadge: () => null }));
 
 function workspaceWith(permissions: WorkspacePermission[]): Workspace {
   return {
@@ -28,6 +29,7 @@ function workspaceWith(permissions: WorkspacePermission[]): Workspace {
     currency: 'USD',
     timeZone: null,
     sandbox: null,
+    outsideAgentChanges: OutsideAgentChanges.require_approval,
     role: WorkspaceRole.CUSTOM,
     customRole: null,
     permissions,

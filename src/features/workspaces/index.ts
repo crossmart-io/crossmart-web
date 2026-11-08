@@ -42,3 +42,4 @@ export { DeleteWorkspaceCard } from './components/DeleteWorkspaceCard';
 export { RenameWorkspaceCard } from './components/RenameWorkspaceCard';
 export { TimeZoneCard } from './components/TimeZoneCard';
 export { useDefaultTimeZone } from './hooks/useDefaultTimeZone';
+export { useUpdateWorkspace } from './hooks/useWorkspaceMutations';

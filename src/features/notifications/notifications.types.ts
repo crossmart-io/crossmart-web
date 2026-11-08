@@ -7,6 +7,8 @@ export enum NoticeKind {
   PlanRequired = 'plan-required',
   ReadOnly = 'read-only',
   VerifyEmail = 'verify-email',
+  /** Outside AI agents' changes wait for a decision (ADR 0028). */
+  AgentProposals = 'agent-proposals',
 }
 
 /** How much a notice needs attention, most urgent last. */

@@ -31,6 +31,8 @@ export const ROUTES = {
   channelConnectionTab: `/channels/:${ROUTE_PARAMS.connectionId}/:${ROUTE_PARAMS.tab}`,
   activity: '/activity',
   suggestions: '/suggestions',
+  /** Outside AI agents' changes waiting for approval (ADR 0028); the bell links here. */
+  agentProposals: '/agent-proposals',
   orders: '/orders',
   order: `/orders/:${ROUTE_PARAMS.orderId}`,
   imports: '/imports',

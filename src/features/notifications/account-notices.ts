@@ -1,10 +1,12 @@
 import { WorkspacePermission } from '@/api/schema';
 import type { SubscriptionAccess } from '@/features/billing';
 import { hasPermission, type Workspace } from '@/features/workspaces';
+import { ROUTES } from '@/config/routes';
 import { formatDate } from '@/lib/format';
 import { billingNotice } from './billing-notice';
 import { noticeRevision } from './notice-revision';
 import {
+  AGENT_PROPOSALS_NOTICE_COPY,
   SANDBOX_NOTICE_COPY,
   SEVERITY_RANK,
   VERIFY_EMAIL_NOTICE_COPY,
@@ -26,6 +28,8 @@ export interface AccountNoticeInput {
   user: NoticeUser | undefined;
   workspace: Workspace | undefined;
   access: SubscriptionAccess | undefined;
+  /** Outside agents' proposals waiting for a decision; 0 for people who cannot see them. */
+  pendingProposals: number;
   now: Date;
 }
 
@@ -65,6 +69,28 @@ function verifyEmailNotice(user: NoticeUser | undefined): AccountNotice | null {
   };
 }
 
+/** Outside agents' changes wait for someone here to approve or reject them (ADR 0028). */
+function agentProposalsNotice(
+  workspace: Workspace | undefined,
+  pendingProposals: number,
+): AccountNotice | null {
+  if (!workspace || pendingProposals === 0) return null;
+  return {
+    key: `${NoticeKind.AgentProposals}:${workspace.id}`,
+    kind: NoticeKind.AgentProposals,
+    severity: NoticeSeverity.Info,
+    banner: false,
+    title: AGENT_PROPOSALS_NOTICE_COPY.title,
+    body: AGENT_PROPOSALS_NOTICE_COPY.body(pendingProposals),
+    revision: noticeRevision(String(pendingProposals)),
+    action: {
+      kind: NoticeActionKind.Link,
+      label: AGENT_PROPOSALS_NOTICE_COPY.review,
+      to: ROUTES.agentProposals,
+    },
+  };
+}
+
 function bySeverity(first: AccountNotice, second: AccountNotice): number {
   return SEVERITY_RANK[first.severity] - SEVERITY_RANK[second.severity];
 }
@@ -75,6 +101,7 @@ export function accountNotices(input: AccountNoticeInput): AccountNotice[] {
     sandboxNotice(input.workspace),
     workspaceBillingNotice(input),
     verifyEmailNotice(input.user),
+    agentProposalsNotice(input.workspace, input.pendingProposals),
   ]
     .filter((notice): notice is AccountNotice => notice !== null)
     .sort(bySeverity);

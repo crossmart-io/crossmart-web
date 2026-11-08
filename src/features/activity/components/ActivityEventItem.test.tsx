@@ -23,6 +23,8 @@ const BASE_EVENT: ActivityEvent = {
     name: 'Catalog agent',
     email: null,
     agentName: null,
+    approvedByUserId: null,
+    approvedByName: null,
   },
   subject: { type: ActivitySubjectType.product, id: 'p-1', label: 'Mug' },
   itemCount: null,
@@ -51,6 +53,24 @@ describe('ActivityEventItem', () => {
     );
     expect(screen.getByText('Catalog agent')).toBeInTheDocument();
     expect(screen.queryByText('Failed')).not.toBeInTheDocument();
+  });
+
+  it('names an agent, the person it acted for, and who approved its proposal', () => {
+    renderItem({
+      ...BASE_EVENT,
+      actor: {
+        ...BASE_EVENT.actor,
+        type: ActivityActorType.AGENT,
+        apiKeyId: null,
+        name: 'Dana',
+        agentName: 'Claude',
+        approvedByName: 'Lee',
+      },
+    });
+
+    expect(screen.getByText('Claude')).toBeInTheDocument();
+    expect(screen.getByText('Lee')).toBeInTheDocument();
+    expect(screen.getByText(/approved by/)).toBeInTheDocument();
   });
 
   it('marks a failure, says why and links to the import', () => {

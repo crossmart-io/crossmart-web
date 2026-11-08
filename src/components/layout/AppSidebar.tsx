@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 import { NAV_GROUPS, NavBadge, type NavItem } from '@/config/navigation';
 import { ChannelErrorsBadge } from '@/features/channels';
+import { PendingProposalsBadge } from '@/features/agent-proposals';
 import { PendingSuggestionsBadge } from '@/features/suggestions';
 import type { ComponentType } from 'react';
 import { ROUTES } from '@/config/routes';
@@ -31,6 +32,7 @@ const MAIN_NAV_LABEL = 'Main';
 const NAV_BADGES: Record<NavBadge, ComponentType> = {
   [NavBadge.ChannelErrors]: ChannelErrorsBadge,
   [NavBadge.PendingSuggestions]: PendingSuggestionsBadge,
+  [NavBadge.PendingProposals]: PendingProposalsBadge,
 };
 
 function NavItemBadge({ badge }: { badge?: NavBadge }) {

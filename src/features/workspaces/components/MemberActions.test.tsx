@@ -1,6 +1,6 @@
 import { render, screen } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { WorkspaceRole } from '@/api/schema';
+import { WorkspaceRole, OutsideAgentChanges } from '@/api/schema';
 import type { Workspace } from '../hooks/useCurrentWorkspace';
 import type { WorkspaceMember } from '../hooks/useMembers';
 import { MemberActions } from './MemberActions';
@@ -20,6 +20,7 @@ function workspaceAs(role: WorkspaceRole): Workspace {
     currency: 'USD',
     timeZone: null,
     sandbox: null,
+    outsideAgentChanges: OutsideAgentChanges.require_approval,
     role,
     customRole: null,
     permissions: [],

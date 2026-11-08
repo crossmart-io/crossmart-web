@@ -1,5 +1,5 @@
 import { renderHook } from '@testing-library/react';
-import { WorkspacePermission, WorkspaceRole } from '@/api/schema';
+import { OutsideAgentChanges, WorkspacePermission, WorkspaceRole } from '@/api/schema';
 import type { Workspace } from './useCurrentWorkspace';
 import { useDefaultTimeZone } from './useDefaultTimeZone';
 import { useUpdateWorkspace } from './useWorkspaceMutations';
@@ -18,6 +18,7 @@ function workspace(fields: Partial<Workspace>): Workspace {
     currency: 'USD',
     timeZone: null,
     sandbox: null,
+    outsideAgentChanges: OutsideAgentChanges.require_approval,
     role: WorkspaceRole.OWNER,
     customRole: null,
     permissions: [WorkspacePermission.workspace_manage],

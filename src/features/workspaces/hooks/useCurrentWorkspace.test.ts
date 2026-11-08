@@ -1,5 +1,5 @@
 import { act, renderHook } from '@testing-library/react';
-import { WorkspaceRole } from '@/api/schema';
+import { WorkspaceRole, OutsideAgentChanges } from '@/api/schema';
 import { selectWorkspace } from '../selected-workspace';
 import { useCurrentWorkspace, type Workspace } from './useCurrentWorkspace';
 import { useMe } from './useMe';
@@ -16,6 +16,7 @@ function workspace(id: string): Workspace {
     currency: 'USD',
     timeZone: null,
     sandbox: null,
+    outsideAgentChanges: OutsideAgentChanges.require_approval,
     role: WorkspaceRole.OWNER,
     customRole: null,
     permissions: [],

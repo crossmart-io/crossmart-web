@@ -4,10 +4,16 @@ import type * as Auth from '@/features/auth';
 import { useSession } from '@/features/auth';
 import type * as Billing from '@/features/billing';
 import { type SubscriptionAccess, useBillingAccess } from '@/features/billing';
+import { usePendingProposalCount } from '@/features/agent-proposals';
+import { ROUTES } from '@/config/routes';
 import type * as Workspaces from '@/features/workspaces';
 import { useCurrentWorkspace, type Workspace } from '@/features/workspaces';
 import { NoticeActionKind, NoticeKind, NoticeSeverity } from '../notifications.types';
 import { useAccountNotices } from './useAccountNotices';
+
+vi.mock('@/features/agent-proposals', () => ({
+  usePendingProposalCount: vi.fn<() => number>(() => 0),
+}));
 
 vi.mock('@/features/auth', async (importOriginal) => ({
   ...(await importOriginal<typeof Auth>()),
@@ -37,9 +43,17 @@ interface Setup {
   sandbox?: { claimExpiresAt: string } | null;
   access?: Partial<SubscriptionAccess>;
   canManageBilling?: boolean;
+  pendingProposals?: number;
 }
 
-function notices({ emailVerified = true, sandbox = null, access, canManageBilling = true }: Setup) {
+function notices({
+  emailVerified = true,
+  sandbox = null,
+  access,
+  canManageBilling = true,
+  pendingProposals = 0,
+}: Setup) {
+  vi.mocked(usePendingProposalCount).mockReturnValue(pendingProposals);
   vi.mocked(useSession).mockReturnValue({
     data: { user: { ...USER, emailVerified } },
   } as unknown as ReturnType<typeof useSession>);
@@ -117,6 +131,17 @@ describe('useAccountNotices', () => {
     const access = { state: SubscriptionAccessState.subscription_required, writable: false };
     expect(notices({ access: { ...access, enforced: false } })).toEqual([
       expect.objectContaining({ kind: NoticeKind.PlanRequired, banner: false }),
+    ]);
+  });
+
+  it('says when agents’ proposals wait, linking to them, in the bell only', () => {
+    expect(notices({ pendingProposals: 2 })).toEqual([
+      expect.objectContaining({
+        kind: NoticeKind.AgentProposals,
+        banner: false,
+        body: expect.stringContaining('2 changes'),
+        action: expect.objectContaining({ kind: NoticeActionKind.Link, to: ROUTES.agentProposals }),
+      }),
     ]);
   });
 

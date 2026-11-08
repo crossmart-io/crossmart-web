@@ -1,7 +1,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import { createMemoryRouter, RouterProvider } from 'react-router';
-import { WorkspaceRole } from '@/api/schema';
+import { WorkspaceRole, OutsideAgentChanges } from '@/api/schema';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { useChannelConnections } from '@/features/channels/hooks/useChannelConnections';
 import type { Workspace } from '@/features/workspaces';
@@ -33,6 +33,7 @@ const WORKSPACE: Workspace = {
   currency: 'USD',
   timeZone: null,
   sandbox: null,
+  outsideAgentChanges: OutsideAgentChanges.require_approval,
   role: WorkspaceRole.VIEWER,
   customRole: null,
   permissions: [],
