@@ -4,7 +4,7 @@ export { RequireSession } from './components/RequireSession';
 export { ForgotPasswordForm } from './components/ForgotPasswordForm';
 export { ResetPasswordForm } from './components/ResetPasswordForm';
 export { SignInForm } from './components/SignInForm';
-export { VerifyEmailBanner } from './components/VerifyEmailBanner';
+export { ResendVerificationButton } from './components/ResendVerificationButton';
 export { AUTH_LINK_QUERY } from './auth.constants';
 export { AuthRequestError } from './auth-error';
 export { isAgentAuthorization } from './agent-sign-in';
