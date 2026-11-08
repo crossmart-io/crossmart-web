@@ -15,7 +15,8 @@ import { PRODUCT_STATUS_LABELS } from '../../product-status';
 import type { ProductFormValues } from '../product-form.schema';
 import { EditorCard } from './EditorCard';
 
-const STATUS_FIELD_ID = 'status';
+/** Distinct from the card's section anchor id (`PageSection.ProductStatus`), so the label finds the select. */
+const STATUS_FIELD_ID = 'status-select';
 
 const STATUS_HINTS: Record<ProductStatus, string> = {
   [ProductStatus.ACTIVE]: 'Ready to list in your stores.',
