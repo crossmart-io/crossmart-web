@@ -22,6 +22,8 @@ function productEvent(action: ActivityAction, id: string | null): ActivityEvent 
       name: null,
       email: null,
       agentName: null,
+      approvedByUserId: null,
+      approvedByName: null,
     },
     subject: { type: ActivitySubjectType.product, id, label: 'Mug' },
     itemCount: null,

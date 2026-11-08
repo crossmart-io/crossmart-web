@@ -1,4 +1,4 @@
-import { Bot, CreditCard, type LucideIcon, MailWarning } from 'lucide-react';
+import { Bot, BotMessageSquare, CreditCard, type LucideIcon, MailWarning } from 'lucide-react';
 import { NoticeKind, NoticeSeverity } from './notifications.types';
 
 /** A trial or free access ending within this many days is also shown as a banner. */
@@ -25,6 +25,7 @@ export const NOTICE_ICONS: Record<NoticeKind, LucideIcon> = {
   [NoticeKind.PlanRequired]: CreditCard,
   [NoticeKind.ReadOnly]: CreditCard,
   [NoticeKind.VerifyEmail]: MailWarning,
+  [NoticeKind.AgentProposals]: BotMessageSquare,
 };
 
 export const NOTICE_ICON_TONES: Record<NoticeSeverity, string> = {
@@ -76,4 +77,13 @@ export const VERIFY_EMAIL_NOTICE_COPY = {
   title: 'Confirm your email',
   body: (email: string) =>
     `We sent a link to ${email}. Confirming it lets you reset your password later.`,
+} as const;
+
+export const AGENT_PROPOSALS_NOTICE_COPY = {
+  title: 'Agent proposals are waiting',
+  body: (count: number) =>
+    count === 1
+      ? 'An AI agent proposed a change. Nothing changes until you approve it.'
+      : `AI agents proposed ${count} changes. Nothing changes until you approve them.`,
+  review: 'Review',
 } as const;

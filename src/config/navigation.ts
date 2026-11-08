@@ -1,5 +1,6 @@
 import {
   Bot,
+  BotMessageSquare,
   FileUp,
   CreditCard,
   History,
@@ -40,6 +41,7 @@ export interface NavItem {
 export enum NavBadge {
   ChannelErrors = 'channel_errors',
   PendingSuggestions = 'pending_suggestions',
+  PendingProposals = 'pending_proposals',
 }
 
 interface NavGroup {
@@ -58,6 +60,13 @@ export const NAV_GROUPS: readonly NavGroup[] = [
       { label: 'Imports', to: ROUTES.imports, icon: FileUp },
       { label: 'Channels', to: ROUTES.channels, icon: Share2, badge: NavBadge.ChannelErrors },
       { label: 'Crossmart Agent', to: ROUTES.agent, icon: Sparkles },
+      {
+        label: 'Agent proposals',
+        to: ROUTES.agentProposals,
+        icon: BotMessageSquare,
+        badge: NavBadge.PendingProposals,
+        permission: WorkspacePermission.suggestions_view,
+      },
       {
         label: 'Suggestions',
         to: ROUTES.suggestions,

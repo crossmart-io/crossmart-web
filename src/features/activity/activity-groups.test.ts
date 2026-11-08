@@ -18,6 +18,8 @@ function event(id: string, createdAt: Date): ActivityEvent {
       name: 'Dana',
       email: null,
       agentName: null,
+      approvedByUserId: null,
+      approvedByName: null,
     },
     subject: null,
     itemCount: null,

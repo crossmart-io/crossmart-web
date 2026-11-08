@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
-import { WorkspaceRole } from '@/api/schema';
+import { WorkspaceRole, OutsideAgentChanges } from '@/api/schema';
 import { SidebarProvider } from '@/components/ui/sidebar';
 import { useCurrentWorkspace, type Workspace } from '../hooks/useCurrentWorkspace';
 import { WorkspaceSwitcher } from './WorkspaceSwitcher';
@@ -21,6 +21,7 @@ function workspace(id: string, role: WorkspaceRole): Workspace {
     currency: 'USD',
     timeZone: null,
     sandbox: null,
+    outsideAgentChanges: OutsideAgentChanges.require_approval,
     role,
     customRole: null,
     permissions: [],

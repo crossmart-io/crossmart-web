@@ -33,6 +33,7 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.sandbox_claimed]: 'Sandbox account claimed',
   [ActivityAction.workspace_renamed]: 'Workspace renamed',
   [ActivityAction.workspace_time_zone_changed]: 'Time zone changed',
+  [ActivityAction.outside_agent_changes_changed]: 'Agent approvals changed',
   [ActivityAction.custom_role_created]: 'Role created',
   [ActivityAction.custom_role_updated]: 'Role changed',
   [ActivityAction.custom_role_deleted]: 'Role deleted',
@@ -63,5 +64,6 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.content_generated]: 'AI content suggested',
   [ActivityAction.suggestion_approved]: 'Suggestion approved',
   [ActivityAction.suggestion_rejected]: 'Suggestion rejected',
+  [ActivityAction.agent_proposal_rejected]: 'Agent proposal rejected',
   [ActivityAction.suggestions_bulk_approved]: 'Suggestions approved in bulk',
 };

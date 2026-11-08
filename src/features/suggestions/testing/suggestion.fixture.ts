@@ -6,6 +6,7 @@ import {
   SuggestionStatus,
   type WorkspacePermission,
   WorkspaceRole,
+  OutsideAgentChanges,
 } from '@/api/schema';
 import type { Workspace } from '@/features/workspaces';
 import type { Suggestion } from '../suggestions.types';
@@ -46,6 +47,7 @@ export function workspaceFixture(permissions: WorkspacePermission[]): Workspace 
     currency: 'USD',
     timeZone: null,
     sandbox: null,
+    outsideAgentChanges: OutsideAgentChanges.require_approval,
     role: WorkspaceRole.CUSTOM,
     customRole: null,
     permissions,

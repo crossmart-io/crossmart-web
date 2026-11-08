@@ -9,6 +9,7 @@ import {
   AgentWorkerTurnStatus,
   WorkspacePermission,
   WorkspaceRole,
+  OutsideAgentChanges,
 } from '@/api/schema';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { fetchClient } from '@/api/client';
@@ -45,6 +46,7 @@ function workspaceWith(permissions: WorkspacePermission[]): Workspace {
     currency: 'USD',
     timeZone: null,
     sandbox: null,
+    outsideAgentChanges: OutsideAgentChanges.require_approval,
     role: WorkspaceRole.CUSTOM,
     customRole: null,
     permissions,

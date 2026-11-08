@@ -2,7 +2,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
-import { ChannelType, WorkspacePermission, WorkspaceRole } from '@/api/schema';
+import { ChannelType, WorkspacePermission, WorkspaceRole, OutsideAgentChanges } from '@/api/schema';
 import { channelRequestMailto } from '@/config/links';
 import type * as Workspaces from '@/features/workspaces';
 import { useMe, type Workspace } from '@/features/workspaces';
@@ -37,6 +37,7 @@ const WORKSPACE: Workspace = {
   currency: 'USD',
   timeZone: null,
   sandbox: null,
+  outsideAgentChanges: OutsideAgentChanges.require_approval,
   role: WorkspaceRole.ADMIN,
   customRole: null,
   permissions: [WorkspacePermission.channels_manage],

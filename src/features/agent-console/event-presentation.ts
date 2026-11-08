@@ -1,6 +1,7 @@
 import { CircleAlert, CircleCheck, Info, type LucideIcon, TriangleAlert } from 'lucide-react';
 import { WorkspaceEventSeverity } from '@/api/schema';
 import {
+  ROUTES,
   toChannelConnectionRoute,
   toOrderRoute,
   toProductRoute,
@@ -22,11 +23,18 @@ export const SEVERITY_PRESENTATION: Record<
 };
 
 /** Who did it: "Claude for Dana", "Crossmart Agent", the API key's name, or Crossmart. */
-export function actorLabel({ actor }: WorkspaceEvent): string {
+function baseActorLabel({ actor }: WorkspaceEvent): string {
   if (actor.agentName && actor.name) {
     return AGENT_CONSOLE_COPY.onBehalfOf(actor.agentName, actor.name);
   }
   return actor.agentName ?? actor.name ?? AGENT_CONSOLE_COPY.system;
+}
+
+/** The actor, and who approved the change when an outside agent proposed it (ADR 0028). */
+export function actorLabel(event: WorkspaceEvent): string {
+  const label = baseActorLabel(event);
+  const approver = event.actor.approvedByName;
+  return approver ? AGENT_CONSOLE_COPY.approvedBy(label, approver) : label;
 }
 
 /** The map node an event is about: its store, else the catalog for a product; null for neither. */
@@ -37,6 +45,7 @@ export function eventNodeId({ refs }: WorkspaceEvent): string | null {
 
 /** The page that shows what an event is about, the most specific first; null when none does. */
 export function eventRoute({ refs }: WorkspaceEvent): string | null {
+  if (refs.proposalId) return ROUTES.agentProposals;
   if (refs.orderId) return toOrderRoute(refs.orderId);
   if (refs.productId) return toProductRoute(refs.productId);
   if (refs.webhookEndpointId) return toWebhookEndpointRoute(refs.webhookEndpointId);

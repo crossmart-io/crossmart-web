@@ -90,6 +90,13 @@ const appRoutes: RouteObject[] = [
       import('@/pages/ActivityPage').then(({ ActivityPage }) => ({ Component: ActivityPage })),
   },
   {
+    path: ROUTES.agentProposals,
+    lazy: () =>
+      import('@/pages/AgentProposalsPage').then(({ AgentProposalsPage }) => ({
+        Component: AgentProposalsPage,
+      })),
+  },
+  {
     path: ROUTES.suggestions,
     lazy: () =>
       import('@/pages/SuggestionsPage').then(({ SuggestionsPage }) => ({
