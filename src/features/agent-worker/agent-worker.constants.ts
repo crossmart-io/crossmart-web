@@ -34,7 +34,7 @@ export const AGENT_WORKER_EXAMPLE_PROMPTS = [
   'Fix my failed eBay listings',
   'Publish the Linen Shirt to my Outlet store',
   'Which products are low on stock?',
-  'Rewrite titles for Etsy',
+  'Shorten titles for eBay’s 80-character limit',
 ] as const;
 
 /** Hooks for end-to-end tests and screenshots. */
