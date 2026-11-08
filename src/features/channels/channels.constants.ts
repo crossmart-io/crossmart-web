@@ -119,6 +119,18 @@ export const MISSING_FEATURES_COPY = {
 /** The visible action that connects another store of a channel. */
 export const CONNECT_STORE_LABEL = 'Connect a store';
 
+/** The action that connects a channel's first store. */
+export const CONNECT_LABEL = 'Connect';
+
+/**
+ * A channel that is coming soon, opened as a preview to the people who run this instance
+ * (`me.platformAdmin`) so they can try its connector before merchants can.
+ */
+export const CHANNEL_PREVIEW_COPY = {
+  connect: 'Connect (preview)',
+  note: 'Preview: only platform admins see this.',
+} as const;
+
 /** The alert on a store that cannot sync until it is connected again. */
 export const RECONNECT_COPY = {
   action: 'Reconnect',

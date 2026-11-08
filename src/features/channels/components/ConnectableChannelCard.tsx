@@ -6,7 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { toChannelConnectionRoute } from '@/config/routes';
 import {
+  CHANNEL_PREVIEW_COPY,
   CHANNEL_STATUS_LABELS,
+  CONNECT_LABEL,
   type ChannelInfo,
   type ConnectableChannel,
 } from '../channels.constants';
@@ -14,6 +16,7 @@ import type { ChannelConnection } from '../channels.types';
 import { connectionsSummary, headlineStatus, needsReconnect } from '../connection-status';
 import { missingSetup, PUBLISH_READINESS_COPY } from '../publish-requirements';
 import { ChannelCardHeader } from './ChannelCardHeader';
+import { ChannelPreviewNote } from './ChannelPreviewNote';
 import { ConnectChannelDialog } from './ConnectChannelDialog';
 import { ConnectionStatusBadge } from './ConnectionStatusBadge';
 import { ConnectStoreButton } from './ConnectStoreButton';
@@ -25,6 +28,8 @@ interface ConnectableChannelCardProps {
   /** This channel's connections that are not disconnected. */
   connections: readonly ChannelConnection[];
   canManage: boolean;
+  /** A channel that is coming soon, opened to platform admins only to try its connector. */
+  preview?: boolean;
 }
 
 /** The store to open first: one that needs attention, else the first connected. */
@@ -71,6 +76,7 @@ function CardActions({
   connect,
   connections,
   canManage,
+  preview = false,
 }: ConnectableChannelCardProps) {
   const store = storeToManage(connections);
   if (store) {
@@ -104,7 +110,7 @@ function CardActions({
       trigger={
         <Button size="sm">
           <Plus data-icon="inline-start" />
-          Connect
+          {preview ? CHANNEL_PREVIEW_COPY.connect : CONNECT_LABEL}
         </Button>
       }
     />
@@ -116,7 +122,7 @@ function CardActions({
  * need attention. Stores are listed, managed and added on a store's own page.
  */
 export function ConnectableChannelCard(props: ConnectableChannelCardProps) {
-  const { channel, connections } = props;
+  const { channel, connections, preview } = props;
   const status = headlineStatus(connections);
 
   return (
@@ -136,6 +142,7 @@ export function ConnectableChannelCard(props: ConnectableChannelCardProps) {
           <p className="text-sm text-muted-foreground">{connectionsSummary(connections)}</p>
         )}
         <SetupNeededNote connections={connections} />
+        {preview && <ChannelPreviewNote />}
       </CardContent>
       <CardFooter className="mt-auto">
         <CardActions {...props} />
