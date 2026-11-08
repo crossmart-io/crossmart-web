@@ -9,6 +9,8 @@ export interface StoresStatus {
   healthy: number;
   liveListings: number;
   failedListings: number;
+  /** Listings waiting for the seller to add what the marketplace requires. */
+  needsDetailsListings: number;
   /** The latest sync of any store; null when none synced yet. */
   lastSyncedAt: string | null;
 }
@@ -30,10 +32,18 @@ export function storesStatus(stores: readonly StoreListingHealth[]): StoresStatu
         healthy: status.healthy + (isHealthy ? 1 : 0),
         liveListings: status.liveListings + counts[MapStatus.Published],
         failedListings: status.failedListings + counts[MapStatus.Failed],
+        needsDetailsListings: status.needsDetailsListings + counts[MapStatus.NeedsDetails],
         lastSyncedAt: latest(status.lastSyncedAt, store.lastSyncedAt),
       };
     },
-    { total: 0, healthy: 0, liveListings: 0, failedListings: 0, lastSyncedAt: null },
+    {
+      total: 0,
+      healthy: 0,
+      liveListings: 0,
+      failedListings: 0,
+      needsDetailsListings: 0,
+      lastSyncedAt: null,
+    },
   );
 }
 

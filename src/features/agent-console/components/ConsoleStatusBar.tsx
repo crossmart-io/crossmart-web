@@ -17,7 +17,10 @@ function StatusItem({ label, children }: { label: string; children: ReactNode })
   return (
     <div className="flex min-w-0 flex-col">
       <dt className="text-[11px] tracking-wide text-muted-foreground uppercase">{label}</dt>
-      <dd className="flex items-center gap-1.5 truncate text-sm font-medium">{children}</dd>
+      {/* Figures wrap whole rather than being cut, so each count stays readable. */}
+      <dd className="flex flex-wrap items-center gap-x-1.5 text-sm font-medium [&>span]:whitespace-nowrap">
+        {children}
+      </dd>
     </div>
   );
 }
@@ -40,6 +43,9 @@ export function ConsoleStatusBar({ stores, agent }: ConsoleStatusBarProps) {
         {COPY.listingsValue(stores.liveListings)}
         {stores.failedListings > 0 && (
           <span className="text-destructive">· {COPY.failed(stores.failedListings)}</span>
+        )}
+        {stores.needsDetailsListings > 0 && (
+          <span className="text-warning">· {COPY.needDetails(stores.needsDetailsListings)}</span>
         )}
       </StatusItem>
       <StatusItem label={COPY.agent}>

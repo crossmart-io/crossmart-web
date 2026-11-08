@@ -89,7 +89,7 @@ export function StoreCard({ store, counts, overlay }: StoreNodeData) {
 
 function StoreCardBody({ store, counts }: StoreNodeData) {
   return (
-    <div className="flex flex-col gap-2.5 rounded-xl border bg-card p-3 text-card-foreground shadow-sm">
+    <div className="@container flex flex-col gap-2.5 rounded-xl border bg-card p-3 text-card-foreground shadow-sm">
       <div className="flex items-center justify-between gap-2 text-sm">
         <Link
           to={storeListingsRoute(store.connectionId)}
@@ -102,12 +102,13 @@ function StoreCardBody({ store, counts }: StoreNodeData) {
           <ConnectionStatusBadge status={store.status} />
         )}
       </div>
-      <ul className="grid grid-cols-4 gap-1">
+      {/* Five counts in a row on a wide card; on a narrow one two rows, so each label fits whole. */}
+      <ul className="grid grid-cols-3 gap-1 @md:grid-cols-5">
         {MAP_STATUS_ORDER.map((status) => (
           <StatusCountLink key={status} store={store} status={status} count={counts[status]} />
         ))}
       </ul>
-      <div className="flex min-h-6 items-center justify-between gap-2">
+      <div className="flex min-h-6 flex-wrap items-center justify-between gap-x-2 gap-y-1">
         <LastSynced value={store.lastSyncedAt} />
         {counts[MapStatus.Failed] > 0 && <FixWithAgentWorker store={store} />}
       </div>

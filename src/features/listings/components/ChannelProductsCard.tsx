@@ -8,7 +8,7 @@ import { useChannelProductFilters } from '../hooks/useChannelProductFilters';
 import { useChannelProducts } from '../hooks/useChannelProducts';
 import { useEditorSearchParam } from '../hooks/useEditorSearchParam';
 import { useAddStoreProducts, useRemoveStoreProducts } from '../hooks/useStoreProducts';
-import { ALL_CHANNEL_PRODUCTS } from '../listings.constants';
+import { channelProductFilterQuery } from '../channel-product-filter';
 import type { ListingStore } from '../listings.types';
 import type { ChannelConnection } from '@/features/channels/channels.types';
 import { needsReconnect } from '@/features/channels/connection-status';
@@ -69,7 +69,7 @@ export function ChannelProductsCard({
   const products = useChannelProducts(
     ref,
     {
-      state: filters.filter === ALL_CHANNEL_PRODUCTS ? undefined : filters.filter,
+      ...channelProductFilterQuery(filters.filter),
       search: filters.search.debouncedValue || undefined,
       sort: filters.sort.sort,
       direction: filters.sort.direction,

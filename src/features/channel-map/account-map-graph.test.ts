@@ -36,9 +36,22 @@ describe('buildAccountMap', () => {
     expect(graph.edges[1]?.style?.stroke).toBe(MAP_STATUS_PRESENTATION[MapStatus.NotListed].stroke);
   });
 
-  it('stacks the column without overlaps', () => {
+  it('stacks the column without overlaps, with room for the fix under a store with failures', () => {
     const leaves = graph.nodes.slice(1).map((node) => node.position.y);
-    expect((leaves[1] ?? 0) - (leaves[0] ?? 0)).toBeGreaterThanOrEqual(MAP_LAYOUT.storeLeafHeight);
+    expect((leaves[1] ?? 0) - (leaves[0] ?? 0)).toBeGreaterThanOrEqual(
+      MAP_LAYOUT.storeLeafHeight + MAP_LAYOUT.storeFixRowHeight,
+    );
+    expect((leaves[2] ?? 0) - (leaves[1] ?? 0)).toBeGreaterThanOrEqual(MAP_LAYOUT.storeLeafHeight);
+  });
+
+  it('draws a store whose products wait for details in the needs-details colour', () => {
+    const waiting = storeHealthFixture({
+      [ListingDisplayState.published]: 5,
+      [ListingDisplayState.publishing]: 1,
+      [ListingDisplayState.needs_details]: 2,
+    });
+    const { edges } = buildAccountMap({ stores: [waiting], productCount: 8, channels: [] });
+    expect(edges[0]?.style?.stroke).toBe(MAP_STATUS_PRESENTATION[MapStatus.NeedsDetails].stroke);
   });
 
   it('lays a live overlay over its nodes and pulses the edges of stores a change syncs to', () => {

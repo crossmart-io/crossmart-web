@@ -132,6 +132,8 @@ export const AGENT_CONSOLE_COPY = {
     listings: 'Listings',
     listingsValue: (live: number) => `${live.toLocaleString()} live`,
     failed: (count: number) => `${count.toLocaleString()} failed`,
+    needDetails: (count: number) =>
+      `${count.toLocaleString()} ${count === 1 ? 'needs' : 'need'} details`,
     agent: 'Agent',
     lastSync: 'Last sync',
     never: 'Never',
