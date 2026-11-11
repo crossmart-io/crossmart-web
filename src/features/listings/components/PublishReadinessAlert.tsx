@@ -65,7 +65,6 @@ export function PublishReadinessAlert(props: PublishReadinessAlertProps) {
       <CircleDashed />
       <AlertTitle>{PUBLISH_READINESS_COPY.title}</AlertTitle>
       <AlertDescription className="flex flex-col items-start gap-2">
-        <p>{PUBLISH_READINESS_COPY.description}</p>
         <ul className="flex list-disc flex-col gap-1 pl-4">
           {missing.map((requirement) => (
             <MissingItem key={requirement} {...props} requirement={requirement} />

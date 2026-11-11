@@ -28,7 +28,7 @@ describe('useSaveableForm', () => {
     const { result } = renderSaveableForm(save);
 
     act(() => result.current.form.setValue('name', '  New  ', { shouldDirty: true }));
-    act(() => result.current.submit());
+    act(() => void result.current.submit());
 
     await waitFor(() => expect(result.current.form.getValues('name')).toBe('SAVED'));
     expect(save).toHaveBeenCalledWith({ name: 'New' });
@@ -42,7 +42,7 @@ describe('useSaveableForm', () => {
     const { result } = renderSaveableForm(save);
 
     act(() => result.current.form.setValue('name', 'New', { shouldDirty: true }));
-    act(() => result.current.submit());
+    act(() => void result.current.submit());
 
     await waitFor(() => expect(save).toHaveBeenCalledOnce());
     await act(() => Promise.resolve());
@@ -55,9 +55,23 @@ describe('useSaveableForm', () => {
     const { result } = renderSaveableForm(save);
 
     act(() => result.current.form.setValue('name', ' '));
-    act(() => result.current.submit());
+    act(() => void result.current.submit());
 
     await waitFor(() => expect(result.current.form.formState.errors.name?.message).toBe('Name it'));
     expect(save).not.toHaveBeenCalled();
+  });
+
+  it('says whether saving outside a submit worked', async () => {
+    const save = vi
+      .fn<(values: NameForm) => Promise<SavedRecord>>()
+      .mockResolvedValueOnce({ name: 'saved' })
+      .mockRejectedValueOnce(new Error('The API is down'));
+    const { result } = renderSaveableForm(save);
+
+    await act(async () => expect(await result.current.saveNow()).toBe(true));
+    await act(async () => expect(await result.current.saveNow()).toBe(false));
+    act(() => result.current.form.setValue('name', ' '));
+    await act(async () => expect(await result.current.saveNow()).toBe(false));
+    expect(save).toHaveBeenCalledTimes(2);
   });
 });

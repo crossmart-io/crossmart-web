@@ -30,9 +30,7 @@ export function EbayListingDefaultsCard({
     <SettingsFormCard
       title={EBAY_DEFAULTS_COPY.title}
       id={PageSection.StoreListingDefaults}
-      description={`${EBAY_DEFAULTS_COPY.description} ${
-        ebay.readyToList ? EBAY_DEFAULTS_COPY.ready : EBAY_DEFAULTS_COPY.notReady
-      }`}
+      description={ebay.readyToList ? undefined : EBAY_DEFAULTS_COPY.notReady}
       form={form}
       onSubmit={submit}
       canManage={canManage}

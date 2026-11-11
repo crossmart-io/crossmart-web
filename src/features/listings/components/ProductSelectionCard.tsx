@@ -1,13 +1,15 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { parseEnum } from '@/lib/enum';
 import { pluralize } from '@/lib/format';
 import { useSelectionEditor } from '../hooks/useSelectionEditor';
-import { SELECTION_MODE_LABELS, SelectionMode } from '../listings.constants';
+import { SELECTION_COPY, SELECTION_MODE_LABELS, SelectionMode } from '../listings.constants';
 import type { ProductSelectionRule, SelectionPreview } from '../listings.types';
 import type { SelectionDraft } from '../selection-draft';
 import { CardSaveFooter } from '@/components/forms/CardSaveFooter';
+import { useSaveGroupMember } from '@/components/forms/save-group';
+import { FormError } from '@/components/feedback/FormError';
 import { SelectionFilters } from './SelectionFilters';
 import { SelectionPreviewList } from './SelectionPreviewList';
 
@@ -70,6 +72,12 @@ function describeImpact(preview: SelectionPreview | undefined): string | undefin
   return `Saving ${parts.join(' and ')} now.`;
 }
 
+/** In a save group, what saving will do and why the last save failed, in place of a footer. */
+function GroupSaveNote({ impact, error }: { impact?: string; error: Error | null }) {
+  if (error) return <FormError error={error} />;
+  return impact ? <p className="text-sm text-muted-foreground">{impact}</p> : null;
+}
+
 /** The store's automatic rule: off, all products or filters, with a live preview of the store. */
 export function ProductSelectionCard({
   workspaceId,
@@ -79,17 +87,20 @@ export function ProductSelectionCard({
 }: ProductSelectionCardProps) {
   const editor = useSelectionEditor({ workspaceId, connectionId }, rule);
   const { draft, setDraft } = editor;
+  const inGroup = useSaveGroupMember({
+    dirty: canManage && editor.isDirty,
+    pending: false,
+    save: editor.submit,
+    discard: editor.discard,
+  });
+  const impact = editor.isDirty ? describeImpact(editor.preview) : undefined;
 
   return (
     <Card>
       <CardHeader>
         <CardTitle>
-          <h2>Add products automatically</h2>
+          <h2>{SELECTION_COPY.title}</h2>
         </CardTitle>
-        <CardDescription>
-          Besides the products you add by hand, the store can get all products or those matching
-          filters. Products you remove by hand stay out. Saving applies the rule at once.
-        </CardDescription>
       </CardHeader>
       <CardContent className="flex flex-col gap-5">
         <ModePicker draft={draft} onChange={setDraft} disabled={!canManage} />
@@ -104,15 +115,16 @@ export function ProductSelectionCard({
         {canManage && draft.excludeProductIds.length > 0 && (
           <RemovedNote count={draft.excludeProductIds.length} onRestore={editor.restoreExcluded} />
         )}
+        {inGroup && <GroupSaveNote impact={impact} error={editor.save.error} />}
       </CardContent>
-      {canManage && (
+      {canManage && !inGroup && (
         <CardSaveFooter
-          label="Save and apply"
-          note={editor.isDirty ? describeImpact(editor.preview) : undefined}
+          label={SELECTION_COPY.save}
+          note={impact}
           error={editor.save.error}
           isSaving={editor.save.isPending}
           disabled={!editor.isDirty}
-          onSave={editor.submit}
+          onSave={() => void editor.submit()}
         />
       )}
     </Card>

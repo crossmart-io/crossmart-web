@@ -45,11 +45,11 @@ function useSaveGoogleSetup(ref: ConnectionRef) {
 /** The listing setup form, starting from the saved setup or the account's country and website. */
 export function useGoogleSetupForm(ref: ConnectionRef, settings: GoogleMerchantSettings) {
   const save = useSaveGoogleSetup(ref);
-  const { form, submit } = useSaveableForm({
+  const { form, submit, saveNow } = useSaveableForm({
     schema: googleSetupFormSchema,
     defaults: toGoogleSetupForm(settings),
     save: (values) => save.mutateAsync(toGoogleSetupBody(values)),
     toForm: (saved) => (saved.googleMerchant ? toGoogleSetupForm(saved.googleMerchant) : null),
   });
-  return { form, saveError: save.error, submit };
+  return { form, saveError: save.error, submit, saveNow };
 }

@@ -51,7 +51,9 @@ const ROW: ChannelProduct = {
 };
 
 function renderCard(initialEntry = '/stores/c-1') {
+  vi.mocked(useChannelProducts).mockClear();
   vi.mocked(useChannelProducts).mockReturnValue({
+    isSuccess: true,
     items: [ROW],
     total: 1,
     pageCount: 1,
@@ -92,5 +94,32 @@ describe('ChannelProductsCard', () => {
     renderCard('/stores/c-1?listing=p-1');
 
     expect(screen.getByRole('dialog', { name: 'Editor p-1 in c-1' })).toBeInTheDocument();
+  });
+
+  it('lists Needs attention as one section per state, and hides the empty ones', () => {
+    renderCard('/stores/c-1?state=attention');
+    const queried = vi.mocked(useChannelProducts).mock.calls.map(([, query]) => query);
+
+    expect(queried).toContainEqual(expect.objectContaining({ state: ChannelProductState.failed }));
+    expect(queried).toContainEqual(
+      expect.objectContaining({ displayState: ListingDisplayState.needs_details }),
+    );
+    expect(screen.getByRole('heading', { name: /Failed/ })).toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /Needs attention/ })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
+  });
+
+  it('keeps an older link to one state precise, under its tab', () => {
+    renderCard('/stores/c-1?state=failed');
+    const queried = vi.mocked(useChannelProducts).mock.calls.map(([, query]) => query);
+
+    expect(queried.every((query) => query.state === ChannelProductState.failed)).toBe(true);
+    expect(screen.queryByRole('heading', { name: /Failed/ })).not.toBeInTheDocument();
+    expect(screen.getByRole('radio', { name: /Needs attention/ })).toHaveAttribute(
+      'aria-checked',
+      'true',
+    );
   });
 });

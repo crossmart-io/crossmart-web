@@ -1,6 +1,7 @@
 import { Navigate, useNavigate, useParams } from 'react-router';
 import { ChannelConnectionStatus, WorkspacePermission } from '@/api/schema';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
+import { SaveGroupProvider } from '@/components/forms/save-group';
 import { Page } from '@/components/layout/Page';
 import { type ResourcePageCopy, ResourcePage } from '@/components/layout/ResourcePage';
 import { ReturnToProvider } from '@/components/navigation/ReturnToProvider';
@@ -115,7 +116,10 @@ function ChannelConnectionTabs({ workspace, connection, tab }: ChannelConnection
         />
       </TabsContent>
       <TabsContent value={ChannelTab.Settings}>
-        <SettingsTab workspace={workspace} connection={connection} />
+        {/* One bar saves the tab's setup, pricing and automatic rule together. */}
+        <SaveGroupProvider>
+          <SettingsTab workspace={workspace} connection={connection} />
+        </SaveGroupProvider>
       </TabsContent>
     </Tabs>
   );

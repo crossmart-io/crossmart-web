@@ -1,21 +1,21 @@
 import { Plus } from 'lucide-react';
+import { useState } from 'react';
 import { Link } from 'react-router';
 import { ProductStoreFilter } from '@/api/schema';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { ROUTE_QUERY, toProductsRoute } from '@/config/routes';
-import { useChannelProductFilters } from '../hooks/useChannelProductFilters';
-import { useChannelProducts } from '../hooks/useChannelProducts';
-import { useEditorSearchParam } from '../hooks/useEditorSearchParam';
-import { useAddStoreProducts, useRemoveStoreProducts } from '../hooks/useStoreProducts';
-import { channelProductFilterQuery } from '../channel-product-filter';
-import type { ListingStore } from '../listings.types';
 import type { ChannelConnection } from '@/features/channels/channels.types';
 import { needsReconnect } from '@/features/channels/connection-status';
+import { useChannelProductFilters } from '../hooks/useChannelProductFilters';
+import { useEditorSearchParam } from '../hooks/useEditorSearchParam';
+import { useAddStoreProducts, useRemoveStoreProducts } from '../hooks/useStoreProducts';
+import type { ChannelProductCounts, ListingStore } from '../listings.types';
+import type { ChannelProductRowActions } from './channel-product-list.types';
 import { ChannelProductFilters } from './ChannelProductFilters';
-import { ChannelProductsTable } from './ChannelProductsTable';
+import { ChannelProductList } from './ChannelProductList';
+import { ChannelProductSections } from './ChannelProductSections';
 import { ListingEditorSheet } from './ListingEditorSheet';
-import { useUrlPagination } from '@/hooks/usePagination';
 
 interface ChannelProductsCardProps {
   workspaceId: string;
@@ -51,10 +51,30 @@ function AddProductsButton({ connectionId }: { connectionId: string }) {
   );
 }
 
+/** What every row can do: open its listing, and for editors remove it or add it. */
+function useRowActions(
+  store: ListingStore,
+  canEdit: boolean,
+  onOpenListing: (productId: string) => void,
+): ChannelProductRowActions {
+  const add = useAddStoreProducts();
+  const remove = useRemoveStoreProducts();
+  const ref = { workspaceId: store.workspaceId, connectionId: store.connectionId };
+  return {
+    store,
+    canEdit,
+    onOpenListing,
+    onRemove: canEdit
+      ? (productId) => remove.mutateAsync({ ref, productIds: [productId] })
+      : undefined,
+    onAddBack: canEdit ? (productId) => add.mutate({ ref, productIds: [productId] }) : undefined,
+  };
+}
+
 /**
- * The store's listings: every product it has or is getting, where each stands on the channel and
- * why it is there, filtered by state, searched and sorted. Products are added from the catalog.
- * A product opens in the listing editor over the list, named in the URL so it can be shared.
+ * The store's listings in four views (all, live, needing attention, not listed), searched and
+ * sorted. A view of several states lists one section per state. A product opens in the listing
+ * editor over the list, named in the URL so it can be shared.
  */
 export function ChannelProductsCard({
   workspaceId,
@@ -62,49 +82,37 @@ export function ChannelProductsCard({
   connection,
   canEdit,
 }: ChannelProductsCardProps) {
-  const connectionId = connection.id;
-  const ref = { workspaceId, connectionId };
   const filters = useChannelProductFilters();
-  const pagination = useUrlPagination();
-  const products = useChannelProducts(
-    ref,
-    {
-      ...channelProductFilterQuery(filters.filter),
-      search: filters.search.debouncedValue || undefined,
-      sort: filters.sort.sort,
-      direction: filters.sort.direction,
-    },
-    pagination,
-  );
-  const add = useAddStoreProducts();
-  const remove = useRemoveStoreProducts();
   const editor = useEditorSearchParam(ROUTE_QUERY.listingProduct);
-
+  const rows = useRowActions(listingStoreOf(workspaceId, connection), canEdit, editor.open);
+  const [counts, setCounts] = useState<ChannelProductCounts>();
+  const query = {
+    search: filters.search.debouncedValue || undefined,
+    sort: filters.sort.sort,
+    direction: filters.sort.direction,
+  };
+  const [onlyFilter] = filters.filters;
   return (
     <Card>
       <CardContent className="flex flex-col gap-4">
         <div className="flex flex-wrap items-start justify-between gap-3">
-          <ChannelProductFilters filters={filters} counts={products.counts} />
-          {canEdit && <AddProductsButton connectionId={connectionId} />}
+          <ChannelProductFilters filters={filters} counts={counts} />
+          {canEdit && <AddProductsButton connectionId={connection.id} />}
         </div>
-        <ChannelProductsTable
-          products={products}
-          pagination={pagination}
-          store={listingStoreOf(workspaceId, connection)}
-          canEdit={canEdit}
-          onOpenListing={editor.open}
-          onRemove={
-            canEdit
-              ? (productId) => remove.mutateAsync({ ref, productIds: [productId] })
-              : undefined
-          }
-          onAddBack={
-            canEdit ? (productId) => add.mutate({ ref, productIds: [productId] }) : undefined
-          }
-        />
+        {filters.filters.length === 1 && onlyFilter ? (
+          <ChannelProductList filter={onlyFilter} query={query} rows={rows} onCounts={setCounts} />
+        ) : (
+          <ChannelProductSections
+            key={filters.view}
+            filters={filters.filters}
+            query={query}
+            rows={rows}
+            onCounts={setCounts}
+          />
+        )}
         {editor.openId && (
           <ListingEditorSheet
-            listingRef={{ ...ref, productId: editor.openId }}
+            listingRef={{ workspaceId, connectionId: connection.id, productId: editor.openId }}
             catalogCurrency={catalogCurrency}
             canEdit={canEdit}
             showProductLink

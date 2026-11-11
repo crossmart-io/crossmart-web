@@ -20,7 +20,7 @@ interface ConnectionRef {
  */
 export function useEbayDefaultsForm(ref: ConnectionRef, defaults: EbayListingDefaults) {
   const save = useSaveEbayDefaults(ref);
-  const { form, submit } = useSaveableForm({
+  const { form, submit, saveNow } = useSaveableForm({
     schema: ebayDefaultsFormSchema,
     defaults: toEbayDefaultsForm(defaults),
     save: (values) => save.mutateAsync(toEbayDefaultsBody(values)),
@@ -33,5 +33,5 @@ export function useEbayDefaultsForm(ref: ConnectionRef, defaults: EbayListingDef
       form.resetField(field, { defaultValue: chosen[field] });
     }
   };
-  return { form, saveError: save.error, submit, choosePolicies };
+  return { form, saveError: save.error, submit, saveNow, choosePolicies };
 }

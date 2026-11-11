@@ -1,6 +1,5 @@
 import type { ReactNode } from 'react';
 import { ChannelConnectionStatus } from '@/api/schema';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { formatDate } from '@/lib/format';
 import { channelInfoFor } from '../channels.constants';
@@ -69,7 +68,7 @@ function ChannelSetupCard({
   return null;
 }
 
-/** What Crossmart knows about the connected store, and the permissions it was granted. */
+/** What Crossmart knows about the connected store. */
 function StoreDetailsCard({ connection }: { connection: ChannelConnection }) {
   return (
     <Card>
@@ -77,22 +76,12 @@ function StoreDetailsCard({ connection }: { connection: ChannelConnection }) {
         <CardTitle>
           <h2>Store</h2>
         </CardTitle>
-        <CardDescription>Read from the store when it was connected.</CardDescription>
       </CardHeader>
       <CardContent>
         <dl className="grid gap-4 sm:grid-cols-2">
           <AccountDetail label="Name">{connectionName(connection)}</AccountDetail>
           <ChannelAccountDetails connection={connection} />
           <AccountDetail label="Connected">{formatDate(connection.connectedAt)}</AccountDetail>
-          <AccountDetail label="Permissions">
-            <span className="flex flex-wrap gap-1">
-              {connection.grantedScopes.map((scope) => (
-                <Badge key={scope} variant="secondary">
-                  {scope}
-                </Badge>
-              ))}
-            </span>
-          </AccountDetail>
         </dl>
       </CardContent>
     </Card>
@@ -113,9 +102,6 @@ function ImportCard({
         <CardTitle>
           <h2>Import</h2>
         </CardTitle>
-        <CardDescription>
-          Brings the store’s products into your catalog and links the ones you already have.
-        </CardDescription>
       </CardHeader>
       <CardContent>
         <ChannelImportSection
@@ -142,10 +128,7 @@ function ConnectionCard({
         <CardTitle>
           <h2>Connection</h2>
         </CardTitle>
-        <CardDescription>
-          {connection.statusReason ??
-            'Changes reach the store at once. Disconnecting keeps your products in both places.'}
-        </CardDescription>
+        {connection.statusReason && <CardDescription>{connection.statusReason}</CardDescription>}
       </CardHeader>
       <CardContent className="flex flex-col gap-4">
         {resyncAction}

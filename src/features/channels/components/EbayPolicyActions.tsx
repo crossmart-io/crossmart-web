@@ -23,7 +23,7 @@ interface EbayPolicyActionsProps extends ConnectionRef {
 }
 
 /** Creates the default policies; the main action while the account cannot list. */
-function CreateDefaultsButton({
+export function CreateDefaultsButton({
   connection,
   prominent,
   onCreated,
@@ -104,7 +104,6 @@ export function EbayPolicyActions({
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">{EBAY_DEFAULTS_COPY.createDefaultsNote}</p>
-      <p className="text-xs text-muted-foreground">{EBAY_DEFAULTS_COPY.manageNote}</p>
     </div>
   );
 }

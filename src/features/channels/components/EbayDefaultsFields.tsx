@@ -96,7 +96,7 @@ export function EbayConditionField() {
         options={CONDITION_OPTIONS}
         className="sm:w-72"
       />
-      <FieldDescription>Some eBay categories accept only some conditions.</FieldDescription>
+      <FieldDescription>{EBAY_DEFAULTS_COPY.conditionNote}</FieldDescription>
     </Field>
   );
 }

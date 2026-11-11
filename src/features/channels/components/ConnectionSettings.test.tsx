@@ -69,7 +69,8 @@ describe('ConnectionSettings', () => {
       'href',
       'https://demo.example.com',
     );
-    expect(screen.getByText('write_products')).toBeInTheDocument();
+    // Raw OAuth scopes mean nothing to a seller; missing permissions show as an alert instead.
+    expect(screen.queryByText('write_products')).not.toBeInTheDocument();
   });
 
   it('offers the import and the connection actions to those allowed to use them', () => {

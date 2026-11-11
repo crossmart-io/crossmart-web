@@ -180,7 +180,7 @@ describe('EbayListingDefaultsCard', () => {
     mockMutations();
     renderCard({ ...SETTINGS, readyToList: true }, false);
 
-    expect(screen.getByText(/Ready to list/)).toBeInTheDocument();
+    expect(screen.queryByText(/Choose a policy of each type/)).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Save defaults' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Refresh policies' })).not.toBeInTheDocument();
     expect(

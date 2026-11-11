@@ -1,19 +1,12 @@
-import { Package } from 'lucide-react';
 import { ErrorState } from '@/components/feedback/ErrorState';
 import { ListSkeleton } from '@/components/lists/ListSkeleton';
 import { TablePagination } from '@/components/lists/TablePagination';
-import {
-  Empty,
-  EmptyDescription,
-  EmptyHeader,
-  EmptyMedia,
-  EmptyTitle,
-} from '@/components/ui/empty';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import type { Pagination } from '@/hooks/usePagination';
 import type { useChannelProducts } from '../hooks/useChannelProducts';
 import type { ListingStore } from '../listings.types';
 import { ChannelProductRow } from './ChannelProductRow';
+import { ChannelProductsEmpty } from './ChannelProductsEmpty';
 
 const SKELETON_ROWS = 5;
 
@@ -26,22 +19,6 @@ interface ChannelProductsTableProps {
   onOpenListing: (productId: string) => void;
   onRemove?: (productId: string) => Promise<unknown>;
   onAddBack?: (productId: string) => void;
-}
-
-function NoProducts() {
-  return (
-    <Empty className="border">
-      <EmptyHeader>
-        <EmptyMedia variant="icon">
-          <Package />
-        </EmptyMedia>
-        <EmptyTitle>No products here</EmptyTitle>
-        <EmptyDescription>
-          Add products from their page or from the products table, or try another filter.
-        </EmptyDescription>
-      </EmptyHeader>
-    </Empty>
-  );
 }
 
 /** The store's products with their state there, a page at a time. */
@@ -64,7 +41,7 @@ export function ChannelProductsTable({
     );
   }
   if (products.isPending) return <ListSkeleton label="Loading products" rows={SKELETON_ROWS} />;
-  if (products.items.length === 0) return <NoProducts />;
+  if (products.items.length === 0) return <ChannelProductsEmpty />;
   return (
     <div className="flex flex-col gap-3">
       <div className="rounded-lg border">

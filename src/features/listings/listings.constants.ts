@@ -1,5 +1,4 @@
 import type { SortOption } from '@/components/lists/sort-options';
-import { LISTING_STATE_PRESENTATION } from './listing-states';
 import {
   ChannelProductSort,
   ChannelProductState,
@@ -97,9 +96,7 @@ export const PRICE_EXPLANATION_COPY = {
 /** The store-wide pricing rule, a section of the store's settings. */
 export const PRICING_RULE_COPY = {
   title: 'Pricing',
-  description:
-    'Every product in this store is priced by this rule. To set one product’s price here, open it ' +
-    'from the Listings tab. Saving sends the new prices to the store at once.',
+  description: 'For every product in this store. Set one product’s price from its listing.',
   save: 'Save and apply',
   exampleLabel: 'Example:',
   noExample: 'Add products to this store to see the rule applied to one.',
@@ -207,8 +204,7 @@ export const RETRY_COPY = {
 export const SYNC_COPY = {
   resend: (channel: string) => `Send all products to ${channel} again`,
   firstPublish: (channel: string) => `Publish all products to ${channel}`,
-  description: (channel: string) =>
-    `Sends every product in this store again and takes off the ones it no longer has. Use it after an outage or a change made on ${channel}.`,
+  description: (channel: string) => `After an outage or a change made on ${channel}.`,
   inProgress: 'Sending…',
   waiting: (count: number) => `${count} still to send`,
   failed: (count: number) => `${count} failed`,
@@ -258,6 +254,12 @@ export enum SelectionMode {
   Filtered = 'filtered',
 }
 
+/** The store's automatic rule, on its Settings tab. */
+export const SELECTION_COPY = {
+  title: 'Add products automatically',
+  save: 'Save and apply',
+} as const;
+
 export const SELECTION_MODE_LABELS: Record<SelectionMode, string> = {
   [SelectionMode.Off]: 'Off',
   [SelectionMode.All]: 'All products',
@@ -280,13 +282,14 @@ type InStoreState = (typeof IN_STORE_STATES)[number];
  */
 export const NEEDS_DETAILS_FILTER = ListingDisplayState.needs_details;
 /**
- * The tab's filters: the store's states, the products that need details, and products removed
- * by hand, to add them back.
+ * The precise filters the tab's views are made of (`store-listing-views.ts`): the store's
+ * states, the products that need details, those removed by hand and those not in the store.
  */
 export type ChannelProductFilter =
   | InStoreState
   | typeof NEEDS_DETAILS_FILTER
   | ChannelProductState.removed_by_hand
+  | ChannelProductState.excluded
   | typeof ALL_CHANNEL_PRODUCTS;
 
 /** The listings tab's filters, in the words of the listing states they group. */
@@ -299,28 +302,12 @@ export const CHANNEL_PRODUCT_STATE_LABELS: Record<ChannelProductState, string> =
   [ChannelProductState.excluded]: 'Not in this store',
 };
 
-const inStoreFilter = (state: InStoreState) => ({
-  value: state,
-  label: CHANNEL_PRODUCT_STATE_LABELS[state],
-});
-
-export const CHANNEL_PRODUCT_FILTERS: readonly { value: ChannelProductFilter; label: string }[] = [
-  { value: ALL_CHANNEL_PRODUCTS, label: 'All' },
-  inStoreFilter(ChannelProductState.listed),
-  inStoreFilter(ChannelProductState.pending),
-  { value: NEEDS_DETAILS_FILTER, label: LISTING_STATE_PRESENTATION[NEEDS_DETAILS_FILTER].label },
-  inStoreFilter(ChannelProductState.failed),
-  inStoreFilter(ChannelProductState.removing),
-  {
-    value: ChannelProductState.removed_by_hand,
-    label: CHANNEL_PRODUCT_STATE_LABELS[ChannelProductState.removed_by_hand],
-  },
-];
-
 /** What a store's listing row says beside its state. */
 export const LISTINGS_ROW_COPY = {
   /** Before when a sync or retry queued the listing's update: "Queued 2 minutes ago". */
   queued: 'Queued',
+  /** Adds a product the store does not have yet. */
+  add: 'Add',
 } as const;
 
 /** How a product joined a store, as its listing row says it. */

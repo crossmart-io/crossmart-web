@@ -249,9 +249,8 @@ export const EBAY_BUSINESS_POLICIES_URL = 'https://www.ebay.com/bp/manage';
 /** What the listing defaults card says. */
 export const EBAY_DEFAULTS_COPY = {
   title: 'Listing defaults',
-  description:
-    'Every listing in this eBay store is sold under these policies and condition, and ships from this address.',
-  ready: 'Ready to list.',
+  /** A product's own condition wins; this one lists the products without one. */
+  conditionNote: 'For products without their own condition.',
   notReady: 'Choose a policy of each type and where items ship from before publishing.',
   choosePolicy: 'Choose a policy',
   noPolicies: 'No policies yet',
@@ -262,7 +261,6 @@ export const EBAY_DEFAULTS_COPY = {
   refresh: 'Refresh policies',
   refreshed: 'Policies read again from eBay',
   manage: 'Manage policies on eBay',
-  manageNote: 'Opens eBay’s site; sandbox accounts manage policies on the sandbox site.',
   policiesOff:
     'eBay lists items only under business policies. Create default policies here, or opt this account in and create your own on eBay.',
   policiesMissing: 'eBay needs a shipping, payment and return policy before it lists items.',
@@ -306,9 +304,6 @@ export const DEFAULT_PRODUCT_PATH = '/products/{handle}';
 /** What the Google listing setup card says. */
 export const GOOGLE_SETUP_COPY = {
   title: 'Listing setup',
-  description:
-    'Where your Google listings sell, and the page on your website each product links to.',
-  ready: 'Ready to list.',
   notReady: 'Choose the country and the product page address before publishing.',
   country: 'Country',
   countryNote: 'Listings are priced in its currency and written for it.',

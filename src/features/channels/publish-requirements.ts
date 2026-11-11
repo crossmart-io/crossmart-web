@@ -129,7 +129,6 @@ export const GENERIC_PRODUCT_FIX: RequirementFix = {
 /** What the "finish setup" alert and the channel card say. */
 export const PUBLISH_READINESS_COPY = {
   title: 'Finish setup to publish',
-  description: 'Nothing is published to this store until you finish these steps:',
   askAdmin: 'A workspace admin can finish it.',
   cardNote: 'Finish setup to publish',
   cardAction: 'Finish setup',

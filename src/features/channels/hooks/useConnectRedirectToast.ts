@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { ROUTE_QUERY } from '@/config/routes';
 import { useSearchParams } from 'react-router';
 import { toast } from 'sonner';
 import { useSearchParamsUpdater } from '@/hooks/useSearchParamsUpdater';
@@ -10,7 +11,8 @@ const OUTCOME_TOAST_ID = 'channel-connect-outcome';
 
 /**
  * Shows the outcome of an OAuth round trip once, then removes its parameters from the URL so
- * a reload or a shared link does not repeat it.
+ * a reload or a shared link does not repeat it. A connected channel is kept as `?setup=`, so
+ * the page can offer the new store's setup.
  */
 export function useConnectRedirectToast(): void {
   const [params] = useSearchParams();
@@ -29,6 +31,7 @@ export function useConnectRedirectToast(): void {
     }
     updateParams((next) => {
       Object.values(CONNECT_REDIRECT_PARAMS).forEach((name) => next.delete(name));
+      if (outcome.kind === 'connected') next.set(ROUTE_QUERY.storeSetup, outcome.channel);
     });
   }, [params, updateParams]);
 }

@@ -24,8 +24,13 @@ interface SaveableFormOptions<Values extends FieldValues, Output, Saved> {
 
 interface SaveableForm<Values extends FieldValues, Output> {
   form: UseFormReturn<Values, unknown, Output>;
-  /** The form's `onSubmit`. A failed save leaves the form as it was, never an unhandled rejection. */
-  submit: (event?: FormEvent<HTMLFormElement>) => void;
+  /**
+   * The form's `onSubmit`, resolved once the save settled. A failed save leaves the form as it
+   * was, never an unhandled rejection.
+   */
+  submit: (event?: FormEvent<HTMLFormElement>) => Promise<void>;
+  /** Validates and saves outside a form's submit; resolves to whether it was saved. */
+  saveNow: () => Promise<boolean>;
 }
 
 /**
@@ -46,20 +51,34 @@ export function useSaveableForm<Values extends FieldValues, Output, Saved>({
     mode,
   });
 
-  async function saveAndReset(values: Output): Promise<void> {
+  async function saveAndReset(values: Output): Promise<boolean> {
     let saved: Saved;
     try {
       saved = await save(values);
     } catch {
       // The mutation holds the error, and the form shows it inline.
-      return;
+      return false;
     }
     const next = toForm(saved);
     if (next) form.reset(next);
+    return true;
+  }
+
+  /** Resolves to false for invalid values, which `handleSubmit` never passes on. */
+  function saveNow(): Promise<boolean> {
+    return new Promise((resolve) => {
+      void form.handleSubmit(
+        async (values) => resolve(await saveAndReset(values)),
+        () => resolve(false),
+      )();
+    });
   }
 
   return {
     form,
-    submit: (event) => void form.handleSubmit(saveAndReset)(event),
+    submit: async (event) => {
+      await form.handleSubmit(saveAndReset)(event);
+    },
+    saveNow,
   };
 }
