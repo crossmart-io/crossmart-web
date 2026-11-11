@@ -129,6 +129,8 @@ export const ROUTE_QUERY = {
   agentPanel: 'panel',
   /** On Stores: the channel a store was just connected on, whose setup is offered. */
   storeSetup: 'setup',
+  /** On Stores: the store just connected, when the OAuth return named it. */
+  storeSetupConnection: 'setupStore',
 } as const;
 
 /** Parts of a page a link can scroll to, as the ids of their cards (`#media`). */

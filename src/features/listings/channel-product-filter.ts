@@ -1,12 +1,13 @@
-import type { ChannelProductState, ListingDisplayState } from '@/api/schema';
+import type { ChannelProductState, ChannelProductView, ListingDisplayState } from '@/api/schema';
 import {
   ALL_CHANNEL_PRODUCTS,
   type ChannelProductFilter,
   NEEDS_DETAILS_FILTER,
 } from './listings.constants';
 
-/** What the store's products endpoint is asked for, by the tab's filter. */
+/** What the store's products endpoint is asked for: a whole view, or one precise filter. */
 export interface ChannelProductFilterQuery {
+  view?: ChannelProductView;
   state?: ChannelProductState;
   displayState?: ListingDisplayState;
 }

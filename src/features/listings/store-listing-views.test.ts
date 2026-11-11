@@ -1,5 +1,5 @@
-import { ChannelProductState } from '@/api/schema';
-import { ALL_CHANNEL_PRODUCTS, NEEDS_DETAILS_FILTER } from './listings.constants';
+import { ChannelProductState, ChannelProductView, ListingDisplayState } from '@/api/schema';
+import { NEEDS_DETAILS_FILTER } from './listings.constants';
 import type { ChannelProductCounts } from './listings.types';
 import {
   StoreListingView,
@@ -9,27 +9,31 @@ import {
 
 describe('toStoreListingSelection', () => {
   it('opens on every product in the store without a state', () => {
-    expect(toStoreListingSelection(null)).toEqual({
-      view: StoreListingView.All,
-      filters: [ALL_CHANNEL_PRODUCTS],
-    });
+    expect(toStoreListingSelection(null)).toEqual({ view: StoreListingView.All, query: {} });
   });
 
-  it('lists each state of a view', () => {
-    expect(toStoreListingSelection(StoreListingView.NeedsAttention)).toEqual({
-      view: StoreListingView.NeedsAttention,
-      filters: [ChannelProductState.failed, NEEDS_DETAILS_FILTER],
-    });
+  it.each([
+    [StoreListingView.Live, ChannelProductView.live],
+    [StoreListingView.NeedsAttention, ChannelProductView.needs_attention],
+    [StoreListingView.NotListed, ChannelProductView.not_listed],
+  ])('lists the %s tab in one request for the API’s %s view', (view, apiView) => {
+    expect(toStoreListingSelection(view)).toEqual({ view, query: { view: apiView } });
   });
 
   it.each([
     [ChannelProductState.listed, StoreListingView.Live],
     [ChannelProductState.failed, StoreListingView.NeedsAttention],
-    [NEEDS_DETAILS_FILTER, StoreListingView.NeedsAttention],
     [ChannelProductState.pending, StoreListingView.NotListed],
     [ChannelProductState.removed_by_hand, StoreListingView.NotListed],
   ])('keeps an older link to %s precise, under the %s tab', (state, view) => {
-    expect(toStoreListingSelection(state)).toEqual({ view, filters: [state] });
+    expect(toStoreListingSelection(state)).toEqual({ view, query: { state } });
+  });
+
+  it('keeps an older link to the products that need details, under Needs attention', () => {
+    expect(toStoreListingSelection(NEEDS_DETAILS_FILTER)).toEqual({
+      view: StoreListingView.NeedsAttention,
+      query: { displayState: ListingDisplayState.needs_details },
+    });
   });
 
   it('falls back to every product for an unknown state', () => {
@@ -45,12 +49,15 @@ describe('storeListingViewCounts', () => {
     removing: 1,
     removed_by_hand: 3,
     excluded: 10,
+    needsDetails: 2,
+    needsAttention: 2,
   };
 
-  it('sums the states each view lists, and leaves out the count it cannot know', () => {
+  it('counts every tab, Needs attention from the API’s own count', () => {
     expect(storeListingViewCounts(counts)).toEqual({
       [StoreListingView.All]: 9,
       [StoreListingView.Live]: 5,
+      [StoreListingView.NeedsAttention]: 2,
       [StoreListingView.NotListed]: 16,
     });
   });
