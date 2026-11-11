@@ -292,16 +292,6 @@ export type ChannelProductFilter =
   | ChannelProductState.excluded
   | typeof ALL_CHANNEL_PRODUCTS;
 
-/** The listings tab's filters, in the words of the listing states they group. */
-export const CHANNEL_PRODUCT_STATE_LABELS: Record<ChannelProductState, string> = {
-  [ChannelProductState.listed]: 'Published',
-  [ChannelProductState.pending]: 'Not published yet',
-  [ChannelProductState.failed]: 'Failed',
-  [ChannelProductState.removing]: 'Removing',
-  [ChannelProductState.removed_by_hand]: 'Removed',
-  [ChannelProductState.excluded]: 'Not in this store',
-};
-
 /** What a store's listing row says beside its state. */
 export const LISTINGS_ROW_COPY = {
   /** Before when a sync or retry queued the listing's update: "Queued 2 minutes ago". */

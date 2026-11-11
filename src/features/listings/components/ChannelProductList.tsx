@@ -1,8 +1,7 @@
 import { useEffect } from 'react';
 import { useUrlPagination } from '@/hooks/usePagination';
-import { channelProductFilterQuery } from '../channel-product-filter';
+import type { ChannelProductFilterQuery } from '../channel-product-filter';
 import { useChannelProducts } from '../hooks/useChannelProducts';
-import type { ChannelProductFilter } from '../listings.constants';
 import type {
   ChannelProductListQuery,
   ChannelProductRowActions,
@@ -11,21 +10,18 @@ import type {
 import { ChannelProductsTable } from './ChannelProductsTable';
 
 interface ChannelProductListProps {
-  filter: ChannelProductFilter;
+  /** The view or precise filter the list shows. */
+  filter: ChannelProductFilterQuery;
   query: ChannelProductListQuery;
   rows: ChannelProductRowActions;
   onCounts: ReportCounts;
 }
 
-/** A view of one state: one table, its page kept in the URL. */
+/** One view of the store's products: one request, one table, its page kept in the URL. */
 export function ChannelProductList({ filter, query, rows, onCounts }: ChannelProductListProps) {
   const ref = { workspaceId: rows.store.workspaceId, connectionId: rows.store.connectionId };
   const pagination = useUrlPagination();
-  const products = useChannelProducts(
-    ref,
-    { ...channelProductFilterQuery(filter), ...query },
-    pagination,
-  );
+  const products = useChannelProducts(ref, { ...filter, ...query }, pagination);
   useEffect(() => {
     if (products.counts) onCounts(products.counts);
   }, [products.counts, onCounts]);

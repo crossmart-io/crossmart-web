@@ -1,6 +1,6 @@
 import { useSearchParams } from 'react-router';
 import { toSortOption } from '@/components/lists/sort-options';
-import { ROUTE_QUERY } from '@/config/routes';
+import { PAGINATION_QUERY, ROUTE_QUERY } from '@/config/routes';
 import { useDebouncedSearchParam } from '@/hooks/useDebouncedSearchParam';
 import { useSearchParamsUpdater } from '@/hooks/useSearchParamsUpdater';
 import { setOrDeleteParam } from '@/lib/search-params';
@@ -20,11 +20,17 @@ export function useChannelProductFilters() {
 
   const setParam = (key: string, value: string, defaultValue: string) =>
     updateParams((params) => setOrDeleteParam(params, key, value === defaultValue ? '' : value));
+  /** Another view starts on its first page: the list it shows is another one. */
+  const setView = (next: StoreListingView) =>
+    updateParams((params) => {
+      setOrDeleteParam(params, ROUTE_QUERY.state, next === StoreListingView.All ? '' : next);
+      params.delete(PAGINATION_QUERY.page);
+    });
 
   return {
     search,
     ...selection,
-    setView: (next: StoreListingView) => setParam(ROUTE_QUERY.state, next, StoreListingView.All),
+    setView,
     sort,
     setSort: (value: string) => setParam(ROUTE_QUERY.sort, value, CHANNEL_PRODUCT_SORTS[0].value),
   };

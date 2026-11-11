@@ -14,7 +14,6 @@ import type { ChannelProductCounts, ListingStore } from '../listings.types';
 import type { ChannelProductRowActions } from './channel-product-list.types';
 import { ChannelProductFilters } from './ChannelProductFilters';
 import { ChannelProductList } from './ChannelProductList';
-import { ChannelProductSections } from './ChannelProductSections';
 import { ListingEditorSheet } from './ListingEditorSheet';
 
 interface ChannelProductsCardProps {
@@ -73,8 +72,8 @@ function useRowActions(
 
 /**
  * The store's listings in four views (all, live, needing attention, not listed), searched and
- * sorted. A view of several states lists one section per state. A product opens in the listing
- * editor over the list, named in the URL so it can be shared.
+ * sorted, each one request with counts for every tab. A product opens in the listing editor over
+ * the list, named in the URL so it can be shared.
  */
 export function ChannelProductsCard({
   workspaceId,
@@ -91,7 +90,6 @@ export function ChannelProductsCard({
     sort: filters.sort.sort,
     direction: filters.sort.direction,
   };
-  const [onlyFilter] = filters.filters;
   return (
     <Card>
       <CardContent className="flex flex-col gap-4">
@@ -99,17 +97,7 @@ export function ChannelProductsCard({
           <ChannelProductFilters filters={filters} counts={counts} />
           {canEdit && <AddProductsButton connectionId={connection.id} />}
         </div>
-        {filters.filters.length === 1 && onlyFilter ? (
-          <ChannelProductList filter={onlyFilter} query={query} rows={rows} onCounts={setCounts} />
-        ) : (
-          <ChannelProductSections
-            key={filters.view}
-            filters={filters.filters}
-            query={query}
-            rows={rows}
-            onCounts={setCounts}
-          />
-        )}
+        <ChannelProductList filter={filters.query} query={query} rows={rows} onCounts={setCounts} />
         {editor.openId && (
           <ListingEditorSheet
             listingRef={{ workspaceId, connectionId: connection.id, productId: editor.openId }}
