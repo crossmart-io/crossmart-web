@@ -3,24 +3,31 @@ import userEvent from '@testing-library/user-event';
 import { MemoryRouter } from 'react-router';
 import { WorkspacePermission } from '@/api/schema';
 import { ReviewSource } from '@/config/routes';
-import { usePendingProposalCount } from '@/features/agent-proposals';
-import { usePendingSuggestionCount } from '@/features/suggestions';
+import type * as Attention from '@/features/attention';
+import { useAttentionCounts } from '@/features/attention';
 import { workspaceFixture } from '@/features/suggestions/testing/suggestion.fixture';
 import { REVIEW_COPY } from '../review.constants';
 import { ReviewInbox } from './ReviewInbox';
 
 vi.mock('@/features/suggestions', () => ({
   SuggestionsInbox: () => <p>Suggestions inbox</p>,
-  usePendingSuggestionCount: vi.fn<typeof usePendingSuggestionCount>(),
 }));
 vi.mock('@/features/agent-proposals', () => ({
   AgentProposalsInbox: () => <p>Proposals inbox</p>,
-  usePendingProposalCount: vi.fn<typeof usePendingProposalCount>(),
+}));
+vi.mock('@/features/attention', async (importOriginal) => ({
+  ...(await importOriginal<typeof Attention>()),
+  useAttentionCounts: vi.fn<typeof useAttentionCounts>(),
 }));
 
 function renderInbox(permissions: WorkspacePermission[], entry = '/agent/review') {
-  vi.mocked(usePendingSuggestionCount).mockReturnValue(2);
-  vi.mocked(usePendingProposalCount).mockReturnValue(3);
+  vi.mocked(useAttentionCounts).mockReturnValue({
+    stores: 0,
+    listings: 0,
+    suggestions: 2,
+    proposals: 3,
+    total: 5,
+  });
   render(
     <MemoryRouter initialEntries={[entry]}>
       <ReviewInbox workspace={workspaceFixture(permissions)} />

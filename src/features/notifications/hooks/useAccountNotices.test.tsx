@@ -4,15 +4,15 @@ import type * as Auth from '@/features/auth';
 import { useSession } from '@/features/auth';
 import type * as Billing from '@/features/billing';
 import { type SubscriptionAccess, useBillingAccess } from '@/features/billing';
-import { usePendingProposalCount } from '@/features/agent-proposals';
+import { type AttentionCounts, useAttentionCounts } from '@/features/attention';
 import { ReviewSource, toAgentReviewRoute } from '@/config/routes';
 import type * as Workspaces from '@/features/workspaces';
 import { useCurrentWorkspace, type Workspace } from '@/features/workspaces';
 import { NoticeActionKind, NoticeKind, NoticeSeverity } from '../notifications.types';
 import { useAccountNotices } from './useAccountNotices';
 
-vi.mock('@/features/agent-proposals', () => ({
-  usePendingProposalCount: vi.fn<() => number>(() => 0),
+vi.mock('@/features/attention', () => ({
+  useAttentionCounts: vi.fn<typeof useAttentionCounts>(),
 }));
 
 vi.mock('@/features/auth', async (importOriginal) => ({
@@ -44,6 +44,7 @@ interface Setup {
   access?: Partial<SubscriptionAccess>;
   canManageBilling?: boolean;
   pendingProposals?: number;
+  attention?: Partial<AttentionCounts>;
 }
 
 function notices({
@@ -52,8 +53,16 @@ function notices({
   access,
   canManageBilling = true,
   pendingProposals = 0,
+  attention,
 }: Setup) {
-  vi.mocked(usePendingProposalCount).mockReturnValue(pendingProposals);
+  vi.mocked(useAttentionCounts).mockReturnValue({
+    stores: 0,
+    listings: 0,
+    proposals: pendingProposals,
+    suggestions: 0,
+    total: pendingProposals,
+    ...attention,
+  });
   vi.mocked(useSession).mockReturnValue({
     data: { user: { ...USER, emailVerified } },
   } as unknown as ReturnType<typeof useSession>);
@@ -146,6 +155,17 @@ describe('useAccountNotices', () => {
         }),
       }),
     ]);
+  });
+
+  it('counts stores, failed listings and AI suggestions as Home does', () => {
+    const found = notices({ attention: { stores: 1, listings: 3, suggestions: 4 } });
+    expect(found.map((notice) => notice.kind)).toEqual([
+      NoticeKind.StoresAttention,
+      NoticeKind.FailedListings,
+      NoticeKind.AiSuggestions,
+    ]);
+    expect(found[1]?.body).toContain('3 listings');
+    expect(found[2]?.revision).not.toEqual(notices({ attention: { suggestions: 5 } })[0]?.revision);
   });
 
   it('lists the most urgent first', () => {

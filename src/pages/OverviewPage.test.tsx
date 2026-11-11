@@ -22,16 +22,9 @@ vi.mock('@/features/orders', async (importOriginal) => ({
 vi.mock('@/features/overview', async (importOriginal) => ({
   ...(await importOriginal<typeof Overview>()),
   useOnboarding: vi.fn<typeof useOnboarding>(),
-  CatalogHealth: () => <p>Catalog health</p>,
-  CatalogStatsGrid: () => <p>Catalog totals</p>,
 }));
 vi.mock('@/features/sales', () => ({ SalesOverview: () => <p>Sales dashboard</p> }));
-vi.mock('@/features/inventory-report', () => ({
-  InventoryOverview: () => <p>Inventory dashboard</p>,
-}));
-vi.mock('@/features/listing-health', () => ({
-  ListingHealthOverview: () => <p>Listing health</p>,
-}));
+vi.mock('@/features/attention', () => ({ NeedsAttention: () => <p>Needs attention</p> }));
 
 const NEW_SELLER: OnboardingState = {
   hasProducts: false,
@@ -73,22 +66,25 @@ describe('OverviewPage', () => {
     const noSales = screen.getByText('Your sales will appear here once orders come in.');
     expect(isBefore(gettingStarted, noSales)).toBe(true);
     expect(screen.queryByText('Sales dashboard')).not.toBeInTheDocument();
-    expect(screen.queryByText('Inventory dashboard')).not.toBeInTheDocument();
-    expect(screen.queryByText('Listing health')).not.toBeInTheDocument();
+  });
+
+  it('puts what needs attention above everything else', () => {
+    renderOverview(NEW_SELLER, false);
+    expect(isBefore(screen.getByText('Needs attention'), screen.getByText('Getting started'))).toBe(
+      true,
+    );
   });
 
   it('keeps the sales note while a set-up seller waits for the first order', () => {
     renderOverview(SET_UP_SELLER, false);
     expect(screen.getByText('No sales yet')).toBeInTheDocument();
-    expect(screen.getByText('Inventory dashboard')).toBeInTheDocument();
-    expect(screen.getByText('Listing health')).toBeInTheDocument();
+    expect(screen.queryByText('Getting started')).not.toBeInTheDocument();
   });
 
   it('reads as a sales dashboard once set up and selling', () => {
     renderOverview(SET_UP_SELLER, true);
-    const sales = screen.getByText('Sales dashboard');
-    expect(isBefore(sales, screen.getByText('Getting started'))).toBe(true);
-    expect(screen.getByText('Inventory dashboard')).toBeInTheDocument();
+    expect(screen.getByText('Sales dashboard')).toBeInTheDocument();
+    expect(screen.queryByText('Getting started')).not.toBeInTheDocument();
     expect(screen.queryByText('No sales yet')).not.toBeInTheDocument();
   });
 });

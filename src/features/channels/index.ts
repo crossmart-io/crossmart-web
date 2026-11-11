@@ -1,7 +1,7 @@
 export { ChannelGrid } from './components/ChannelGrid';
 export { CHANNELS, isLiveChannel } from './channels.constants';
 export { useConnectRedirectToast } from './hooks/useConnectRedirectToast';
-export { ChannelSetup, connectionsSummary, needsReconnect } from './connection-status';
+export { ChannelSetup, needsReconnect } from './connection-status';
 export { useChannelSetup } from './hooks/useChannelSetup';
 export { ConnectionStatusBadge } from './components/ConnectionStatusBadge';
 export { ConnectionSettings } from './components/ConnectionSettings';

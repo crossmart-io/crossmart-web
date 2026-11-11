@@ -2,6 +2,7 @@ import { MutationCache, QueryCache, QueryClient } from '@tanstack/react-query';
 import { toast } from 'sonner';
 import { errorCodeOf, isUnauthorizedError } from '@/api/api-error';
 import { endpointQueryKey } from '@/api/query-keys';
+import { ATTENTION_ENDPOINT } from '@/features/attention';
 import { refreshSession } from '@/features/auth';
 import { BILLING_ACCESS_ENDPOINT, SUBSCRIPTION_INACTIVE_CODE } from '@/features/billing';
 import { showApiErrorToast } from './api-error-toast';
@@ -19,6 +20,7 @@ export function createAppQueryClient(): QueryClient {
       onSuccess: (_data, _variables, _context, mutation) => {
         const message = mutation.meta?.successMessage;
         if (message) toast.success(message);
+        refreshAttention(queryClient);
       },
       onError: (error, _variables, _context, mutation) => {
         if (handleUnauthorized(error, queryClient)) return;
@@ -36,6 +38,14 @@ export function createAppQueryClient(): QueryClient {
     },
   });
   return queryClient;
+}
+
+/**
+ * Any change can settle or raise something that needs the merchant (a store reconnected, a
+ * listing retried, a suggestion approved), so Home, the badges and the bell read it again.
+ */
+function refreshAttention(queryClient: QueryClient): void {
+  void queryClient.invalidateQueries({ queryKey: endpointQueryKey(ATTENTION_ENDPOINT) });
 }
 
 /** A change refused as read-only: the billing banner reads the access again, so it shows at once. */
