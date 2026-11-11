@@ -48,6 +48,7 @@ function row(state: ChannelProductState, options: RowOptions = {}): ChannelProdu
       status: ProductStatus.ACTIVE,
       vendor: null,
       productType: null,
+      condition: null,
       variantCount: 1,
       totalAvailable: 4,
       priceRange: null,
