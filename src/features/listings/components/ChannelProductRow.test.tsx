@@ -98,7 +98,7 @@ function mockRetry(state: { isPending?: boolean; error?: Error | null } = {}) {
 function renderRow(product: ChannelProduct, options: RenderOptions = {}) {
   render(
     <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter initialEntries={[options.initialEntry ?? '/channels/c-1']}>
+      <MemoryRouter initialEntries={[options.initialEntry ?? '/stores/c-1']}>
         <Table>
           <TableBody>
             <ChannelProductRow
@@ -190,7 +190,7 @@ describe('ChannelProductRow', () => {
     );
     expect(screen.getByRole('link', { name: RETRY_COPY.reconnectLink })).toHaveAttribute(
       'href',
-      '/channels/c-1',
+      '/stores/c-1',
     );
   });
 
@@ -237,7 +237,7 @@ describe('ChannelProductRow', () => {
     expect(screen.getByText('Needs details')).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open listing defaults' })).toHaveAttribute(
       'href',
-      '/channels/c-1/settings#listing-defaults',
+      '/stores/c-1/settings#listing-defaults',
     );
   });
 
@@ -258,11 +258,11 @@ describe('ChannelProductRow', () => {
   });
 
   it('links the product to its listing editor on this page, keeping the list’s filters', () => {
-    renderRow(row(ChannelProductState.listed), { initialEntry: '/channels/c-1?state=failed' });
+    renderRow(row(ChannelProductState.listed), { initialEntry: '/stores/c-1?state=failed' });
 
     expect(screen.getByRole('link', { name: 'Linen shirt' })).toHaveAttribute(
       'href',
-      '/channels/c-1?state=failed&listing=p-1',
+      '/stores/c-1?state=failed&listing=p-1',
     );
   });
 

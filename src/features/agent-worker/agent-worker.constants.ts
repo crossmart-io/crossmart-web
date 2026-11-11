@@ -41,7 +41,6 @@ export const AGENT_WORKER_EXAMPLE_PROMPTS = [
 export const AGENT_WORKER_TEST_IDS = {
   launcher: 'agent-worker-launcher',
   channelMapButton: 'channel-map-ask-agent-worker',
-  productMapButton: 'product-map-ask-agent-worker',
   storeFixButton: 'store-fix-with-agent-worker',
   composer: 'agent-worker-composer',
   send: 'agent-worker-send',
@@ -60,7 +59,6 @@ export const AGENT_WORKER_ELEMENT_IDS = {
 export const AGENT_WORKER_COPY = {
   name: 'Crossmart Agent',
   open: 'Ask Crossmart Agent',
-  openInAgent: 'Open in Crossmart Agent',
   fixStore: 'Fix with Crossmart Agent',
   fixStorePrompt: (store: string) => `Fix the failed listings on ${store}`,
   description:

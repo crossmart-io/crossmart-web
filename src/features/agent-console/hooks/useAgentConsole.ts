@@ -1,4 +1,7 @@
 import { useCallback, useMemo, useState } from 'react';
+import { useSearchParams } from 'react-router';
+import { ROUTE_QUERY } from '@/config/routes';
+import { parseEnum } from '@/lib/enum';
 import { useAgentWorker } from '@/features/agent-worker';
 import { useListingHealth } from '@/features/listing-health/hooks/useListingHealth';
 import type { StoreListingHealth } from '@/features/listing-health/listing-health.types';
@@ -24,7 +27,11 @@ export function useAgentConsole(workspaceId: string) {
   useRefreshOnAgentChanges(session);
   const health = useListingHealth(workspaceId);
   const stores = health.data?.stores ?? NO_STORES;
-  const [tab, setTab] = useState(ConsoleTab.Chat);
+  const [searchParams] = useSearchParams();
+  // A link can open a panel (`?panel=map`); on wide screens every panel shows anyway.
+  const [tab, setTab] = useState(
+    () => parseEnum(ConsoleTab, searchParams.get(ROUTE_QUERY.agentPanel)) ?? ConsoleTab.Chat,
+  );
   const [highlightedNodeId, setHighlightedNodeId] = useState<string | null>(null);
 
   const openProposals = useCallback(() => {

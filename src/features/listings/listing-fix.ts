@@ -1,6 +1,6 @@
 import { ListingDisplayState, type PublishRequirement } from '@/api/schema';
 import {
-  toChannelConnectionRoute,
+  toStoreRoute,
   toProductRoute,
   toProductStoreOverrideRoute,
   withSection,
@@ -46,9 +46,9 @@ export interface ListingRef {
 export function listingFixRoute(fix: RequirementFix, { productId, connectionId }: ListingRef) {
   switch (fix.target) {
     case FixTarget.Reconnect:
-      return toChannelConnectionRoute(connectionId);
+      return toStoreRoute(connectionId);
     case FixTarget.StoreSettings:
-      return withSection(toChannelConnectionRoute(connectionId, ChannelTab.Settings), fix.section);
+      return withSection(toStoreRoute(connectionId, ChannelTab.Settings), fix.section);
     case FixTarget.StoreOverride:
       return toProductStoreOverrideRoute(productId, connectionId);
     case FixTarget.ProductEditor:

@@ -1,5 +1,5 @@
 import { ListChecks, type LucideIcon, Settings } from 'lucide-react';
-import { PageSection, toChannelConnectionRoute, withSection } from '@/config/routes';
+import { PageSection, toStoreRoute, withSection } from '@/config/routes';
 
 /** The sections of a channel connection's page, as they appear in its URL. */
 export enum ChannelTab {
@@ -44,5 +44,5 @@ export function retiredChannelTabRoute(
 ): string | null {
   const retired = segment === undefined ? undefined : RETIRED_CHANNEL_TABS[segment];
   if (!retired) return null;
-  return withSection(toChannelConnectionRoute(connectionId, retired.tab), retired.section);
+  return withSection(toStoreRoute(connectionId, retired.tab), retired.section);
 }

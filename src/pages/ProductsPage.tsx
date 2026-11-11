@@ -17,6 +17,7 @@ import {
   ProductsTable,
   ProductsTableSkeleton,
   ProductViewsBar,
+  ProductViewTabs,
   toStatusCounts,
   toStatusQuery,
   useCatalogStats,
@@ -66,11 +67,8 @@ function Products({ workspace }: { workspace: Workspace }) {
   const counts = stats && toStatusCounts(stats);
 
   return (
-    <Page
-      name="Products"
-      description="One catalog for every channel you sell on."
-      actions={<AddProductActions workspace={workspace} />}
-    >
+    <Page name="Products" actions={<AddProductActions workspace={workspace} />}>
+      <ProductViewTabs />
       <ProductViewsBar workspaceId={workspace.id} filters={filters} />
       <ProductFilters
         search={filters.search}

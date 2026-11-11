@@ -38,7 +38,7 @@ export function OrdersEmptyState({ isFiltered, onClearFilters }: OrdersEmptyStat
           </Button>
         ) : (
           <Button asChild variant="outline">
-            <Link to={ROUTES.channels}>Manage stores</Link>
+            <Link to={ROUTES.stores}>Manage stores</Link>
           </Button>
         )}
       </EmptyContent>

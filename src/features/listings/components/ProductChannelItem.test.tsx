@@ -154,7 +154,7 @@ describe('ProductChannelItem', () => {
 
     expect(screen.getByRole('link', { name: 'Open listing setup' })).toHaveAttribute(
       'href',
-      '/channels/c-1/settings#listing-setup',
+      '/stores/c-1/settings#listing-setup',
     );
   });
 

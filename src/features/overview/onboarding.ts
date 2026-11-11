@@ -22,14 +22,14 @@ function channelStep(setup: ChannelSetup | undefined): OnboardingStep {
     return {
       title: 'Import products from your store',
       description: 'Your store is connected. Import its products to link them to your catalog.',
-      to: ROUTES.channels,
+      to: ROUTES.stores,
       done: false,
     };
   }
   return {
-    title: 'Connect a channel',
+    title: 'Connect a store',
     description: `${CONNECT_CHANNEL_PROMPT}.`,
-    to: ROUTES.channels,
+    to: ROUTES.stores,
     done: setup === ChannelSetup.Imported,
   };
 }
@@ -51,7 +51,7 @@ export function onboardingSteps({
     {
       title: 'Give your AI agent a key',
       description: 'Let Claude or your own agent work with your catalog.',
-      to: ROUTES.apiKeys,
+      to: ROUTES.developers,
       done: hasApiKey,
     },
   ];

@@ -8,10 +8,10 @@ import type * as Workspaces from '@/features/workspaces';
 import { useMe, type Workspace } from '@/features/workspaces';
 import {
   CHANNEL_PREVIEW_COPY,
-  CHANNEL_ROADMAP_ACTION_LABELS,
   CHANNEL_STATUS_LABELS,
   CHANNELS,
   ChannelStatus,
+  REQUEST_CHANNEL_COPY,
 } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
 import type * as ChannelConnectionHooks from '../hooks/useChannelConnections';
@@ -88,21 +88,23 @@ describe('ChannelGrid', () => {
     }
   });
 
-  it.each([ChannelStatus.ComingSoon, ChannelStatus.Planned, ChannelStatus.Community] as const)(
-    'shows %s channels with their status and no way to connect',
-    (status) => {
-      renderGrid();
+  it('leaves channels that cannot be connected out, with one way to request a marketplace', () => {
+    renderGrid();
 
+    for (const status of [
+      ChannelStatus.ComingSoon,
+      ChannelStatus.Planned,
+      ChannelStatus.Community,
+    ]) {
       for (const name of channelNames(status)) {
-        const roadmapCard = within(card(name));
-        expect(roadmapCard.getByText(CHANNEL_STATUS_LABELS[status])).toBeInTheDocument();
-        expect(
-          roadmapCard.getByRole('link', { name: CHANNEL_ROADMAP_ACTION_LABELS[status] }),
-        ).toHaveAttribute('href', channelRequestMailto(name));
-        expect(roadmapCard.queryByRole('button', { name: CONNECT_ACTION })).not.toBeInTheDocument();
+        expect(screen.queryByRole('heading', { name })).not.toBeInTheDocument();
       }
-    },
-  );
+    }
+    expect(screen.getByRole('link', { name: REQUEST_CHANNEL_COPY.action })).toHaveAttribute(
+      'href',
+      channelRequestMailto(),
+    );
+  });
 
   it('keeps stores already connected to a channel that is coming soon reachable', () => {
     renderGrid([
@@ -116,7 +118,7 @@ describe('ChannelGrid', () => {
     const googleCard = within(card('Google Merchant Center'));
     expect(googleCard.getByRole('link', { name: MANAGE_ACTION })).toHaveAttribute(
       'href',
-      '/channels/c-google',
+      '/stores/c-google',
     );
     expect(
       googleCard.queryByText(CHANNEL_STATUS_LABELS[ChannelStatus.ComingSoon]),
@@ -133,11 +135,6 @@ describe('ChannelGrid', () => {
           previewCard.getByText(CHANNEL_STATUS_LABELS[ChannelStatus.ComingSoon]),
         ).toBeInTheDocument();
         expect(previewCard.getByText(CHANNEL_PREVIEW_COPY.note)).toBeInTheDocument();
-        expect(
-          previewCard.queryByRole('link', {
-            name: CHANNEL_ROADMAP_ACTION_LABELS[ChannelStatus.ComingSoon],
-          }),
-        ).not.toBeInTheDocument();
       }
 
       await userEvent.click(
@@ -151,16 +148,14 @@ describe('ChannelGrid', () => {
       expect(screen.getByLabelText('Merchant Center ID')).toBeInTheDocument();
     });
 
-    it('keeps planned and community channels on the roadmap', () => {
+    it('still leaves planned and community channels out', () => {
       renderGrid([], true);
 
       for (const name of [
         ...channelNames(ChannelStatus.Planned),
         ...channelNames(ChannelStatus.Community),
       ]) {
-        const roadmapCard = within(card(name));
-        expect(roadmapCard.queryByRole('button', { name: /Connect/ })).not.toBeInTheDocument();
-        expect(roadmapCard.queryByText(CHANNEL_PREVIEW_COPY.note)).not.toBeInTheDocument();
+        expect(screen.queryByRole('heading', { name })).not.toBeInTheDocument();
       }
     });
 

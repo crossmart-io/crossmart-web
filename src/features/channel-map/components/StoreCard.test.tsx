@@ -96,14 +96,14 @@ describe('StoreCard', () => {
   it('opens the store’s listings from its name', async () => {
     renderStore();
     await userEvent.click(screen.getByRole('link', { name: 'Open North shop’s listings' }));
-    expect(screen.getByTestId('location')).toHaveTextContent('/channels/c-1/listings');
+    expect(screen.getByTestId('location')).toHaveTextContent('/stores/c-1/listings');
   });
 
   it.each([
-    ['7 published', '/channels/c-1/listings?state=listed'],
-    ['1 pending', '/channels/c-1/listings?state=pending'],
-    ['3 needs details', '/channels/c-1/listings?state=needs_details'],
-    ['2 failed', '/channels/c-1/listings?state=failed'],
+    ['7 published', '/stores/c-1/listings?state=listed'],
+    ['1 pending', '/stores/c-1/listings?state=pending'],
+    ['3 needs details', '/stores/c-1/listings?state=needs_details'],
+    ['2 failed', '/stores/c-1/listings?state=failed'],
     ['40 not listed', '/products?stores=not_in_store&store=c-1'],
   ])('opens the products behind "%s"', async (count, route) => {
     renderStore();

@@ -10,7 +10,7 @@ export function SignUpPage() {
   return (
     <AuthCard
       title="Create your account"
-      description="One catalog for every channel you sell on."
+      description="One catalog for every store you sell on."
       footer={
         <p>
           Already have an account?{' '}

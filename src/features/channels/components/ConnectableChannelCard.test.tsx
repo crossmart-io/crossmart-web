@@ -50,7 +50,7 @@ describe('ConnectableChannelCard', () => {
     expect(screen.getByText(/Finish setup to publish/)).toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Finish setup' })).toHaveAttribute(
       'href',
-      '/channels/c-1',
+      '/stores/c-1',
     );
   });
 
@@ -82,7 +82,7 @@ describe('ConnectableChannelCard', () => {
     expect(screen.getByText('1 store connected')).toBeInTheDocument();
     expect(screen.queryByText('demo-store.myshopify.com')).not.toBeInTheDocument();
     expect(screen.getAllByText('Connected')).not.toHaveLength(0);
-    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-1');
+    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/stores/c-1');
     expect(screen.queryByRole('button', { name: 'Disconnect' })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Import products/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Connect' })).not.toBeInTheDocument();
@@ -105,7 +105,7 @@ describe('ConnectableChannelCard', () => {
     ]);
 
     expect(screen.getByText('1 of 2 stores needs reconnecting')).toBeInTheDocument();
-    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-2');
+    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/stores/c-2');
   });
 
   it('asks members who cannot manage the workspace to have an admin connect a store', () => {
@@ -118,6 +118,6 @@ describe('ConnectableChannelCard', () => {
   it('lets anyone open a connected store, whoever views it', () => {
     renderCard([connection()], false);
 
-    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/channels/c-1');
+    expect(screen.getByRole('link', { name: 'Manage' })).toHaveAttribute('href', '/stores/c-1');
   });
 });

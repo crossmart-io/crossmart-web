@@ -6,7 +6,7 @@ import { useParentsOrReturnTo, useReturnToState } from './return-to';
 import { ReturnToProvider } from './ReturnToProvider';
 
 const FALLBACK: readonly Crumb[] = [{ label: 'Products', to: '/products' }];
-const CHANNELS: readonly Crumb[] = [{ label: 'Channels', to: '/channels' }];
+const STORES: readonly Crumb[] = [{ label: 'Stores', to: '/stores' }];
 
 function ProductLink() {
   return (
@@ -26,9 +26,9 @@ function renderAt(path: string) {
     <MemoryRouter initialEntries={[path]}>
       <Routes>
         <Route
-          path="/channels/:id/:tab"
+          path="/stores/:id/:tab"
           element={
-            <ReturnToProvider parents={CHANNELS} label="demo-store">
+            <ReturnToProvider parents={STORES} label="demo-store">
               <ProductLink />
             </ReturnToProvider>
           }
@@ -42,12 +42,12 @@ function renderAt(path: string) {
 
 describe('return to', () => {
   it('leads a page opened from a store tab back to that tab', async () => {
-    renderAt('/channels/c-1/products');
+    renderAt('/stores/c-1/products');
 
     await userEvent.click(screen.getByRole('link', { name: 'Linen shirt' }));
 
     expect(
-      screen.getByText('Channels=/channels > demo-store=/channels/c-1/products'),
+      screen.getByText('Stores=/stores > demo-store=/stores/c-1/products'),
     ).toBeInTheDocument();
   });
 

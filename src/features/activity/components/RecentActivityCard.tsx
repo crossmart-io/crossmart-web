@@ -1,8 +1,13 @@
+import { Link } from 'react-router';
 import { ErrorState } from '@/components/feedback/ErrorState';
+import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ROUTES } from '@/config/routes';
 import { useProductActivity } from '../hooks/useProductActivity';
 import { ActivityEventItem } from './ActivityEventItem';
+
+const ALL_ACTIVITY_LABEL = 'All activity';
 
 interface RecentActivityCardProps {
   workspaceId: string;
@@ -17,6 +22,11 @@ export function RecentActivityCard({ workspaceId, productId }: RecentActivityCar
         <CardTitle>
           <h2 className="text-sm font-semibold">Recent activity</h2>
         </CardTitle>
+        <CardAction>
+          <Button variant="link" size="sm" className="h-auto px-0" asChild>
+            <Link to={ROUTES.activity}>{ALL_ACTIVITY_LABEL}</Link>
+          </Button>
+        </CardAction>
       </CardHeader>
       <CardContent>
         <RecentActivity workspaceId={workspaceId} productId={productId} />

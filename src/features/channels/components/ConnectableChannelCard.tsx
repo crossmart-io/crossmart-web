@@ -4,7 +4,7 @@ import { ChannelConnectionStatus } from '@/api/schema';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
-import { toChannelConnectionRoute } from '@/config/routes';
+import { toStoreRoute } from '@/config/routes';
 import {
   CHANNEL_PREVIEW_COPY,
   CHANNEL_STATUS_LABELS,
@@ -59,10 +59,7 @@ function SetupNeededNote({ connections }: { connections: readonly ChannelConnect
       <span>
         {PUBLISH_READINESS_COPY.cardNote}
         {connections.length > 1 && ` (${store.displayName})`}.{' '}
-        <Link
-          to={toChannelConnectionRoute(store.id)}
-          className="font-medium text-foreground underline"
-        >
+        <Link to={toStoreRoute(store.id)} className="font-medium text-foreground underline">
           {PUBLISH_READINESS_COPY.cardAction}
         </Link>
       </span>
@@ -83,7 +80,7 @@ function CardActions({
     return (
       <div className="flex flex-wrap gap-2">
         <Button asChild variant="outline" size="sm">
-          <Link to={toChannelConnectionRoute(store.id)}>
+          <Link to={toStoreRoute(store.id)}>
             <Settings2 data-icon="inline-start" />
             Manage
           </Link>

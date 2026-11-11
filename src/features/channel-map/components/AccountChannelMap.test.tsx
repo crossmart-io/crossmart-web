@@ -51,7 +51,7 @@ describe('AccountChannelMap', () => {
   it('falls back to a list of the same nodes on a narrow screen', () => {
     stubMatchMedia(false);
     renderMap();
-    expect(screen.queryByRole('region', { name: /Channel map/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: /Map of your catalog/ })).not.toBeInTheDocument();
     expect(screen.queryByRole('radio', { name: 'Map' })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open the products list' })).toHaveTextContent(
       '12 products',
@@ -64,11 +64,9 @@ describe('AccountChannelMap', () => {
   it('offers the list beside the graph on a wide screen', async () => {
     stubMatchMedia(true);
     renderMap();
-    expect(
-      screen.getByRole('region', { name: 'Channel map of your catalog and stores' }),
-    ).toBeVisible();
+    expect(screen.getByRole('region', { name: 'Map of your catalog and stores' })).toBeVisible();
     await userEvent.click(screen.getByRole('radio', { name: 'List' }));
-    expect(screen.queryByRole('region', { name: /Channel map/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('region', { name: /Map of your catalog/ })).not.toBeInTheDocument();
     expect(screen.getByRole('link', { name: 'Open North shop’s listings' })).toBeVisible();
   });
 

@@ -16,13 +16,13 @@ function useHasStores(workspaceId: string): boolean {
 }
 
 /**
- * The channels card of a product not saved yet. Stores are chosen on the saved product's page,
+ * The stores card of a product not saved yet. Stores are chosen on the saved product's page,
  * so this says how to get there, or sends the seller to connect a first store.
  */
 export function ChannelsCard({ workspaceId }: { workspaceId: string }) {
   const hasStores = useHasStores(workspaceId);
   return (
-    <EditorCard title="Channels">
+    <EditorCard title={NEW_PRODUCT_CHANNELS_COPY.title}>
       <div className="flex items-start gap-3 text-sm">
         <Share2 className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
         {hasStores ? (
@@ -30,7 +30,7 @@ export function ChannelsCard({ workspaceId }: { workspaceId: string }) {
         ) : (
           <p className="text-muted-foreground">
             {NEW_PRODUCT_CHANNELS_COPY.noStores}{' '}
-            <Link to={ROUTES.channels} className="font-medium text-foreground underline">
+            <Link to={ROUTES.stores} className="font-medium text-foreground underline">
               {NEW_PRODUCT_CHANNELS_COPY.connect}
             </Link>{' '}
             {NEW_PRODUCT_CHANNELS_COPY.connectReason}

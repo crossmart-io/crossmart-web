@@ -76,13 +76,13 @@ describe('listingFixOf', () => {
 
 describe('listingFixRoute', () => {
   it.each([
-    [PublishRequirement.reconnect, '/channels/c-1'],
-    [PublishRequirement.account_settings, '/channels/c-1'],
-    [PublishRequirement.shipping_policy, '/channels/c-1/settings#listing-defaults'],
-    [PublishRequirement.payment_policy, '/channels/c-1/settings#listing-defaults'],
-    [PublishRequirement.return_policy, '/channels/c-1/settings#listing-defaults'],
-    [PublishRequirement.ship_from_location, '/channels/c-1/settings#listing-defaults'],
-    [PublishRequirement.listing_setup, '/channels/c-1/settings#listing-setup'],
+    [PublishRequirement.reconnect, '/stores/c-1'],
+    [PublishRequirement.account_settings, '/stores/c-1'],
+    [PublishRequirement.shipping_policy, '/stores/c-1/settings#listing-defaults'],
+    [PublishRequirement.payment_policy, '/stores/c-1/settings#listing-defaults'],
+    [PublishRequirement.return_policy, '/stores/c-1/settings#listing-defaults'],
+    [PublishRequirement.ship_from_location, '/stores/c-1/settings#listing-defaults'],
+    [PublishRequirement.listing_setup, '/stores/c-1/settings#listing-setup'],
     [PublishRequirement.images, '/products/p-1#media'],
     [PublishRequirement.active_product, '/products/p-1#status'],
     [PublishRequirement.option_names, '/products/p-1#variants'],

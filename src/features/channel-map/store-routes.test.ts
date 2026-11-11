@@ -3,14 +3,14 @@ import { storeListingsRoute } from './store-routes';
 
 describe('storeListingsRoute', () => {
   it('opens the store’s listings', () => {
-    expect(storeListingsRoute('c-1')).toBe('/channels/c-1/listings');
+    expect(storeListingsRoute('c-1')).toBe('/stores/c-1/listings');
   });
 
   it.each([
-    [MapStatus.Published, '/channels/c-1/listings?state=listed'],
-    [MapStatus.Pending, '/channels/c-1/listings?state=pending'],
-    [MapStatus.NeedsDetails, '/channels/c-1/listings?state=needs_details'],
-    [MapStatus.Failed, '/channels/c-1/listings?state=failed'],
+    [MapStatus.Published, '/stores/c-1/listings?state=listed'],
+    [MapStatus.Pending, '/stores/c-1/listings?state=pending'],
+    [MapStatus.NeedsDetails, '/stores/c-1/listings?state=needs_details'],
+    [MapStatus.Failed, '/stores/c-1/listings?state=failed'],
   ])('filters the store’s listings to %s', (status, route) => {
     expect(storeListingsRoute('c-1', status)).toBe(route);
   });

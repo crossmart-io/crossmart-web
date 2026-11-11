@@ -1,109 +1,60 @@
 import {
-  Bot,
-  BotMessageSquare,
-  FileUp,
-  CreditCard,
-  History,
-  Inbox,
-  KeyRound,
-  MessageCircleQuestionMark,
   CircleUser,
-  LayoutDashboard,
+  House,
+  MessageCircleQuestionMark,
   Package,
+  Settings,
   ShoppingBag,
-  Share2,
-  ShieldCheck,
-  Store,
-  Users,
   Sparkles,
-  Warehouse,
-  Webhook,
+  Store,
   type LucideIcon,
 } from 'lucide-react';
-import { WorkspacePermission } from '@/api/schema';
 import { ROUTES } from './routes';
 
 export interface NavItem {
   label: string;
   to: string;
   icon: LucideIcon;
-  /** Match only this exact path (the overview), not its children. */
+  /** Match only this exact path (Home), not the pages under it. */
   end?: boolean;
+  /** Other sections that belong to this item, so it stays highlighted there (Imports → Products). */
+  also?: readonly string[];
   /** A count shown on the item, such as listings that need attention. */
   badge?: NavBadge;
-  /** Shown only to members whose role holds this permission. */
-  permission?: WorkspacePermission;
-  /** Shown only to the people who run this Crossmart instance (`me.platformAdmin`). */
-  platformAdminOnly?: boolean;
 }
 
 /** Counts the sidebar can show on an item; `AppSidebar` maps each to its component. */
 export enum NavBadge {
   ChannelErrors = 'channel_errors',
-  PendingSuggestions = 'pending_suggestions',
-  PendingProposals = 'pending_proposals',
+  PendingReview = 'pending_review',
 }
 
-interface NavGroup {
+/** The whole sidebar: what a seller does every day. Everything else lives inside these pages. */
+export const NAV_ITEMS: readonly NavItem[] = [
+  { label: 'Home', to: ROUTES.home, icon: House, end: true, also: [ROUTES.activity] },
+  { label: 'Products', to: ROUTES.products, icon: Package, also: [ROUTES.imports] },
+  { label: 'Orders', to: ROUTES.orders, icon: ShoppingBag },
+  { label: 'Stores', to: ROUTES.stores, icon: Store, badge: NavBadge.ChannelErrors },
+  { label: 'Agent', to: ROUTES.agent, icon: Sparkles, badge: NavBadge.PendingReview },
+  { label: 'Settings', to: ROUTES.settings, icon: Settings },
+];
+
+/** Pages about the signed-in person rather than the workspace, in the user menu. */
+export interface UserMenuLink {
   label: string;
-  items: readonly NavItem[];
+  to: string;
+  icon: LucideIcon;
+  /** Shown only to the people who run this Crossmart instance (`me.platformAdmin`). */
+  platformAdminOnly?: boolean;
 }
 
-export const NAV_GROUPS: readonly NavGroup[] = [
+export const USER_MENU_LINKS: readonly UserMenuLink[] = [
+  { label: 'Account', to: ROUTES.account, icon: CircleUser },
   {
-    label: 'Catalog',
-    items: [
-      { label: 'Overview', to: ROUTES.home, icon: LayoutDashboard, end: true },
-      { label: 'Products', to: ROUTES.products, icon: Package },
-      { label: 'Orders', to: ROUTES.orders, icon: ShoppingBag },
-      { label: 'Inventory', to: ROUTES.inventory, icon: Warehouse },
-      { label: 'Imports', to: ROUTES.imports, icon: FileUp },
-      { label: 'Channels', to: ROUTES.channels, icon: Share2, badge: NavBadge.ChannelErrors },
-      { label: 'Crossmart Agent', to: ROUTES.agent, icon: Sparkles },
-      {
-        label: 'Agent proposals',
-        to: ROUTES.agentProposals,
-        icon: BotMessageSquare,
-        badge: NavBadge.PendingProposals,
-        permission: WorkspacePermission.suggestions_view,
-      },
-      {
-        label: 'Suggestions',
-        to: ROUTES.suggestions,
-        icon: Inbox,
-        badge: NavBadge.PendingSuggestions,
-      },
-      { label: 'Activity', to: ROUTES.activity, icon: History },
-    ],
-  },
-  {
-    label: 'Settings',
-    items: [
-      { label: 'Workspace', to: ROUTES.workspaceSettings, icon: Store },
-      { label: 'Billing', to: ROUTES.billing, icon: CreditCard },
-      { label: 'Members', to: ROUTES.members, icon: Users },
-      { label: 'Roles', to: ROUTES.roles, icon: ShieldCheck },
-      { label: 'API keys', to: ROUTES.apiKeys, icon: KeyRound },
-      {
-        label: 'Webhooks',
-        to: ROUTES.webhooks,
-        icon: Webhook,
-        permission: WorkspacePermission.webhooks_manage,
-      },
-      { label: 'Connected agents', to: ROUTES.agentConnections, icon: Bot },
-      { label: 'Account', to: ROUTES.account, icon: CircleUser },
-    ],
-  },
-  {
-    label: 'Platform',
-    items: [
-      {
-        label: 'Ask insights',
-        to: ROUTES.askInsights,
-        icon: MessageCircleQuestionMark,
-        platformAdminOnly: true,
-      },
-    ],
+    label: 'Ask insights',
+    to: ROUTES.askInsights,
+    icon: MessageCircleQuestionMark,
+    platformAdminOnly: true,
   },
 ];
 
@@ -119,10 +70,14 @@ export const PAGE_PARENTS = {
   products: [{ label: 'Products', to: ROUTES.products }],
   settings: [{ label: 'Settings' }],
   billing: [{ label: 'Settings' }, { label: 'Billing', to: ROUTES.billing }],
-  imports: [{ label: 'Imports', to: ROUTES.imports }],
-  channels: [{ label: 'Channels', to: ROUTES.channels }],
+  developers: [{ label: 'Settings' }, { label: 'Developers', to: ROUTES.developers }],
+  imports: [
+    { label: 'Products', to: ROUTES.products },
+    { label: 'Imports', to: ROUTES.imports },
+  ],
+  stores: [{ label: 'Stores', to: ROUTES.stores }],
   orders: [{ label: 'Orders', to: ROUTES.orders }],
-  webhooks: [{ label: 'Settings' }, { label: 'Webhooks', to: ROUTES.webhooks }],
+  agent: [{ label: 'Agent', to: ROUTES.agent }],
   platform: [{ label: 'Platform' }],
   askInsights: [{ label: 'Platform' }, { label: 'Ask insights', to: ROUTES.askInsights }],
 } as const satisfies Record<string, readonly Crumb[]>;

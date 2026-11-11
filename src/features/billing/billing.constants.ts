@@ -64,9 +64,6 @@ export const READ_ONLY_FALLBACK_REASON = 'The subscription is not active.';
 export const SUBSCRIPTION_INACTIVE_CODE = 'subscription_inactive';
 
 export const BILLING_COPY = {
-  pageName: 'Billing',
-  pageDescription:
-    'Your organization’s plan, its billing and how much of it is in use across all workspaces.',
   noAccess: 'Only owners and admins can see the plan and its billing.',
   loadError: 'Billing could not be loaded',
   plansLoadError: 'The plans could not be loaded',

@@ -10,8 +10,12 @@ export const EXTERNAL_LINKS = {
   webhookSignatures: 'https://docs.crossmart.io/developers/webhooks/#verify-the-signature',
 } as const;
 
-/** A mail link to Crossmart about a channel, with the channel named in the subject. */
-export function channelRequestMailto(channelName: string): string {
-  const subject = encodeURIComponent(`Channel request: ${channelName}`);
-  return `mailto:${SUPPORT_EMAIL}?subject=${subject}`;
+const CHANNEL_REQUEST_SUBJECT = 'Channel request';
+
+/** A mail link to Crossmart asking for a channel, named in the subject when one is given. */
+export function channelRequestMailto(channelName?: string): string {
+  const subject = channelName
+    ? `${CHANNEL_REQUEST_SUBJECT}: ${channelName}`
+    : CHANNEL_REQUEST_SUBJECT;
+  return `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(subject)}`;
 }

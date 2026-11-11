@@ -5,7 +5,7 @@ import { useSession } from '@/features/auth';
 import type * as Billing from '@/features/billing';
 import { type SubscriptionAccess, useBillingAccess } from '@/features/billing';
 import { usePendingProposalCount } from '@/features/agent-proposals';
-import { ROUTES } from '@/config/routes';
+import { ReviewSource, toAgentReviewRoute } from '@/config/routes';
 import type * as Workspaces from '@/features/workspaces';
 import { useCurrentWorkspace, type Workspace } from '@/features/workspaces';
 import { NoticeActionKind, NoticeKind, NoticeSeverity } from '../notifications.types';
@@ -140,7 +140,10 @@ describe('useAccountNotices', () => {
         kind: NoticeKind.AgentProposals,
         banner: false,
         body: expect.stringContaining('2 changes'),
-        action: expect.objectContaining({ kind: NoticeActionKind.Link, to: ROUTES.agentProposals }),
+        action: expect.objectContaining({
+          kind: NoticeActionKind.Link,
+          to: toAgentReviewRoute(ReviewSource.Proposals),
+        }),
       }),
     ]);
   });

@@ -72,10 +72,7 @@ function Orders({ workspace }: { workspace: Workspace }) {
 
 export function OrdersPage() {
   return (
-    <Page
-      name="Orders"
-      description="Orders from every store. Each one reserves its stock everywhere."
-    >
+    <Page name="Orders">
       <WorkspaceGate>{(workspace) => <Orders workspace={workspace} />}</WorkspaceGate>
     </Page>
   );

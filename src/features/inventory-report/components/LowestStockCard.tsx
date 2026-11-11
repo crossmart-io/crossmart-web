@@ -2,7 +2,7 @@ import { CircleCheck } from 'lucide-react';
 import { Link } from 'react-router';
 import { StockLevel } from '@/api/schema';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toInventoryRoute, toProductRoute } from '@/config/routes';
+import { toStockRoute, toProductRoute } from '@/config/routes';
 import { StockLevelBadge, variantLabel } from '@/features/inventory';
 import { LOWEST_STOCK_COPY } from '../inventory-report.constants';
 import type { InventoryReport, LowStockVariant } from '../inventory-report.types';
@@ -55,7 +55,7 @@ export function LowestStockCard({ report }: { report: InventoryReport }) {
               ))}
             </ul>
             <Link
-              to={toInventoryRoute(StockLevel.out_of_stock)}
+              to={toStockRoute(StockLevel.out_of_stock)}
               className="mt-3 inline-block text-xs font-medium text-muted-foreground hover:underline"
             >
               {LOWEST_STOCK_COPY.viewAll}

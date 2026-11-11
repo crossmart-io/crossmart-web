@@ -13,7 +13,7 @@ export const CONNECT_REDIRECT_PARAMS = {
 type ConnectOutcome = { kind: 'connected'; message: string } | { kind: 'failed'; message: string };
 
 function channelName(type: ChannelType | undefined): string {
-  return CHANNELS.find((channel) => channel.connect?.type === type)?.name ?? 'The channel';
+  return CHANNELS.find((channel) => channel.connect?.type === type)?.name ?? 'The store';
 }
 
 /** What to tell the merchant about the redirect they just came back with, if anything. */

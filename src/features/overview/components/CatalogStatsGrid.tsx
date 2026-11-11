@@ -14,11 +14,11 @@ function ChannelsTile({ workspaceId }: { workspaceId: string }) {
   );
   return (
     <StatTile
-      label="Channels"
+      label="Stores"
       value={stores?.length}
       detail={stores?.length ? connectionsSummary(stores) : CONNECT_CHANNEL_PROMPT}
       icon={Share2}
-      to={ROUTES.channels}
+      to={ROUTES.stores}
     />
   );
 }

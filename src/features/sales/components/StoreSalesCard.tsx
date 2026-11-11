@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { ROUTES, toChannelConnectionRoute } from '@/config/routes';
+import { ROUTES, toStoreRoute } from '@/config/routes';
 import { formatMoney, pluralize } from '@/lib/format';
 import { toSharePercent } from '../sales-format';
 import { RankedBar } from './RankedBar';
@@ -21,7 +21,7 @@ export function StoreSalesCard({ report }: { report: SalesReport }) {
       <CardContent>
         {stores.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            <Link to={ROUTES.channels} className="font-medium text-foreground underline">
+            <Link to={ROUTES.stores} className="font-medium text-foreground underline">
               Connect a store
             </Link>{' '}
             to see its sales here.
@@ -34,7 +34,7 @@ export function StoreSalesCard({ report }: { report: SalesReport }) {
                 <li key={store.connectionId} className="flex flex-col gap-1.5">
                   <div className="flex items-baseline justify-between gap-4 text-sm">
                     <Link
-                      to={toChannelConnectionRoute(store.connectionId)}
+                      to={toStoreRoute(store.connectionId)}
                       className="truncate font-medium hover:underline"
                     >
                       {store.displayName}

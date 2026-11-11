@@ -1,4 +1,4 @@
-import { Plus } from 'lucide-react';
+import { History, Plus } from 'lucide-react';
 import { Link } from 'react-router';
 import { ContentLoader } from '@/components/feedback/ContentLoader';
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
@@ -61,23 +61,35 @@ function OverviewContent({ workspace }: { workspace: Workspace }) {
   );
 }
 
+function HomeActions() {
+  return (
+    <>
+      <Button variant="outline" asChild>
+        <Link to={ROUTES.activity}>
+          <History data-icon="inline-start" />
+          Activity
+        </Link>
+      </Button>
+      <Button asChild>
+        <Link to={ROUTES.newProduct}>
+          <Plus data-icon="inline-start" />
+          Add product
+        </Link>
+      </Button>
+    </>
+  );
+}
+
+/** Home: sales, stock, listings and the catalog at a glance, and what to do next. */
 export function OverviewPage() {
   const { data: session } = useSession();
   const firstName = session?.user.name.split(' ')[0];
 
   return (
     <Page
-      name="Overview"
-      title={firstName ? `Welcome, ${firstName}` : 'Overview'}
-      description="Your sales, stock, listings and catalog at a glance, and what to do next."
-      actions={
-        <Button asChild>
-          <Link to={ROUTES.newProduct}>
-            <Plus data-icon="inline-start" />
-            Add product
-          </Link>
-        </Button>
-      }
+      name="Home"
+      title={firstName ? `Welcome, ${firstName}` : 'Home'}
+      actions={<HomeActions />}
     >
       <WorkspaceGate>{(workspace) => <OverviewContent workspace={workspace} />}</WorkspaceGate>
     </Page>

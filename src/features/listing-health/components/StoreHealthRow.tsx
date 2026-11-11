@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { ListingDisplayState } from '@/api/schema';
-import { toChannelConnectionRoute } from '@/config/routes';
+import { toStoreRoute } from '@/config/routes';
 import { ConnectionStatusBadge } from '@/features/channels';
 import { StoreName } from '@/features/listings';
 import { formatDateTime } from '@/lib/format';
@@ -15,10 +15,7 @@ export function StoreHealthRow({ store }: { store: StoreListingHealth }) {
   return (
     <li className="flex flex-col gap-3 py-4 first:pt-0 last:pb-0">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <Link
-          to={toChannelConnectionRoute(store.connectionId)}
-          className="min-w-0 text-sm hover:underline"
-        >
+        <Link to={toStoreRoute(store.connectionId)} className="min-w-0 text-sm hover:underline">
           <StoreName connection={store} />
         </Link>
         <ConnectionStatusBadge status={store.status} />

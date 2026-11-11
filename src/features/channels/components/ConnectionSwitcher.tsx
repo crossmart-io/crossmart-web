@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { toChannelConnectionRoute } from '@/config/routes';
+import { toStoreRoute } from '@/config/routes';
 import { channelInfoFor } from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
 import { connectionName } from '../connection-name';
@@ -93,7 +93,7 @@ export function ConnectionSwitcher({
               key={candidate.id}
               connection={candidate}
               isCurrent={candidate.id === connection.id}
-              onSelect={() => void navigate(toChannelConnectionRoute(candidate.id, tab))}
+              onSelect={() => void navigate(toStoreRoute(candidate.id, tab))}
             />
           ))}
           {canManage && channel?.connect && (

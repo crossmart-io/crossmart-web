@@ -2,7 +2,7 @@ import { CircleDashed } from 'lucide-react';
 import { Link } from 'react-router';
 import type { PublishRequirement } from '@/api/schema';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
-import { toChannelConnectionRoute, withSection } from '@/config/routes';
+import { toStoreRoute, withSection } from '@/config/routes';
 import { channelInfoFor } from '@/features/channels/channels.constants';
 import type { ChannelConnection } from '@/features/channels/channels.types';
 import { ReconnectButton } from '@/features/channels/components/ReconnectButton';
@@ -34,10 +34,7 @@ function MissingItem({ workspaceId, connection, canManage, requirement }: Missin
       {fix.missing}.{' '}
       {fix.target === FixTarget.StoreSettings && (
         <Link
-          to={withSection(
-            toChannelConnectionRoute(connection.id, ChannelTab.Settings),
-            fix.section,
-          )}
+          to={withSection(toStoreRoute(connection.id, ChannelTab.Settings), fix.section)}
           className="font-medium text-foreground underline"
         >
           {fix.action}

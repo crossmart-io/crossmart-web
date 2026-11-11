@@ -20,39 +20,37 @@ export const ROUTES = {
   claimSandbox: '/claim',
   products: '/products',
   newProduct: '/products/new',
+  /** The stock of every variant, a view of the products list. */
+  stock: '/products/stock',
   product: `/products/:${ROUTE_PARAMS.productId}`,
-  inventory: '/inventory',
-  channels: '/channels',
+  /** The connected stores (channel connections), and the channels a store can be added on. */
+  stores: '/stores',
+  store: `/stores/:${ROUTE_PARAMS.connectionId}`,
+  storeTab: `/stores/:${ROUTE_PARAMS.connectionId}/:${ROUTE_PARAMS.tab}`,
   /** Crossmart Agent: the chat, the live map of the catalog and its stores, and the event stream. */
   agent: '/agent',
-  /** The former channel map page; kept so old links land on Crossmart Agent. */
-  channelMap: '/channel-map',
-  channelConnection: `/channels/:${ROUTE_PARAMS.connectionId}`,
-  channelConnectionTab: `/channels/:${ROUTE_PARAMS.connectionId}/:${ROUTE_PARAMS.tab}`,
+  /** AI suggestions and outside agents' proposals (ADR 0028) waiting for review; the bell links here. */
+  agentReview: '/agent/review',
   activity: '/activity',
-  suggestions: '/suggestions',
-  /** Outside AI agents' changes waiting for approval (ADR 0028); the bell links here. */
-  agentProposals: '/agent-proposals',
   orders: '/orders',
   order: `/orders/:${ROUTE_PARAMS.orderId}`,
   imports: '/imports',
   importJob: `/imports/:${ROUTE_PARAMS.jobId}`,
-  apiKeys: '/settings/api-keys',
-  /** The backend's email about an endpoint it turned off links here. */
-  webhooks: '/settings/webhooks',
-  webhookEndpoint: `/settings/webhooks/:${ROUTE_PARAMS.endpointId}`,
-  workspaceSettings: '/settings/workspace',
+  /** Settings is one page with a tab per route below it. */
+  settings: '/settings',
+  generalSettings: '/settings/general',
+  team: '/settings/team',
+  roles: '/settings/team/roles',
   /** The plan, its billing and usage. Checkout and the billing portal return here (ADR 0024). */
   billing: '/settings/billing',
   /** Where checkout returns after paying, and after backing out; the API names these paths. */
   checkoutSuccess: '/settings/billing/checkout/success',
   checkoutCanceled: '/settings/billing/checkout/canceled',
-  /** The former plan page; kept so old links land on billing. */
-  plan: '/settings/plan',
-  members: '/settings/members',
-  roles: '/settings/roles',
-  account: '/settings/account',
-  agentConnections: '/settings/agents',
+  /** API keys, webhooks and connected agents. */
+  developers: '/settings/developers',
+  webhookEndpoint: `/settings/developers/webhooks/:${ROUTE_PARAMS.endpointId}`,
+  /** The signed-in person's own account, from the user menu. */
+  account: '/account',
   /** Steps of an AI agent's sign-in (ADR 0019): Better Auth sends the browser here. */
   agentWorkspace: '/oauth/workspace',
   agentConsent: '/oauth/consent',
@@ -62,13 +60,38 @@ export const ROUTES = {
   askConversation: `/admin/ask/:${ROUTE_PARAMS.conversationId}`,
 } as const;
 
+/**
+ * Paths the app used before, kept so bookmarks, emails and OAuth returns still land: each one
+ * redirects to its page in `ROUTES`, with its query and hash.
+ */
+export const LEGACY_ROUTES = {
+  /** The API's OAuth callback still sends the browser here after a store connects. */
+  channels: '/channels',
+  channelConnection: `/channels/:${ROUTE_PARAMS.connectionId}`,
+  channelConnectionTab: `/channels/:${ROUTE_PARAMS.connectionId}/:${ROUTE_PARAMS.tab}`,
+  channelMap: '/channel-map',
+  inventory: '/inventory',
+  suggestions: '/suggestions',
+  agentProposals: '/agent-proposals',
+  workspaceSettings: '/settings/workspace',
+  members: '/settings/members',
+  roles: '/settings/roles',
+  apiKeys: '/settings/api-keys',
+  /** The backend's email about an endpoint it turned off links here. */
+  webhooks: '/settings/webhooks',
+  webhookEndpoint: `/settings/webhooks/:${ROUTE_PARAMS.endpointId}`,
+  agentConnections: '/settings/agents',
+  account: '/settings/account',
+  plan: '/settings/plan',
+} as const;
+
 export function toProductRoute(productId: string): string {
   return ROUTES.product.replace(`:${ROUTE_PARAMS.productId}`, productId);
 }
 
-/** A channel connection's page, opened on `tab` when one is given. */
-export function toChannelConnectionRoute(connectionId: string, tab?: string): string {
-  const route = ROUTES.channelConnection.replace(`:${ROUTE_PARAMS.connectionId}`, connectionId);
+/** A store's (channel connection's) page, opened on `tab` when one is given. */
+export function toStoreRoute(connectionId: string, tab?: string): string {
+  const route = ROUTES.store.replace(`:${ROUTE_PARAMS.connectionId}`, connectionId);
   return tab ? `${route}/${tab}` : route;
 }
 
@@ -100,6 +123,10 @@ export const ROUTE_QUERY = {
   overrideStore: 'override',
   /** On a store's page: the product whose listing editor opens over the listings. */
   listingProduct: 'listing',
+  /** On the review list: `ReviewSource`. */
+  reviewSource: 'source',
+  /** On Crossmart Agent: the panel a narrow screen opens on. */
+  agentPanel: 'panel',
 } as const;
 
 /** Parts of a page a link can scroll to, as the ids of their cards (`#media`). */
@@ -107,7 +134,9 @@ export enum PageSection {
   ProductMedia = 'media',
   ProductStatus = 'status',
   ProductVariants = 'variants',
-  ProductChannelMap = 'channel-map',
+  ApiKeys = 'api-keys',
+  Webhooks = 'webhooks',
+  ConnectedAgents = 'agents',
   StoreListingDefaults = 'listing-defaults',
   StoreListingSetup = 'listing-setup',
   StorePricing = 'pricing',
@@ -127,7 +156,7 @@ export function toProductStoreOverrideRoute(productId: string, connectionId: str
 /** A store's listings with the listing editor open on one product, so it can be shared. */
 export function toStoreListingRoute(connectionId: string, productId: string): string {
   const query = new URLSearchParams({ [ROUTE_QUERY.listingProduct]: productId });
-  return `${toChannelConnectionRoute(connectionId)}?${query}`;
+  return `${toStoreRoute(connectionId)}?${query}`;
 }
 
 /** A table's page and rows per page, kept in the URL with its filters. */
@@ -165,11 +194,31 @@ export function toProductsRoute(
   return search ? `${ROUTES.products}?${search}` : ROUTES.products;
 }
 
-/** The inventory list, optionally at one stock level (`StockLevel`). */
-export function toInventoryRoute(stockLevel?: string): string {
+/** The stock list, optionally at one stock level (`StockLevel`). */
+export function toStockRoute(stockLevel?: string): string {
   return stockLevel
-    ? `${ROUTES.inventory}?${new URLSearchParams({ [ROUTE_QUERY.stockLevel]: stockLevel })}`
-    : ROUTES.inventory;
+    ? `${ROUTES.stock}?${new URLSearchParams({ [ROUTE_QUERY.stockLevel]: stockLevel })}`
+    : ROUTES.stock;
+}
+
+/** Where review items come from: AI suggestions, or outside agents' proposals (ADR 0028). */
+export enum ReviewSource {
+  Suggestions = 'ai',
+  Proposals = 'agents',
+}
+
+/** The review list, on one source when one is given. */
+export function toAgentReviewRoute(source?: ReviewSource): string {
+  return source
+    ? `${ROUTES.agentReview}?${new URLSearchParams({ [ROUTE_QUERY.reviewSource]: source })}`
+    : ROUTES.agentReview;
+}
+
+/** Crossmart Agent, opened on one of its panels (on narrow screens, where they are tabs). */
+export function toAgentRoute(panel?: string): string {
+  return panel
+    ? `${ROUTES.agent}?${new URLSearchParams({ [ROUTE_QUERY.agentPanel]: panel })}`
+    : ROUTES.agent;
 }
 
 export function toOrderRoute(orderId: string): string {

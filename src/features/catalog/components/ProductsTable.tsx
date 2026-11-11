@@ -55,7 +55,7 @@ export function ProductsTable({
             )}
             <TableHead>Product</TableHead>
             <TableHead className="hidden sm:table-cell">Status</TableHead>
-            <TableHead className="hidden sm:table-cell">Channels</TableHead>
+            <TableHead className="hidden sm:table-cell">Stores</TableHead>
             <TableHead className="hidden md:table-cell">Inventory</TableHead>
             <TableHead className="hidden text-right md:table-cell">Price</TableHead>
             <TableHead className="hidden lg:table-cell">Vendor</TableHead>

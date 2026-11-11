@@ -155,7 +155,7 @@ describe('WebhookEndpoints', () => {
     expect(await within(dialog).findByText(/10 are in use/)).toBeVisible();
     expect(within(dialog).getByRole('link', { name: 'See plan & usage' })).toHaveAttribute(
       'href',
-      ROUTES.plan,
+      ROUTES.billing,
     );
   });
 
