@@ -10,6 +10,10 @@ import {
   PULSING_EDGE_CLASS,
 } from './channel-map.constants';
 
+/** The map panel's canvas on a 1280×800 screen, in pixels. */
+const EIGHT_STORE_PANEL_HEIGHT = 420;
+const EIGHT_STORES = 8;
+
 describe('buildAccountMap', () => {
   const stores = [
     storeHealthFixture({ [ListingDisplayState.published]: 5, [ListingDisplayState.failed]: 1 }),
@@ -36,12 +40,24 @@ describe('buildAccountMap', () => {
     expect(graph.edges[1]?.style?.stroke).toBe(MAP_STATUS_PRESENTATION[MapStatus.NotListed].stroke);
   });
 
-  it('stacks the column without overlaps, with room for the fix under a store with failures', () => {
+  it('stacks the column evenly without overlaps, the catalog centred beside it', () => {
     const leaves = graph.nodes.slice(1).map((node) => node.position.y);
-    expect((leaves[1] ?? 0) - (leaves[0] ?? 0)).toBeGreaterThanOrEqual(
-      MAP_LAYOUT.storeLeafHeight + MAP_LAYOUT.storeFixRowHeight,
+    const steps = leaves.slice(1).map((top, index) => top - (leaves[index] ?? 0));
+    expect(steps.slice(0, 2)).toEqual([
+      MAP_LAYOUT.storeLeafHeight + MAP_LAYOUT.rowGap,
+      MAP_LAYOUT.storeLeafHeight + MAP_LAYOUT.rowGap,
+    ]);
+    const hub = graph.nodes[0]?.position.y ?? 0;
+    expect(hub).toBeGreaterThan(0);
+    expect(hub).toBeLessThan(graph.height / 2);
+  });
+
+  it('keeps eight compact stores within a column a laptop’s map panel shows whole', () => {
+    const eight = [...Array(EIGHT_STORES).keys()].map((index) =>
+      storeHealthFixture({}, { connectionId: `c-${index}` }),
     );
-    expect((leaves[2] ?? 0) - (leaves[1] ?? 0)).toBeGreaterThanOrEqual(MAP_LAYOUT.storeLeafHeight);
+    const { height } = buildAccountMap({ stores: eight, productCount: 1, channels: [] });
+    expect(height * MAP_LAYOUT.fillMinZoom).toBeLessThan(EIGHT_STORE_PANEL_HEIGHT);
   });
 
   it('draws a store whose products wait for details in the needs-details colour', () => {

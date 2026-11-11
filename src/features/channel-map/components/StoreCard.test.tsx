@@ -93,6 +93,23 @@ describe('StoreCard', () => {
     ]);
   });
 
+  it('shows only the statuses the store has products in, as short counts', () => {
+    renderStore({ [ListingDisplayState.published]: 1, [ListingDisplayState.draft]: 1 });
+    const links = screen.getAllByRole('link', { name: /Show them$/ });
+    expect(links.map((link) => link.getAttribute('data-status'))).toEqual([
+      MapStatus.Published,
+      MapStatus.NotListed,
+    ]);
+    expect(links[0]).toHaveTextContent('1live');
+    expect(links[1]).toHaveTextContent('1not listed');
+  });
+
+  it('says so in one line when the store has nothing to count', () => {
+    renderStore({});
+    expect(screen.queryAllByRole('link', { name: /Show them$/ })).toEqual([]);
+    expect(screen.getByText('No products to list yet')).toBeVisible();
+  });
+
   it('opens the store’s listings from its name', async () => {
     renderStore();
     await userEvent.click(screen.getByRole('link', { name: 'Open North shop’s listings' }));

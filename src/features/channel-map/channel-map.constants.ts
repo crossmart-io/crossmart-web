@@ -61,6 +61,8 @@ export const MAP_STATUS_MEMBERS: Record<MapStatus, readonly ListingDisplayState[
 
 export interface MapStatusPresentation {
   label: string;
+  /** The status after a count on a compact card: "3 live", "1 not listed". */
+  countLabel: string;
   icon: LucideIcon;
   /** The edge's colour: a theme token, so it follows light and dark mode. */
   stroke: string;
@@ -75,6 +77,7 @@ export interface MapStatusPresentation {
 export const MAP_STATUS_PRESENTATION: Record<MapStatus, MapStatusPresentation> = {
   [MapStatus.Published]: {
     label: 'Published',
+    countLabel: 'live',
     icon: CircleCheck,
     stroke: 'var(--success)',
     animated: false,
@@ -82,6 +85,7 @@ export const MAP_STATUS_PRESENTATION: Record<MapStatus, MapStatusPresentation> =
   },
   [MapStatus.Pending]: {
     label: 'Pending',
+    countLabel: 'pending',
     icon: LoaderCircle,
     stroke: 'var(--brand)',
     dash: '6 4',
@@ -90,6 +94,7 @@ export const MAP_STATUS_PRESENTATION: Record<MapStatus, MapStatusPresentation> =
   },
   [MapStatus.NeedsDetails]: {
     label: 'Needs details',
+    countLabel: 'needs details',
     icon: CircleAlert,
     stroke: 'var(--warning)',
     dash: '10 4 2 4',
@@ -98,6 +103,7 @@ export const MAP_STATUS_PRESENTATION: Record<MapStatus, MapStatusPresentation> =
   },
   [MapStatus.Failed]: {
     label: 'Failed',
+    countLabel: 'failed',
     icon: CircleX,
     stroke: 'var(--destructive)',
     animated: false,
@@ -105,6 +111,7 @@ export const MAP_STATUS_PRESENTATION: Record<MapStatus, MapStatusPresentation> =
   },
   [MapStatus.NotListed]: {
     label: 'Not listed',
+    countLabel: 'not listed',
     icon: CircleDashed,
     stroke: 'var(--muted-foreground)',
     dash: '2 5',
@@ -152,11 +159,12 @@ export const MAP_LAYOUT = {
   hubWidth: 220,
   leafWidth: 330,
   columnGap: 140,
-  rowGap: 24,
-  /** A store's card: its name, five counts in two rows, and when it last synced. */
-  storeLeafHeight: 188,
-  /** A store with failures also offers Crossmart Agent, on a row of its own below. */
-  storeFixRowHeight: 20,
+  rowGap: 20,
+  /**
+   * A store's card: its name, a line of the counts it has, and when it last synced (beside
+   * which a store with failures offers Crossmart Agent).
+   */
+  storeLeafHeight: 104,
   ghostLeafHeight: 56,
   /** Room above and below the graph in the canvas, together. */
   canvasPadding: 48,
@@ -169,13 +177,15 @@ export const MAP_LAYOUT = {
   maxZoom: 1,
   minZoom: 0.45,
   /**
-   * A map that fills a page's column never shrinks below this, so a node's labels stay
-   * readable; what does not fit is reached by dragging the map.
+   * A map that fills a page's column shrinks far enough that up to eight stores fit whole; the
+   * zoom controls bring a part of it closer.
    */
-  fillMinZoom: 0.7,
+  fillMinZoom: 0.35,
   /** It may also grow a little past natural size, so a wide column is not left mostly empty. */
   fillMaxZoom: 1.25,
-  fillPadding: 0.04,
+  fillPadding: 0.06,
+  /** How long refitting the map takes when the column or the stores change. */
+  fitDurationMs: 200,
 } as const;
 
 export const MAP_EDGE_WIDTH = 2;
@@ -225,4 +235,7 @@ export const CHANNEL_MAP_COPY = {
       ? '1 change waiting for you. Show it'
       : `${count} changes waiting for you. Show them`,
   loadError: 'The map could not be loaded.',
+  controlsLabel: 'Map zoom',
+  nothingListed: 'No products to list yet',
+  countSeparator: '·',
 } as const;
