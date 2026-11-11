@@ -2,10 +2,12 @@ import '@xyflow/react/dist/base.css';
 import './channel-map.css';
 import { useEffect } from 'react';
 import {
+  Controls,
   type Edge,
   type Node,
   type NodeTypes,
   ReactFlow,
+  type ReactFlowState,
   useNodesInitialized,
   useNodesState,
   useReactFlow,
@@ -13,7 +15,7 @@ import {
 } from '@xyflow/react';
 import { useTheme } from '@/components/theme/useTheme';
 import { cn } from '@/lib/utils';
-import { MAP_LAYOUT } from '../channel-map.constants';
+import { CHANNEL_MAP_COPY, MAP_LAYOUT } from '../channel-map.constants';
 import { canvasHeight } from '../map-layout';
 
 interface ChannelMapCanvasProps<TNode extends Node> {
@@ -33,24 +35,38 @@ const FIT_VIEW_OPTIONS = {
   minZoom: MAP_LAYOUT.minZoom,
 } as const;
 
-/** A map filling a column: fitted tighter, and never so small that labels blur. */
+/** A map filling a column: fitted tighter, and shrunk as far as it takes to show it whole. */
 const FILL_FIT_VIEW_OPTIONS = {
   padding: MAP_LAYOUT.fillPadding,
   maxZoom: MAP_LAYOUT.fillMaxZoom,
   minZoom: MAP_LAYOUT.fillMinZoom,
+  duration: MAP_LAYOUT.fitDurationMs,
 } as const;
 
 type FitOptions = typeof FIT_VIEW_OPTIONS | typeof FILL_FIT_VIEW_OPTIONS;
 
-/** Fits the graph again whenever the canvas changes size or the nodes are measured anew. */
-function FitOnResize({ options }: { options: FitOptions }) {
+const SHAPE_SEPARATOR = '|';
+
+/** Which nodes there are and how big each was measured: it changes when the graph's shape does. */
+function graphShape(state: ReactFlowState): string {
+  return state.nodes
+    .map((node) => `${node.id}:${node.measured?.width ?? 0}x${node.measured?.height ?? 0}`)
+    .join(SHAPE_SEPARATOR);
+}
+
+/**
+ * Fits the graph again whenever the canvas changes size, or nodes are added, removed or measured
+ * anew, so the whole map stays in view.
+ */
+function FitOnChange({ options }: { options: FitOptions }) {
   const { fitView } = useReactFlow();
   const width = useStore((state) => state.width);
   const height = useStore((state) => state.height);
+  const shape = useStore(graphShape);
   const measured = useNodesInitialized();
   useEffect(() => {
     if (measured) void fitView(options);
-  }, [fitView, options, width, height, measured]);
+  }, [fitView, options, width, height, shape, measured]);
   return null;
 }
 
@@ -71,9 +87,9 @@ function useMeasuredNodes<TNode extends Node>(nodes: TNode[]) {
 
 /**
  * A read-only React Flow canvas fitted to its graph: no dragging, connecting, selecting, panning
- * or zooming, so the page scrolls over it as over any card. Filling a column, it may be dragged,
- * for a graph larger than the column at a readable size. The nodes' own buttons and links
- * are what a keyboard reaches.
+ * or zooming, so the page scrolls over it as over any card. Filling a column, it is fitted whole
+ * and offers zoom and fit controls, and may be dragged once zoomed in. The nodes' own buttons and
+ * links are what a keyboard reaches.
  */
 export function ChannelMapCanvas<TNode extends Node>({
   nodes,
@@ -91,7 +107,7 @@ export function ChannelMapCanvas<TNode extends Node>({
       aria-label={label}
       className={cn(
         'channel-map w-full overflow-hidden rounded-lg border bg-muted/30',
-        fill && 'h-full min-h-80',
+        fill && 'h-full min-h-64',
       )}
       style={fill ? undefined : { height: canvasHeight(graphHeight) }}
     >
@@ -118,7 +134,15 @@ export function ChannelMapCanvas<TNode extends Node>({
         preventScrolling={false}
         disableKeyboardA11y
       >
-        <FitOnResize options={fitOptions} />
+        <FitOnChange options={fitOptions} />
+        {fill && (
+          <Controls
+            showInteractive={false}
+            fitViewOptions={fitOptions}
+            orientation="horizontal"
+            aria-label={CHANNEL_MAP_COPY.controlsLabel}
+          />
+        )}
       </ReactFlow>
     </section>
   );

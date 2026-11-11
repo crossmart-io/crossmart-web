@@ -23,38 +23,62 @@ import { NodeOverlayFrame } from './NodeOverlayFrame';
 const FOCUS_RING =
   'rounded-md focus-visible:ring-[3px] focus-visible:ring-ring/50 focus-visible:outline-none';
 
-/** One status of the store, as a link to its products in that status. */
-function StatusCountLink({
+/** One status the store has products in, as a link to them: "3 live". */
+function StatusCountChip({
   store,
   status,
   count,
+  separated,
 }: {
   store: StoreListingHealth;
   status: MapStatus;
   count: number;
+  /** Set apart from the count before it. */
+  separated: boolean;
 }) {
-  const { label, icon: Icon, iconClass } = MAP_STATUS_PRESENTATION[status];
+  const { label, countLabel, icon: Icon, iconClass } = MAP_STATUS_PRESENTATION[status];
   return (
-    <li>
+    <li className="flex items-center gap-1">
+      {separated && (
+        <span className="text-muted-foreground" aria-hidden="true">
+          {CHANNEL_MAP_COPY.countSeparator}
+        </span>
+      )}
       <Link
         to={storeListingsRoute(store.connectionId, status)}
         aria-label={CHANNEL_MAP_COPY.statusCount(store.displayName, label, count)}
         data-status={status}
         className={cn(
-          'flex flex-col gap-0.5 px-1.5 py-1 transition-colors hover:bg-accent',
+          'flex items-center gap-1 px-0.5 whitespace-nowrap transition-colors hover:bg-accent',
           FOCUS_RING,
-          count === 0 && 'opacity-60',
         )}
       >
-        <span className="text-base leading-none font-semibold tabular-nums">
-          {count.toLocaleString()}
-        </span>
-        <span className="flex items-center gap-1 text-xs whitespace-nowrap text-muted-foreground">
-          <Icon className={cn('size-3', iconClass)} aria-hidden="true" />
-          {label}
-        </span>
+        <Icon className={cn('size-3', iconClass)} aria-hidden="true" />
+        <span className="font-medium tabular-nums">{count.toLocaleString()}</span>
+        <span className="text-muted-foreground">{countLabel}</span>
       </Link>
     </li>
+  );
+}
+
+/** The statuses the store has products in, or one muted line when it has none. */
+function StatusCounts({ store, counts }: StoreNodeData) {
+  const present = MAP_STATUS_ORDER.filter((status) => counts[status] > 0);
+  if (present.length === 0) {
+    return <p className="text-xs text-muted-foreground">{CHANNEL_MAP_COPY.nothingListed}</p>;
+  }
+  return (
+    <ul className="flex flex-wrap items-center gap-x-1 gap-y-0.5 text-xs">
+      {present.map((status, index) => (
+        <StatusCountChip
+          key={status}
+          store={store}
+          status={status}
+          count={counts[status]}
+          separated={index > 0}
+        />
+      ))}
+    </ul>
   );
 }
 
@@ -75,8 +99,8 @@ function FixWithAgentWorker({ store }: { store: StoreListingHealth }) {
 
 /**
  * A store on the account's map: its name (opening its listings), its connection when it is not
- * connected, how many products are in each status (each opening those products), and when it
- * last synced; with failed listings, a way to have Crossmart Agent fix them. A live view lays the
+ * connected, how many products are in each status it has (each opening those products), and when
+ * it last synced; with failed listings, a way to have Crossmart Agent fix them. A live view lays the
  * agent's work over it.
  */
 export function StoreCard({ store, counts, overlay }: StoreNodeData) {
@@ -89,7 +113,7 @@ export function StoreCard({ store, counts, overlay }: StoreNodeData) {
 
 function StoreCardBody({ store, counts }: StoreNodeData) {
   return (
-    <div className="@container flex flex-col gap-2.5 rounded-xl border bg-card p-3 text-card-foreground shadow-sm">
+    <div className="flex flex-col gap-2 rounded-xl border bg-card p-3 text-card-foreground shadow-sm">
       <div className="flex items-center justify-between gap-2 text-sm">
         <Link
           to={storeListingsRoute(store.connectionId)}
@@ -102,12 +126,7 @@ function StoreCardBody({ store, counts }: StoreNodeData) {
           <ConnectionStatusBadge status={store.status} />
         )}
       </div>
-      {/* Five counts in a row on a wide card; on a narrow one two rows, so each label fits whole. */}
-      <ul className="grid grid-cols-3 gap-1 @md:grid-cols-5">
-        {MAP_STATUS_ORDER.map((status) => (
-          <StatusCountLink key={status} store={store} status={status} count={counts[status]} />
-        ))}
-      </ul>
+      <StatusCounts store={store} counts={counts} />
       <div className="flex min-h-6 flex-wrap items-center justify-between gap-x-2 gap-y-1">
         <LastSynced value={store.lastSyncedAt} />
         {counts[MapStatus.Failed] > 0 && <FixWithAgentWorker store={store} />}

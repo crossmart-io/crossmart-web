@@ -70,6 +70,22 @@ describe('AccountChannelMap', () => {
     expect(screen.getByRole('link', { name: 'Open North shop’s listings' })).toBeVisible();
   });
 
+  it('offers fit and zoom controls when the map fills a column, and only then', () => {
+    stubMatchMedia(true);
+    renderMap({ fill: true });
+    expect(screen.getByLabelText('Map zoom')).toBeVisible();
+    for (const name of [/fit view/i, /zoom in/i, /zoom out/i]) {
+      expect(screen.getByRole('button', { name })).toBeVisible();
+    }
+    expect(screen.queryByRole('button', { name: /toggle interactivity/i })).not.toBeInTheDocument();
+  });
+
+  it('keeps a map sized to its graph free of controls', () => {
+    stubMatchMedia(true);
+    renderMap();
+    expect(screen.queryByRole('button', { name: /fit view/i })).not.toBeInTheDocument();
+  });
+
   it('leaves out the channels coming soon when asked, as Crossmart Agent’s map does', () => {
     stubMatchMedia(false);
     renderMap({ showComingSoon: false, fill: true });
