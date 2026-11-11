@@ -18,3 +18,7 @@ export { useInvalidateCatalog } from './hooks/useInvalidateCatalog';
 export { ProductThumbnail } from './components/ProductThumbnail';
 export { PRODUCT_SORTS } from './catalog.constants';
 export { ProductViewTabs } from './components/ProductViewTabs';
+export { ProductRowMenu } from './components/ProductRowMenu';
+export { MarkSoldButton } from './sold/MarkSoldButton';
+export { soldStateOfProduct } from './sold/sold-state';
+export type { Product, ProductSummary } from './catalog.types';

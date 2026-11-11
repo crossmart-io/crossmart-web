@@ -16,8 +16,6 @@ interface InheritedFieldProps {
   onUseProductValue?: () => void;
   /** The product's value, shown beside a changed field so the difference is plain. */
   productValue?: ReactNode;
-  /** A small action beside the badge, such as an AI rewrite. */
-  action?: ReactNode;
   children: ReactNode;
 }
 
@@ -31,7 +29,6 @@ export function InheritedField({
   origin,
   onUseProductValue,
   productValue,
-  action,
   children,
 }: InheritedFieldProps) {
   const changed = origin === FieldOrigin.Store;
@@ -45,10 +42,7 @@ export function InheritedField({
     >
       <div className="flex min-h-6 flex-wrap items-center justify-between gap-2">
         {label}
-        <div className="flex items-center gap-1.5">
-          {action}
-          <FieldOriginBadge origin={origin} />
-        </div>
+        <FieldOriginBadge origin={origin} />
       </div>
       {children}
       {changed && (productValue !== undefined || onUseProductValue) && (

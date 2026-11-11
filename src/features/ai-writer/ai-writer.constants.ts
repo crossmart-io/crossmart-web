@@ -16,7 +16,6 @@ export const QUICK_INSTRUCTIONS = [
 export const AI_WRITER_COPY = {
   rewrite: 'Rewrite with AI',
   writeAll: 'Write with AI',
-  writeAllHint: 'AI writes the title and description from the product. You review before saving.',
   instructionLabel: 'What should change?',
   instructionPlaceholder: 'Optional. For example: mention it is dishwasher-safe',
   submit: 'Rewrite',

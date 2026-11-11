@@ -72,6 +72,13 @@ export function formatDateTime(value: string | null | undefined, fallback = '—
 const COPY_LIST_LOCALE = 'en-GB';
 const ALTERNATIVES_FORMAT = new Intl.ListFormat(COPY_LIST_LOCALE, { type: 'disjunction' });
 
+const LIST_FORMAT = new Intl.ListFormat(COPY_LIST_LOCALE, { type: 'conjunction' });
+
+/** Items as they read in a sentence: "Shopify, eBay and Google". */
+export function formatList(items: readonly string[]): string {
+  return LIST_FORMAT.format(items);
+}
+
 /** Choices as they read in a sentence: "Shopify, eBay or Google". */
 export function formatAlternatives(items: readonly string[]): string {
   return ALTERNATIVES_FORMAT.format(items);

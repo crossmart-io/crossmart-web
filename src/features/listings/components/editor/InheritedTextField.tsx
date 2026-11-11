@@ -1,4 +1,3 @@
-import type { ReactNode } from 'react';
 import { useFormContext } from 'react-hook-form';
 import { FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
@@ -23,8 +22,6 @@ interface InheritedTextFieldProps {
   productValue: string | null;
   /** What to call the product's value when it has none, beside a changed field. */
   emptyProductValue?: string;
-  /** A small action beside the badge, such as an AI rewrite. */
-  action?: ReactNode;
 }
 
 /** A single-line text field in this store: empty shows, and follows, the product's value. */
@@ -32,7 +29,6 @@ export function InheritedTextField({
   field,
   productValue,
   emptyProductValue,
-  action,
 }: InheritedTextFieldProps) {
   const { productDefaults, readOnly } = useListingEditorContext();
   const { register } = useFormContext<OverrideFormValues>();
@@ -46,7 +42,6 @@ export function InheritedTextField({
       origin={origin}
       productValue={productValue ?? emptyProductValue}
       onUseProductValue={readOnly ? undefined : useProductValue}
-      action={action}
     >
       <Input
         id={inputId}

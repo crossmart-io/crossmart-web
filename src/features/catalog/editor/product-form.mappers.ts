@@ -6,18 +6,22 @@ import { emptyVariant } from './variant-sync';
 type VariantPayload = components['schemas']['UpdateVariantDto'];
 export type ProductPayload = components['schemas']['UpdateProductDto'];
 
+/** A new item for sale: one of it, published unless saved as a draft. */
+const NEW_PRODUCT_QUANTITY = '1';
+
 export function emptyProductForm(): ProductFormValues {
   return {
     title: '',
     handle: '',
     descriptionHtml: '',
-    status: ProductStatus.DRAFT,
+    status: ProductStatus.ACTIVE,
+    condition: null,
     vendor: '',
     productType: '',
     tags: [],
     media: [],
     options: [],
-    variants: [emptyVariant()],
+    variants: [{ ...emptyVariant(), quantity: NEW_PRODUCT_QUANTITY }],
   };
 }
 
@@ -37,6 +41,7 @@ export function toProductForm(product: Product): ProductFormValues {
     handle: product.handle,
     descriptionHtml: product.descriptionHtml,
     status: product.status,
+    condition: product.condition,
     vendor: product.vendor ?? '',
     productType: product.productType ?? '',
     tags: product.tags,
@@ -87,6 +92,7 @@ export function toProductPayload(values: ProductFormValues): ProductPayload {
     handle: values.handle,
     descriptionHtml: values.descriptionHtml,
     status: values.status,
+    condition: values.condition,
     vendor: orUndefined(values.vendor),
     productType: orUndefined(values.productType),
     tags: values.tags,

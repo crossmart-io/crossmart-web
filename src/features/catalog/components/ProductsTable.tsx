@@ -1,3 +1,4 @@
+import type { ReactNode } from 'react';
 import { Link } from 'react-router';
 import { cn } from '@/lib/utils';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -28,6 +29,8 @@ interface ProductsTableProps {
   isRefreshing?: boolean;
   /** Checked rows, for bulk actions. Without it the table has no checkboxes. */
   selection?: Selection;
+  /** A row's own actions, such as marking it sold. Without it the table has no menu column. */
+  renderRowMenu?: (product: ProductSummary) => ReactNode;
 }
 
 export function ProductsTable({
@@ -35,6 +38,7 @@ export function ProductsTable({
   currency,
   isRefreshing = false,
   selection,
+  renderRowMenu,
 }: ProductsTableProps) {
   return (
     <div
@@ -59,6 +63,11 @@ export function ProductsTable({
             <TableHead className="hidden md:table-cell">Inventory</TableHead>
             <TableHead className="hidden text-right md:table-cell">Price</TableHead>
             <TableHead className="hidden lg:table-cell">Vendor</TableHead>
+            {renderRowMenu && (
+              <TableHead className="w-10">
+                <span className="sr-only">Actions</span>
+              </TableHead>
+            )}
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -69,6 +78,7 @@ export function ProductsTable({
               currency={currency}
               selection={selection}
               isRefreshing={isRefreshing}
+              menu={renderRowMenu?.(product)}
             />
           ))}
         </TableBody>
@@ -103,9 +113,10 @@ interface ProductRowProps {
   currency: string;
   selection?: Selection;
   isRefreshing: boolean;
+  menu?: ReactNode;
 }
 
-function ProductRow({ product, currency, selection, isRefreshing }: ProductRowProps) {
+function ProductRow({ product, currency, selection, isRefreshing, menu }: ProductRowProps) {
   const price = product.priceRange ? formatPriceRange(product.priceRange, currency) : NO_VALUE;
   const isSelected = selection?.isSelected(product.id) ?? false;
 
@@ -138,6 +149,7 @@ function ProductRow({ product, currency, selection, isRefreshing }: ProductRowPr
       <TableCell className="hidden text-muted-foreground lg:table-cell">
         {product.vendor?.trim() ? product.vendor : NO_VALUE}
       </TableCell>
+      {menu !== undefined && <TableCell className="text-right">{menu}</TableCell>}
     </TableRow>
   );
 }

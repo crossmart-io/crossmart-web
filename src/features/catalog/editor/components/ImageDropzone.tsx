@@ -1,7 +1,7 @@
 import { ImagePlus } from 'lucide-react';
 import { type DragEvent, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
-import { IMAGE_FILE_ACCEPT, MAX_IMAGE_MEGABYTES } from '../../catalog.constants';
+import { IMAGE_FILE_ACCEPT } from '../../catalog.constants';
 
 interface ImageDropzoneProps {
   onFiles: (files: File[]) => void;
@@ -40,11 +40,11 @@ export function ImageDropzone({ onFiles, compact = false }: ImageDropzoneProps) 
       >
         <ImagePlus className="size-5" aria-hidden="true" />
         {compact ? (
-          <span className="sr-only">Add images</span>
+          <span className="sr-only">Add photos</span>
         ) : (
           <>
-            <span className="font-medium text-foreground">Add images</span>
-            <span>Drop JPEG, PNG, WebP or GIF files, up to {MAX_IMAGE_MEGABYTES} MB each</span>
+            <span className="font-medium text-foreground">Add photos</span>
+            <span>or drop them here</span>
           </>
         )}
       </button>

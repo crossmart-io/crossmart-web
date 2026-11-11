@@ -1,31 +1,21 @@
 import { PageSection } from '@/config/routes';
 import { useFormContext, useWatch } from 'react-hook-form';
-import { pluralize } from '@/lib/format';
 import type { ProductFormValues } from '../product-form.schema';
-import { EditorCard } from './EditorCard';
+import { EditorSection } from './EditorSection';
 import { OptionsEditor } from './OptionsEditor';
 import { VariantsGrid } from './VariantsGrid';
 
-export function VariantsCard({ currency }: { currency: string }) {
+/** Options such as size or color, and a row of price and stock per variant. */
+export function VariantsSection({ currency }: { currency: string }) {
   const { control } = useFormContext<ProductFormValues>();
   const options = useWatch({ control, name: 'options' });
   const variantCount = useWatch({ control, name: 'variants' }).length;
   const hasOptions = options.some((option) => option.values.length > 0);
-
+  const title = hasOptions ? `Variants (${variantCount.toLocaleString()})` : 'Variants';
   return (
-    <EditorCard
-      title="Variants"
-      id={PageSection.ProductVariants}
-      action={
-        hasOptions && (
-          <span className="text-sm text-muted-foreground">
-            {pluralize(variantCount, 'variant')}
-          </span>
-        )
-      }
-    >
+    <EditorSection title={title} id={PageSection.ProductVariants}>
       <OptionsEditor />
       {hasOptions && <VariantsGrid currency={currency} />}
-    </EditorCard>
+    </EditorSection>
   );
 }

@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { OutOfStockPolicy, ProductStatus } from '@/api/schema';
+import { OutOfStockPolicy, ProductCondition, ProductStatus } from '@/api/schema';
 import { moneyAmount, optionalMoneyAmount } from '@/lib/form-schemas';
 
 const INTEGER_PATTERN = /^-?\d+$/;
@@ -43,6 +43,7 @@ export const productFormSchema = z
     handle: z.string().trim().max(MAX_TEXT_LENGTH),
     descriptionHtml: z.string(),
     status: z.enum(ProductStatus),
+    condition: z.enum(ProductCondition).nullable(),
     vendor: optionalText,
     productType: optionalText,
     tags: z.array(z.string()),

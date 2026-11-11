@@ -1,6 +1,7 @@
 import {
   formatAlternatives,
   formatAmount,
+  formatList,
   formatMinorUnits,
   formatPriceRange,
   pluralize,
@@ -45,5 +46,12 @@ describe('formatMinorUnits', () => {
     expect(formatMinorUnits(2900, 'usd')).toMatch(/29[.,]00/);
     expect(formatMinorUnits(2300, 'USD')).toMatch(/23[.,]00/);
     expect(formatMinorUnits(500, 'jpy')).toMatch(/500/);
+  });
+});
+
+describe('formatList', () => {
+  it('joins items with "and" and no serial comma', () => {
+    expect(formatList(['Shopify', 'eBay', 'Google'])).toBe('Shopify, eBay and Google');
+    expect(formatList(['eBay'])).toBe('eBay');
   });
 });

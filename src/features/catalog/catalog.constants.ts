@@ -2,6 +2,7 @@ import type { SortOption } from '@/components/lists/sort-options';
 import { ProductSort, SortDirection } from '@/api/schema';
 export const PRODUCTS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/products';
 export const PRODUCT_ENDPOINT = '/api/v1/workspaces/{workspaceId}/products/{productId}';
+export const MARK_SOLD_ENDPOINT = '/api/v1/workspaces/{workspaceId}/products/{productId}/mark-sold';
 
 export const SEARCH_DEBOUNCE_MS = 300;
 
@@ -29,10 +30,22 @@ export const PRODUCT_FEEDBACK = {
   deleted: 'Product deleted',
 } as const;
 
+/** Marking a one-of-a-kind item sold outside the stores. */
+export const MARK_SOLD_COPY = {
+  action: 'Mark as sold',
+  sold: 'Sold',
+  title: (title: string) => `Mark “${title}” as sold?`,
+  confirmWithStores: (stores: string) =>
+    `Its stock goes to 0 and it comes off ${stores}, so it cannot sell twice.`,
+  confirmNoStores: 'Its stock goes to 0, so it cannot sell again.',
+  done: 'Marked sold.',
+  doneWithStores: (stores: string) => `Marked sold and removed from ${stores}.`,
+  alreadySold: 'Already sold. Nothing changed.',
+} as const;
+
 /** Feedback while editing a product. */
 export const EDITOR_FEEDBACK = {
   invalid: 'Some fields need attention before you can save.',
-  newProduct: 'New product',
   unsaved: 'Unsaved changes',
   optionRemoved: 'Option removed. Its variants were merged.',
   undo: 'Undo',
@@ -41,13 +54,20 @@ export const EDITOR_FEEDBACK = {
     'Your role can view products but not change them. Ask a workspace owner or admin for access.',
 } as const;
 
-/** The stores card of a product that is not saved yet. */
-export const NEW_PRODUCT_CHANNELS_COPY = {
-  title: 'Stores',
-  saveFirst: 'Save the product first, then choose which stores to list it in.',
-  noStores: 'Not listed in any store yet.',
-  connect: 'Connect a store',
-  connectReason: 'to publish it with content written for each marketplace.',
+/** The folded part of the product form. */
+export const MORE_DETAILS_COPY = {
+  title: 'More details',
+  summary: 'SKU, shipping, tags, variants',
+} as const;
+
+/** The save bar of a product that is not saved yet. */
+export const CREATE_BAR_COPY = {
+  label: 'Save the new product',
+  newProduct: 'New product',
+  uploading: 'Uploading photos…',
+  draft: 'Save as draft',
+  publish: 'Save & publish',
+  save: 'Save',
 } as const;
 
 /** The two views of the catalog, as tabs over the products list. */
@@ -68,6 +88,9 @@ export const VIEW_FEEDBACK = {
 
 /** Explains the variant cost field wherever it is edited. */
 export const COST_HELP = 'What you pay per unit. Used for pricing floors; never shown to buyers.';
+export const COMPARE_AT_HELP = 'The original price, shown crossed out.';
+export const BARCODE_HELP = 'GTIN, UPC, EAN or ISBN';
+export const TAGS_HELP = 'Help you find products and build store rules.';
 
 /** The products table's orders, by their URL value; the first is the default. */
 export const PRODUCT_SORTS: readonly [SortOption<ProductSort>, ...SortOption<ProductSort>[]] = [

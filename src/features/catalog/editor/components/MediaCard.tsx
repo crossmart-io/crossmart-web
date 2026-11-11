@@ -58,7 +58,7 @@ export function MediaCard({ workspaceId, onPendingChange }: MediaCardProps) {
 
   if (media.fields.length === 0 && uploads.pendingCount === 0) {
     return (
-      <EditorCard title="Media" id={PageSection.ProductMedia}>
+      <EditorCard title="Photos" id={PageSection.ProductMedia}>
         {problems}
         <ImageDropzone onFiles={addFiles} />
       </EditorCard>
@@ -66,7 +66,7 @@ export function MediaCard({ workspaceId, onPendingChange }: MediaCardProps) {
   }
 
   return (
-    <EditorCard title="Media" id={PageSection.ProductMedia}>
+    <EditorCard title="Photos" id={PageSection.ProductMedia}>
       {problems}
       <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
         <SortableContext
@@ -100,8 +100,7 @@ export function MediaCard({ workspaceId, onPendingChange }: MediaCardProps) {
 function ReorderHint() {
   return (
     <p className="text-xs text-muted-foreground">
-      Drag to reorder, or focus the handle and use the arrow keys. The first image is the main image
-      on every channel.
+      Drag to reorder. The first photo is the main one.
     </p>
   );
 }

@@ -4,6 +4,7 @@ import { MoneyInput } from '@/components/forms/MoneyInput';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Field, FieldDescription, FieldError, FieldLabel } from '@/components/ui/field';
 import { Input } from '@/components/ui/input';
+import { FieldHint } from '@/components/forms/FieldHint';
 import { LabelRow } from '@/components/forms/LabelRow';
 import type { ProductFormValues } from '../product-form.schema';
 
@@ -20,6 +21,18 @@ interface TextFieldProps {
   isCode?: boolean;
   /** A small action beside the label. */
   labelAction?: ReactNode;
+  /** Help shown on hover beside the label, instead of a line under the field. */
+  hint?: string;
+}
+
+/** A field's label, with its help mark when it has one. */
+function HintedLabel({ name, label, hint }: { name: string; label: string; hint?: string }) {
+  return (
+    <span className="flex items-center gap-1">
+      <FieldLabel htmlFor={name}>{label}</FieldLabel>
+      {hint && <FieldHint text={hint} />}
+    </span>
+  );
 }
 
 /** Ids that tie a field's description and error to its control for screen readers. */
@@ -52,6 +65,7 @@ export function TextField({
   maxLength,
   isCode = false,
   labelAction,
+  hint,
 }: TextFieldProps) {
   const { register, getFieldState, formState } = useFormContext<ProductFormValues>();
   const { error } = getFieldState(name, formState);
@@ -59,7 +73,7 @@ export function TextField({
   return (
     <Field data-invalid={Boolean(error)}>
       <LabelRow action={labelAction}>
-        <FieldLabel htmlFor={name}>{label}</FieldLabel>
+        <HintedLabel name={name} label={label} hint={hint} />
       </LabelRow>
       <Input
         id={name}
@@ -82,15 +96,16 @@ interface MoneyFieldProps {
   label: string;
   currency: string;
   description?: ReactNode;
+  hint?: string;
 }
 
-export function MoneyField({ name, label, currency, description }: MoneyFieldProps) {
+export function MoneyField({ name, label, currency, description, hint }: MoneyFieldProps) {
   const { register, getFieldState, formState } = useFormContext<ProductFormValues>();
   const { error } = getFieldState(name, formState);
 
   return (
     <Field data-invalid={Boolean(error)}>
-      <FieldLabel htmlFor={name}>{label}</FieldLabel>
+      <HintedLabel name={name} label={label} hint={hint} />
       <MoneyInput
         id={name}
         currency={currency}

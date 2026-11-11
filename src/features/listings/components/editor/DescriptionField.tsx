@@ -1,5 +1,4 @@
 import { Controller, useFormContext } from 'react-hook-form';
-import { ContentField } from '@/api/schema';
 import { RichTextEditor } from '@/components/forms/RichTextEditor';
 import { FieldLabel } from '@/components/ui/field';
 import { htmlToText } from '@/lib/html-text';
@@ -8,7 +7,6 @@ import { FieldOrigin, ListingField } from '../../listing-editor';
 import { LISTING_EDITOR_COPY, LISTING_FIELD_LABELS } from '../../listings.constants';
 import type { OverrideFormValues } from '../../override-form';
 import { ChangeForStoreButton } from './ChangeForStoreButton';
-import { ContentRewriteButton } from './ContentRewriteButton';
 import { InheritedField } from './InheritedField';
 import { useListingEditorContext } from './listing-editor-context';
 
@@ -40,7 +38,6 @@ export function DescriptionField() {
       origin={origin}
       productValue={<DescriptionPreview html={productDefaults.descriptionHtml} compact />}
       onUseProductValue={readOnly ? undefined : useProductValue}
-      action={<ContentRewriteButton field={ContentField.description} />}
     >
       {changed ? (
         <Controller
