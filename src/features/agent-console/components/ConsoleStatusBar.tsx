@@ -36,7 +36,7 @@ export function ConsoleStatusBar({ stores, agent }: ConsoleStatusBarProps) {
     <dl
       aria-label={COPY.label}
       data-testid={AGENT_CONSOLE_TEST_IDS.statusBar}
-      className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg border bg-card px-3 py-2 @2xl:grid-cols-4"
+      className="grid grid-cols-2 gap-x-4 gap-y-2 rounded-lg border bg-card px-3 py-2 @lg:grid-cols-4"
     >
       <StatusItem label={COPY.stores}>{COPY.storesValue(stores.healthy, stores.total)}</StatusItem>
       <StatusItem label={COPY.listings}>

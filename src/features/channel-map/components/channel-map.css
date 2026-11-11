@@ -5,13 +5,59 @@
   }
 }
 
-/* React Flow's credit, kept, in the app's colours so it sits quietly in both themes. */
+/* React Flow's credit, kept visible as its licence asks, in the app's colours and small type. */
 .channel-map .react-flow__attribution {
   background: transparent;
+  padding: 2px 6px;
+  font-size: 10px;
 }
 
 .channel-map .react-flow__attribution a {
   color: var(--muted-foreground);
+}
+
+/* Zoom and fit, as a small group of the app's outline buttons. */
+.channel-map .react-flow__controls {
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: calc(var(--radius) * 0.8);
+  background: var(--card);
+  box-shadow: 0 1px 2px color-mix(in oklab, var(--foreground) 8%, transparent);
+}
+
+.channel-map .react-flow__controls-button {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition:
+    background-color 150ms ease-out,
+    color 150ms ease-out;
+}
+
+.channel-map .react-flow__controls-button + .react-flow__controls-button {
+  border-inline-start: 1px solid var(--border);
+}
+
+.channel-map .react-flow__controls-button:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.channel-map .react-flow__controls-button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: -2px;
+}
+
+.channel-map .react-flow__controls-button:disabled {
+  cursor: default;
+  opacity: 0.4;
+}
+
+.channel-map .react-flow__controls-button svg {
+  fill: currentColor;
 }
 
 /* An edge carrying an agent's change to its store glows while it syncs. */
