@@ -120,7 +120,7 @@ export function ListingEditorHeader({ isAdding, showProductLink }: ListingEditor
         <SheetTitle dir="auto" className="line-clamp-2 break-words">
           {listing.title.product}
         </SheetTitle>
-        <SheetDescription>
+        <SheetDescription className={isAdding ? undefined : 'sr-only'}>
           {isAdding ? LISTING_EDITOR_COPY.addingTo(store) : LISTING_EDITOR_COPY.editingIn(store)}
         </SheetDescription>
       </div>

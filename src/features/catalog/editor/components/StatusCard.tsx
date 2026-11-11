@@ -18,8 +18,8 @@ import { EditorCard } from './EditorCard';
 /** Distinct from the card's section anchor id (`PageSection.ProductStatus`), so the label finds the select. */
 const STATUS_FIELD_ID = 'status-select';
 
-const STATUS_HINTS: Record<ProductStatus, string> = {
-  [ProductStatus.ACTIVE]: 'Ready to list in your stores.',
+/** Only the statuses that keep a product off its stores say so; Active needs no words. */
+const STATUS_HINTS: Partial<Record<ProductStatus, string>> = {
   [ProductStatus.DRAFT]: 'Hidden from your stores while you work on it.',
   [ProductStatus.ARCHIVED]: 'Kept for your records and removed from your stores.',
 };
@@ -54,7 +54,9 @@ export function StatusCard() {
                 </SelectGroup>
               </SelectContent>
             </Select>
-            <FieldDescription>{STATUS_HINTS[field.value]}</FieldDescription>
+            {STATUS_HINTS[field.value] && (
+              <FieldDescription>{STATUS_HINTS[field.value]}</FieldDescription>
+            )}
           </Field>
         )}
       />

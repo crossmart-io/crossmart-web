@@ -14,6 +14,8 @@ import {
   ProductFilters,
   type ProductListFilters,
   ProductsEmptyState,
+  ProductRowMenu,
+  type ProductSummary,
   ProductsTable,
   ProductsTableSkeleton,
   ProductViewsBar,
@@ -98,6 +100,14 @@ function Products({ workspace }: { workspace: Workspace }) {
   );
 }
 
+/** Each row's menu, such as Mark as sold, for members who may edit products. */
+function rowMenuFor(workspace: Workspace) {
+  if (!hasPermission(workspace, WorkspacePermission.products_edit)) return undefined;
+  return (product: ProductSummary) => (
+    <ProductRowMenu workspaceId={workspace.id} product={product} />
+  );
+}
+
 interface ProductResultsProps {
   workspace: Workspace;
   filters: ProductListFilters;
@@ -146,6 +156,7 @@ function ProductResults({ workspace, filters }: ProductResultsProps) {
         currency={workspace.currency}
         isRefreshing={products.isPlaceholderData}
         selection={selection}
+        renderRowMenu={rowMenuFor(workspace)}
       />
       <TablePagination
         pagination={pagination}

@@ -377,8 +377,7 @@ export const STORE_FILTER_LABELS: Partial<Record<ProductStoreFilter, string>> = 
 
 /** What the listing editor says: one product in one store, field by field. */
 export const LISTING_EDITOR_COPY = {
-  addingTo: (store: string) =>
-    `Adding to ${store}. Change anything this store should show differently.`,
+  addingTo: (store: string) => `Adding to ${store}.`,
   editingIn: (store: string) => `How this product shows in ${store}.`,
   fromProduct: 'From product',
   changedForStore: 'Changed for this store',
@@ -399,7 +398,6 @@ export const LISTING_EDITOR_COPY = {
   loading: 'Listing',
   notFound: 'This store is no longer connected to the product.',
   storeOnly: 'Only in this store',
-  storeOnlyDescription: 'eBay asks for these; the product has no value for them.',
   noTags: 'No tags',
   noVendor: 'No vendor',
   noDescription: 'No description',
@@ -438,3 +436,16 @@ export const LISTING_FIELD_LABELS = {
 export enum ListingEditorSection {
   StoreOnly = 'listing-store-only',
 }
+
+/** The stores card of a product that is not saved yet, and what publishing it says. */
+export const PUBLISH_STORES_COPY = {
+  title: 'Publish to',
+  automatic: 'Adds every active product',
+  reconnect: 'Reconnect first',
+  noStores: 'No store connected yet.',
+  connect: 'Connect a store',
+  published: (count: number) => (count === 1 ? 'Added to 1 store' : `Added to ${count} stores`),
+  partialTitle: (added: number, total: number) => `Added to ${added} of ${total} stores`,
+  failedTitle: 'Not added to your stores',
+  dismiss: 'Dismiss',
+} as const;

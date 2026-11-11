@@ -33,12 +33,9 @@ export function StoreOnlyFields() {
       aria-labelledby={`${ListingEditorSection.StoreOnly}-title`}
       className="flex scroll-mt-4 flex-col gap-4 border-b pb-6"
     >
-      <div className="flex flex-col gap-0.5">
-        <h3 id={`${ListingEditorSection.StoreOnly}-title`} className="text-sm font-semibold">
-          {LISTING_EDITOR_COPY.storeOnly}
-        </h3>
-        <p className="text-xs text-muted-foreground">{LISTING_EDITOR_COPY.storeOnlyDescription}</p>
-      </div>
+      <h3 id={`${ListingEditorSection.StoreOnly}-title`} className="text-sm font-semibold">
+        {LISTING_EDITOR_COPY.storeOnly}
+      </h3>
       {category.supported && (
         <ChannelCategoryField channelRef={listingRef} category={category.value} />
       )}

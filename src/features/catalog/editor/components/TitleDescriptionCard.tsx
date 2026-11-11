@@ -1,8 +1,6 @@
 import { Controller, useFormContext } from 'react-hook-form';
-import { ContentField } from '@/api/schema';
-import { LabelRow } from '@/components/forms/LabelRow';
 import { RichTextEditor } from '@/components/forms/RichTextEditor';
-import { Card, CardAction, CardContent, CardDescription, CardHeader } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Field, FieldLabel } from '@/components/ui/field';
 import {
   AI_WRITER_COPY,
@@ -21,40 +19,32 @@ interface TitleDescriptionCardProps {
   aiTarget?: ContentDraftTarget;
 }
 
+/** One AI action for both fields; its form takes an instruction such as "shorter". */
+function WriteWithAi({ target }: { target: ContentDraftTarget }) {
+  const writer = useProductAiWriter();
+  return (
+    <AiRewriteButton
+      target={target}
+      fields={ALL_CONTENT_FIELDS}
+      label={AI_WRITER_COPY.writeAll}
+      {...writer}
+    />
+  );
+}
+
 export function TitleDescriptionCard({ aiTarget }: TitleDescriptionCardProps) {
   const { control } = useFormContext<ProductFormValues>();
-  const writer = useProductAiWriter();
-  const rewrite = (fields: readonly ContentField[]) =>
-    aiTarget && <AiRewriteButton target={aiTarget} fields={fields} {...writer} />;
-
   return (
     <Card>
-      {aiTarget && (
-        <CardHeader>
-          <CardDescription>{AI_WRITER_COPY.writeAllHint}</CardDescription>
-          <CardAction>
-            <AiRewriteButton
-              target={aiTarget}
-              fields={ALL_CONTENT_FIELDS}
-              label={AI_WRITER_COPY.writeAll}
-              prominent
-              {...writer}
-            />
-          </CardAction>
-        </CardHeader>
-      )}
       <CardContent className="flex flex-col gap-4">
         <TextField
           name="title"
           label="Title"
-          placeholder="Short-sleeve linen shirt"
           maxLength={MAX_TITLE_LENGTH}
-          labelAction={rewrite([ContentField.title])}
+          labelAction={aiTarget && <WriteWithAi target={aiTarget} />}
         />
         <Field>
-          <LabelRow action={rewrite([ContentField.description])}>
-            <FieldLabel id={DESCRIPTION_LABEL_ID}>Description</FieldLabel>
-          </LabelRow>
+          <FieldLabel id={DESCRIPTION_LABEL_ID}>Description</FieldLabel>
           <Controller
             control={control}
             name="descriptionHtml"

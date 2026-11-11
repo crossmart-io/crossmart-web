@@ -1,12 +1,13 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { createMemoryRouter, RouterProvider } from 'react-router';
 import { WorkspaceRole, OutsideAgentChanges } from '@/api/schema';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import type { useChannelConnections } from '@/features/channels/hooks/useChannelConnections';
 import type { Workspace } from '@/features/workspaces';
 import type * as MediaQueryHooks from '@/hooks/useMediaQuery';
-import { EDITOR_FEEDBACK } from '../../catalog.constants';
+import { CREATE_BAR_COPY, EDITOR_FEEDBACK, MORE_DETAILS_COPY } from '../../catalog.constants';
 import { ProductEditor } from './ProductEditor';
 
 vi.mock('@/features/channels/hooks/useChannelConnections', () => ({
@@ -39,14 +40,14 @@ const WORKSPACE: Workspace = {
   permissions: [],
 };
 
-function renderEditor(readOnly: boolean) {
+function renderEditor(readOnly: boolean, publishes = false) {
   // The unsaved-changes guard needs a data router.
   const router = createMemoryRouter([
     {
       path: '/',
       element: (
         <TooltipProvider>
-          <ProductEditor workspace={WORKSPACE} readOnly={readOnly} />
+          <ProductEditor workspace={WORKSPACE} readOnly={readOnly} publishes={publishes} />
         </TooltipProvider>
       ),
     },
@@ -71,7 +72,33 @@ describe('ProductEditor', () => {
 
     expect(screen.getByText(EDITOR_FEEDBACK.readOnly)).toBeInTheDocument();
     expect(screen.getByLabelText('Title')).toBeDisabled();
-    expect(screen.getByRole('button', { name: /Add images/ })).toBeDisabled();
-    expect(screen.queryByText(EDITOR_FEEDBACK.newProduct)).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /Add photos/ })).toBeDisabled();
+    expect(screen.queryByText(CREATE_BAR_COPY.newProduct)).not.toBeInTheDocument();
+  });
+
+  it('starts a new item as one, unconditioned, with the rest folded away', () => {
+    renderEditor(false);
+
+    expect(screen.getByLabelText('Quantity')).toHaveValue('1');
+    expect(screen.getByRole('combobox', { name: 'Condition' })).toHaveTextContent('Not set');
+    expect(screen.queryByLabelText('SKU')).not.toBeInTheDocument();
+    expect(screen.queryByText('Status')).not.toBeInTheDocument();
+  });
+
+  it('opens More details on request', async () => {
+    renderEditor(false);
+
+    await userEvent.click(
+      screen.getByRole('button', { name: new RegExp(MORE_DETAILS_COPY.title) }),
+    );
+    expect(screen.getByLabelText('SKU')).toBeInTheDocument();
+    expect(screen.getByLabelText('Type')).not.toHaveAttribute('placeholder');
+  });
+
+  it('offers to publish or keep a draft', () => {
+    renderEditor(false, true);
+
+    expect(screen.getByRole('button', { name: CREATE_BAR_COPY.publish })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: CREATE_BAR_COPY.draft })).toBeInTheDocument();
   });
 });
