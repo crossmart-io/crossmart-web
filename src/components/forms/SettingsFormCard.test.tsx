@@ -19,7 +19,7 @@ function NameCard({ canManage, saveError = null }: CardProps) {
       title="Name"
       description="What everyone sees."
       form={form}
-      onSubmit={(event) => event.preventDefault()}
+      onSubmit={(event) => event?.preventDefault()}
       canManage={canManage}
       saveLabel="Save name"
       saveError={saveError}

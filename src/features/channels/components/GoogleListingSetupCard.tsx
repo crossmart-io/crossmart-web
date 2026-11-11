@@ -73,9 +73,7 @@ export function GoogleListingSetupCard({
     <SettingsFormCard
       title={GOOGLE_SETUP_COPY.title}
       id={PageSection.StoreListingSetup}
-      description={`${GOOGLE_SETUP_COPY.description} ${
-        googleMerchant.readyToList ? GOOGLE_SETUP_COPY.ready : GOOGLE_SETUP_COPY.notReady
-      }`}
+      description={googleMerchant.readyToList ? undefined : GOOGLE_SETUP_COPY.notReady}
       form={form}
       onSubmit={submit}
       canManage={canManage}

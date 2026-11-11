@@ -24,8 +24,11 @@ interface SaveableFormOptions<Values extends FieldValues, Output, Saved> {
 
 interface SaveableForm<Values extends FieldValues, Output> {
   form: UseFormReturn<Values, unknown, Output>;
-  /** The form's `onSubmit`. A failed save leaves the form as it was, never an unhandled rejection. */
-  submit: (event?: FormEvent<HTMLFormElement>) => void;
+  /**
+   * The form's `onSubmit`, resolved once the save settled. A failed save leaves the form as it
+   * was, never an unhandled rejection.
+   */
+  submit: (event?: FormEvent<HTMLFormElement>) => Promise<void>;
 }
 
 /**
@@ -60,6 +63,6 @@ export function useSaveableForm<Values extends FieldValues, Output, Saved>({
 
   return {
     form,
-    submit: (event) => void form.handleSubmit(saveAndReset)(event),
+    submit: (event) => form.handleSubmit(saveAndReset)(event),
   };
 }

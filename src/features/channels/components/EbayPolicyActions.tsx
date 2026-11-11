@@ -104,7 +104,6 @@ export function EbayPolicyActions({
         </Button>
       </div>
       <p className="text-xs text-muted-foreground">{EBAY_DEFAULTS_COPY.createDefaultsNote}</p>
-      <p className="text-xs text-muted-foreground">{EBAY_DEFAULTS_COPY.manageNote}</p>
     </div>
   );
 }

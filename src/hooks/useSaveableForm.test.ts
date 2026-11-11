@@ -28,7 +28,7 @@ describe('useSaveableForm', () => {
     const { result } = renderSaveableForm(save);
 
     act(() => result.current.form.setValue('name', '  New  ', { shouldDirty: true }));
-    act(() => result.current.submit());
+    act(() => void result.current.submit());
 
     await waitFor(() => expect(result.current.form.getValues('name')).toBe('SAVED'));
     expect(save).toHaveBeenCalledWith({ name: 'New' });
@@ -42,7 +42,7 @@ describe('useSaveableForm', () => {
     const { result } = renderSaveableForm(save);
 
     act(() => result.current.form.setValue('name', 'New', { shouldDirty: true }));
-    act(() => result.current.submit());
+    act(() => void result.current.submit());
 
     await waitFor(() => expect(save).toHaveBeenCalledOnce());
     await act(() => Promise.resolve());
@@ -55,7 +55,7 @@ describe('useSaveableForm', () => {
     const { result } = renderSaveableForm(save);
 
     act(() => result.current.form.setValue('name', ' '));
-    act(() => result.current.submit());
+    act(() => void result.current.submit());
 
     await waitFor(() => expect(result.current.form.formState.errors.name?.message).toBe('Name it'));
     expect(save).not.toHaveBeenCalled();

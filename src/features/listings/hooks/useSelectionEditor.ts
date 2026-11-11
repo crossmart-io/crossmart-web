@@ -22,18 +22,21 @@ export function useSelectionEditor(ref: ConnectionRef, rule: ProductSelectionRul
   const preview = useSelectionPreview(ref, toSelectionRule(draft));
   const save = useUpdateSelection(ref);
 
-  function submit(): void {
-    save.mutate(toSelectionRule(draft), {
-      onSuccess: (connection) => {
-        // Keep the mode the merchant chose: "all" and "filtered" can store the same rule.
-        const next: SelectionDraft = {
-          ...toSelectionDraft(connection.productSelection),
-          mode: draft.mode,
-        };
-        setSaved(next);
-        setDraft(next);
-      },
-    });
+  /** Saves the rule; resolves either way, as the mutation holds the error. */
+  async function submit(): Promise<void> {
+    let connection;
+    try {
+      connection = await save.mutateAsync(toSelectionRule(draft));
+    } catch {
+      return;
+    }
+    // Keep the mode the merchant chose: "all" and "filtered" can store the same rule.
+    const next: SelectionDraft = {
+      ...toSelectionDraft(connection.productSelection),
+      mode: draft.mode,
+    };
+    setSaved(next);
+    setDraft(next);
   }
 
   return {
@@ -46,5 +49,6 @@ export function useSelectionEditor(ref: ConnectionRef, rule: ProductSelectionRul
     include: (productId: string) => setDraft(includeProduct(draft, productId)),
     exclude: (productId: string) => setDraft(excludeProduct(draft, productId)),
     restoreExcluded: () => setDraft({ ...draft, excludeProductIds: [] }),
+    discard: () => setDraft(saved),
   };
 }
