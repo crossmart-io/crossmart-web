@@ -109,6 +109,7 @@ function attentionNotices(workspace: Workspace | undefined, attention: Attention
       kind: NoticeKind.StoresAttention,
       severity: NoticeSeverity.Warning,
       ...STORES_NOTICE_COPY,
+      title: STORES_NOTICE_COPY.title(attention.stores),
       body: STORES_NOTICE_COPY.body(attention.stores),
       to: ROUTES.stores,
     }),

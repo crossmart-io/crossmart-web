@@ -101,11 +101,12 @@ export const AGENT_PROPOSALS_NOTICE_COPY = {
 } as const;
 
 export const STORES_NOTICE_COPY = {
-  title: 'A store needs attention',
+  title: (count: number) =>
+    count === 1 ? 'A store needs attention' : `${count} stores need attention`,
   body: (count: number) =>
     count === 1
       ? 'Reconnect it so its listings and orders keep syncing.'
-      : `${count} stores need reconnecting or fixing.`,
+      : 'Reconnect them so their listings and orders keep syncing.',
   label: 'Fix',
 } as const;
 
