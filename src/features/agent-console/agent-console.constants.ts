@@ -104,6 +104,7 @@ export const AGENT_CONSOLE_COPY = {
   name: 'Crossmart Agent',
   tabs: { [ConsoleTab.Chat]: 'Chat', [ConsoleTab.Map]: 'Map', [ConsoleTab.Events]: 'Events' },
   mapTitle: 'Live map',
+  viewMap: 'View map',
   mapActive: 'Crossmart Agent is working on the map',
   eventsTitle: 'Events',
   hideEvents: 'Hide events',

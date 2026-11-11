@@ -31,9 +31,6 @@ export const PROPOSAL_STATUS_TABS: readonly FilterTab<AgentProposalStatus>[] = [
 ];
 
 export const AGENT_PROPOSALS_COPY = {
-  pageName: 'Agent proposals',
-  pageDescription:
-    'Changes your connected AI agents want to make. Nothing changes until you approve it.',
   tabsLabel: 'Proposal status',
   loading: 'Loading proposals',
   loadError: 'Proposals could not be loaded',
@@ -53,20 +50,16 @@ export const AGENT_PROPOSALS_COPY = {
   approved: 'Approved and applied',
   approvedButFailed: 'Approved, but Crossmart refused the change',
   rejected: 'Proposal rejected',
-  pendingLabel: (count: number) =>
-    count === 1 ? 'proposal waiting for you' : 'proposals waiting for you',
 } as const;
 
 export const OUTSIDE_AGENT_CHANGES_COPY = {
   title: "Outside agents' changes",
   description:
-    'What happens when an AI agent you connected (Claude, ChatGPT or any MCP client) changes your catalog, stock or listings. Crossmart Agent always asks first, and scripts that use an API key are not affected.',
-  saved: 'Saved',
-  save: 'Save',
+    'When an AI agent you connected (Claude, ChatGPT or any MCP client) changes your catalog, stock or listings. API keys are not affected.',
   options: {
     [OutsideAgentChanges.require_approval]: {
       label: 'Wait for my approval',
-      description: 'Each change waits under Agent proposals with what it would do. Recommended.',
+      description: 'Each change waits in Agent, under Review. Recommended.',
     },
     [OutsideAgentChanges.apply_directly]: {
       label: 'Apply directly',

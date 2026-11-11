@@ -12,7 +12,7 @@ export function EndpointFormError({ error }: { error: Error | null }) {
       <FormError error={error} />
       {isPlanLimitError(error) && (
         <Button asChild variant="outline" size="sm" className="self-start">
-          <Link to={ROUTES.plan}>See plan & usage</Link>
+          <Link to={ROUTES.billing}>See plan & usage</Link>
         </Button>
       )}
     </div>

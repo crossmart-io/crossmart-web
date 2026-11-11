@@ -3,16 +3,16 @@ import { Link } from 'react-router';
 import { toApiErrorMessage } from '@/api/api-error';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { ROUTES, toChannelConnectionRoute } from '@/config/routes';
+import { ROUTES, toStoreRoute } from '@/config/routes';
 import { type ProductChannelRef, useRetryListing } from '../hooks/useProductChannels';
 import { RETRY_COPY, RetryFailure } from '../listings.constants';
 import { retryFailureOf } from '../retry-failure';
 
 /** Where a failure is dealt with, when it has such a place: the plan, or reconnecting. */
 function failureLink(failure: RetryFailure, connectionId: string) {
-  if (failure === RetryFailure.PlanFull) return { to: ROUTES.plan, label: RETRY_COPY.planLink };
+  if (failure === RetryFailure.PlanFull) return { to: ROUTES.billing, label: RETRY_COPY.planLink };
   if (failure === RetryFailure.StoreNotConnected) {
-    return { to: toChannelConnectionRoute(connectionId), label: RETRY_COPY.reconnectLink };
+    return { to: toStoreRoute(connectionId), label: RETRY_COPY.reconnectLink };
   }
   return null;
 }

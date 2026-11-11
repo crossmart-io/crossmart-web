@@ -4,11 +4,12 @@ import { Separator } from '@/components/ui/separator';
 import { SidebarInset, SidebarProvider, SidebarTrigger } from '@/components/ui/sidebar';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import { MAIN_CONTENT_ID } from '@/config/app';
+import { USER_MENU_LINKS } from '@/config/navigation';
 import { AgentWorkerLauncher, AgentWorkerProvider } from '@/features/agent-worker';
 import { AskLauncher } from '@/features/ask';
 import { UserMenu } from '@/features/auth';
 import { AccountNoticeBanners, NotificationBell } from '@/features/notifications';
-import { useCurrentWorkspace, useDefaultTimeZone } from '@/features/workspaces';
+import { useCurrentWorkspace, useDefaultTimeZone, useMe } from '@/features/workspaces';
 import { AppSidebar } from './AppSidebar';
 import { BreadcrumbsProvider } from './BreadcrumbsProvider';
 import { HeaderBreadcrumbs } from './HeaderBreadcrumbs';
@@ -23,10 +24,17 @@ const MAIN_CLASSES: Record<PageLayout, string> = {
     'flex h-[calc(100svh-var(--app-header-height))] w-full flex-col gap-3 overflow-hidden p-3 outline-none',
 };
 
+/** The user menu's links this person may open; platform pages only for those who run Crossmart. */
+function useUserMenuLinks() {
+  const isPlatformAdmin = useMe().data?.platformAdmin ?? false;
+  return USER_MENU_LINKS.filter((link) => !link.platformAdminOnly || isPlatformAdmin);
+}
+
 export function AppShell() {
   const mainRef = useRef<HTMLElement>(null);
   const layout = usePageLayout();
   const sidebar = useShellSidebar(layout);
+  const userMenuLinks = useUserMenuLinks();
   useFocusOnNavigation(mainRef);
   useDefaultTimeZone(useCurrentWorkspace().workspace);
 
@@ -54,7 +62,7 @@ export function AppShell() {
                   <AgentWorkerLauncher />
                   <AskLauncher />
                   <NotificationBell />
-                  <UserMenu />
+                  <UserMenu links={userMenuLinks} />
                 </div>
               </header>
               <main

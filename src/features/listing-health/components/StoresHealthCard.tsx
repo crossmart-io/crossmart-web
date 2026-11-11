@@ -16,7 +16,7 @@ export function StoresHealthCard({ stores }: { stores: StoreListingHealth[] }) {
       <CardContent>
         {stores.length === 0 ? (
           <p className="text-sm text-muted-foreground">
-            <Link to={ROUTES.channels} className="font-medium text-foreground underline">
+            <Link to={ROUTES.stores} className="font-medium text-foreground underline">
               {LISTING_HEALTH_COPY.connectStore}
             </Link>{' '}
             {LISTING_HEALTH_COPY.noStores}

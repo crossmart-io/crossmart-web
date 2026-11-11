@@ -1,5 +1,6 @@
 import { WorkspaceGate } from '@/components/feedback/WorkspaceGate';
 import { Page } from '@/components/layout/Page';
+import { PAGE_PARENTS } from '@/config/navigation';
 import { ImportJobHistory, ImportProductsDialog } from '@/features/imports';
 import { useCurrentWorkspace } from '@/features/workspaces';
 
@@ -9,8 +10,10 @@ export function ImportsPage() {
   return (
     <Page
       name="Imports"
-      description="Every file and store imported into this workspace, and the records that need a fix."
-      actions={workspace && <ImportProductsDialog workspaceId={workspace.id} />}
+      parents={PAGE_PARENTS.products}
+      actions={
+        workspace && <ImportProductsDialog workspaceId={workspace.id} showHistoryLink={false} />
+      }
     >
       <WorkspaceGate>{(current) => <ImportJobHistory workspaceId={current.id} />}</WorkspaceGate>
     </Page>

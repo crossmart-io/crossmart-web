@@ -1,6 +1,6 @@
 import { Link } from 'react-router';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { toInventoryRoute } from '@/config/routes';
+import { toStockRoute } from '@/config/routes';
 import { STOCK_LEVEL_COPY } from '@/features/inventory';
 import { cn } from '@/lib/utils';
 import { STOCK_BAR_FILLS, STOCK_BAR_LEVELS } from '../inventory-report.constants';
@@ -35,7 +35,7 @@ export function StockLevelBar({ report }: { report: InventoryReport }) {
           {STOCK_BAR_LEVELS.map((level) => (
             <li key={level}>
               <Link
-                to={toInventoryRoute(level)}
+                to={toStockRoute(level)}
                 className="flex flex-col gap-0.5 rounded-md text-sm hover:underline"
               >
                 <span className="flex items-center gap-1.5 text-muted-foreground">

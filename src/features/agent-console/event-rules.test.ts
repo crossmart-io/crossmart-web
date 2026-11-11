@@ -90,7 +90,7 @@ describe('event presentation', () => {
       '/orders/o-1',
     );
     expect(eventRoute({ ...NO_REFS, refs: { ...NO_REFS.refs, connectionId: 'c-1' } })).toBe(
-      '/channels/c-1',
+      '/stores/c-1',
     );
     expect(eventRoute(NO_REFS)).toBeNull();
   });
@@ -100,6 +100,6 @@ describe('event presentation', () => {
       ...NO_REFS,
       refs: { ...NO_REFS.refs, proposalId: 'pr-1', productId: 'p-1' },
     };
-    expect(eventRoute(proposal)).toBe('/agent-proposals');
+    expect(eventRoute(proposal)).toBe('/agent/review?source=agents');
   });
 });

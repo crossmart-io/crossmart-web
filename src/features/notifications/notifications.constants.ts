@@ -80,7 +80,7 @@ export const VERIFY_EMAIL_NOTICE_COPY = {
 } as const;
 
 export const AGENT_PROPOSALS_NOTICE_COPY = {
-  title: 'Agent proposals are waiting',
+  title: 'AI agent changes are waiting for review',
   body: (count: number) =>
     count === 1
       ? 'An AI agent proposed a change. Nothing changes until you approve it.'

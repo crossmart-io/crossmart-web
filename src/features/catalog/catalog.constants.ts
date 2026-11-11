@@ -41,12 +41,20 @@ export const EDITOR_FEEDBACK = {
     'Your role can view products but not change them. Ask a workspace owner or admin for access.',
 } as const;
 
-/** The channels card of a product that is not saved yet. */
+/** The stores card of a product that is not saved yet. */
 export const NEW_PRODUCT_CHANNELS_COPY = {
+  title: 'Stores',
   saveFirst: 'Save the product first, then choose which stores to list it in.',
-  noStores: 'Not listed on any channel yet.',
-  connect: 'Connect a channel',
+  noStores: 'Not listed in any store yet.',
+  connect: 'Connect a store',
   connectReason: 'to publish it with content written for each marketplace.',
+} as const;
+
+/** The two views of the catalog, as tabs over the products list. */
+export const PRODUCT_VIEW_TABS_COPY = {
+  label: 'Product views',
+  products: 'Products',
+  stock: 'Stock',
 } as const;
 
 /** Mirrors the API's limits, so the form can say so before a round trip. */

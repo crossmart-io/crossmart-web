@@ -1,6 +1,7 @@
 import { Share2 } from 'lucide-react';
 import { Link } from 'react-router';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import type { ReactNode } from 'react';
+import { Card, CardAction, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ROUTE_QUERY, ROUTES } from '@/config/routes';
 import { useProductChannels } from '../hooks/useProductChannels';
@@ -16,6 +17,8 @@ interface ProductChannelsCardProps {
   /** The workspace's currency, which the product's own prices are in. */
   catalogCurrency: string;
   canEdit: boolean;
+  /** A link in the card's header, such as to the map of every store. */
+  action?: ReactNode;
 }
 
 function NoChannels() {
@@ -23,9 +26,9 @@ function NoChannels() {
     <div className="flex items-start gap-3 text-sm">
       <Share2 className="mt-0.5 size-4 shrink-0 text-muted-foreground" aria-hidden="true" />
       <p className="text-muted-foreground">
-        No channel is connected yet.{' '}
-        <Link to={ROUTES.channels} className="font-medium text-foreground underline">
-          Connect a channel
+        No store is connected yet.{' '}
+        <Link to={ROUTES.stores} className="font-medium text-foreground underline">
+          Connect a store
         </Link>{' '}
         to publish this product there.
       </p>
@@ -48,6 +51,7 @@ export function ProductChannelsCard({
   productId,
   catalogCurrency,
   canEdit,
+  action,
 }: ProductChannelsCardProps) {
   const { data: channels, isPending } = useProductChannels(workspaceId, productId);
   const editor = useEditorSearchParam(ROUTE_QUERY.overrideStore);
@@ -56,8 +60,9 @@ export function ProductChannelsCard({
     <Card>
       <CardHeader>
         <CardTitle>
-          <h2 className="text-sm font-semibold">Channels</h2>
+          <h2 className="text-sm font-semibold">Stores</h2>
         </CardTitle>
+        {action && <CardAction>{action}</CardAction>}
       </CardHeader>
       <CardContent>
         {isPending && <Skeleton className="h-24 w-full" />}

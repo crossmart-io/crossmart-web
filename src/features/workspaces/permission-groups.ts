@@ -55,7 +55,7 @@ export const PERMISSION_GROUPS: readonly PermissionGroup[] = [
     ],
   },
   {
-    label: 'Channels',
+    label: 'Stores',
     permissions: [
       { permission: WorkspacePermission.channels_view, label: 'See stores and their listings' },
       {

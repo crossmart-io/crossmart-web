@@ -1,5 +1,5 @@
 import { Link } from 'react-router';
-import { toInventoryRoute } from '@/config/routes';
+import { toStockRoute } from '@/config/routes';
 import { formatMoney, pluralize } from '@/lib/format';
 import { NO_VALUE } from '../inventory-report.constants';
 import type { InventoryReport } from '../inventory-report.types';
@@ -43,7 +43,7 @@ export function InventoryValueTiles({ report }: { report: InventoryReport }) {
         label="Low or out of stock"
         value={short.toLocaleString()}
         detail={
-          <Link to={toInventoryRoute()} className="underline-offset-2 hover:underline">
+          <Link to={toStockRoute()} className="underline-offset-2 hover:underline">
             {stockLevels.outOfStock} out · {stockLevels.lowStock} with {report.lowStockThreshold} or
             fewer left
           </Link>

@@ -19,7 +19,7 @@ export function ActivityPage() {
   const filters = useActivityFilters();
 
   return (
-    <Page name="Activity" description="Who changed what in your workspace, and what went wrong.">
+    <Page name="Activity">
       <ActivityFilterBar filters={filters} />
       <WorkspaceGate>
         {(workspace) => <ActivityResults workspace={workspace} filters={filters} />}

@@ -1,5 +1,5 @@
 import { ChannelProductState, ProductStoreFilter } from '@/api/schema';
-import { ROUTE_QUERY, toChannelConnectionRoute, toProductsRoute } from '@/config/routes';
+import { ROUTE_QUERY, toStoreRoute, toProductsRoute } from '@/config/routes';
 import { type ChannelProductFilter, ChannelTab, NEEDS_DETAILS_FILTER } from '@/features/listings';
 import { MapStatus } from './channel-map.constants';
 
@@ -19,7 +19,7 @@ export function storeListingsRoute(connectionId: string, status?: MapStatus): st
   if (status === MapStatus.NotListed) {
     return toProductsRoute({ storeFilter: ProductStoreFilter.not_in_store, storeId: connectionId });
   }
-  const route = toChannelConnectionRoute(connectionId, ChannelTab.Listings);
+  const route = toStoreRoute(connectionId, ChannelTab.Listings);
   if (!status) return route;
   return `${route}?${new URLSearchParams({ [ROUTE_QUERY.state]: STORE_TAB_FILTERS[status] })}`;
 }

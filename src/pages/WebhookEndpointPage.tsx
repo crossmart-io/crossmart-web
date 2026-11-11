@@ -26,11 +26,11 @@ function WebhookEndpoint({ endpointRef }: { endpointRef: WebhookEndpointRef }) {
   const query = useWebhookEndpoint(endpointRef);
   const navigate = useNavigate();
   return (
-    <ResourcePage query={query} copy={ENDPOINT_PAGE_COPY} parents={PAGE_PARENTS.webhooks}>
+    <ResourcePage query={query} copy={ENDPOINT_PAGE_COPY} parents={PAGE_PARENTS.developers}>
       {(endpoint) => (
         <Page
           name={endpoint.url}
-          parents={PAGE_PARENTS.webhooks}
+          parents={PAGE_PARENTS.developers}
           title={<span className="min-w-0 font-mono break-all">{endpoint.url}</span>}
           description={endpoint.description}
           actions={
@@ -39,7 +39,7 @@ function WebhookEndpoint({ endpointRef }: { endpointRef: WebhookEndpointRef }) {
               <EndpointActionsMenu
                 workspaceId={endpointRef.workspaceId}
                 endpoint={endpoint}
-                onDeleted={() => void navigate(ROUTES.webhooks)}
+                onDeleted={() => void navigate(ROUTES.developers)}
               />
             </>
           }

@@ -21,10 +21,7 @@ describe('StoresHealthCard', () => {
       [ListingDisplayState.draft]: 40,
     });
     renderInRouter(<StoresHealthCard stores={[store]} />);
-    expect(screen.getByRole('link', { name: /North shop/ })).toHaveAttribute(
-      'href',
-      '/channels/c-1',
-    );
+    expect(screen.getByRole('link', { name: /North shop/ })).toHaveAttribute('href', '/stores/c-1');
     expect(screen.getByText('Published').nextSibling).toHaveTextContent('7');
     expect(screen.getByText('Failed').nextSibling).toHaveTextContent('2');
     expect(screen.queryByText('Removing')).not.toBeInTheDocument();
@@ -40,7 +37,7 @@ describe('StoresHealthCard', () => {
     renderInRouter(<StoresHealthCard stores={[]} />);
     expect(screen.getByRole('link', { name: 'Connect a store' })).toHaveAttribute(
       'href',
-      '/channels',
+      '/stores',
     );
   });
 });

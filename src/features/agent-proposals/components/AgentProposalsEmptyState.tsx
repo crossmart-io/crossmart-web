@@ -32,7 +32,7 @@ export function AgentProposalsEmptyState({ status }: { status: AgentProposalStat
       {waiting && (
         <EmptyContent>
           <Button variant="outline" asChild>
-            <Link to={ROUTES.agentConnections}>{AGENT_PROPOSALS_COPY.connectAgent}</Link>
+            <Link to={ROUTES.developers}>{AGENT_PROPOSALS_COPY.connectAgent}</Link>
           </Button>
         </EmptyContent>
       )}

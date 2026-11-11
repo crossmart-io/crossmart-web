@@ -42,7 +42,7 @@ describe('PublishReadinessAlert', () => {
     expect(screen.getByText(/Set where items ship from/)).toBeInTheDocument();
     const links = screen.getAllByRole('link', { name: 'Open listing defaults' });
     expect(links).toHaveLength(2);
-    expect(links[0]).toHaveAttribute('href', '/channels/c-ebay/settings#listing-defaults');
+    expect(links[0]).toHaveAttribute('href', '/stores/c-ebay/settings#listing-defaults');
   });
 
   it('leaves reconnecting to the reconnect alert', () => {

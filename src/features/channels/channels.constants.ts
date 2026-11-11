@@ -61,12 +61,11 @@ export const CHANNEL_STATUS_LABELS: Record<ChannelStatus, string> = {
 /** The status of a channel merchants cannot connect yet. */
 export type RoadmapStatus = Exclude<ChannelStatus, ChannelStatus.Live>;
 
-/** The link under a channel that cannot be connected yet, by its status. */
-export const CHANNEL_ROADMAP_ACTION_LABELS: Record<RoadmapStatus, string> = {
-  [ChannelStatus.ComingSoon]: 'Get notified',
-  [ChannelStatus.Planned]: 'Request this channel',
-  [ChannelStatus.Community]: 'Offer to build it',
-};
+/** Under the stores: one way to ask for a channel that cannot be connected yet. */
+export const REQUEST_CHANNEL_COPY = {
+  prompt: 'Sell somewhere else?',
+  action: 'Request a marketplace',
+} as const;
 
 export const CONNECTION_STATUS_LABELS: Record<ChannelConnectionStatus, string> = {
   [ChannelConnectionStatus.CONNECTED]: 'Connected',
@@ -88,7 +87,7 @@ export const CONNECT_FAILURE_MESSAGES: Record<ConnectFailure, string> = {
   [ConnectFailure.not_permitted]: 'You can no longer manage this workspace.',
   [ConnectFailure.channel_unavailable]: 'The channel is not responding. Try again in a moment.',
   [ConnectFailure.plan_limit_reached]:
-    'Your plan has no room for another connected channel. See Plan & usage in Settings.',
+    'Your plan has no room for another store. See Settings, Billing.',
   [ConnectFailure.sandbox_claim_required]:
     'Claim this account first: stores can be connected once it is yours.',
   [ConnectFailure.session_required]:
@@ -147,7 +146,7 @@ export const RECONNECT_COPY = {
 } as const;
 
 export const CHANNEL_FEEDBACK = {
-  disconnected: 'Channel disconnected',
+  disconnected: 'Store disconnected',
   connectFailedTitle: 'Could not connect',
 } as const;
 

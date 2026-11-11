@@ -1,8 +1,9 @@
 import { CircleAlert, CircleCheck, Info, type LucideIcon, TriangleAlert } from 'lucide-react';
 import { WorkspaceEventSeverity } from '@/api/schema';
 import {
-  ROUTES,
-  toChannelConnectionRoute,
+  ReviewSource,
+  toAgentReviewRoute,
+  toStoreRoute,
   toOrderRoute,
   toProductRoute,
   toWebhookEndpointRoute,
@@ -45,10 +46,10 @@ export function eventNodeId({ refs }: WorkspaceEvent): string | null {
 
 /** The page that shows what an event is about, the most specific first; null when none does. */
 export function eventRoute({ refs }: WorkspaceEvent): string | null {
-  if (refs.proposalId) return ROUTES.agentProposals;
+  if (refs.proposalId) return toAgentReviewRoute(ReviewSource.Proposals);
   if (refs.orderId) return toOrderRoute(refs.orderId);
   if (refs.productId) return toProductRoute(refs.productId);
   if (refs.webhookEndpointId) return toWebhookEndpointRoute(refs.webhookEndpointId);
-  if (refs.connectionId) return toChannelConnectionRoute(refs.connectionId);
+  if (refs.connectionId) return toStoreRoute(refs.connectionId);
   return null;
 }

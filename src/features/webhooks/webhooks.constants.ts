@@ -168,8 +168,6 @@ export const WEBHOOK_FEEDBACK = {
 } as const;
 
 export const WEBHOOK_COPY = {
-  pageDescription:
-    'Crossmart POSTs events to your URLs as they happen: orders, stock, listings and products. Use them instead of polling from n8n, Zapier or your own backend.',
   noAccess: 'Only owners and admins can manage webhooks.',
   addEndpoint: 'Add endpoint',
   emptyTitle: 'No webhook endpoints yet',

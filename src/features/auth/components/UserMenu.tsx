@@ -1,4 +1,5 @@
 import { LogOut } from 'lucide-react';
+import { Link } from 'react-router';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { ThemeSubMenu } from '@/components/theme/ThemeSubMenu';
 import { Button } from '@/components/ui/button';
@@ -11,11 +12,32 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import type { UserMenuLink } from '@/config/navigation';
 import { useSession } from '../hooks/useSession';
 import { useSignOut } from '../hooks/useSignOut';
 import { toInitials } from '../initials';
 
-export function UserMenu() {
+function UserMenuLinks({ links }: { links: readonly UserMenuLink[] }) {
+  if (links.length === 0) return null;
+  return (
+    <>
+      <DropdownMenuGroup>
+        {links.map((link) => (
+          <DropdownMenuItem key={link.to} asChild>
+            <Link to={link.to}>
+              <link.icon />
+              {link.label}
+            </Link>
+          </DropdownMenuItem>
+        ))}
+      </DropdownMenuGroup>
+      <DropdownMenuSeparator />
+    </>
+  );
+}
+
+/** The signed-in person's menu: their own pages (`links`), the theme, and signing out. */
+export function UserMenu({ links = [] }: { links?: readonly UserMenuLink[] }) {
   const { data: session } = useSession();
   const signOut = useSignOut();
   if (!session) return null;
@@ -37,6 +59,7 @@ export function UserMenu() {
           <span className="truncate text-xs font-normal text-muted-foreground">{email}</span>
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
+        <UserMenuLinks links={links} />
         <DropdownMenuGroup>
           <ThemeSubMenu />
         </DropdownMenuGroup>

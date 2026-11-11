@@ -3,7 +3,7 @@ import { useId } from 'react';
 import { Link } from 'react-router';
 import { Button } from '@/components/ui/button';
 import { Spinner } from '@/components/ui/spinner';
-import { toChannelConnectionRoute } from '@/config/routes';
+import { toStoreRoute } from '@/config/routes';
 import { needsReconnect } from '@/features/channels/connection-status';
 import { type ProductChannelRef, useAddToStore } from '../hooks/useProductChannels';
 import { CHANNEL_CARD_COPY, STORE_NOT_CONNECTED_COPY } from '../listings.constants';
@@ -14,10 +14,7 @@ function NotConnectedHint({ id, connectionId }: { id: string; connectionId: stri
   return (
     <p id={id} className="text-xs text-muted-foreground">
       {STORE_NOT_CONNECTED_COPY.reason}{' '}
-      <Link
-        to={toChannelConnectionRoute(connectionId)}
-        className="font-medium text-foreground underline"
-      >
+      <Link to={toStoreRoute(connectionId)} className="font-medium text-foreground underline">
         {STORE_NOT_CONNECTED_COPY.action}
       </Link>
     </p>

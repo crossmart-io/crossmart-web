@@ -49,7 +49,7 @@ const ROW: ChannelProduct = {
   listing: null,
 };
 
-function renderCard(initialEntry = '/channels/c-1') {
+function renderCard(initialEntry = '/stores/c-1') {
   vi.mocked(useChannelProducts).mockReturnValue({
     items: [ROW],
     total: 1,
@@ -81,14 +81,14 @@ describe('ChannelProductsCard', () => {
     await userEvent.click(screen.getByRole('link', { name: 'Linen shirt' }));
 
     expect(screen.getByRole('dialog', { name: 'Editor p-1 in c-1' })).toBeInTheDocument();
-    expect(screen.getByTestId('location')).toHaveTextContent('/channels/c-1?listing=p-1');
+    expect(screen.getByTestId('location')).toHaveTextContent('/stores/c-1?listing=p-1');
     await userEvent.click(screen.getByRole('button', { name: 'Close editor' }));
     expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
-    expect(screen.getByTestId('location')).toHaveTextContent(/^\/channels\/c-1$/);
+    expect(screen.getByTestId('location')).toHaveTextContent(/^\/stores\/c-1$/);
   });
 
   it('opens the editor at once from a shared link', () => {
-    renderCard('/channels/c-1?listing=p-1');
+    renderCard('/stores/c-1?listing=p-1');
 
     expect(screen.getByRole('dialog', { name: 'Editor p-1 in c-1' })).toBeInTheDocument();
   });

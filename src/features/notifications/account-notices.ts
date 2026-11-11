@@ -1,7 +1,7 @@
 import { WorkspacePermission } from '@/api/schema';
 import type { SubscriptionAccess } from '@/features/billing';
 import { hasPermission, type Workspace } from '@/features/workspaces';
-import { ROUTES } from '@/config/routes';
+import { ReviewSource, toAgentReviewRoute } from '@/config/routes';
 import { formatDate } from '@/lib/format';
 import { billingNotice } from './billing-notice';
 import { noticeRevision } from './notice-revision';
@@ -86,7 +86,7 @@ function agentProposalsNotice(
     action: {
       kind: NoticeActionKind.Link,
       label: AGENT_PROPOSALS_NOTICE_COPY.review,
-      to: ROUTES.agentProposals,
+      to: toAgentReviewRoute(ReviewSource.Proposals),
     },
   };
 }

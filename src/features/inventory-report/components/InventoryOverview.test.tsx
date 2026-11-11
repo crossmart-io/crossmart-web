@@ -61,7 +61,7 @@ describe('StockLevelBar', () => {
     renderInRouter(<StockLevelBar report={REPORT} />);
     expect(screen.getByRole('link', { name: /Out of stock\s*2/ })).toHaveAttribute(
       'href',
-      '/inventory?stock=out_of_stock',
+      '/products/stock?stock=out_of_stock',
     );
   });
 });

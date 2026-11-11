@@ -115,8 +115,6 @@ export const MAP_STATUS_PRESENTATION: Record<MapStatus, MapStatusPresentation> =
 
 /** The kinds of node the maps draw; React Flow picks each one's component by it. */
 export enum MapNodeType {
-  Product = 'product',
-  ProductChannel = 'product_channel',
   Catalog = 'catalog',
   Store = 'store',
   GhostChannel = 'ghost_channel',
@@ -155,7 +153,6 @@ export const MAP_LAYOUT = {
   leafWidth: 330,
   columnGap: 140,
   rowGap: 24,
-  productLeafHeight: 150,
   /** A store's card: its name, five counts in two rows, and when it last synced. */
   storeLeafHeight: 188,
   /** A store with failures also offers Crossmart Agent, on a row of its own below. */
@@ -213,20 +210,9 @@ export const GHOST_EDGE_OPACITY = 0.35;
 
 export const CHANNEL_MAP_COPY = {
   viewLabel: 'Show as',
-  productTitle: 'Channel map',
-  productDescription: 'Where this product is listed, and how it is doing on each store.',
-  productGraphLabel: (title: string) => `Channel map of ${title}`,
-  liveIn: (live: number, total: number) => `Live in ${live} of ${total} stores`,
-  noStores: 'No store is connected yet.',
-  connectStore: 'Connect a store',
   lastSync: 'Synced',
   neverSynced: 'Not synced yet',
-  stock: (quantity: number) => `${quantity.toLocaleString()} in stock`,
-  stockUntracked: 'Stock not tracked',
-  overridden: 'Custom for this store',
-  suggestions: (count: number) => (count === 1 ? '1 AI suggestion' : `${count} AI suggestions`),
-  openDetails: (store: string, status: string) => `${store}: ${status}. Open details`,
-  accountGraphLabel: 'Channel map of your catalog and stores',
+  accountGraphLabel: 'Map of your catalog and stores',
   catalog: 'Catalog',
   products: (count: number) => (count === 1 ? '1 product' : `${count.toLocaleString()} products`),
   openCatalog: 'Open the products list',
@@ -238,19 +224,5 @@ export const CHANNEL_MAP_COPY = {
     count === 1
       ? '1 change waiting for you. Show it'
       : `${count} changes waiting for you. Show them`,
-  loadError: 'The channel map could not be loaded.',
-} as const;
-
-/** The side panel opened from a store on the product's map. */
-export const CHANNEL_PANEL_COPY = {
-  description: 'This product on this store.',
-  status: 'Status',
-  lastSync: 'Last synced',
-  price: 'Price',
-  stock: 'Stock shown',
-  overrides: 'Changed for this store',
-  noOverrides: 'Everything follows the product.',
-  editOverrides: 'Edit for this store',
-  viewOnStore: 'View on the store',
-  suggestionsTitle: 'AI suggestions',
+  loadError: 'The map could not be loaded.',
 } as const;

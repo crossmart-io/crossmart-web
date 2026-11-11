@@ -1,10 +1,14 @@
 import { ActivityAction, ActivitySubjectType } from '@/api/schema';
 import {
+  PageSection,
+  ReviewSource,
   ROUTES,
-  toChannelConnectionRoute,
+  toAgentReviewRoute,
+  toStoreRoute,
   toImportJobRoute,
   toProductRoute,
   toWebhookEndpointRoute,
+  withSection,
 } from '@/config/routes';
 import type { ActivityEvent } from './activity.types';
 
@@ -20,17 +24,18 @@ const GONE_SUBJECT_ACTIONS: ReadonlySet<ActivityAction> = new Set([
 /** Where each kind of subject opens, given its id. */
 const SUBJECT_ROUTES: Record<ActivitySubjectType, (subjectId: string) => string | undefined> = {
   [ActivitySubjectType.product]: toProductRoute,
-  [ActivitySubjectType.api_key]: () => ROUTES.apiKeys,
-  [ActivitySubjectType.agent_connection]: () => ROUTES.agentConnections,
+  [ActivitySubjectType.api_key]: () => withSection(ROUTES.developers, PageSection.ApiKeys),
+  [ActivitySubjectType.agent_connection]: () =>
+    withSection(ROUTES.developers, PageSection.ConnectedAgents),
   [ActivitySubjectType.webhook_endpoint]: toWebhookEndpointRoute,
   [ActivitySubjectType.import_job]: toImportJobRoute,
-  [ActivitySubjectType.channel_connection]: (subjectId) => toChannelConnectionRoute(subjectId),
-  [ActivitySubjectType.member]: () => ROUTES.members,
-  [ActivitySubjectType.invitation]: () => ROUTES.members,
+  [ActivitySubjectType.channel_connection]: (subjectId) => toStoreRoute(subjectId),
+  [ActivitySubjectType.member]: () => ROUTES.team,
+  [ActivitySubjectType.invitation]: () => ROUTES.team,
   [ActivitySubjectType.custom_role]: () => ROUTES.roles,
-  [ActivitySubjectType.workspace]: () => ROUTES.workspaceSettings,
+  [ActivitySubjectType.workspace]: () => ROUTES.generalSettings,
   [ActivitySubjectType.product_view]: () => undefined,
-  [ActivitySubjectType.agent_proposal]: () => ROUTES.agentProposals,
+  [ActivitySubjectType.agent_proposal]: () => toAgentReviewRoute(ReviewSource.Proposals),
 };
 
 /** Where the event's subject can be opened, if anywhere. */
