@@ -1,13 +1,18 @@
 import { WorkspacePermission } from '@/api/schema';
 import type { SubscriptionAccess } from '@/features/billing';
 import { hasPermission, type Workspace } from '@/features/workspaces';
-import { ReviewSource, toAgentReviewRoute } from '@/config/routes';
+import { ProductStoreFilter } from '@/api/schema';
+import type { AttentionCounts } from '@/features/attention';
+import { ReviewSource, ROUTES, toAgentReviewRoute, toProductsRoute } from '@/config/routes';
 import { formatDate } from '@/lib/format';
 import { billingNotice } from './billing-notice';
 import { noticeRevision } from './notice-revision';
 import {
   AGENT_PROPOSALS_NOTICE_COPY,
+  AI_SUGGESTIONS_NOTICE_COPY,
+  FAILED_LISTINGS_NOTICE_COPY,
   SANDBOX_NOTICE_COPY,
+  STORES_NOTICE_COPY,
   SEVERITY_RANK,
   VERIFY_EMAIL_NOTICE_COPY,
 } from './notifications.constants';
@@ -28,8 +33,8 @@ export interface AccountNoticeInput {
   user: NoticeUser | undefined;
   workspace: Workspace | undefined;
   access: SubscriptionAccess | undefined;
-  /** Outside agents' proposals waiting for a decision; 0 for people who cannot see them. */
-  pendingProposals: number;
+  /** What needs the merchant, from the attention summary; 0 for sections they cannot see. */
+  attention: AttentionCounts;
   now: Date;
 }
 
@@ -69,26 +74,67 @@ function verifyEmailNotice(user: NoticeUser | undefined): AccountNotice | null {
   };
 }
 
-/** Outside agents' changes wait for someone here to approve or reject them (ADR 0028). */
-function agentProposalsNotice(
+interface CountNoticeSpec {
+  kind: NoticeKind;
+  severity: NoticeSeverity;
+  title: string;
+  body: string;
+  label: string;
+  to: string;
+}
+
+/** A notice about things to act on, new again whenever their number changes. */
+function countNotice(
   workspace: Workspace | undefined,
-  pendingProposals: number,
+  count: number,
+  spec: CountNoticeSpec,
 ): AccountNotice | null {
-  if (!workspace || pendingProposals === 0) return null;
+  if (!workspace || count === 0) return null;
   return {
-    key: `${NoticeKind.AgentProposals}:${workspace.id}`,
-    kind: NoticeKind.AgentProposals,
-    severity: NoticeSeverity.Info,
+    key: `${spec.kind}:${workspace.id}`,
+    kind: spec.kind,
+    severity: spec.severity,
     banner: false,
-    title: AGENT_PROPOSALS_NOTICE_COPY.title,
-    body: AGENT_PROPOSALS_NOTICE_COPY.body(pendingProposals),
-    revision: noticeRevision(String(pendingProposals)),
-    action: {
-      kind: NoticeActionKind.Link,
-      label: AGENT_PROPOSALS_NOTICE_COPY.review,
-      to: toAgentReviewRoute(ReviewSource.Proposals),
-    },
+    title: spec.title,
+    body: spec.body,
+    revision: noticeRevision(String(count)),
+    action: { kind: NoticeActionKind.Link, label: spec.label, to: spec.to },
   };
+}
+
+/** Stores to reconnect, refused listings, and changes waiting for review (ADR 0028). */
+function attentionNotices(workspace: Workspace | undefined, attention: AttentionCounts) {
+  return [
+    countNotice(workspace, attention.stores, {
+      kind: NoticeKind.StoresAttention,
+      severity: NoticeSeverity.Warning,
+      ...STORES_NOTICE_COPY,
+      title: STORES_NOTICE_COPY.title(attention.stores),
+      body: STORES_NOTICE_COPY.body(attention.stores),
+      to: ROUTES.stores,
+    }),
+    countNotice(workspace, attention.listings, {
+      kind: NoticeKind.FailedListings,
+      severity: NoticeSeverity.Warning,
+      ...FAILED_LISTINGS_NOTICE_COPY,
+      body: FAILED_LISTINGS_NOTICE_COPY.body(attention.listings),
+      to: toProductsRoute({ storeFilter: ProductStoreFilter.with_errors }),
+    }),
+    countNotice(workspace, attention.proposals, {
+      kind: NoticeKind.AgentProposals,
+      severity: NoticeSeverity.Info,
+      ...AGENT_PROPOSALS_NOTICE_COPY,
+      body: AGENT_PROPOSALS_NOTICE_COPY.body(attention.proposals),
+      to: toAgentReviewRoute(ReviewSource.Proposals),
+    }),
+    countNotice(workspace, attention.suggestions, {
+      kind: NoticeKind.AiSuggestions,
+      severity: NoticeSeverity.Info,
+      ...AI_SUGGESTIONS_NOTICE_COPY,
+      body: AI_SUGGESTIONS_NOTICE_COPY.body(attention.suggestions),
+      to: toAgentReviewRoute(ReviewSource.Suggestions),
+    }),
+  ];
 }
 
 function bySeverity(first: AccountNotice, second: AccountNotice): number {
@@ -101,7 +147,7 @@ export function accountNotices(input: AccountNoticeInput): AccountNotice[] {
     sandboxNotice(input.workspace),
     workspaceBillingNotice(input),
     verifyEmailNotice(input.user),
-    agentProposalsNotice(input.workspace, input.pendingProposals),
+    ...attentionNotices(input.workspace, input.attention),
   ]
     .filter((notice): notice is AccountNotice => notice !== null)
     .sort(bySeverity);

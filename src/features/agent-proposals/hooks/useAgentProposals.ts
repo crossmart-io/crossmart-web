@@ -1,13 +1,9 @@
-import { api, fetchClient } from '@/api/client';
+import { fetchClient } from '@/api/client';
 import type { AgentProposalStatus } from '@/api/schema';
 import { unwrap } from '@/api/unwrap';
 import { usePagedList } from '@/hooks/usePagedList';
 import type { Pagination } from '@/hooks/usePagination';
-import {
-  AGENT_PROPOSALS_ENDPOINT,
-  AGENT_PROPOSALS_SUMMARY_ENDPOINT,
-  PENDING_PROPOSALS_REFRESH_MS,
-} from '../agent-proposals.constants';
+import { AGENT_PROPOSALS_ENDPOINT } from '../agent-proposals.constants';
 import type { AgentProposal } from '../agent-proposals.types';
 
 interface ProposalFilter {
@@ -38,15 +34,4 @@ export function useAgentProposals(filter: ProposalFilter, pagination: Pagination
     staleTime: 0,
   });
   return { ...query, proposals: query.items };
-}
-
-/** How many proposals wait for a decision, for the sidebar and the bell. Polled. */
-export function usePendingProposalCount(workspaceId: string | undefined, enabled = true): number {
-  const query = api.useQuery(
-    'get',
-    AGENT_PROPOSALS_SUMMARY_ENDPOINT,
-    { params: { path: { workspaceId: workspaceId ?? '' } } },
-    { enabled: enabled && Boolean(workspaceId), refetchInterval: PENDING_PROPOSALS_REFRESH_MS },
-  );
-  return query.data?.pendingCount ?? 0;
 }

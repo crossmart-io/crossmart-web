@@ -9,9 +9,6 @@ export const APPROVE_PROPOSAL_ENDPOINT =
 export const REJECT_PROPOSAL_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/agent-proposals/{proposalId}/reject';
 
-/** The waiting count (sidebar, bell) is refreshed this often, as agents add to it. */
-export const PENDING_PROPOSALS_REFRESH_MS = 30_000;
-
 export const PROPOSAL_STATUS_LABELS: Record<AgentProposalStatus, string> = {
   [AgentProposalStatus.pending]: 'Waiting for you',
   [AgentProposalStatus.applying]: 'Applying',

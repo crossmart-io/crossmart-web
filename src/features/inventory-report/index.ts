@@ -1,1 +1,1 @@
-export { InventoryOverview } from './components/InventoryOverview';
+export { StockValueTiles } from './components/StockValueTiles';

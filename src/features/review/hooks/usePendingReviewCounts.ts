@@ -1,7 +1,6 @@
 import { WorkspacePermission } from '@/api/schema';
 import { ReviewSource } from '@/config/routes';
-import { usePendingProposalCount } from '@/features/agent-proposals';
-import { usePendingSuggestionCount } from '@/features/suggestions';
+import { useAttentionCounts } from '@/features/attention';
 import { hasPermission, type Workspace } from '@/features/workspaces';
 
 export interface PendingReviewCounts {
@@ -11,19 +10,21 @@ export interface PendingReviewCounts {
   canViewProposals: boolean;
 }
 
-/** What waits for review in the workspace, by source and in all. */
+/**
+ * What waits for review in the workspace, by source and in all. Read from the attention summary,
+ * so the Agent badge, the Review tab and Home always show the same numbers.
+ */
 export function usePendingReviewCounts(workspace: Workspace | undefined): PendingReviewCounts {
   const canViewProposals =
     workspace !== undefined && hasPermission(workspace, WorkspacePermission.suggestions_view);
-  const suggestions = usePendingSuggestionCount(workspace?.id);
-  const proposals = usePendingProposalCount(workspace?.id, canViewProposals);
-  const visibleProposals = canViewProposals ? proposals : 0;
+  const counts = useAttentionCounts(workspace?.id);
+  const proposals = canViewProposals ? counts.proposals : 0;
   return {
     bySource: {
-      [ReviewSource.Suggestions]: suggestions,
-      [ReviewSource.Proposals]: visibleProposals,
+      [ReviewSource.Suggestions]: counts.suggestions,
+      [ReviewSource.Proposals]: proposals,
     },
-    total: suggestions + visibleProposals,
+    total: counts.suggestions + proposals,
     canViewProposals,
   };
 }

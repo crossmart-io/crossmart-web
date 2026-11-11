@@ -6,6 +6,7 @@ import { TablePagination } from '@/components/lists/TablePagination';
 import { useUrlPagination } from '@/hooks/usePagination';
 import { Page } from '@/components/layout/Page';
 import { ProductViewTabs } from '@/features/catalog';
+import { StockValueTiles } from '@/features/inventory-report';
 import {
   type InventoryItem,
   type InventoryListFilters,
@@ -20,13 +21,14 @@ import {
 import { WorkspacePermission } from '@/api/schema';
 import { hasPermission, type Workspace } from '@/features/workspaces';
 
-/** Products › Stock: the stock of every variant, and every change to it. */
+/** Products › Stock: what the stock is worth, the stock of every variant, and every change. */
 export function StockPage() {
   const filters = useInventoryListFilters();
 
   return (
     <Page name="Stock" title="Products">
       <ProductViewTabs />
+      <WorkspaceGate>{(workspace) => <StockValueTiles workspaceId={workspace.id} />}</WorkspaceGate>
       <InventoryFilters filters={filters} />
       <WorkspaceGate>
         {(workspace) => <InventoryResults workspace={workspace} filters={filters} />}

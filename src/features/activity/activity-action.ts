@@ -5,6 +5,7 @@ export const ACTIVITY_ACTION_LABELS: Record<ActivityAction, string> = {
   [ActivityAction.product_created]: 'Product created',
   [ActivityAction.product_updated]: 'Product updated',
   [ActivityAction.product_deleted]: 'Product deleted',
+  [ActivityAction.product_marked_sold]: 'Product marked sold',
   [ActivityAction.products_bulk_updated]: 'Bulk edit',
   [ActivityAction.products_bulk_deleted]: 'Bulk delete',
   [ActivityAction.products_imported]: 'Products imported',

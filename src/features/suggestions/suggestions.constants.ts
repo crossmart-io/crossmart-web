@@ -15,8 +15,6 @@ export const CONTENT_GENERATIONS_ENDPOINT =
 export const CONTENT_GENERATION_BATCH_SIZE = 100;
 /** Suggestions one bulk approval may name; the API allows no more, and it matches a page. */
 export const BULK_APPROVE_MAX = 100;
-/** The pending count in the sidebar is refreshed this often, as agents add to it. */
-export const PENDING_COUNT_REFRESH_MS = 30_000;
 /** Whether AI is configured changes only with a server restart. */
 export const AI_STATUS_STALE_MS = 300_000;
 

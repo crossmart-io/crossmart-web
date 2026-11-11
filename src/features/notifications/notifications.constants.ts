@@ -1,4 +1,13 @@
-import { Bot, BotMessageSquare, CreditCard, type LucideIcon, MailWarning } from 'lucide-react';
+import {
+  Bot,
+  BotMessageSquare,
+  CreditCard,
+  type LucideIcon,
+  MailWarning,
+  PackageX,
+  Sparkles,
+  Store,
+} from 'lucide-react';
 import { NoticeKind, NoticeSeverity } from './notifications.types';
 
 /** A trial or free access ending within this many days is also shown as a banner. */
@@ -26,6 +35,9 @@ export const NOTICE_ICONS: Record<NoticeKind, LucideIcon> = {
   [NoticeKind.ReadOnly]: CreditCard,
   [NoticeKind.VerifyEmail]: MailWarning,
   [NoticeKind.AgentProposals]: BotMessageSquare,
+  [NoticeKind.StoresAttention]: Store,
+  [NoticeKind.FailedListings]: PackageX,
+  [NoticeKind.AiSuggestions]: Sparkles,
 };
 
 export const NOTICE_ICON_TONES: Record<NoticeSeverity, string> = {
@@ -85,5 +97,29 @@ export const AGENT_PROPOSALS_NOTICE_COPY = {
     count === 1
       ? 'An AI agent proposed a change. Nothing changes until you approve it.'
       : `AI agents proposed ${count} changes. Nothing changes until you approve them.`,
-  review: 'Review',
+  label: 'Review',
+} as const;
+
+export const STORES_NOTICE_COPY = {
+  title: (count: number) =>
+    count === 1 ? 'A store needs attention' : `${count} stores need attention`,
+  body: (count: number) =>
+    count === 1
+      ? 'Reconnect it so its listings and orders keep syncing.'
+      : 'Reconnect them so their listings and orders keep syncing.',
+  label: 'Fix',
+} as const;
+
+export const FAILED_LISTINGS_NOTICE_COPY = {
+  title: 'Listings failed',
+  body: (count: number) =>
+    count === 1 ? 'A store refused a listing.' : `Your stores refused ${count} listings.`,
+  label: 'See them',
+} as const;
+
+export const AI_SUGGESTIONS_NOTICE_COPY = {
+  title: 'AI suggestions to review',
+  body: (count: number) =>
+    count === 1 ? '1 suggestion is waiting for you.' : `${count} suggestions are waiting for you.`,
+  label: 'Review',
 } as const;

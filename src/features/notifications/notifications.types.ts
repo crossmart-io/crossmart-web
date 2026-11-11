@@ -9,6 +9,12 @@ export enum NoticeKind {
   VerifyEmail = 'verify-email',
   /** Outside AI agents' changes wait for a decision (ADR 0028). */
   AgentProposals = 'agent-proposals',
+  /** Stores to reconnect or fix. */
+  StoresAttention = 'stores-attention',
+  /** Listings the stores refused. */
+  FailedListings = 'failed-listings',
+  /** AI suggestions waiting for review. */
+  AiSuggestions = 'ai-suggestions',
 }
 
 /** How much a notice needs attention, most urgent last. */

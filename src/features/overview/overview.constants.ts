@@ -11,10 +11,3 @@ export const SALES_EMPTY_COPY = {
   title: 'No sales yet',
   description: 'Your sales will appear here once orders come in.',
 } as const;
-
-export const CATALOG_HEALTH_EMPTY_COPY = {
-  title: 'No products yet',
-  description: 'Add or import products to see what marketplaces still need from them.',
-  addProduct: 'Add product',
-  importProducts: 'Import',
-} as const;

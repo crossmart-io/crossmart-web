@@ -35,6 +35,7 @@ const ROW: ChannelProduct = {
     status: ProductStatus.ACTIVE,
     vendor: null,
     productType: null,
+    condition: null,
     variantCount: 1,
     totalAvailable: 4,
     priceRange: null,

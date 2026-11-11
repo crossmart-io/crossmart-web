@@ -18,6 +18,7 @@ function pageWith(displayState: ListingDisplayState): { items: ProductSummary[] 
         status: ProductStatus.ACTIVE,
         vendor: null,
         productType: null,
+        condition: null,
         variantCount: 1,
         totalAvailable: 1,
         priceRange: null,
