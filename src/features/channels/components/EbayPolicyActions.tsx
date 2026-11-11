@@ -23,7 +23,7 @@ interface EbayPolicyActionsProps extends ConnectionRef {
 }
 
 /** Creates the default policies; the main action while the account cannot list. */
-function CreateDefaultsButton({
+export function CreateDefaultsButton({
   connection,
   prominent,
   onCreated,

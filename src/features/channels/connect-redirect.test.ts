@@ -1,3 +1,4 @@
+import { ChannelType } from '@/api/schema';
 import { readConnectOutcome } from './connect-redirect';
 
 describe('readConnectOutcome', () => {
@@ -5,6 +6,7 @@ describe('readConnectOutcome', () => {
     expect(readConnectOutcome(new URLSearchParams('connected=shopify'))).toEqual({
       kind: 'connected',
       message: 'Shopify is connected',
+      channel: ChannelType.shopify,
     });
   });
 

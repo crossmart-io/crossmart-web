@@ -10,7 +10,9 @@ export const CONNECT_REDIRECT_PARAMS = {
   channel: 'channel',
 } as const satisfies Record<keyof ConnectRedirect, keyof ConnectRedirect>;
 
-type ConnectOutcome = { kind: 'connected'; message: string } | { kind: 'failed'; message: string };
+type ConnectOutcome =
+  | { kind: 'connected'; message: string; channel: ChannelType }
+  | { kind: 'failed'; message: string };
 
 function channelName(type: ChannelType | undefined): string {
   return CHANNELS.find((channel) => channel.connect?.type === type)?.name ?? 'The store';
@@ -20,7 +22,11 @@ function channelName(type: ChannelType | undefined): string {
 export function readConnectOutcome(params: URLSearchParams): ConnectOutcome | null {
   const connected = parseEnum(ChannelType, params.get(CONNECT_REDIRECT_PARAMS.connected));
   if (connected) {
-    return { kind: 'connected', message: `${channelName(connected)} is connected` };
+    return {
+      kind: 'connected',
+      message: `${channelName(connected)} is connected`,
+      channel: connected,
+    };
   }
   const raw = params.get(CONNECT_REDIRECT_PARAMS.error);
   if (raw === null) return null;
