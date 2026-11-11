@@ -4,26 +4,18 @@ import { ROUTE_QUERY } from '@/config/routes';
 import { useDebouncedSearchParam } from '@/hooks/useDebouncedSearchParam';
 import { useSearchParamsUpdater } from '@/hooks/useSearchParamsUpdater';
 import { setOrDeleteParam } from '@/lib/search-params';
-import {
-  ALL_CHANNEL_PRODUCTS,
-  CHANNEL_PRODUCT_SORTS,
-  CHANNEL_PRODUCTS_SEARCH_DEBOUNCE_MS,
-  CHANNEL_PRODUCT_FILTERS,
-  type ChannelProductFilter,
-} from '../listings.constants';
+import { CHANNEL_PRODUCT_SORTS, CHANNEL_PRODUCTS_SEARCH_DEBOUNCE_MS } from '../listings.constants';
+import { StoreListingView, toStoreListingSelection } from '../store-listing-views';
 
-function toFilter(value: string | null): ChannelProductFilter {
-  return (
-    CHANNEL_PRODUCT_FILTERS.find((filter) => filter.value === value)?.value ?? ALL_CHANNEL_PRODUCTS
-  );
-}
-
-/** The products tab's filter, search and sort, kept in the URL so a view can be shared. */
+/**
+ * The listings tab's view, search and sort, kept in the URL so a view can be shared. `state`
+ * holds the view, or a precise state from a more specific link.
+ */
 export function useChannelProductFilters() {
   const [searchParams] = useSearchParams();
   const updateParams = useSearchParamsUpdater();
   const search = useDebouncedSearchParam(ROUTE_QUERY.search, CHANNEL_PRODUCTS_SEARCH_DEBOUNCE_MS);
-  const filter = toFilter(searchParams.get(ROUTE_QUERY.state));
+  const selection = toStoreListingSelection(searchParams.get(ROUTE_QUERY.state));
   const sort = toSortOption(CHANNEL_PRODUCT_SORTS, searchParams.get(ROUTE_QUERY.sort));
 
   const setParam = (key: string, value: string, defaultValue: string) =>
@@ -31,9 +23,8 @@ export function useChannelProductFilters() {
 
   return {
     search,
-    filter,
-    setFilter: (next: ChannelProductFilter) =>
-      setParam(ROUTE_QUERY.state, next, ALL_CHANNEL_PRODUCTS),
+    ...selection,
+    setView: (next: StoreListingView) => setParam(ROUTE_QUERY.state, next, StoreListingView.All),
     sort,
     setSort: (value: string) => setParam(ROUTE_QUERY.sort, value, CHANNEL_PRODUCT_SORTS[0].value),
   };

@@ -1,4 +1,4 @@
-import { ExternalLink, Undo2, X } from 'lucide-react';
+import { ExternalLink, Plus, Undo2, X } from 'lucide-react';
 import type { MouseEvent } from 'react';
 import { Link, useSearchParams } from 'react-router';
 import { ChannelProductState, ListingDisplayState } from '@/api/schema';
@@ -24,7 +24,10 @@ interface ChannelProductRowProps {
   onOpenListing: (productId: string) => void;
   /** Removes the product from the store; absent for members who may not. */
   onRemove?: (productId: string) => Promise<unknown>;
-  /** Adds a product removed by hand back to the store; absent for members who may not. */
+  /**
+   * Adds a product removed by hand back to the store, or one not in it yet; absent for members
+   * who may not.
+   */
   onAddBack?: (productId: string) => void;
 }
 
@@ -133,12 +136,23 @@ function StateCell({
   );
 }
 
-/** What the row offers: removing a product in the store, or adding back one removed by hand. */
+/**
+ * What the row offers: removing a product in the store, adding back one removed by hand, or
+ * adding one the store does not have.
+ */
 function RowAction({
   row,
   onRemove,
   onAddBack,
 }: Pick<ChannelProductRowProps, 'row' | 'onRemove' | 'onAddBack'>) {
+  if (row.state === ChannelProductState.excluded) {
+    return onAddBack ? (
+      <Button type="button" variant="outline" size="sm" onClick={() => onAddBack(row.product.id)}>
+        <Plus data-icon="inline-start" />
+        {LISTINGS_ROW_COPY.add}
+      </Button>
+    ) : null;
+  }
   if (row.state === ChannelProductState.removed_by_hand) {
     return onAddBack ? (
       <Button type="button" variant="outline" size="sm" onClick={() => onAddBack(row.product.id)}>
