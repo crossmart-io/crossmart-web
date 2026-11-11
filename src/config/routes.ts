@@ -127,6 +127,8 @@ export const ROUTE_QUERY = {
   reviewSource: 'source',
   /** On Crossmart Agent: the panel a narrow screen opens on. */
   agentPanel: 'panel',
+  /** On Stores: the channel a store was just connected on, whose setup is offered. */
+  storeSetup: 'setup',
 } as const;
 
 /** Parts of a page a link can scroll to, as the ids of their cards (`#media`). */

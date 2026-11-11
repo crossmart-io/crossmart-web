@@ -1,4 +1,4 @@
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { useForm } from 'react-hook-form';
 import { SettingsFormCard } from '../SettingsFormCard';
@@ -69,10 +69,12 @@ describe('SaveGroupProvider', () => {
 
     await user.click(screen.getByRole('button', { name: 'Save' }));
 
+    await waitFor(() =>
+      expect(screen.queryByRole('region', { name: 'Save changes' })).not.toBeInTheDocument(),
+    );
     expect(onSave).toHaveBeenCalledTimes(2);
     expect(onSave).toHaveBeenCalledWith('Pricing 2');
     expect(onSave).toHaveBeenCalledWith('Rule 3');
-    expect(screen.queryByRole('region', { name: 'Save changes' })).not.toBeInTheDocument();
   });
 
   it('puts the cards back as they were on Discard', async () => {
