@@ -131,6 +131,11 @@ export const ROUTE_QUERY = {
   storeSetup: 'setup',
   /** On Stores: the store just connected, when the OAuth return named it. */
   storeSetupConnection: 'setupStore',
+  /**
+   * On Stores: the channel whose connect dialog opens at once (`?connect=shopify`). The API's
+   * getting-started steps link here, so an AI agent can send the seller straight to it.
+   */
+  connectChannel: 'connect',
 } as const;
 
 /** Parts of a page a link can scroll to, as the ids of their cards (`#media`). */
