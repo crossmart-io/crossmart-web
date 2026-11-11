@@ -1,6 +1,6 @@
 import { ChannelConnectionStatus, ChannelType, ProductStatus } from '@/api/schema';
 import { connectionFixture } from '@/features/channels/testing/channel-connection.fixture';
-import { activeProductsRule, justConnectedStore } from './just-connected';
+import { activeProductsRule, justConnectedStore, storeToSetUp } from './just-connected';
 
 const NOW = new Date('2026-11-11T10:00:00Z');
 const FIVE_MINUTES_AGO = '2026-11-11T09:55:00Z';
@@ -39,6 +39,35 @@ describe('justConnectedStore', () => {
     expect(justConnectedStore(stores, ChannelType.shopify, NOW)?.status).toBe(
       ChannelConnectionStatus.CONNECTED,
     );
+  });
+});
+
+describe('storeToSetUp', () => {
+  const named = (connectionId: string | null) => ({ channel: ChannelType.shopify, connectionId });
+
+  it('sets up the store the OAuth return names, however long ago it was connected', () => {
+    const fresher = connectionFixture({ id: 'other', connectedAt: FIVE_MINUTES_AGO });
+    const store = connectionFixture({ id: 'named', connectedAt: AN_HOUR_AGO });
+
+    expect(storeToSetUp([fresher, store], named('named'), NOW)?.id).toBe('named');
+  });
+
+  it('skips a named store that is not connected or already adds products', () => {
+    const broken = connectionFixture({ id: 'broken', status: ChannelConnectionStatus.ERROR });
+    const automatic = connectionFixture({
+      id: 'automatic',
+      productSelection: { filter: {}, includeProductIds: [], excludeProductIds: [] },
+    });
+
+    expect(storeToSetUp([broken, automatic], named('broken'), NOW)).toBeUndefined();
+    expect(storeToSetUp([broken, automatic], named('automatic'), NOW)).toBeUndefined();
+    expect(storeToSetUp([broken], named('missing'), NOW)).toBeUndefined();
+  });
+
+  it('guesses the newest store when the OAuth return names none', () => {
+    const fresh = connectionFixture({ id: 'new', connectedAt: FIVE_MINUTES_AGO });
+
+    expect(storeToSetUp([fresh], named(null), NOW)?.id).toBe('new');
   });
 });
 

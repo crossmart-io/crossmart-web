@@ -19,10 +19,10 @@ export function StoresPage() {
         {(workspace) => (
           <>
             <ChannelGrid workspace={workspace} />
-            {setup.channel && hasPermission(workspace, WorkspacePermission.channels_manage) && (
+            {setup.request && hasPermission(workspace, WorkspacePermission.channels_manage) && (
               <StoreSetupDialog
                 workspaceId={workspace.id}
-                channel={setup.channel}
+                request={setup.request}
                 onDone={setup.close}
               />
             )}
