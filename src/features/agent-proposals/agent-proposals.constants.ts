@@ -56,7 +56,8 @@ export const OUTSIDE_AGENT_CHANGES_COPY = {
   options: {
     [OutsideAgentChanges.require_approval]: {
       label: 'Wait for my approval',
-      description: 'Each change waits in Agent, under Review. Recommended.',
+      description:
+        'Each change waits in Agent, under Review, except new products added as drafts. Recommended.',
     },
     [OutsideAgentChanges.apply_directly]: {
       label: 'Apply directly',
