@@ -1,10 +1,17 @@
 import { ChannelConnectionStatus, WorkspacePermission } from '@/api/schema';
 import type { Workspace } from '@/features/workspaces';
 import { hasPermission, useMe } from '@/features/workspaces';
-import { CHANNELS, ChannelStatus, type ChannelInfo } from '../channels.constants';
+import {
+  CHANNELS,
+  ChannelStatus,
+  type ChannelInfo,
+  type ConnectableChannel,
+} from '../channels.constants';
 import type { ChannelConnection } from '../channels.types';
 import { useChannelConnections } from '../hooks/useChannelConnections';
+import { useConnectChannelParam } from '../hooks/useConnectChannelParam';
 import { ConnectableChannelCard } from './ConnectableChannelCard';
+import { ConnectChannelDialog } from './ConnectChannelDialog';
 import { RequestChannelLink } from './RequestChannelLink';
 
 const NO_CONNECTIONS: readonly ChannelConnection[] = [];
@@ -25,6 +32,41 @@ function isShown(channel: ChannelInfo, stores: number, isPlatformAdmin: boolean)
   );
 }
 
+interface ShownChannel {
+  channel: ChannelInfo;
+  connect: ConnectableChannel;
+  stores: ChannelConnection[];
+}
+
+/**
+ * The connect dialog a link asks for (`?connect=<channel>`), when the channel has a card here
+ * and the person may connect stores. Closing it drops the parameter.
+ */
+function RequestedConnectDialog({
+  workspaceId,
+  cards,
+  canManage,
+}: {
+  workspaceId: string;
+  cards: readonly ShownChannel[];
+  canManage: boolean;
+}) {
+  const requested = useConnectChannelParam();
+  const card = cards.find(({ connect }) => connect.type === requested.channel);
+  if (!card || !canManage) return null;
+  return (
+    <ConnectChannelDialog
+      workspaceId={workspaceId}
+      channel={card.channel}
+      connect={card.connect}
+      open
+      onOpenChange={(open) => {
+        if (!open) requested.clear();
+      }}
+    />
+  );
+}
+
 /** The channels a store can be connected on, each with its stores, then a way to ask for more. */
 export function ChannelGrid({ workspace }: { workspace: Workspace }) {
   const { data } = useChannelConnections(workspace.id);
@@ -33,7 +75,7 @@ export function ChannelGrid({ workspace }: { workspace: Workspace }) {
   );
   const canManage = hasPermission(workspace, WorkspacePermission.channels_manage);
   const isPlatformAdmin = useMe().data?.platformAdmin ?? false;
-  const cards = CHANNELS.flatMap((channel) => {
+  const cards: ShownChannel[] = CHANNELS.flatMap((channel) => {
     const stores = active.filter((connection) => connection.channel === channel.connect?.type);
     const { connect } = channel;
     return connect && isShown(channel, stores.length, isPlatformAdmin)
@@ -57,6 +99,7 @@ export function ChannelGrid({ workspace }: { workspace: Workspace }) {
         ))}
       </div>
       <RequestChannelLink />
+      <RequestedConnectDialog workspaceId={workspace.id} cards={cards} canManage={canManage} />
     </div>
   );
 }

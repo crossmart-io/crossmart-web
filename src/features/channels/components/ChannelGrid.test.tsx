@@ -46,15 +46,19 @@ const WORKSPACE: Workspace = {
 const CONNECT_ACTION = 'Connect';
 const MANAGE_ACTION = 'Manage';
 
-function renderGrid(connections: ChannelConnection[] = [], platformAdmin = false) {
+function renderGrid(
+  connections: ChannelConnection[] = [],
+  platformAdmin = false,
+  { url = '/stores', workspace = WORKSPACE }: { url?: string; workspace?: Workspace } = {},
+) {
   vi.mocked(useMe).mockReturnValue({ data: { platformAdmin } } as ReturnType<typeof useMe>);
   vi.mocked(useChannelConnections).mockReturnValue({
     data: connections,
   } as unknown as ReturnType<typeof useChannelConnections>);
   return render(
     <QueryClientProvider client={new QueryClient()}>
-      <MemoryRouter>
-        <ChannelGrid workspace={WORKSPACE} />
+      <MemoryRouter initialEntries={[url]}>
+        <ChannelGrid workspace={workspace} />
       </MemoryRouter>
     </QueryClientProvider>,
   );
@@ -184,5 +188,36 @@ describe('ChannelGrid', () => {
     expect(
       screen.queryByRole('button', { name: CHANNEL_PREVIEW_COPY.connect }),
     ).not.toBeInTheDocument();
+  });
+
+  describe('with ?connect=<channel>, as an AI agent links the seller', () => {
+    it('opens that channel’s connect dialog at once', () => {
+      renderGrid([], false, { url: `/stores?connect=${ChannelType.shopify}` });
+
+      expect(screen.getByRole('dialog', { name: 'Connect Shopify' })).toBeInTheDocument();
+    });
+
+    it('closes it for good on cancel', async () => {
+      renderGrid([], false, { url: `/stores?connect=${ChannelType.ebay}` });
+
+      await userEvent.click(screen.getByRole('button', { name: 'Cancel' }));
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('ignores a channel without a card, or an unknown one', () => {
+      renderGrid([], false, { url: `/stores?connect=${ChannelType.etsy}` });
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+      renderGrid([], false, { url: '/stores?connect=myspace' });
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
+
+    it('opens nothing for someone who may not connect stores', () => {
+      const viewer = { ...WORKSPACE, role: WorkspaceRole.VIEWER, permissions: [] };
+      renderGrid([], false, { url: `/stores?connect=${ChannelType.shopify}`, workspace: viewer });
+
+      expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+    });
   });
 });
