@@ -1,7 +1,8 @@
 import { ChannelType, ConnectFailure } from '@/api/schema';
+import { ROUTES } from '@/config/routes';
 import { parseEnum } from '@/lib/enum';
 import { CHANNELS, CONNECT_FAILURE_MESSAGES } from './channels.constants';
-import type { ConnectRedirect } from './channels.types';
+import type { ConnectedChannel, ConnectRedirect } from './channels.types';
 
 /** The parameters the OAuth callback adds, named by the generated redirect type. */
 export const CONNECT_REDIRECT_PARAMS = {
@@ -49,4 +50,17 @@ export function readConnectOutcome(params: URLSearchParams): ConnectOutcome | nu
   if (raw === null) return null;
   const failure = parseEnum(ConnectFailure, raw) ?? ConnectFailure.unexpected;
   return { kind: 'failed', message: CONNECT_FAILURE_MESSAGES[failure] };
+}
+
+/**
+ * The Stores page with the parameters an OAuth callback adds, for a store connected without
+ * leaving the app (pasted credentials), so it is announced and set up the same way.
+ */
+export function connectedStoresUrl({ connection, reconnected }: ConnectedChannel): string {
+  const params = new URLSearchParams({
+    [CONNECT_REDIRECT_PARAMS.connected]: connection.channel,
+    [CONNECT_REDIRECT_PARAMS.connectionId]: connection.id,
+  });
+  if (reconnected) params.set(CONNECT_REDIRECT_PARAMS.reconnected, FLAG_SET);
+  return `${ROUTES.stores}?${params.toString()}`;
 }

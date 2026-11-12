@@ -9,6 +9,7 @@ import { AccountDetail } from './AccountDetail';
 import { ChannelImportSection } from './ChannelImportSection';
 import { ConnectionActions } from './ConnectionActions';
 import { EbayAccountDetails } from './EbayAccountDetails';
+import { FalabellaAccountDetails } from './FalabellaAccountDetails';
 import { EbayListingDefaultsCard } from './EbayListingDefaultsCard';
 import { GoogleAccountDetails } from './GoogleAccountDetails';
 import { GoogleListingSetupCard } from './GoogleListingSetupCard';
@@ -32,6 +33,7 @@ interface ConnectionSettingsProps {
 function ChannelAccountDetails({ connection }: { connection: ChannelConnection }) {
   if (connection.ebay) return <EbayAccountDetails ebay={connection.ebay} />;
   if (connection.googleMerchant) return <GoogleAccountDetails google={connection.googleMerchant} />;
+  if (connection.falabella) return <FalabellaAccountDetails falabella={connection.falabella} />;
   return <ShopifyAccountDetails connection={connection} />;
 }
 

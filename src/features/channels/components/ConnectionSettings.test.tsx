@@ -1,6 +1,11 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { render, screen } from '@testing-library/react';
-import { ChannelConnectionStatus, EbayMarketplaceId } from '@/api/schema';
+import {
+  ChannelConnectionStatus,
+  ChannelType,
+  EbayMarketplaceId,
+  FalabellaCountry,
+} from '@/api/schema';
 import {
   connectionFixture,
   ebayConnectionFixture,
@@ -114,6 +119,26 @@ describe('ConnectionSettings', () => {
     expect(screen.queryByText('Domain')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: /Import products/ })).not.toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Disconnect' })).toBeInTheDocument();
+  });
+
+  it('shows a Falabella account’s seller, user and country, never its key', () => {
+    renderSettings(
+      connectionFixture({
+        channel: ChannelType.falabella,
+        shopify: null,
+        falabella: {
+          sellerId: 'SC478FA',
+          userId: 'me@shop.cl',
+          country: FalabellaCountry.facl,
+          currencyCode: 'CLP',
+        },
+      }),
+    );
+
+    expect(screen.getByText('SC478FA')).toBeInTheDocument();
+    expect(screen.getByText('me@shop.cl')).toBeInTheDocument();
+    expect(screen.getByText('Chile (CLP)')).toBeInTheDocument();
+    expect(screen.queryByText('Domain')).not.toBeInTheDocument();
   });
 
   it('counts an eBay account’s business policies', () => {

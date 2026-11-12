@@ -31,6 +31,7 @@ describe('buildAccountMap', () => {
       MapNodeType.Store,
       MapNodeType.GhostChannel,
       MapNodeType.GhostChannel,
+      MapNodeType.GhostChannel,
     ]);
     expect(graph.edges.every((edge) => edge.source === CATALOG_NODE_ID)).toBe(true);
   });

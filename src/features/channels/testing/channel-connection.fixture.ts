@@ -27,6 +27,7 @@ export function connectionFixture(overrides: Partial<ChannelConnection> = {}): C
     ebay: null,
     googleMerchant: null,
     etsy: null,
+    falabella: null,
     productSelection: null,
     failedListings: 0,
     publishReadiness: { ready: true, missing: [] },

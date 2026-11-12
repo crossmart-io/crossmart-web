@@ -456,7 +456,10 @@ export interface paths {
      */
     get: operations['ProductsController_list_v1'];
     put?: never;
-    /** Create a product with its variants */
+    /**
+     * Create a product with its variants
+     * @description A connected agent may create a draft (status left out or DRAFT) even while the workspace approves agents’ changes; any other status is refused with `agent_approval_required`, so the agent proposes it.
+     */
     post: operations['ProductsController_create_v1'];
     delete?: never;
     options?: never;
@@ -855,6 +858,26 @@ export interface paths {
      * @description Revokes Crossmart’s access on the channel (for Shopify, uninstalls the app unless another workspace uses the same store) and wipes the stored credentials. Listings stay.
      */
     post: operations['ChannelConnectionsController_disconnect_v1'];
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/channel-connections/credentials': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    get?: never;
+    put?: never;
+    /**
+     * Connect a channel account with credentials the channel issued
+     * @description For channels whose sellers paste keys instead of approving an app (Falabella). The credentials are checked with a live call to the channel, then stored encrypted; they are never returned or logged. Connecting the same account again replaces its keys. Needs a signed-in user.
+     */
+    post: operations['ChannelCredentialsController_connect_v1'];
     delete?: never;
     options?: never;
     head?: never;
@@ -1481,6 +1504,26 @@ export interface paths {
      * @description Stores to reconnect, failed listings, outside agents’ proposals and AI suggestions waiting for review: a count and the latest few of each, for Home and a sidebar badge. Counts match the Channels, Agent proposals and Suggestions pages. A section is null without the permission its page needs (`channels:view` or `suggestions:view`).
      */
     get: operations['AttentionController_get_v1'];
+    put?: never;
+    post?: never;
+    delete?: never;
+    options?: never;
+    head?: never;
+    patch?: never;
+    trace?: never;
+  };
+  '/api/v1/workspaces/{workspaceId}/getting-started': {
+    parameters: {
+      query?: never;
+      header?: never;
+      path?: never;
+      cookie?: never;
+    };
+    /**
+     * Where a new account stands, and what to do next
+     * @description Counts of products, stores and live listings, whether the email is confirmed, and the steps to a first listing: each says whether it is done, whether the seller (in the app, with a link) or an agent (with the tools named) takes it. For agents that connect to an empty workspace.
+     */
+    get: operations['GettingStartedController_get_v1'];
     put?: never;
     post?: never;
     delete?: never;
@@ -3634,6 +3677,23 @@ export interface components {
       /** @description Whether the listing setup is complete, so products can be listed */
       readyToList: boolean;
     };
+    /** @enum {string} */
+    FalabellaCountry: FalabellaCountry;
+    FalabellaSettingsDto: {
+      country: components['schemas']['FalabellaCountry'];
+      /** @example SC478FA */
+      sellerId: string;
+      /**
+       * @description The Seller Center user whose key is used
+       * @example seller@example.com
+       */
+      userId: string;
+      /**
+       * @description ISO 4217 code of the country’s currency
+       * @example CLP
+       */
+      currencyCode: string;
+    };
     ProductSelectionFilterDto: {
       /** @description Matches title, handle or SKU */
       search?: string;
@@ -3717,6 +3777,8 @@ export interface components {
       googleMerchant: components['schemas']['GoogleMerchantSettingsDto'] | null;
       /** @description The Etsy shop, its profiles and its listing setup, for Etsy connections */
       etsy: components['schemas']['EtsySettingsDto'] | null;
+      /** @description The Falabella account’s country, seller and user, for Falabella connections */
+      falabella: components['schemas']['FalabellaSettingsDto'] | null;
       /** @description Which products the connection lists; null lists every product */
       productSelection: components['schemas']['ProductSelectionRuleDto'] | null;
       /** @description How the connection prices variants; null sends catalog prices */
@@ -3758,6 +3820,42 @@ export interface components {
        * @example demo-store.myshopify.com
        */
       externalAccountId: string;
+    };
+    FalabellaCredentialsDto: {
+      /**
+       * @description The seller id, under Mi cuenta in Seller Center
+       * @example SC478FA
+       */
+      sellerId: string;
+      /**
+       * @description The Seller Center user’s email (Mi cuenta, Usuarios). See https://developers.falabella.com/docs/operate-with-apis
+       * @example seller@example.com
+       */
+      userId: string;
+      /** @description The user’s API key, from the Api Key column of Mi cuenta, Usuarios. Stored encrypted; never returned. */
+      apiKey: string;
+      /** @description The country the account sells in: facl Chile, faco Colombia, fape Peru */
+      country: components['schemas']['FalabellaCountry'];
+    };
+    ConnectWithCredentialsDto: {
+      /** @description A channel connected with credentials: `falabella` */
+      channel: components['schemas']['ChannelType'];
+      /** @description The credentials the channel issued, with the fields of its schema */
+      credentials: components['schemas']['FalabellaCredentialsDto'];
+    };
+    ConnectedChannelDto: {
+      connection: components['schemas']['ChannelConnectionDto'];
+      /** @description True when the account was connected before and got new keys */
+      reconnected: boolean;
+    };
+    CredentialsRejectedErrorDto: {
+      /** @example 422 */
+      statusCode: number;
+      /** @example Unprocessable Entity */
+      error: string;
+      failure: components['schemas']['ConnectFailure'];
+      /** @example Falabella rejected the user id or API key. Copy them again from Seller Center.: E007: Login failed. Signature mismatching */
+      message: string;
     };
     UpdateEbayListingDefaultsDto: {
       /** @description Shipping policy; null uses the account’s only one, when it has exactly one */
@@ -4704,6 +4802,61 @@ export interface components {
       proposals: components['schemas']['AttentionProposalsDto'] | null;
       suggestions: components['schemas']['AttentionSuggestionsDto'] | null;
     };
+    /**
+     * @description The first step still to take; null once every step is done
+     * @enum {string}
+     */
+    GettingStartedStep: GettingStartedStep;
+    /** @enum {string} */
+    GettingStartedStepState: GettingStartedStepState;
+    /**
+     * @description `merchant`: only the seller can take it, in the app; `agent`: with `tools`
+     * @enum {string}
+     */
+    GettingStartedStepOwner: GettingStartedStepOwner;
+    GettingStartedStepDto: {
+      step: components['schemas']['GettingStartedStep'];
+      state: components['schemas']['GettingStartedStepState'];
+      /** @description `merchant`: only the seller can take it, in the app; `agent`: with `tools` */
+      owner: components['schemas']['GettingStartedStepOwner'];
+      /** @example Connect a store */
+      title: string;
+      detail: string;
+      /** @description The page of the web app where the seller takes it */
+      url: string | null;
+      /**
+       * @description Agent tools
+       * @example [
+       *       "create_product"
+       *     ]
+       */
+      tools: string[];
+    };
+    StoreConnectLinkDto: {
+      channel: components['schemas']['ChannelType'];
+      /** @description Opens the Stores page with this channel’s connect dialog */
+      url: string;
+    };
+    GettingStartedDto: {
+      /** @description Whether the caller (or the key’s creator) confirmed their email */
+      emailVerified: boolean;
+      /** @description An account an AI agent opened that nobody has claimed yet */
+      unclaimedSandbox: boolean;
+      products: number;
+      /** @description Stores that are not disconnected */
+      connectedStores: number;
+      /** @description Listings live on a store */
+      liveListings: number;
+      /** @description Outside agents’ changes waiting for approval */
+      pendingProposals: number;
+      /** @description Whether outside agents’ changes wait for the seller’s approval */
+      agentChangesNeedApproval: boolean;
+      /** @description The first step still to take; null once every step is done */
+      nextStep: components['schemas']['GettingStartedStep'] | null;
+      /** @description The steps that apply, in order */
+      steps: components['schemas']['GettingStartedStepDto'][];
+      connectStoreLinks: components['schemas']['StoreConnectLinkDto'][];
+    };
     /** @enum {string} */
     SuggestionStatus: SuggestionStatus;
     SuggestionConnectionDto: {
@@ -5073,7 +5226,7 @@ export interface components {
       };
     };
     /**
-     * @description `proposed`: it waits for the seller. `apply_directly`: the workspace lets agents make changes at once, so make the call itself.
+     * @description `proposed`: it waits for the seller. `apply_directly`: make the call itself, because the workspace lets agents make changes at once or the call needs no approval (`exemption`).
      * @enum {string}
      */
     AgentProposalOutcome: AgentProposalOutcome;
@@ -5127,12 +5280,19 @@ export interface components {
       /** Format: date-time */
       createdAt: string;
     };
+    /**
+     * @description Set with `apply_directly` when the workspace approves agents’ changes but this call needs none: `new_draft` for `create_product` with no status or DRAFT. Null otherwise.
+     * @enum {string}
+     */
+    AgentApprovalExemption: AgentApprovalExemption;
     AgentProposalSubmissionDto: {
-      /** @description `proposed`: it waits for the seller. `apply_directly`: the workspace lets agents make changes at once, so make the call itself. */
+      /** @description `proposed`: it waits for the seller. `apply_directly`: make the call itself, because the workspace lets agents make changes at once or the call needs no approval (`exemption`). */
       outcome: components['schemas']['AgentProposalOutcome'];
       /** @description What to do next, or to tell the user */
       message: string;
       proposal: components['schemas']['AgentProposalDto'] | null;
+      /** @description Set with `apply_directly` when the workspace approves agents’ changes but this call needs none: `new_draft` for `create_product` with no status or DRAFT. Null otherwise. */
+      exemption: components['schemas']['AgentApprovalExemption'] | null;
     };
     AgentProposalPageDto: {
       /** @description Newest first */
@@ -7369,6 +7529,67 @@ export interface operations {
       };
     };
   };
+  ChannelCredentialsController_connect_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody: {
+      content: {
+        'application/json': components['schemas']['ConnectWithCredentialsDto'];
+      };
+    };
+    responses: {
+      201: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['ConnectedChannelDto'];
+        };
+      };
+      /** @description The organization’s plan does not allow this (`ENTITLEMENTS_ENFORCED` is on). `code` and `feature` say why; upgrading the plan resolves it. Where billing is on, `code: subscription_inactive` means the organization is read-only until a billing admin fixes its subscription (`state` says why). */
+      402: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json':
+            | components['schemas']['PlanLimitErrorDto']
+            | components['schemas']['SubscriptionInactiveErrorDto'];
+        };
+      };
+      /** @description Missing permission, or (with `code: sandbox_claim_required`) the workspace is an unclaimed sandbox account an AI agent opened: the user must claim it from the emailed link first. */
+      403: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['SandboxRestrictedErrorDto'];
+        };
+      };
+      /** @description The channel refused the credentials, or the account they name. `message` is its explanation. */
+      422: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['CredentialsRejectedErrorDto'];
+        };
+      };
+      /** @description The channel is not responding */
+      503: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content?: never;
+      };
+    };
+  };
   ChannelImportsController_start_v1: {
     parameters: {
       query?: never;
@@ -8364,6 +8585,27 @@ export interface operations {
         };
         content: {
           'application/json': components['schemas']['AttentionSummaryDto'];
+        };
+      };
+    };
+  };
+  GettingStartedController_get_v1: {
+    parameters: {
+      query?: never;
+      header?: never;
+      path: {
+        workspaceId: string;
+      };
+      cookie?: never;
+    };
+    requestBody?: never;
+    responses: {
+      200: {
+        headers: {
+          [name: string]: unknown;
+        };
+        content: {
+          'application/json': components['schemas']['GettingStartedDto'];
         };
       };
     };
@@ -10010,6 +10252,7 @@ export enum ChannelType {
   ebay = 'ebay',
   google_merchant = 'google_merchant',
   etsy = 'etsy',
+  falabella = 'falabella',
   amazon = 'amazon',
   walmart = 'walmart',
 }
@@ -10232,6 +10475,7 @@ export enum ConnectFailure {
   channel_unavailable = 'channel_unavailable',
   plan_limit_reached = 'plan_limit_reached',
   sandbox_claim_required = 'sandbox_claim_required',
+  credentials_rejected = 'credentials_rejected',
   unexpected = 'unexpected',
 }
 export enum ChannelConnectionStatus {
@@ -10307,6 +10551,11 @@ export enum EtsyWhenMade {
   Value1800s = '1800s',
   Value1700s = '1700s',
   before_1700 = 'before_1700',
+}
+export enum FalabellaCountry {
+  facl = 'facl',
+  faco = 'faco',
+  fape = 'fape',
 }
 export enum PriceRounding {
   none = 'none',
@@ -10399,6 +10648,23 @@ export enum AttentionStoreReason {
 export enum SuggestionKind {
   listing_title = 'listing_title',
   listing_description = 'listing_description',
+}
+export enum GettingStartedStep {
+  verify_email = 'verify_email',
+  claim_account = 'claim_account',
+  add_products = 'add_products',
+  review_proposals = 'review_proposals',
+  connect_store = 'connect_store',
+  publish = 'publish',
+}
+export enum GettingStartedStepState {
+  done = 'done',
+  todo = 'todo',
+  blocked = 'blocked',
+}
+export enum GettingStartedStepOwner {
+  merchant = 'merchant',
+  agent = 'agent',
 }
 export enum SuggestionStatus {
   PENDING = 'PENDING',
@@ -10502,6 +10768,9 @@ export enum AgentProposalStatus {
 export enum AgentProposerKind {
   oauth_agent = 'oauth_agent',
   api_key = 'api_key',
+}
+export enum AgentApprovalExemption {
+  new_draft = 'new_draft',
 }
 export enum AgentClientRegistration {
   metadata_document = 'metadata_document',

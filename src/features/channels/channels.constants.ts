@@ -5,12 +5,14 @@ import {
   ConnectFailure,
   EbayCondition,
   EbayMarketplaceId,
+  FalabellaCountry,
   GoogleTargetCountry,
 } from '@/api/schema';
 import amazonLogo from './assets/logos/amazon.svg';
 import bigcommerceLogo from './assets/logos/bigcommerce.svg';
 import ebayLogo from './assets/logos/ebay.svg';
 import etsyLogo from './assets/logos/etsy.svg';
+import falabellaLogo from './assets/logos/falabella.svg';
 import googleLogo from './assets/logos/google.svg';
 import metaLogo from './assets/logos/meta.svg';
 import pinterestLogo from './assets/logos/pinterest.svg';
@@ -18,12 +20,15 @@ import shopifyLogo from './assets/logos/shopify.svg';
 import tiktokLogo from './assets/logos/tiktok.svg';
 import walmartLogo from './assets/logos/walmart.svg';
 import woocommerceLogo from './assets/logos/woocommerce.svg';
+import type { ConnectWithCredentialsBody } from './channels.types';
 
 export const CHANNEL_CONNECTIONS_ENDPOINT = '/api/v1/workspaces/{workspaceId}/channel-connections';
 export const CHANNEL_CONNECTION_DETAIL_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}';
 export const CHANNEL_AUTHORIZATIONS_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/authorizations';
+export const CHANNEL_CREDENTIALS_ENDPOINT =
+  '/api/v1/workspaces/{workspaceId}/channel-connections/credentials';
 export const CHANNEL_DISCONNECT_ENDPOINT =
   '/api/v1/workspaces/{workspaceId}/channel-connections/{connectionId}/disconnect';
 export const CHANNEL_IMPORTS_ENDPOINT =
@@ -92,6 +97,7 @@ export const CONNECT_FAILURE_MESSAGES: Record<ConnectFailure, string> = {
     'Claim this account first: stores can be connected once it is yours.',
   [ConnectFailure.session_required]:
     'Sign in to Crossmart in this browser, then connect the store again.',
+  [ConnectFailure.credentials_rejected]: 'Those details were rejected. Copy them again and retry.',
   [ConnectFailure.unexpected]: 'Something went wrong while connecting. Please try again.',
 };
 
@@ -192,12 +198,87 @@ export interface SelectAccountPrompt extends AccountPromptBase {
 
 export type AccountPrompt = TextAccountPrompt | SelectAccountPrompt;
 
-export interface ConnectableChannel {
+/** How a store is connected: approving Crossmart on the channel, or pasting its API details. */
+export enum ConnectMethod {
+  OAuth = 'oauth',
+  Credentials = 'credentials',
+}
+
+interface ConnectableChannelBase {
   type: ChannelType;
-  account: AccountPrompt;
   /** Whether Crossmart can import the channel's catalog into the workspace. */
   importsCatalog: boolean;
 }
+
+/** The merchant names the account, then approves Crossmart on the channel. */
+export interface OAuthConnectableChannel extends ConnectableChannelBase {
+  method: ConnectMethod.OAuth;
+  account: AccountPrompt;
+}
+
+/** What a merchant pastes: the credentials of `POST …/channel-connections/credentials`. */
+export type SellerCredentials = ConnectWithCredentialsBody['credentials'];
+
+export enum CredentialFieldKind {
+  Text = 'text',
+  /** Masked while typed, such as an API key. */
+  Secret = 'secret',
+  Select = 'select',
+}
+
+export interface CredentialFieldPrompt {
+  key: keyof SellerCredentials;
+  label: string;
+  kind: CredentialFieldKind;
+  placeholder?: string;
+  options?: readonly AccountOption[];
+}
+
+/** The merchant pastes the API details the channel issued them. */
+export interface CredentialsConnectableChannel extends ConnectableChannelBase {
+  method: ConnectMethod.Credentials;
+  fields: readonly CredentialFieldPrompt[];
+  /** The channel's page on where to find them. */
+  guideUrl: string;
+}
+
+export type ConnectableChannel = OAuthConnectableChannel | CredentialsConnectableChannel;
+
+/** What the paste-credentials dialog says. */
+export const CREDENTIALS_DIALOG_COPY = {
+  description: 'Paste your API details from Seller Center.',
+  guide: 'Where to find them',
+  submit: 'Connect',
+} as const;
+
+export const FALABELLA_COUNTRY_LABELS: Record<FalabellaCountry, string> = {
+  [FalabellaCountry.facl]: 'Chile',
+  [FalabellaCountry.faco]: 'Colombia',
+  [FalabellaCountry.fape]: 'Peru',
+};
+
+/** Seller Center, Mi cuenta, Usuarios: the user's email and API key. */
+const FALABELLA_GUIDE_URL = 'https://developers.falabella.com/docs/operate-with-apis';
+
+const FALABELLA_FIELDS: readonly CredentialFieldPrompt[] = [
+  { key: 'sellerId', label: 'Seller ID', kind: CredentialFieldKind.Text, placeholder: 'SC478FA' },
+  {
+    key: 'userId',
+    label: 'User ID',
+    kind: CredentialFieldKind.Text,
+    placeholder: 'you@company.com',
+  },
+  { key: 'apiKey', label: 'API key', kind: CredentialFieldKind.Secret },
+  {
+    key: 'country',
+    label: 'Country',
+    kind: CredentialFieldKind.Select,
+    options: Object.values(FalabellaCountry).map((country) => ({
+      value: country,
+      label: FALABELLA_COUNTRY_LABELS[country],
+    })),
+  },
+];
 
 /** The eBay marketplaces Crossmart can connect, as the merchant picks them. */
 export const EBAY_MARKETPLACE_LABELS: Record<EbayMarketplaceId, string> = {
@@ -346,6 +427,7 @@ export const CHANNELS: readonly ChannelInfo[] = [
     status: ChannelStatus.Live,
     logo: { src: shopifyLogo, tint: '#5e8e3e' },
     connect: {
+      method: ConnectMethod.OAuth,
       type: ChannelType.shopify,
       importsCatalog: true,
       account: {
@@ -364,6 +446,7 @@ export const CHANNELS: readonly ChannelInfo[] = [
     status: ChannelStatus.Live,
     logo: { src: ebayLogo, tint: '#e53238' },
     connect: {
+      method: ConnectMethod.OAuth,
       type: ChannelType.ebay,
       importsCatalog: false,
       account: {
@@ -382,6 +465,7 @@ export const CHANNELS: readonly ChannelInfo[] = [
     status: ChannelStatus.ComingSoon,
     logo: { src: googleLogo, tint: '#4285f4' },
     connect: {
+      method: ConnectMethod.OAuth,
       type: ChannelType.google_merchant,
       importsCatalog: false,
       account: {
@@ -399,6 +483,7 @@ export const CHANNELS: readonly ChannelInfo[] = [
     status: ChannelStatus.ComingSoon,
     logo: { src: etsyLogo, tint: '#f1641e' },
     connect: {
+      method: ConnectMethod.OAuth,
       type: ChannelType.etsy,
       importsCatalog: false,
       account: {
@@ -408,6 +493,19 @@ export const CHANNELS: readonly ChannelInfo[] = [
         description:
           'The name in your shop’s address, etsy.com/shop/YourShopName. Sign in with the Etsy account that owns it.',
       },
+    },
+  },
+  {
+    name: 'Falabella',
+    description: 'Sell on Falabella in Chile, Colombia and Peru.',
+    status: ChannelStatus.ComingSoon,
+    logo: { src: falabellaLogo, tint: '#7ab51d' },
+    connect: {
+      method: ConnectMethod.Credentials,
+      type: ChannelType.falabella,
+      importsCatalog: false,
+      fields: FALABELLA_FIELDS,
+      guideUrl: FALABELLA_GUIDE_URL,
     },
   },
   {
