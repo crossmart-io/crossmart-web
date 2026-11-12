@@ -77,9 +77,13 @@ function channelNames(status: ChannelStatus): string[] {
 }
 
 describe('ChannelGrid', () => {
-  it('lists Shopify and eBay as live, and Google and Etsy as coming soon', () => {
+  it('lists Shopify and eBay as live, and Google, Etsy and Falabella as coming soon', () => {
     expect(channelNames(ChannelStatus.Live)).toEqual(['Shopify', 'eBay']);
-    expect(channelNames(ChannelStatus.ComingSoon)).toEqual(['Google Merchant Center', 'Etsy']);
+    expect(channelNames(ChannelStatus.ComingSoon)).toEqual([
+      'Google Merchant Center',
+      'Etsy',
+      'Falabella',
+    ]);
   });
 
   it('lets merchants connect live channels', () => {

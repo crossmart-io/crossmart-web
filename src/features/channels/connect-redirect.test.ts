@@ -1,5 +1,6 @@
 import { ChannelType } from '@/api/schema';
-import { readConnectOutcome } from './connect-redirect';
+import { connectionFixture } from './testing/channel-connection.fixture';
+import { connectedStoresUrl, readConnectOutcome } from './connect-redirect';
 
 describe('readConnectOutcome', () => {
   it('reads a successful connection', () => {
@@ -40,5 +41,19 @@ describe('readConnectOutcome', () => {
   it('ignores pages without a redirect outcome and unknown channels', () => {
     expect(readConnectOutcome(new URLSearchParams(''))).toBeNull();
     expect(readConnectOutcome(new URLSearchParams('connected=myspace'))).toBeNull();
+  });
+});
+
+describe('connectedStoresUrl', () => {
+  it('announces a store connected with credentials the way an OAuth callback does', () => {
+    const connection = connectionFixture({ id: 'c-9', channel: ChannelType.falabella });
+    const url = connectedStoresUrl({ connection, reconnected: true });
+
+    expect(url).toBe('/stores?connected=falabella&connectionId=c-9&reconnected=true');
+    expect(readConnectOutcome(new URL(url, 'http://app.test').searchParams)).toMatchObject({
+      message: 'Falabella is connected',
+      connectionId: 'c-9',
+      reconnected: true,
+    });
   });
 });
