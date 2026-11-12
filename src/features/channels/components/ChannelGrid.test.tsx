@@ -77,9 +77,13 @@ function channelNames(status: ChannelStatus): string[] {
 }
 
 describe('ChannelGrid', () => {
-  it('lists Shopify and eBay as live, and Google and Etsy as coming soon', () => {
+  it('lists Shopify and eBay as live, and Google, Etsy and Mercado Libre as coming soon', () => {
     expect(channelNames(ChannelStatus.Live)).toEqual(['Shopify', 'eBay']);
-    expect(channelNames(ChannelStatus.ComingSoon)).toEqual(['Google Merchant Center', 'Etsy']);
+    expect(channelNames(ChannelStatus.ComingSoon)).toEqual([
+      'Google Merchant Center',
+      'Etsy',
+      'Mercado Libre',
+    ]);
   });
 
   it('lets merchants connect live channels', () => {
@@ -150,6 +154,17 @@ describe('ChannelGrid', () => {
         screen.getByRole('dialog', { name: 'Connect Google Merchant Center' }),
       ).toBeInTheDocument();
       expect(screen.getByLabelText('Merchant Center ID')).toBeInTheDocument();
+    });
+
+    it('lets them connect Mercado Libre by picking the country', async () => {
+      renderGrid([], true);
+
+      await userEvent.click(
+        within(card('Mercado Libre')).getByRole('button', { name: CHANNEL_PREVIEW_COPY.connect }),
+      );
+
+      expect(screen.getByRole('dialog', { name: 'Connect Mercado Libre' })).toBeInTheDocument();
+      expect(screen.getByText('Country')).toBeInTheDocument();
     });
 
     it('still leaves planned and community channels out', () => {
