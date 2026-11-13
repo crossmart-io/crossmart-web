@@ -1,5 +1,5 @@
 import { ListingDisplayState } from '@/api/schema';
-import { CHANNELS } from '@/features/channels/channels.constants';
+import { CHANNELS, ChannelStatus } from '@/features/channels/channels.constants';
 import { storeHealthFixture } from '@/features/listing-health/testing/listing-health.fixture';
 import { buildAccountMap, CATALOG_NODE_ID } from './account-map-graph';
 import {
@@ -29,9 +29,9 @@ describe('buildAccountMap', () => {
       MapNodeType.Catalog,
       MapNodeType.Store,
       MapNodeType.Store,
-      MapNodeType.GhostChannel,
-      MapNodeType.GhostChannel,
-      MapNodeType.GhostChannel,
+      ...CHANNELS.filter((channel) => channel.status === ChannelStatus.ComingSoon).map(
+        () => MapNodeType.GhostChannel,
+      ),
     ]);
     expect(graph.edges.every((edge) => edge.source === CATALOG_NODE_ID)).toBe(true);
   });

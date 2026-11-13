@@ -13,7 +13,7 @@ The web app for **[Crossmart](https://github.com/crossmart-io/crossmart)**, the 
 
 More screenshots are in the [Crossmart README](https://github.com/crossmart-io/crossmart#readme).
 
-Shopify and eBay are live. Google Shopping and Etsy are coming soon, and Amazon, Walmart and TikTok Shop are planned.
+Shopify and eBay are live. Google Shopping, Etsy and Mercado Libre are coming soon, and Amazon, Walmart and TikTok Shop are planned.
 
 ## Stack
 
@@ -131,4 +131,4 @@ Copyright (C) 2026 YIOT LLC.
 crossmart-web is licensed under the [GNU Affero General Public License v3.0 only](LICENSE) (`AGPL-3.0-only`).
 "Crossmart" and the Crossmart logo are trademarks of YIOT LLC and are not covered by the code license.
 
-Channel logos (Shopify, eBay, Google, Etsy and others) are trademarks of their respective owners. They are used only to identify the sales channels Crossmart connects to and do not imply endorsement. Amazon and Walmart are shown as neutral monograms.
+Channel logos (Shopify, eBay, Google, Etsy, Mercado Libre and others) are trademarks of their respective owners. They are used only to identify the sales channels Crossmart connects to and do not imply endorsement. Amazon and Walmart are shown as neutral monograms.

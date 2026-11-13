@@ -3,6 +3,7 @@ import {
   ChannelType,
   EbayCondition,
   EbayMarketplaceId,
+  MercadoLibreSiteId,
 } from '@/api/schema';
 import type { ChannelConnection } from '../channels.types';
 
@@ -27,6 +28,7 @@ export function connectionFixture(overrides: Partial<ChannelConnection> = {}): C
     ebay: null,
     googleMerchant: null,
     etsy: null,
+    mercadoLibre: null,
     falabella: null,
     productSelection: null,
     failedListings: 0,
@@ -70,6 +72,28 @@ export function ebayConnectionFixture(
       policies: { fulfillment: [], payment: [], return: [] },
       listingDefaults: NO_EBAY_DEFAULTS,
       readyToList: false,
+    },
+    ...overrides,
+  });
+}
+
+/** A connected Mercado Libre seller in Mexico, with `overrides` applied. */
+export function mercadoLibreConnectionFixture(
+  overrides: Partial<ChannelConnection> = {},
+): ChannelConnection {
+  return connectionFixture({
+    id: 'c-mercadolibre',
+    channel: ChannelType.mercado_libre,
+    externalAccountId: '1008002397',
+    displayName: 'TESTSELLER',
+    shopify: null,
+    mercadoLibre: {
+      userId: '1008002397',
+      nickname: 'TESTSELLER',
+      siteId: MercadoLibreSiteId.MLM,
+      currencyCode: 'MXN',
+      permalink: null,
+      userProductSeller: true,
     },
     ...overrides,
   });

@@ -7,6 +7,7 @@ import {
   EbayMarketplaceId,
   FalabellaCountry,
   GoogleTargetCountry,
+  MercadoLibreSiteId,
 } from '@/api/schema';
 import amazonLogo from './assets/logos/amazon.svg';
 import bigcommerceLogo from './assets/logos/bigcommerce.svg';
@@ -14,6 +15,7 @@ import ebayLogo from './assets/logos/ebay.svg';
 import etsyLogo from './assets/logos/etsy.svg';
 import falabellaLogo from './assets/logos/falabella.svg';
 import googleLogo from './assets/logos/google.svg';
+import mercadoLibreLogo from './assets/logos/mercadolibre.svg';
 import metaLogo from './assets/logos/meta.svg';
 import pinterestLogo from './assets/logos/pinterest.svg';
 import shopifyLogo from './assets/logos/shopify.svg';
@@ -296,6 +298,20 @@ const EBAY_MARKETPLACE_OPTIONS: readonly AccountOption[] = Object.values(EbayMar
   (marketplaceId) => ({ value: marketplaceId, label: EBAY_MARKETPLACE_LABELS[marketplaceId] }),
 );
 
+/** The Mercado Libre sites Crossmart can connect, as the merchant picks them. */
+export const MERCADOLIBRE_SITE_LABELS: Record<MercadoLibreSiteId, string> = {
+  [MercadoLibreSiteId.MLM]: 'Mexico (MXN)',
+  [MercadoLibreSiteId.MLC]: 'Chile (CLP)',
+  [MercadoLibreSiteId.MCO]: 'Colombia (COP)',
+  [MercadoLibreSiteId.MPE]: 'Peru (PEN)',
+  [MercadoLibreSiteId.MLA]: 'Argentina (ARS)',
+  [MercadoLibreSiteId.MLB]: 'Brazil (BRL)',
+};
+
+const MERCADOLIBRE_SITE_OPTIONS: readonly AccountOption[] = Object.values(MercadoLibreSiteId).map(
+  (siteId) => ({ value: siteId, label: MERCADOLIBRE_SITE_LABELS[siteId] }),
+);
+
 /** What the store page says about an eBay account's business policies. */
 export const EBAY_POLICIES_COPY = {
   label: 'Business policies',
@@ -492,6 +508,24 @@ export const CHANNELS: readonly ChannelInfo[] = [
         placeholder: 'YourShopName',
         description:
           'The name in your shop’s address, etsy.com/shop/YourShopName. Sign in with the Etsy account that owns it.',
+      },
+    },
+  },
+  {
+    name: 'Mercado Libre',
+    description: 'Sell across Latin America with Mercado Libre categories and attributes.',
+    status: ChannelStatus.ComingSoon,
+    logo: { src: mercadoLibreLogo },
+    connect: {
+      method: ConnectMethod.OAuth,
+      type: ChannelType.mercado_libre,
+      importsCatalog: false,
+      account: {
+        kind: AccountPromptKind.Select,
+        label: 'Country',
+        placeholder: 'Choose a country',
+        options: MERCADOLIBRE_SITE_OPTIONS,
+        description: 'The country your Mercado Libre account sells in. You sign in there.',
       },
     },
   },
